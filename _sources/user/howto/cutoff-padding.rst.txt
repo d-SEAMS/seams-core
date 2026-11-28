@@ -1,0 +1,28 @@
+=============================
+Choosing a cutoff and padding
+=============================
+
+
+The neighbour cutoff is the ``--cutoff`` of ``seams chill-plus``.
+The default is 3.5 Å. ``SEAMS_CUTOFF`` sets that default when the flag
+is omitted.
+Open-face padding is the ``openFace`` argument of ``symm::classifyIce``,
+``symm::classifyIceCloud``, and ``symm::classifyIceArrays``.
+It completes a short second shell on a bonded neighbour that has fewer
+than four bonds. A full coordination shell is never padded.
+The argument defaults to false.
+``seams symmetry`` calls ``classifyIce`` with that default, so the command
+leaves the completion off.
+CHILL+ stays the published rule. It does not take ``openFace``.
+
+Pass ``openFace`` true when the bulk-liquid rows record no added false
+positive. On an interface, read the layers whose label changed before
+treating the extra shell labels as ice. The classify timings are the
+same bulk liquid with the completion off and on.
+
+A false positive is a non-negative shell label on an atom CHILL+ does
+not call cubic or hexagonal. ``dseams_off`` and ``fp_off`` are the
+classifier with the completion off. ``dseams_on`` and ``fp_on`` are the
+same frame with it on.
+
+.. include:: cutoff-padding-tables.rst

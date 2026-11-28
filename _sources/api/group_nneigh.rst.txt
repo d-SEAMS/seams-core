@@ -1,0 +1,22 @@
+.. index:: pair: group; Nneigh
+.. _doxid-group__nneigh:
+
+Nneigh
+======
+
+.. toctree::
+	:hidden:
+
+	namespace_nneigh.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`nneigh<doxid-namespacenneigh>`;
+

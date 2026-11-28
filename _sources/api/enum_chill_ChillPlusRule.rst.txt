@@ -1,0 +1,18 @@
+.. index:: pair: enum; ChillPlusRule
+.. _doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602:
+
+enum chill::ChillPlusRule
+=========================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <chill_plus_scheme.hpp>
+
+	enum ChillPlusRule {
+	    :target:`Published<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5>`,
+	    :target:`Ovito<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9>`,
+	};
+

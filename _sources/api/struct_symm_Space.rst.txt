@@ -1,0 +1,24 @@
+.. index:: pair: struct; symm::Space
+.. _doxid-structsymm_1_1_space:
+
+struct symm::Space
+==================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/local_symmetry.hpp>
+	
+	struct Space {
+		// fields
+	
+		int :target:`status<doxid-structsymm_1_1_space_1a6a33c1e9c3ea18fc63975179f6f16053>` = 1;
+		int :target:`number<doxid-structsymm_1_1_space_1a57657a26f5f576dfbfb502b8b516d957>` = 0;
+		std::string :target:`symbol<doxid-structsymm_1_1_space_1a426cc467d7c46d60d004e9a5051fd623>`;
+	};

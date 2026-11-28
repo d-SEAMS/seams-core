@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::Rejection
+.. _doxid-structseams_1_1_rejection:
+
+struct seams::Rejection
+=======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Molal rejection coefficient. :ref:`More...<details-structseams_1_1_rejection>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Rejection {
+		// fields
+	
+		double :ref:`ice<doxid-structseams_1_1_rejection_1a616a04e2500b7a68d856c8404d2247e8>` = 0;
+		double :ref:`liquid<doxid-structseams_1_1_rejection_1ac0573a55922a183774368d0c9c63b41f>` = 0;
+		double :ref:`k<doxid-structseams_1_1_rejection_1a7dd557c4c6119313ca8252612958b836>` = 0;
+		bool :ref:`defined<doxid-structseams_1_1_rejection_1a2593a0d352eecc7a67d1ab0e2f1be88a>` = false;
+	};
+.. _details-structseams_1_1_rejection:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Molal rejection coefficient.
+
+Fields
+------
+
+.. index:: pair: variable; ice
+.. _doxid-structseams_1_1_rejection_1a616a04e2500b7a68d856c8404d2247e8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double ice = 0
+
+Bulk ice molality, mol/kg.
+
+.. index:: pair: variable; liquid
+.. _doxid-structseams_1_1_rejection_1ac0573a55922a183774368d0c9c63b41f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double liquid = 0
+
+Bulk liquid molality, mol/kg.
+
+.. index:: pair: variable; k
+.. _doxid-structseams_1_1_rejection_1a7dd557c4c6119313ca8252612958b836:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double k = 0
+
+Ratio of the two molalities.
+
+.. index:: pair: variable; defined
+.. _doxid-structseams_1_1_rejection_1a2593a0d352eecc7a67d1ab0e2f1be88a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool defined = false
+
+The ratio is defined.
+

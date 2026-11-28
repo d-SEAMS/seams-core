@@ -1,0 +1,19 @@
+.. index:: pair: enum; MolMode
+.. _doxid-namespacewater_1a81f5dd0c1d071693a18e6ceb202925b0:
+
+enum water::MolMode
+===================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <water_select.hpp>
+
+	enum MolMode {
+	    :target:`None<doxid-namespacewater_1a81f5dd0c1d071693a18e6ceb202925b0a6adf97f83acf6453d4a6a4b1070f3754>`,
+	    :target:`Ids<doxid-namespacewater_1a81f5dd0c1d071693a18e6ceb202925b0afbec588d53da0b45c4f22c033dc12db1>`,
+	    :target:`Water<doxid-namespacewater_1a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18>`,
+	};
+

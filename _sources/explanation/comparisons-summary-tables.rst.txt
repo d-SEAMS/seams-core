@@ -1,0 +1,238 @@
+Head-to-head summary
+--------------------
+
+The tables compare d-SEAMS with the named analysis packages on the same inputs.
+
+Each row reports the version, thread count, repeat count ``n``, core count, and measured times. The agreement text for every row is in the block below.
+
+.. csv-table::
+   :header: comparator,version,operation,molecules,threads,cores,n,d-SEAMS ms,other ms,ratio
+
+   pyscal3,2.14.0/4.1.0,chill_plus,,1,8,0,,,
+   vesin,2.14.0/0.6.2,neighbours,4096,1,8,8,0.2524,1.7137,6.7902
+   freud,2.14.0/3.6.1,neighbours,4096,1,8,8,0.2809,2.9465,10.4886
+   mdapy,2.14.0/2.0.0,q6,4096,1,8,8,0.7256,4.6527,6.4123
+   pyscal3,2.14.0/4.1.0,q6,4096,1,8,8,0.7415,3.5078,4.7306
+   mdapy,2.14.0/2.0.0,chill_plus,4096,1,8,8,0.7184,2.6670,3.7122
+   OVITO,2.14.0,cna,4096,1,8,1,,,
+   OVITO,2.14.0,cna,4096,1,8,1,,,
+   OVITO,2.14.0,cna,4096,1,8,1,,,
+   PTM,2.14.0,ptm,4096,1,8,8,0.7334,189.4989,258.3907
+   ClavisCage,2.14.0/0.3.18,chill_plus,4096,1,8,8,0.7255,4.5952,6.3335
+   freud,2.14.0,rings,4096,1,8,0,,,
+   OVITO,2.14.0/3.17.2,identify_diamond,4096,1,8,8,0.7306,4.7155,6.4542
+   OVITO,2.14.0/3.17.2,rings,4096,1,8,8,4.5301,15.8206,3.4923
+   OVITO,2.14.0/3.17.2,ptm,4096,1,8,8,0.7264,105.0304,144.5805
+   PLUMED,2.14.0/2.10.0,q6,4096,1,8,8,0.7230,121.5863,168.1621
+   rings-statistics-matter,2.14.0/0.3.0,rings,4096,1,8,8,4.5552,56.9215,12.4961
+   cycless,2.14.0/0.7,rings,4096,1,8,8,5.0379,12678.2659,2516.5770
+   IRA,2.14.0/2.2.0,shape,4096,1,8,8,0.7481,1302.6695,1741.2294
+   SQQ,0.5.8,cages,4096,1,8,0,,,
+   vesin,2.14.0/0.6.2,neighbours,110592,1,8,8,6.4962,45.9557,7.0742
+   freud,2.14.0/3.6.1,neighbours,110592,1,8,8,6.4788,91.8476,14.1766
+   mdapy,2.14.0/2.0.0,q6,110592,1,8,8,18.7583,108.5550,5.7870
+   pyscal3,2.14.0/4.1.0,q6,110592,1,8,8,18.7787,99.5513,5.3013
+   mdapy,2.14.0/2.0.0,chill_plus,110592,1,8,8,18.5351,56.9564,3.0729
+   PTM,2.14.0,ptm,110592,1,8,8,21.8284,4855.0064,222.4168
+   ClavisCage,2.14.0/0.3.18,chill_plus,110592,1,8,8,18.4099,113.8680,6.1851
+   freud,2.14.0,rings,110592,1,8,0,,,
+   OVITO,2.14.0/3.17.2,identify_diamond,110592,1,8,8,20.7730,136.5008,6.5711
+   OVITO,2.14.0/3.17.2,rings,110592,1,8,8,119.4383,503.1571,4.2127
+   OVITO,2.14.0/3.17.2,ptm,110592,1,8,8,21.0405,2903.9205,138.0160
+   PLUMED,2.14.0/2.10.0,q6,110592,1,8,8,19.2551,3006.8135,156.1569
+   rings-statistics-matter,2.14.0/0.3.0,rings,110592,1,8,8,116.2389,1327.4966,11.4204
+   IRA,2.2.0,shape,110592,1,8,0,,,
+   cycless,2.14.0/0.7,rings,110592,1,8,8,136.3856,341558.2557,2504.3573
+   SQQ,0.5.8,cages,110592,1,8,0,,,
+   vesin,2.14.0/0.6.2,neighbours,884736,1,8,8,82.4432,1140.5612,13.8345
+   freud,2.14.0/3.6.1,neighbours,884736,1,8,8,102.7091,930.3372,9.0580
+   mdapy,2.14.0/2.0.0,q6,884736,1,8,8,237.0502,1039.0684,4.3833
+   pyscal3,2.14.0/4.1.0,q6,884736,1,8,8,237.9653,927.0447,3.8957
+   mdapy,2.14.0/2.0.0,chill_plus,884736,1,8,8,203.1011,585.3079,2.8819
+   PTM,2.14.0,ptm,884736,1,8,8,255.8396,38381.2306,150.0207
+   ClavisCage,2.14.0/0.3.18,chill_plus,884736,1,8,8,208.1052,1007.4027,4.8408
+   freud,2.14.0,rings,884736,1,8,0,,,
+   OVITO,2.14.0/3.17.2,identify_diamond,884736,1,8,8,248.1369,1136.5466,4.5803
+   OVITO,2.14.0/3.17.2,rings,884736,1,8,8,1046.5149,4542.0060,4.3401
+   OVITO,2.14.0/3.17.2,ptm,884736,1,8,8,259.8032,23247.5896,89.4815
+   PLUMED,2.14.0/2.10.0,q6,884736,1,8,8,240.7382,23208.5792,96.4059
+   rings-statistics-matter,2.14.0/0.3.0,rings,884736,1,8,8,1032.6158,13012.7347,12.6017
+   cycless,0.7,rings,884736,1,8,0,,,
+   IRA,2.2.0,shape,884736,1,8,0,,,
+   SQQ,0.5.8,cages,884736,1,8,0,,,
+   pyscal3,2.14.0/4.1.0,chill_plus,,8,8,0,,,
+   vesin,2.14.0/0.6.2,neighbours,4096,8,8,8,0.2509,0.5761,2.2961
+   freud,2.14.0/3.6.1,neighbours,4096,8,8,8,0.3054,0.8688,2.8444
+   mdapy,2.14.0/2.0.0,q6,4096,8,8,8,0.5273,0.8488,1.6098
+   pyscal3,2.14.0/4.1.0,q6,4096,8,8,8,0.3900,1.9000,4.8712
+   mdapy,2.14.0/2.0.0,chill_plus,4096,8,8,8,0.5076,0.5913,1.1649
+   PTM,2.14.0,ptm,4096,8,8,8,0.2783,24.0122,86.2705
+   ClavisCage,2.14.0/0.3.18,chill_plus,4096,8,8,8,0.4711,4.5363,9.6285
+   freud,2.14.0,rings,4096,8,8,0,,,
+   OVITO,2.14.0/3.17.2,identify_diamond,4096,8,8,8,0.5566,1.9548,3.5122
+   OVITO,2.14.0/3.17.2,rings,4096,8,8,8,2.6129,17.6346,6.7491
+   OVITO,2.14.0/3.17.2,ptm,4096,8,8,8,0.5204,28.3374,54.4549
+   PLUMED,2.14.0/2.10.0,q6,4096,8,8,8,0.6326,109.1420,172.5345
+   rings-statistics-matter,2.14.0/0.3.0,rings,4096,8,8,8,2.2476,12.5984,5.6052
+   cycless,2.14.0/0.7,rings,4096,8,8,8,2.9191,12516.1838,4287.6594
+   IRA,2.14.0/2.2.0,shape,4096,8,8,8,1.2898,1299.2780,1007.3679
+   SQQ,0.5.8,cages,4096,8,8,0,,,
+   vesin,2.14.0/0.6.2,neighbours,110592,8,8,8,4.0501,14.9654,3.6950
+   freud,2.14.0/3.6.1,neighbours,110592,8,8,8,3.8882,31.5433,8.1125
+   mdapy,2.14.0/2.0.0,q6,110592,8,8,8,5.3935,15.2391,2.8254
+   pyscal3,2.14.0/4.1.0,q6,110592,8,8,8,5.3208,18.3291,3.4448
+   mdapy,2.14.0/2.0.0,chill_plus,110592,8,8,8,7.5892,10.3904,1.3691
+   PTM,2.14.0,ptm,110592,8,8,8,8.2662,613.5692,74.2262
+   ClavisCage,2.14.0/0.3.18,chill_plus,110592,8,8,8,5.2050,113.8816,21.8794
+   freud,2.14.0,rings,110592,8,8,0,,,
+   OVITO,2.14.0/3.17.2,identify_diamond,110592,8,8,8,8.3309,29.5160,3.5430
+   OVITO,2.14.0/3.17.2,rings,110592,8,8,8,48.3409,323.8505,6.6993
+   OVITO,2.14.0/3.17.2,ptm,110592,8,8,8,8.5196,387.5268,45.4867
+   PLUMED,2.14.0/2.10.0,q6,110592,8,8,8,8.9858,3028.2786,337.0065
+   rings-statistics-matter,2.14.0/0.3.0,rings,110592,8,8,8,47.2318,307.1093,6.5022
+   IRA,2.2.0,shape,110592,8,8,0,,,
+   cycless,2.14.0/0.7,rings,110592,8,8,8,65.8726,337108.4778,5117.5843
+   SQQ,0.5.8,cages,110592,8,8,0,,,
+   vesin,2.14.0/0.6.2,neighbours,884736,8,8,8,41.3136,209.6075,5.0736
+   freud,2.14.0/3.6.1,neighbours,884736,8,8,8,49.5928,343.2560,6.9215
+   mdapy,2.14.0/2.0.0,q6,884736,8,8,8,71.0785,149.8983,2.1089
+   pyscal3,2.14.0/4.1.0,q6,884736,8,8,8,71.7527,177.4625,2.4733
+   mdapy,2.14.0/2.0.0,chill_plus,884736,8,8,8,66.4798,115.4407,1.7365
+   PTM,2.14.0,ptm,884736,8,8,8,59.6748,4823.9120,80.8367
+   ClavisCage,2.14.0/0.3.18,chill_plus,884736,8,8,8,59.4890,1008.0481,16.9451
+   freud,2.14.0,rings,884736,8,8,0,,,
+   OVITO,2.14.0/3.17.2,identify_diamond,884736,8,8,8,62.1147,262.3612,4.2238
+   OVITO,2.14.0/3.17.2,rings,884736,8,8,8,484.2037,2917.3354,6.0250
+   OVITO,2.14.0/3.17.2,ptm,884736,8,8,8,63.6214,3062.3280,48.1336
+   PLUMED,2.14.0/2.10.0,q6,884736,8,8,8,91.1466,23631.1588,259.2655
+   rings-statistics-matter,2.14.0/0.3.0,rings,884736,8,8,8,476.9637,2967.7415,6.2222
+   cycless,0.7,rings,884736,8,8,0,,,
+   IRA,2.2.0,shape,884736,8,8,0,,,
+   SQQ,0.5.8,cages,884736,8,8,0,,,
+   ClavisCage,2.14.0/0.3.18,cages,46,1,8,8,0.5796,50.3899,86.9321
+   ClavisCage,2.14.0/0.3.18,cages,46,8,8,8,0.5947,50.2893,84.5632
+   ClavisCage,2.14.0/0.3.18,cages,368,1,8,8,3.7222,297.6070,79.9538
+   ClavisCage,2.14.0/0.3.18,cages,368,8,8,8,2.9243,297.9639,101.8907
+   ClavisCage,2.14.0/0.3.18,cages,136,1,8,8,1.4924,68.3007,45.7666
+   ClavisCage,2.14.0/0.3.18,cages,136,8,8,8,1.5655,68.2571,43.6016
+   ClavisCage,2.14.0/0.3.18,cages,1088,1,8,8,10.7150,697.6882,65.1132
+   ClavisCage,2.14.0/0.3.18,cages,1088,8,8,8,4.7284,697.7931,147.5752
+   ClavisCage,2.14.0/0.3.18,cages,110160,1,8,8,955.8314,61962.4841,64.8257
+   ClavisCage,2.14.0/0.3.18,cages,110160,8,8,8,303.0753,61956.9697,204.4277
+
+.. dropdown:: Full head-to-head records, including the agreement text
+
+   .. csv-table::
+      :header: comparator,version,operation,molecules,threads,cores,n,d-SEAMS ms,other ms,ratio,agreement
+
+      pyscal3,2.14.0/4.1.0,chill_plus,,1,8,0,,,,"pyscal3 4.1.0 __all__ has no CHILL or CHILL+ name. common_neighbor_analysis is adaptive CNA and returns fcc, hcp, bcc, ico, and others (pyscal3/descriptors.py). diamond_structure is extended CNA. Neither is Nguyen and Molinero CHILL+. PyPI's latest pyscal3 is this same 4.1.0."
+      vesin,2.14.0/0.6.2,neighbours,4096,1,8,8,0.2524,1.7137,6.7902,pairs 8192 equal
+      freud,2.14.0/3.6.1,neighbours,4096,1,8,8,0.2809,2.9465,10.4886,pairs 8192 equal
+      mdapy,2.14.0/2.0.0,q6,4096,1,8,8,0.7256,4.6527,6.4123,q6_max_abs 4.441e-16 q6bar_max_abs 4.441e-16
+      pyscal3,2.14.0/4.1.0,q6,4096,1,8,8,0.7415,3.5078,4.7306,q6_max_abs 5.551e-16 q6bar_max_abs 5.551e-16
+      mdapy,2.14.0/2.0.0,chill_plus,4096,1,8,8,0.7184,2.6670,3.7122,labels 4096 equal q6_max_abs 4.441e-16
+      OVITO,2.14.0,cna,4096,1,8,1,,,,"phase Ih atoms 4096 disagree 4096. hexagonal_ice vs Other coordination 4 n=4096 (3 staggered and 1 eclipsed). Every disagreement is a CHILL+ row on a shell adaptive CNA does not name: Structure Type is only Other, FCC, HCP, BCC, or ICO (ovito/modifiers/__init__.pyi). FCC control 256/256 FCC, so the modifier is classifying. CHILL+ rows are the table in src/include/internal/bop.hpp."
+      OVITO,2.14.0,cna,4096,1,8,1,,,,"phase Ic atoms 4096 disagree 4096. cubic_ice vs Other coordination 4 n=4096 (4 staggered and 0 eclipsed). Every disagreement is a CHILL+ row on a shell adaptive CNA does not name: Structure Type is only Other, FCC, HCP, BCC, or ICO (ovito/modifiers/__init__.pyi). FCC control 256/256 FCC, so the modifier is classifying. CHILL+ rows are the table in src/include/internal/bop.hpp."
+      OVITO,2.14.0,cna,4096,1,8,1,,,,"phase liquid atoms 4096 disagree 222. hexagonal_ice vs Other coordination 4 n=1 (3 staggered and 1 eclipsed); hydrate vs Other coordination 4 n=49 (4 eclipsed and 0 staggered); interfacial_hydrate vs Other coordination 4 n=168 (3 eclipsed); interfacial_ice vs Other coordination 4 n=4 (2 staggered, or 3 staggered and 0 eclipsed). Every disagreement is a CHILL+ row on a shell adaptive CNA does not name: Structure Type is only Other, FCC, HCP, BCC, or ICO (ovito/modifiers/__init__.pyi). FCC control 256/256 FCC, so the modifier is classifying. CHILL+ rows are the table in src/include/internal/bop.hpp. Four shifted-ice waters have 12 neighbours inside 3.5 A: 690 at (4.490, 15.864, 50.345), 1673 at (16.865, 18.399, 11.795), 1675 at (15.210, 17.036, 12.464), 2304 at (16.902, 34.179, 1.355). An independent minimum-image count gives the same 12 distinct ids. The nearest pair in the frame is 0.183 A, from the Gaussian shift, not a repeated periodic image."
+      PTM,2.14.0,ptm,4096,1,8,8,0.7334,189.4989,258.3907,hexagonal 4096 equal rmsd_max 4.337e-08
+      ClavisCage,2.14.0/0.3.18,chill_plus,4096,1,8,8,0.7255,4.5952,6.3335,labels 4096 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18
+      freud,2.14.0,rings,4096,1,8,0,,,,"freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020)."
+      OVITO,2.14.0/3.17.2,identify_diamond,4096,1,8,8,0.7306,4.7155,6.4542,hexagonal 4096 equal
+      OVITO,2.14.0/3.17.2,rings,4096,1,8,8,4.5301,15.8206,3.4923,hexagons 8192 equal
+      OVITO,2.14.0/3.17.2,ptm,4096,1,8,8,0.7264,105.0304,144.5805,hexagonal 4096 equal
+      PLUMED,2.14.0/2.10.0,q6,4096,1,8,8,0.7230,121.5863,168.1621,q6_max_abs 2.220e-16
+      rings-statistics-matter,2.14.0/0.3.0,rings,4096,1,8,8,4.5552,56.9215,12.4961,hexagons 8192 equal
+      cycless,2.14.0/0.7,rings,4096,1,8,8,5.0379,12678.2659,2516.5770,hexagons 8192 equal; cycles_iter has no thread argument
+      IRA,2.14.0/2.2.0,shape,4096,1,8,8,0.7481,1302.6695,1741.2294,hexagonal 4096 equal
+      SQQ,0.5.8,cages,4096,1,8,0,,,,"512 molecules exceeded 600 s, so this size was not started"
+      vesin,2.14.0/0.6.2,neighbours,110592,1,8,8,6.4962,45.9557,7.0742,pairs 221184 equal
+      freud,2.14.0/3.6.1,neighbours,110592,1,8,8,6.4788,91.8476,14.1766,pairs 221184 equal
+      mdapy,2.14.0/2.0.0,q6,110592,1,8,8,18.7583,108.5550,5.7870,q6_max_abs 1.776e-15 q6bar_max_abs 1.776e-15
+      pyscal3,2.14.0/4.1.0,q6,110592,1,8,8,18.7787,99.5513,5.3013,q6_max_abs 2.442e-15 q6bar_max_abs 2.442e-15
+      mdapy,2.14.0/2.0.0,chill_plus,110592,1,8,8,18.5351,56.9564,3.0729,labels 110592 equal q6_max_abs 1.776e-15
+      PTM,2.14.0,ptm,110592,1,8,8,21.8284,4855.0064,222.4168,hexagonal 110592 equal rmsd_max 4.337e-08
+      ClavisCage,2.14.0/0.3.18,chill_plus,110592,1,8,8,18.4099,113.8680,6.1851,labels 110592 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18
+      freud,2.14.0,rings,110592,1,8,0,,,,"freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020)."
+      OVITO,2.14.0/3.17.2,identify_diamond,110592,1,8,8,20.7730,136.5008,6.5711,hexagonal 110592 equal
+      OVITO,2.14.0/3.17.2,rings,110592,1,8,8,119.4383,503.1571,4.2127,hexagons 221184 equal
+      OVITO,2.14.0/3.17.2,ptm,110592,1,8,8,21.0405,2903.9205,138.0160,hexagonal 110592 equal
+      PLUMED,2.14.0/2.10.0,q6,110592,1,8,8,19.2551,3006.8135,156.1569,q6_max_abs 5.551e-16
+      rings-statistics-matter,2.14.0/0.3.0,rings,110592,1,8,8,116.2389,1327.4966,11.4204,hexagons 221184 equal
+      IRA,2.2.0,shape,110592,1,8,0,,,,"one sample exceeded 600 s | fit b=1.8826 se=0.0354 R2=0.999646 from 8000,13824,32768; extrapolated 110592 = 501919.9 ms. N^2 projection from 32768 is 585513.7 ms. The nine-size exponent is not used: the local exponent rises with N. Fit, not a measurement. classify_serial has no thread argument."
+      cycless,2.14.0/0.7,rings,110592,1,8,8,136.3856,341558.2557,2504.3573,hexagons 221184 equal; cycles_iter has no thread argument
+      SQQ,0.5.8,cages,110592,1,8,0,,,,"4096 molecules exceeded 600 s, so this size was not started"
+      vesin,2.14.0/0.6.2,neighbours,884736,1,8,8,82.4432,1140.5612,13.8345,pairs 1769472 equal
+      freud,2.14.0/3.6.1,neighbours,884736,1,8,8,102.7091,930.3372,9.0580,pairs 1769472 equal
+      mdapy,2.14.0/2.0.0,q6,884736,1,8,8,237.0502,1039.0684,4.3833,q6_max_abs 2.331e-15 q6bar_max_abs 2.331e-15
+      pyscal3,2.14.0/4.1.0,q6,884736,1,8,8,237.9653,927.0447,3.8957,q6_max_abs 3.220e-15 q6bar_max_abs 3.220e-15
+      mdapy,2.14.0/2.0.0,chill_plus,884736,1,8,8,203.1011,585.3079,2.8819,labels 884736 equal q6_max_abs 2.331e-15
+      PTM,2.14.0,ptm,884736,1,8,8,255.8396,38381.2306,150.0207,hexagonal 884736 equal rmsd_max 4.337e-08
+      ClavisCage,2.14.0/0.3.18,chill_plus,884736,1,8,8,208.1052,1007.4027,4.8408,labels 884736 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18
+      freud,2.14.0,rings,884736,1,8,0,,,,"freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020)."
+      OVITO,2.14.0/3.17.2,identify_diamond,884736,1,8,8,248.1369,1136.5466,4.5803,hexagonal 884736 equal
+      OVITO,2.14.0/3.17.2,rings,884736,1,8,8,1046.5149,4542.0060,4.3401,hexagons 1769472 equal
+      OVITO,2.14.0/3.17.2,ptm,884736,1,8,8,259.8032,23247.5896,89.4815,hexagonal 884736 equal
+      PLUMED,2.14.0/2.10.0,q6,884736,1,8,8,240.7382,23208.5792,96.4059,q6_max_abs 6.661e-16
+      rings-statistics-matter,2.14.0/0.3.0,rings,884736,1,8,8,1032.6158,13012.7347,12.6017,hexagons 1769472 equal
+      cycless,0.7,rings,884736,1,8,0,,,,"one sample exceeded 600 s | fit b=1.0193 se=0.0111 R2=0.999166 from 64,216,512,1000,1728,4096,8000,13824,32768; extrapolated 884736 = 2952280.4 ms. Fit, not a measurement. cycles_iter has no thread argument."
+      IRA,2.2.0,shape,884736,1,8,0,,,,"110592 molecules exceeded 600 s, so this size was not started | fit b=1.8826 se=0.0354 R2=0.999646 from 8000,13824,32768; extrapolated 884736 = 25162336.6 ms. N^2 projection from 32768 is 37472876.4 ms. The nine-size exponent is not used: the local exponent rises with N. Fit, not a measurement. classify_serial has no thread argument."
+      SQQ,0.5.8,cages,884736,1,8,0,,,,"4096 molecules exceeded 600 s, so this size was not started"
+      pyscal3,2.14.0/4.1.0,chill_plus,,8,8,0,,,,"pyscal3 4.1.0 __all__ has no CHILL or CHILL+ name. common_neighbor_analysis is adaptive CNA and returns fcc, hcp, bcc, ico, and others (pyscal3/descriptors.py). diamond_structure is extended CNA. Neither is Nguyen and Molinero CHILL+. PyPI's latest pyscal3 is this same 4.1.0."
+      vesin,2.14.0/0.6.2,neighbours,4096,8,8,8,0.2509,0.5761,2.2961,pairs 8192 equal
+      freud,2.14.0/3.6.1,neighbours,4096,8,8,8,0.3054,0.8688,2.8444,pairs 8192 equal
+      mdapy,2.14.0/2.0.0,q6,4096,8,8,8,0.5273,0.8488,1.6098,q6_max_abs 4.441e-16 q6bar_max_abs 4.441e-16
+      pyscal3,2.14.0/4.1.0,q6,4096,8,8,8,0.3900,1.9000,4.8712,q6_max_abs 5.551e-16 q6bar_max_abs 5.551e-16
+      mdapy,2.14.0/2.0.0,chill_plus,4096,8,8,8,0.5076,0.5913,1.1649,labels 4096 equal q6_max_abs 4.441e-16
+      PTM,2.14.0,ptm,4096,8,8,8,0.2783,24.0122,86.2705,hexagonal 4096 equal rmsd_max 4.337e-08
+      ClavisCage,2.14.0/0.3.18,chill_plus,4096,8,8,8,0.4711,4.5363,9.6285,labels 4096 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18
+      freud,2.14.0,rings,4096,8,8,0,,,,"freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020)."
+      OVITO,2.14.0/3.17.2,identify_diamond,4096,8,8,8,0.5566,1.9548,3.5122,hexagonal 4096 equal
+      OVITO,2.14.0/3.17.2,rings,4096,8,8,8,2.6129,17.6346,6.7491,hexagons 8192 equal
+      OVITO,2.14.0/3.17.2,ptm,4096,8,8,8,0.5204,28.3374,54.4549,hexagonal 4096 equal
+      PLUMED,2.14.0/2.10.0,q6,4096,8,8,8,0.6326,109.1420,172.5345,q6_max_abs 2.220e-16
+      rings-statistics-matter,2.14.0/0.3.0,rings,4096,8,8,8,2.2476,12.5984,5.6052,hexagons 8192 equal
+      cycless,2.14.0/0.7,rings,4096,8,8,8,2.9191,12516.1838,4287.6594,hexagons 8192 equal; cycles_iter has no thread argument
+      IRA,2.14.0/2.2.0,shape,4096,8,8,8,1.2898,1299.2780,1007.3679,hexagonal 4096 equal
+      SQQ,0.5.8,cages,4096,8,8,0,,,,"512 molecules exceeded 600 s, so this size was not started"
+      vesin,2.14.0/0.6.2,neighbours,110592,8,8,8,4.0501,14.9654,3.6950,pairs 221184 equal
+      freud,2.14.0/3.6.1,neighbours,110592,8,8,8,3.8882,31.5433,8.1125,pairs 221184 equal
+      mdapy,2.14.0/2.0.0,q6,110592,8,8,8,5.3935,15.2391,2.8254,q6_max_abs 1.776e-15 q6bar_max_abs 1.776e-15
+      pyscal3,2.14.0/4.1.0,q6,110592,8,8,8,5.3208,18.3291,3.4448,q6_max_abs 2.442e-15 q6bar_max_abs 2.442e-15
+      mdapy,2.14.0/2.0.0,chill_plus,110592,8,8,8,7.5892,10.3904,1.3691,labels 110592 equal q6_max_abs 1.776e-15
+      PTM,2.14.0,ptm,110592,8,8,8,8.2662,613.5692,74.2262,hexagonal 110592 equal rmsd_max 4.337e-08
+      ClavisCage,2.14.0/0.3.18,chill_plus,110592,8,8,8,5.2050,113.8816,21.8794,labels 110592 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18
+      freud,2.14.0,rings,110592,8,8,0,,,,"freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020)."
+      OVITO,2.14.0/3.17.2,identify_diamond,110592,8,8,8,8.3309,29.5160,3.5430,hexagonal 110592 equal
+      OVITO,2.14.0/3.17.2,rings,110592,8,8,8,48.3409,323.8505,6.6993,hexagons 221184 equal
+      OVITO,2.14.0/3.17.2,ptm,110592,8,8,8,8.5196,387.5268,45.4867,hexagonal 110592 equal
+      PLUMED,2.14.0/2.10.0,q6,110592,8,8,8,8.9858,3028.2786,337.0065,q6_max_abs 5.551e-16
+      rings-statistics-matter,2.14.0/0.3.0,rings,110592,8,8,8,47.2318,307.1093,6.5022,hexagons 221184 equal
+      IRA,2.2.0,shape,110592,8,8,0,,,,"one sample exceeded 600 s | fit b=1.8826 se=0.0354 R2=0.999646 from 8000,13824,32768; extrapolated 110592 = 501919.9 ms. N^2 projection from 32768 is 585513.7 ms. The nine-size exponent is not used: the local exponent rises with N. Fit, not a measurement. classify_serial has no thread argument."
+      cycless,2.14.0/0.7,rings,110592,8,8,8,65.8726,337108.4778,5117.5843,hexagons 221184 equal; cycles_iter has no thread argument
+      SQQ,0.5.8,cages,110592,8,8,0,,,,"4096 molecules exceeded 600 s, so this size was not started"
+      vesin,2.14.0/0.6.2,neighbours,884736,8,8,8,41.3136,209.6075,5.0736,pairs 1769472 equal
+      freud,2.14.0/3.6.1,neighbours,884736,8,8,8,49.5928,343.2560,6.9215,pairs 1769472 equal
+      mdapy,2.14.0/2.0.0,q6,884736,8,8,8,71.0785,149.8983,2.1089,q6_max_abs 2.331e-15 q6bar_max_abs 2.331e-15
+      pyscal3,2.14.0/4.1.0,q6,884736,8,8,8,71.7527,177.4625,2.4733,q6_max_abs 3.220e-15 q6bar_max_abs 3.220e-15
+      mdapy,2.14.0/2.0.0,chill_plus,884736,8,8,8,66.4798,115.4407,1.7365,labels 884736 equal q6_max_abs 2.331e-15
+      PTM,2.14.0,ptm,884736,8,8,8,59.6748,4823.9120,80.8367,hexagonal 884736 equal rmsd_max 4.337e-08
+      ClavisCage,2.14.0/0.3.18,chill_plus,884736,8,8,8,59.4890,1008.0481,16.9451,labels 884736 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18
+      freud,2.14.0,rings,884736,8,8,0,,,,"freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020)."
+      OVITO,2.14.0/3.17.2,identify_diamond,884736,8,8,8,62.1147,262.3612,4.2238,hexagonal 884736 equal
+      OVITO,2.14.0/3.17.2,rings,884736,8,8,8,484.2037,2917.3354,6.0250,hexagons 1769472 equal
+      OVITO,2.14.0/3.17.2,ptm,884736,8,8,8,63.6214,3062.3280,48.1336,hexagonal 884736 equal
+      PLUMED,2.14.0/2.10.0,q6,884736,8,8,8,91.1466,23631.1588,259.2655,q6_max_abs 6.661e-16
+      rings-statistics-matter,2.14.0/0.3.0,rings,884736,8,8,8,476.9637,2967.7415,6.2222,hexagons 1769472 equal
+      cycless,0.7,rings,884736,8,8,0,,,,"one sample exceeded 600 s | fit b=1.0193 se=0.0111 R2=0.999166 from 64,216,512,1000,1728,4096,8000,13824,32768; extrapolated 884736 = 2952280.4 ms. Fit, not a measurement. cycles_iter has no thread argument."
+      IRA,2.2.0,shape,884736,8,8,0,,,,"110592 molecules exceeded 600 s, so this size was not started | fit b=1.8826 se=0.0354 R2=0.999646 from 8000,13824,32768; extrapolated 884736 = 25162336.6 ms. N^2 projection from 32768 is 37472876.4 ms. The nine-size exponent is not used: the local exponent rises with N. Fit, not a measurement. classify_serial has no thread argument."
+      SQQ,0.5.8,cages,884736,8,8,0,,,,"4096 molecules exceeded 600 s, so this size was not started"
+      ClavisCage,2.14.0/0.3.18,cages,46,1,8,8,0.5796,50.3899,86.9321,"sI. 512 both 1 d-SEAMS-only 1 TRACE-only 0; 51262 both 0 d-SEAMS-only 6 TRACE-only 0; 51264 both 0 d-SEAMS-only 0 TRACE-only 0. 512-0 has 18 of 30 bonds across the periodic cell; the six 51262 cages have 10 to 15. The 5^12 TRACE returns has none. The 2x2x2 tile matches, so d-SEAMS is right."
+      ClavisCage,2.14.0/0.3.18,cages,46,8,8,8,0.5947,50.2893,84.5632,"sI. 512 both 1 d-SEAMS-only 1 TRACE-only 0; 51262 both 0 d-SEAMS-only 6 TRACE-only 0; 51264 both 0 d-SEAMS-only 0 TRACE-only 0. 512-0 has 18 of 30 bonds across the periodic cell; the six 51262 cages have 10 to 15. The 5^12 TRACE returns has none. The 2x2x2 tile matches, so d-SEAMS is right."
+      ClavisCage,2.14.0/0.3.18,cages,368,1,8,8,3.7222,297.6070,79.9538,sI-222. 512 both 16 d-SEAMS-only 0 TRACE-only 0; 51262 both 48 d-SEAMS-only 0 TRACE-only 0; 51264 both 0 d-SEAMS-only 0 TRACE-only 0.
+      ClavisCage,2.14.0/0.3.18,cages,368,8,8,8,2.9243,297.9639,101.8907,sI-222. 512 both 16 d-SEAMS-only 0 TRACE-only 0; 51262 both 48 d-SEAMS-only 0 TRACE-only 0; 51264 both 0 d-SEAMS-only 0 TRACE-only 0.
+      ClavisCage,2.14.0/0.3.18,cages,136,1,8,8,1.4924,68.3007,45.7666,sII. 512 both 16 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 8 d-SEAMS-only 0 TRACE-only 0.
+      ClavisCage,2.14.0/0.3.18,cages,136,8,8,8,1.5655,68.2571,43.6016,sII. 512 both 16 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 8 d-SEAMS-only 0 TRACE-only 0.
+      ClavisCage,2.14.0/0.3.18,cages,1088,1,8,8,10.7150,697.6882,65.1132,sII-222. 512 both 128 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 64 d-SEAMS-only 0 TRACE-only 0.
+      ClavisCage,2.14.0/0.3.18,cages,1088,8,8,8,4.7284,697.7931,147.5752,sII-222. 512 both 128 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 64 d-SEAMS-only 0 TRACE-only 0.
+      ClavisCage,2.14.0/0.3.18,cages,110160,1,8,8,955.8314,61962.4841,64.8257,sII-9x9x10. 512 both 12960 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 6480 d-SEAMS-only 0 TRACE-only 0. TRACE is serial: analyze_waters has no thread argument and Cargo.toml leaves rayon commented out.
+      ClavisCage,2.14.0/0.3.18,cages,110160,8,8,8,303.0753,61956.9697,204.4277,sII-9x9x10. 512 both 12960 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 6480 d-SEAMS-only 0 TRACE-only 0. TRACE is serial: analyze_waters has no thread argument and Cargo.toml leaves rayon commented out.

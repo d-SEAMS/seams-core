@@ -1,0 +1,26 @@
+.. index:: pair: struct; sinp::ChemfilesLoadOptions
+.. _doxid-structsinp_1_1_chemfiles_load_options:
+
+struct sinp::ChemfilesLoadOptions
+=================================
+
+.. toctree::
+	:hidden:
+
+Name-based filtering and species overrides for chemfiles input. Include lists are ORed within a category and ANDed between residue and atom categories. Exclusions take precedence. typeMap is consulted before chemfiles element inference.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/seams_input.hpp>
+	
+	struct ChemfilesLoadOptions {
+		// fields
+	
+		std::vector<std::string> :target:`residueNames<doxid-structsinp_1_1_chemfiles_load_options_1af5ec813df7e55e08bbd2b685b69b8bb8>`;
+		std::vector<std::string> :target:`excludedResidueNames<doxid-structsinp_1_1_chemfiles_load_options_1abf2984d679c8b813849d74eaa86e0712>`;
+		std::vector<std::string> :target:`atomNames<doxid-structsinp_1_1_chemfiles_load_options_1a1c121ae9bf4b982caeb3ab5604d1f6dc>`;
+		std::vector<std::string> :target:`excludedAtomNames<doxid-structsinp_1_1_chemfiles_load_options_1afc4d05647d938d68e2e8742ed029298e>`;
+		std::unordered_map<std::string, int> :target:`typeMap<doxid-structsinp_1_1_chemfiles_load_options_1abffaf5508578cb302775f708baafe77a>`;
+	};

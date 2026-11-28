@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::MoleculeCentres
+.. _doxid-structseams_1_1_molecule_centres:
+
+struct seams::MoleculeCentres
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Per-molecule intact periodic centres. :ref:`More...<details-structseams_1_1_molecule_centres>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct MoleculeCentres {
+		// fields
+	
+		std::vector<int> :ref:`mol_ids<doxid-structseams_1_1_molecule_centres_1aea18e56e6d1b47ee1339cacbf4efb0bc>`;
+		std::vector<double> :ref:`centres<doxid-structseams_1_1_molecule_centres_1a71af62e8a11a82063ccf592aa138bb39>`;
+	};
+.. _details-structseams_1_1_molecule_centres:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Per-molecule intact periodic centres.
+
+Fields
+------
+
+.. index:: pair: variable; mol_ids
+.. _doxid-structseams_1_1_molecule_centres_1aea18e56e6d1b47ee1339cacbf4efb0bc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> mol_ids
+
+Unique molecule ids in appearance order.
+
+.. index:: pair: variable; centres
+.. _doxid-structseams_1_1_molecule_centres_1a71af62e8a11a82063ccf592aa138bb39:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> centres
+
+Interleaved coordinates, 3 \* n_mols doubles.
+

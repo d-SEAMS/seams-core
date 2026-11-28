@@ -1,0 +1,22 @@
+.. index:: pair: group; Rdf2
+.. _doxid-group__rdf2:
+
+Rdf2
+====
+
+.. toctree::
+	:hidden:
+
+	namespace_rdf2.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`rdf2<doxid-namespacerdf2>`;
+

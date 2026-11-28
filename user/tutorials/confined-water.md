@@ -1,0 +1,69 @@
+<!-- https://docs.dseams.info/user/tutorials/confined-water.md -->
+
+# Confined water {#confined-water}
+
+Quasi-one-dimensional ice is a stack of prism blocks.
+Quasi-two-dimensional ice is a sheet of primitive rings plus an in-plane radial distribution.
+
+`seams prisms` counts perfect and imperfect prisms of size 3 to 6 on the mutual four-nearest graph.
+`seams rdf` is the three-dimensional partial RDF.
+The CLI has no command for the sheet census or the in-plane histogram.
+Those two calls are on the Python frame.
+
+The 2020 nanotube and monolayer dumps are figshare project 73545.
+They are not in this repository, so this page does not give their counts.
+The in-tree confined frame is `input/traj/exampleTraj.lammpstrj` (250 oxygens, LAMMPS type 2).
+
+## Prisms {#prisms}
+
+```bash
+seams prisms input/traj/exampleTraj.lammpstrj --type 2
+```
+
+```default
+nop 250
+size 3 perfect 0 imperfect 0
+size 4 perfect 51 imperfect 0
+size 5 perfect 0 imperfect 0
+size 6 perfect 0 imperfect 0
+perfect 51 imperfect 0
+```
+
+Fifty-one perfect four-membered prisms, and no other size.
+Ice Ih and frame 1 of the cubic mW cell are the contrast: every size prints perfect 0 and imperfect 0.
+A hexagonal cage is not a prism block.
+
+```bash
+seams prisms input/traj/ice1h.lammpstrj --type 1
+seams prisms input/traj/mW_cubic.lammpstrj --type 1
+```
+
+## Sheet rings and the in-plane RDF {#sheet-rings-and-the-in-plane-rdf}
+
+Install `pydseamslib` with `pip install pydseamslib` and import `from dseams import userframe`.
+Its sheet census uses the cutoff neighbour list.
+Its prism rows are not the CLI line: size 4 is 50 perfect, where `seams prisms` prints 51.
+
+`sheet_area` is the area the coverage fraction divides by.
+Use the area of the sheet you loaded.
+The ring counts do not use it.
+With `sheet_area=1` the coverage number is the ring area itself.
+
+```python
+import tempfile
+from dseams import userframe as ds
+
+frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
+out = tempfile.mkdtemp()
+r, g = frame.rdf_2d(out, cutoff=6.0, binwidth=0.5)
+assert len(r) == len(g) == 12
+assert round(max(g), 6) == 1.154771
+sheet = frame.monolayer_rings(out + "/sheet", sheet_area=1.0, max_depth=6)
+assert [sheet[n]["count"] for n in (3, 4, 5, 6)] == [37, 273, 34, 167]
+prisms = frame.find_prisms(output_dir=out + "/prisms", max_depth=6)
+assert prisms[1] == {"size": 4, "perfect": 50, "imperfect": 0}
+```
+
+The in-plane $g(r)$ has 12 bins of width 0.5 Å out to 6 Å.
+The maximum is 1.154771 in the bin centred at 2.75 Å.
+The sheet counts are the cutoff ring census: 37 three-rings, 273 four-rings, 34 five-rings, and 167 six-rings.

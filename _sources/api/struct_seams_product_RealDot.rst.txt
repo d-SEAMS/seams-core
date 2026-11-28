@@ -1,0 +1,26 @@
+.. index:: pair: struct; seams::product::RealDot
+.. _doxid-structseams_1_1product_1_1_real_dot:
+
+struct seams::product::RealDot
+==============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/ozaki.hpp>
+	
+	struct RealDot {
+		// fields
+	
+		double :target:`value<doxid-structseams_1_1product_1_1_real_dot_1aefef1ba97a24b2676b5455b4c747ba73>`;
+		double :target:`bound<doxid-structseams_1_1product_1_1_real_dot_1a54d2cb040fb9812f13ea6743ba36a3e6>`;
+		bool :target:`certified<doxid-structseams_1_1product_1_1_real_dot_1a10ab65138796b89008f65a28ce04180b>`;
+		int :target:`work<doxid-structseams_1_1product_1_1_real_dot_1a8e418852023347c545edab43a3bc8ec2>`;
+		const char* :target:`backend<doxid-structseams_1_1product_1_1_real_dot_1a370538360b39ac1bd03fac89cbc922cb>`;
+	};

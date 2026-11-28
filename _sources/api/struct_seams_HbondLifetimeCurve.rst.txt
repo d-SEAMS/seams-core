@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::HbondLifetimeCurve
+.. _doxid-structseams_1_1_hbond_lifetime_curve:
+
+struct seams::HbondLifetimeCurve
+================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Intermittent and continuous H-bond lifetime curves. :ref:`More...<details-structseams_1_1_hbond_lifetime_curve>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct HbondLifetimeCurve {
+		// fields
+	
+		std::vector<double> :ref:`lag_time<doxid-structseams_1_1_hbond_lifetime_curve_1a61fcf19af88676dc0d691b6a6312022f>`;
+		std::vector<double> :ref:`c_intermittent<doxid-structseams_1_1_hbond_lifetime_curve_1acaa33969ef8ecad01be7232c46f784c8>`;
+		std::vector<double> :ref:`s_continuous<doxid-structseams_1_1_hbond_lifetime_curve_1af302d21aea72ea59993d77f506b4883b>`;
+		std::vector<std::size_t> :ref:`n_origins<doxid-structseams_1_1_hbond_lifetime_curve_1aedd20179b9ed8b7171cb846c1e5092a5>`;
+	};
+.. _details-structseams_1_1_hbond_lifetime_curve:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Intermittent and continuous H-bond lifetime curves.
+
+Fields
+------
+
+.. index:: pair: variable; lag_time
+.. _doxid-structseams_1_1_hbond_lifetime_curve_1a61fcf19af88676dc0d691b6a6312022f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> lag_time
+
+Lag times k \* dt.
+
+.. index:: pair: variable; c_intermittent
+.. _doxid-structseams_1_1_hbond_lifetime_curve_1acaa33969ef8ecad01be7232c46f784c8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> c_intermittent
+
+Intermittent autocorrelation C_HB.
+
+.. index:: pair: variable; s_continuous
+.. _doxid-structseams_1_1_hbond_lifetime_curve_1af302d21aea72ea59993d77f506b4883b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> s_continuous
+
+Continuous survival S_HB.
+
+.. index:: pair: variable; n_origins
+.. _doxid-structseams_1_1_hbond_lifetime_curve_1aedd20179b9ed8b7171cb846c1e5092a5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::size_t> n_origins
+
+Time-origin count at each lag.
+

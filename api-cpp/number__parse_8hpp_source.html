@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/number_parse.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/number__parse_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/number_parse.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/number__parse_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/number_parse.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('number__parse_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">number_parse.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="number__parse_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SEAMS_NUMBER_PARSE_HPP_</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SEAMS_NUMBER_PARSE_HPP_</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;cerrno&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;cstdlib&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;locale.h&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams.html">seams</a> {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">// libc++ from the conda macOS 11 toolchain deletes std::from_chars for</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// a floating value. strtod_l in the C locale follows the same grammar:</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// no leading plus, no hexadecimal form, the whole text consumed, and</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// overflow or underflow to zero rejected.</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="foldopen" id="foldopen00018" data-start="{" data-end="}">
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="namespaceseams.html#ae8356c14dff3260b771759a58fb18246">   18</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceseams.html#ae8356c14dff3260b771759a58fb18246">parseExactDouble</a>(std::string_view text, <span class="keywordtype">double</span> &amp;out) {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  <span class="keywordflow">if</span> (text.empty() || text.front() == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  }</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  <span class="keywordflow">for</span> (<span class="keywordtype">char</span> raw : text) {</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">const</span> <span class="keyword">auto</span> c = <span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span><span class="keyword">&gt;</span>(raw);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordflow">if</span> (raw == <span class="charliteral">&#39;x&#39;</span> || raw == <span class="charliteral">&#39;X&#39;</span> || c == <span class="charliteral">&#39; &#39;</span> || c == <span class="charliteral">&#39;\t&#39;</span> || c == <span class="charliteral">&#39;\n&#39;</span> ||</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        c == <span class="charliteral">&#39;\v&#39;</span> || c == <span class="charliteral">&#39;\f&#39;</span> || c == <span class="charliteral">&#39;\r&#39;</span>) {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    }</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  }</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#if defined(_WIN32)</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>  <span class="comment">// MinGW and MSVC spell the C-locale converter this way. newlocale</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>  <span class="comment">// is not in their headers. The grammar stays the one strtod_l uses.</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  <span class="keyword">static</span> <span class="keyword">const</span> _locale_t loc = _create_locale(LC_ALL, <span class="stringliteral">&quot;C&quot;</span>);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keywordflow">if</span> (loc == <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  }</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keyword">static</span> <span class="keyword">const</span> locale_t loc =</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>      newlocale(LC_ALL_MASK, <span class="stringliteral">&quot;C&quot;</span>, <span class="keyword">static_cast&lt;</span>locale_t<span class="keyword">&gt;</span>(<span class="keyword">nullptr</span>));</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keywordflow">if</span> (loc == <span class="keyword">static_cast&lt;</span>locale_t<span class="keyword">&gt;</span>(<span class="keyword">nullptr</span>)) {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keyword">const</span> std::string token(text);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="keywordtype">char</span> *end = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  errno = 0;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#if defined(_WIN32)</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> value = _strtod_l(token.c_str(), &amp;end, loc);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> value = strtod_l(token.c_str(), &amp;end, loc);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keywordflow">if</span> (end != token.c_str() + token.size()) {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordflow">if</span> (errno == ERANGE &amp;&amp; (value == 0.0 || !std::isfinite(value))) {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  }</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  out = value;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>}</div>
+</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>} <span class="comment">// namespace seams</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="anamespaceseams_html"><div class="ttname"><a href="namespaceseams.html">seams</a></div><div class="ttdef"><b>Definition</b> <a href="cpu__features_8hpp_source.html#l00030">cpu_features.hpp:30</a></div></div>
+<div class="ttc" id="anamespaceseams_html_ae8356c14dff3260b771759a58fb18246"><div class="ttname"><a href="namespaceseams.html#ae8356c14dff3260b771759a58fb18246">seams::parseExactDouble</a></div><div class="ttdeci">bool parseExactDouble(std::string_view text, double &amp;out)</div><div class="ttdef"><b>Definition</b> <a href="#l00018">number_parse.hpp:18</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="number__parse_8hpp.html">number_parse.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

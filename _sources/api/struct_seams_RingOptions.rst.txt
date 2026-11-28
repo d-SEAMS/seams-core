@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::RingOptions
+.. _doxid-structseams_1_1_ring_options:
+
+struct seams::RingOptions
+=========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for primitive rings. :ref:`More...<details-structseams_1_1_ring_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct RingOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_ring_options_1ac012f13a5c8ecc6642fd15c95a7192fe>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_ring_options_1a03060dbbc50cf2d1497aa3835d019bc3>` = 0;
+		:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` :ref:`graph<doxid-structseams_1_1_ring_options_1ab2da68c729464940c041d29f5e8ffc96>` = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`;
+		int :ref:`max_size<doxid-structseams_1_1_ring_options_1a2009cc27435c6a58f770ef5d3419f5a8>` = 6;
+	};
+.. _details-structseams_1_1_ring_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for primitive rings.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_ring_options_1ac012f13a5c8ecc6642fd15c95a7192fe:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_ring_options_1a03060dbbc50cf2d1497aa3835d019bc3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+.. index:: pair: variable; graph
+.. _doxid-structseams_1_1_ring_options_1ab2da68c729464940c041d29f5e8ffc96:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` graph = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`
+
+Cutoff or mutual.
+
+.. index:: pair: variable; max_size
+.. _doxid-structseams_1_1_ring_options_1a2009cc27435c6a58f770ef5d3419f5a8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int max_size = 6
+
+Largest ring size, from 3 through 12.
+

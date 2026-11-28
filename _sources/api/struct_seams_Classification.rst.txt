@@ -1,0 +1,58 @@
+.. index:: pair: struct; seams::Classification
+.. _doxid-structseams_1_1_classification:
+
+struct seams::Classification
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+CHILL or CHILL+ labels and the nine population counts. :ref:`More...<details-structseams_1_1_classification>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Classification {
+		// fields
+	
+		std::vector<int> :ref:`labels<doxid-structseams_1_1_classification_1a113aa1a3fbdffdb0cfdf0e99f4ae7e75>`;
+		std::array<int, 9> :ref:`counts<doxid-structseams_1_1_classification_1a7bcb44792e23e9f68c7f88768fe11f2b>` {};
+	};
+.. _details-structseams_1_1_classification:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+CHILL or CHILL+ labels and the nine population counts.
+
+``:ref:`counts <doxid-structseams_1_1_classification_1a7bcb44792e23e9f68c7f88768fe11f2b>`[k]`` is the number of atoms whose label is the enumerator with value ``k``.
+
+Fields
+------
+
+.. index:: pair: variable; labels
+.. _doxid-structseams_1_1_classification_1a113aa1a3fbdffdb0cfdf0e99f4ae7e75:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> labels
+
+One label code per atom.
+
+.. index:: pair: variable; counts
+.. _doxid-structseams_1_1_classification_1a7bcb44792e23e9f68c7f88768fe11f2b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<int, 9> counts {}
+
+Population in label order.
+

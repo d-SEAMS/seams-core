@@ -1,0 +1,107 @@
+.. index:: pair: class; seams::Error
+.. _doxid-classseams_1_1_error:
+
+class seams::Error
+==================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Failure from the C API, or from a rejected argument. :ref:`More...<details-classseams_1_1_error>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	class Error: public std::runtime_error {
+	public:
+		// construction
+	
+		:ref:`Error<doxid-classseams_1_1_error_1afa1a477ab0ed901f607dccf49b67680b>`(int status, std::string message);
+
+		// methods
+	
+		:ref:`Status<doxid-group__seams__cpp_1ga66e498496a8ac061410534a9f0171779>` :ref:`status<doxid-classseams_1_1_error_1a262ad62a5e21a2922d47b6fb816ff052>`() const;
+		int :ref:`code<doxid-classseams_1_1_error_1ab85bb0b64754ec9b459210f58350f930>`() const;
+	};
+.. _details-classseams_1_1_error:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Failure from the C API, or from a rejected argument.
+
+``what()`` is the text from ``:ref:`seams_handle_error <doxid-group__capi__meta_1ga53c7d5d16b336c47ed94f5ea9a3f689f>```. ``:ref:`code() <doxid-classseams_1_1_error_1ab85bb0b64754ec9b459210f58350f930>``` is the status integer. The object does not own a handle.
+
+Construction
+------------
+
+.. index:: pair: function; Error
+.. _doxid-classseams_1_1_error_1afa1a477ab0ed901f607dccf49b67680b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	Error(int status, std::string message)
+
+Build an error from a status and a message.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- status
+
+		- :ref:`Status <doxid-group__seams__cpp_1ga66e498496a8ac061410534a9f0171779>` code. Zero is not thrown by ``check``.
+
+	*
+		- message
+
+		- Detail text. An empty string is allowed.
+
+Methods
+-------
+
+.. index:: pair: function; status
+.. _doxid-classseams_1_1_error_1a262ad62a5e21a2922d47b6fb816ff052:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Status<doxid-group__seams__cpp_1ga66e498496a8ac061410534a9f0171779>` status() const
+
+:ref:`Status <doxid-group__seams__cpp_1ga66e498496a8ac061410534a9f0171779>` as the ``:ref:`Status <doxid-group__seams__cpp_1ga66e498496a8ac061410534a9f0171779>``` enumeration when the code is known.
+
+
+
+.. rubric:: Returns:
+
+The matching enumerator.
+
+.. index:: pair: function; code
+.. _doxid-classseams_1_1_error_1ab85bb0b64754ec9b459210f58350f930:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int code() const
+
+:ref:`Status <doxid-group__seams__cpp_1ga66e498496a8ac061410534a9f0171779>` integer.
+
+Same values as ``:ref:`seams_status <doxid-group__capi__types_1gac77ff4b4eced39c40520bb71495b0b0d>```.
+
+
+
+.. rubric:: Returns:
+
+The code stored at construction.
+

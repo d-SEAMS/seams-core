@@ -1,0 +1,27 @@
+.. index:: pair: struct; bond::DirectedHydrogenBond
+.. _doxid-structbond_1_1_directed_hydrogen_bond:
+
+struct bond::DirectedHydrogenBond
+=================================
+
+.. toctree::
+	:hidden:
+
+One directed hydrogen bond. Indices are positions in the single cloud passed to directedHydrogenBonds. Angle is degrees, acceptor-first: the two vectors are the minimum image of acceptor minus donor and the minimum image of acceptor minus the hydrogen. A linear donor-hydrogen-acceptor geometry has angle 0.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/bond.hpp>
+	
+	struct DirectedHydrogenBond {
+		// fields
+	
+		int :target:`donor<doxid-structbond_1_1_directed_hydrogen_bond_1ac3cfe2b251cb5603d0f9b73fdf7e2684>` = -1;
+		int :target:`hydrogen<doxid-structbond_1_1_directed_hydrogen_bond_1a5e84db4e05e711be637845588deb973b>` = -1;
+		int :target:`acceptor<doxid-structbond_1_1_directed_hydrogen_bond_1a81d7181eed83aa48b9205d27e3941c04>` = -1;
+		double :target:`d_AH<doxid-structbond_1_1_directed_hydrogen_bond_1a053bf1afcaee3390c76684b1dd3d15ec>` = 0.0;
+		double :target:`d_DA<doxid-structbond_1_1_directed_hydrogen_bond_1ac4dc8947de18965d841451d3d00527e5>` = 0.0;
+		double :target:`angle<doxid-structbond_1_1_directed_hydrogen_bond_1a4f69e353bf7cceb549ac7aac80df9ba4>` = 0.0;
+	};

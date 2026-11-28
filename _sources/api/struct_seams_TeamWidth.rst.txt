@@ -1,0 +1,33 @@
+.. index:: pair: struct; seams::TeamWidth
+.. _doxid-structseams_1_1_team_width:
+
+struct seams::TeamWidth
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/thread_team.hpp>
+	
+	struct TeamWidth {
+		// fields
+	
+		int :target:`saved<doxid-structseams_1_1_team_width_1a06b316a6d02ce31cbe77fe9b3f613af1>` = 1;
+		bool :target:`on<doxid-structseams_1_1_team_width_1af5db172844a12c2818afa97df5866f4b>` = false;
+
+		// construction
+	
+		:target:`TeamWidth<doxid-structseams_1_1_team_width_1a52dfff082980b4519577587df3640d9d>`(int n);
+		:target:`TeamWidth<doxid-structseams_1_1_team_width_1ac9422572843c23e4a5d2e391c5b41955>`(const TeamWidth&);
+		:target:`~TeamWidth<doxid-structseams_1_1_team_width_1a22c6edf8e225c81def3829d2af56622b>`();
+
+		// methods
+	
+		:ref:`TeamWidth<doxid-structseams_1_1_team_width_1a52dfff082980b4519577587df3640d9d>`& :target:`operator=<doxid-structseams_1_1_team_width_1a8dac13763e615ed31e19af46e05332d3>`(const :ref:`TeamWidth<doxid-structseams_1_1_team_width_1a52dfff082980b4519577587df3640d9d>`&);
+	};

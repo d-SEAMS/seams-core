@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: seams::minimax Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespaceseams_1_1minimax.html">
+<meta property="og:title" content="seams-core: seams::minimax Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespaceseams_1_1minimax.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: seams::minimax Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespaceseams_1_1minimax.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams::minimax Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ac95b894aafb675e35cee5cf93fa9e182" id="r_ac95b894aafb675e35cee5cf93fa9e182"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#ac95b894aafb675e35cee5cf93fa9e182">kExp2Neg</a> [11]</td></tr>
+<tr class="memitem:a7e1be452aef1152b7e56885c72ed369c" id="r_a7e1be452aef1152b7e56885c72ed369c"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a7e1be452aef1152b7e56885c72ed369c">kExp2NegDeriv</a> [10]</td></tr>
+<tr class="memitem:af4c43574cc6f0f4d0b1e2715c9bd6406" id="r_af4c43574cc6f0f4d0b1e2715c9bd6406"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#af4c43574cc6f0f4d0b1e2715c9bd6406">kExp2NegSupRelative</a> = 0x1.00000003dfffcp-52</td></tr>
+<tr class="memitem:a6889f9d6f78ba7e132e7c31d8c5e9957" id="r_a6889f9d6f78ba7e132e7c31d8c5e9957"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a6889f9d6f78ba7e132e7c31d8c5e9957">kExp2NegDerivSupRelative</a> = 0x1.5e74ff9e2c313p-44</td></tr>
+<tr class="memitem:a19f52d0ffe21b89430f12ac2a53a1286" id="r_a19f52d0ffe21b89430f12ac2a53a1286"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a19f52d0ffe21b89430f12ac2a53a1286">kRsqrtMantissa</a> [19]</td></tr>
+<tr class="memitem:a20412263e4c366b2dade55fef68d88f2" id="r_a20412263e4c366b2dade55fef68d88f2"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a20412263e4c366b2dade55fef68d88f2">kRsqrtMantissaDeriv</a> [18]</td></tr>
+<tr class="memitem:a6aed183b1768bc71d7ac7e950627b2c7" id="r_a6aed183b1768bc71d7ac7e950627b2c7"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a6aed183b1768bc71d7ac7e950627b2c7">kRsqrtMantissaSupRelative</a> = 0x1.00000003dfffcp-50</td></tr>
+<tr class="memitem:ad6f92241fb0694871930128620b26d5d" id="r_ad6f92241fb0694871930128620b26d5d"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#ad6f92241fb0694871930128620b26d5d">kRsqrtMantissaDegree</a> = 18</td></tr>
+<tr class="memitem:a777b52bc5775d57a5895b3afa297f08e" id="r_a777b52bc5775d57a5895b3afa297f08e"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a777b52bc5775d57a5895b3afa297f08e">kLnMantissa</a> [21]</td></tr>
+<tr class="memitem:a637712369deeaa122783afd79335cb91" id="r_a637712369deeaa122783afd79335cb91"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a637712369deeaa122783afd79335cb91">kLnMantissaDeriv</a> [20]</td></tr>
+<tr class="memitem:a0b73aa5760e524886ce92de2cca0dfde" id="r_a0b73aa5760e524886ce92de2cca0dfde"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a0b73aa5760e524886ce92de2cca0dfde">kLnMantissaSupAbsolute</a> = 0x1.7b9312581828ep-57</td></tr>
+</table>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="ac95b894aafb675e35cee5cf93fa9e182" name="ac95b894aafb675e35cee5cf93fa9e182"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac95b894aafb675e35cee5cf93fa9e182">&#9670;&#160;</a></span>kExp2Neg</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kExp2Neg[11]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                                 = {</div>
+<div class="line">    0x1.ffffffffffffep-1,</div>
+<div class="line">    -0x1.62e42fefa3835p-1,</div>
+<div class="line">    0x1.ebfbdff81bf0dp-3,</div>
+<div class="line">    -0x1.c6b08d6c71a91p-5,</div>
+<div class="line">    0x1.3b2ab6845a794p-7,</div>
+<div class="line">    -0x1.5d87ed7ddfc9fp-10,</div>
+<div class="line">    0x1.43078ed37205fp-13,</div>
+<div class="line">    -0x1.ff9f29bbfca5ap-17,</div>
+<div class="line">    0x1.6112afa2ab0c4p-20,</div>
+<div class="line">    -0x1.a0e31268b138bp-24,</div>
+<div class="line">    0x1.55eee9a3a967ap-28</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00013">13</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7e1be452aef1152b7e56885c72ed369c" name="a7e1be452aef1152b7e56885c72ed369c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e1be452aef1152b7e56885c72ed369c">&#9670;&#160;</a></span>kExp2NegDeriv</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kExp2NegDeriv[10]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                                      = {</div>
+<div class="line">    -0x1.62e42fefa3835p-1,</div>
+<div class="line">    0x1.ebfbdff81bf0dp-2,</div>
+<div class="line">    -0x1.55046a11553edp-3,</div>
+<div class="line">    0x1.3b2ab6845a794p-5,</div>
+<div class="line">    -0x1.b4e9e8dd57bc7p-8,</div>
+<div class="line">    0x1.e48b563d2b08ep-11,</div>
+<div class="line">    -0x1.bfab44847d10fp-14,</div>
+<div class="line">    0x1.6112afa2ab0c4p-17,</div>
+<div class="line">    -0x1.d4ff74b5c75fcp-21,</div>
+<div class="line">    0x1.ab6aa40c93c18p-25</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00027">27</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a6889f9d6f78ba7e132e7c31d8c5e9957" name="a6889f9d6f78ba7e132e7c31d8c5e9957"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6889f9d6f78ba7e132e7c31d8c5e9957">&#9670;&#160;</a></span>kExp2NegDerivSupRelative</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kExp2NegDerivSupRelative = 0x1.5e74ff9e2c313p-44</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00041">41</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af4c43574cc6f0f4d0b1e2715c9bd6406" name="af4c43574cc6f0f4d0b1e2715c9bd6406"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4c43574cc6f0f4d0b1e2715c9bd6406">&#9670;&#160;</a></span>kExp2NegSupRelative</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kExp2NegSupRelative = 0x1.00000003dfffcp-52</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00040">40</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a777b52bc5775d57a5895b3afa297f08e" name="a777b52bc5775d57a5895b3afa297f08e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a777b52bc5775d57a5895b3afa297f08e">&#9670;&#160;</a></span>kLnMantissa</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kLnMantissa[21]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                                    = {</div>
+<div class="line">    -0x1.f907a2098dcd0p+1,</div>
+<div class="line">    0x1.c46b4bf9ba949p+4,</div>
+<div class="line">    -0x1.7aa1ce9aaed54p+7,</div>
+<div class="line">    0x1.0a099294f9d3bp+10,</div>
+<div class="line">    -0x1.2902b8896aceap+12,</div>
+<div class="line">    0x1.0981ed11e61e5p+14,</div>
+<div class="line">    -0x1.8123e1f69e96dp+15,</div>
+<div class="line">    0x1.ca5413c3fd5a9p+16,</div>
+<div class="line">    -0x1.c308758b49a2ap+17,</div>
+<div class="line">    0x1.70dccd5030a57p+18,</div>
+<div class="line">    -0x1.f676a1eb3fbfcp+18,</div>
+<div class="line">    0x1.1cd7937abe4e6p+19,</div>
+<div class="line">    -0x1.0bdc40d538c30p+19,</div>
+<div class="line">    0x1.9f073dfa85ae5p+18,</div>
+<div class="line">    -0x1.06073886c88fap+18,</div>
+<div class="line">    0x1.0946a0d64e9eap+17,</div>
+<div class="line">    -0x1.a44a01fb067dfp+15,</div>
+<div class="line">    0x1.f5e56e7b8265fp+13,</div>
+<div class="line">    -0x1.a8cd44770561bp+11,</div>
+<div class="line">    0x1.c649e92f37b12p+8,</div>
+<div class="line">    -0x1.cd84965812d6fp+4</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00091">91</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a637712369deeaa122783afd79335cb91" name="a637712369deeaa122783afd79335cb91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a637712369deeaa122783afd79335cb91">&#9670;&#160;</a></span>kLnMantissaDeriv</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kLnMantissaDeriv[20]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                                         = {</div>
+<div class="line">    0x1.c46b4bf9ba949p+4,</div>
+<div class="line">    -0x1.7aa1ce9aaed54p+8,</div>
+<div class="line">    0x1.8f0e5bdf76bd8p+11,</div>
+<div class="line">    -0x1.2902b8896aceap+14,</div>
+<div class="line">    0x1.4be268565fa5ep+16,</div>
+<div class="line">    -0x1.20dae978f6f12p+18,</div>
+<div class="line">    0x1.9109914b7daf4p+19,</div>
+<div class="line">    -0x1.c308758b49a2ap+20,</div>
+<div class="line">    0x1.9ef866fa36ba2p+21,</div>
+<div class="line">    -0x1.3a0a253307d7ep+22,</div>
+<div class="line">    0x1.87a86ac8c5abcp+22,</div>
+<div class="line">    -0x1.91ca613fd5248p+22,</div>
+<div class="line">    0x1.5135e25b8c9dap+22,</div>
+<div class="line">    -0x1.ca8ca2ebdefb6p+21,</div>
+<div class="line">    0x1.f1646d91d3697p+20,</div>
+<div class="line">    -0x1.a44a01fb067dfp+19,</div>
+<div class="line">    0x1.0aa1e2b19d462p+18,</div>
+<div class="line">    -0x1.dde6ed05e60dep+15,</div>
+<div class="line">    0x1.0dbbe27409113p+13,</div>
+<div class="line">    -0x1.2072ddf70bc65p+9</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00115">115</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0b73aa5760e524886ce92de2cca0dfde" name="a0b73aa5760e524886ce92de2cca0dfde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b73aa5760e524886ce92de2cca0dfde">&#9670;&#160;</a></span>kLnMantissaSupAbsolute</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kLnMantissaSupAbsolute = 0x1.7b9312581828ep-57</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00138">138</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a19f52d0ffe21b89430f12ac2a53a1286" name="a19f52d0ffe21b89430f12ac2a53a1286"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19f52d0ffe21b89430f12ac2a53a1286">&#9670;&#160;</a></span>kRsqrtMantissa</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kRsqrtMantissa[19]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                                       = {</div>
+<div class="line">    0x1.740b5ad90ff59p+2,</div>
+<div class="line">    -0x1.89f2511be8494p+5,</div>
+<div class="line">    0x1.615fd5d70bd6ap+8,</div>
+<div class="line">    -0x1.d7f48d3255972p+10,</div>
+<div class="line">    0x1.e0f99fd1b228fp+12,</div>
+<div class="line">    -0x1.7fb6efa94b32fp+14,</div>
+<div class="line">    0x1.e851ecbaa4366p+15,</div>
+<div class="line">    -0x1.f5ef051ebbf5cp+16,</div>
+<div class="line">    0x1.a3e8b7ff820c5p+17,</div>
+<div class="line">    -0x1.1ee74781c099cp+18,</div>
+<div class="line">    0x1.401139e754cdfp+18,</div>
+<div class="line">    -0x1.223a1b9d11673p+18,</div>
+<div class="line">    0x1.a8007e460e15ep+17,</div>
+<div class="line">    -0x1.ebabbbd602474p+16,</div>
+<div class="line">    0x1.ba315f315c01fp+15,</div>
+<div class="line">    -0x1.296a701306cabp+14,</div>
+<div class="line">    0x1.19975bd197a7ap+12,</div>
+<div class="line">    -0x1.4ec07376789b9p+9,</div>
+<div class="line">    0x1.77e7484efaea9p+5</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00044">44</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ad6f92241fb0694871930128620b26d5d" name="ad6f92241fb0694871930128620b26d5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6f92241fb0694871930128620b26d5d">&#9670;&#160;</a></span>kRsqrtMantissaDegree</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::minimax::kRsqrtMantissaDegree = 18</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00088">88</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a20412263e4c366b2dade55fef68d88f2" name="a20412263e4c366b2dade55fef68d88f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20412263e4c366b2dade55fef68d88f2">&#9670;&#160;</a></span>kRsqrtMantissaDeriv</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kRsqrtMantissaDeriv[18]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                                            = {</div>
+<div class="line">    -0x1.89f2511be8494p+5,</div>
+<div class="line">    0x1.615fd5d70bd6ap+9,</div>
+<div class="line">    -0x1.61f769e5c0316p+12,</div>
+<div class="line">    0x1.e0f99fd1b228fp+14,</div>
+<div class="line">    -0x1.dfa4ab939dffbp+16,</div>
+<div class="line">    0x1.6e3d718bfb28cp+18,</div>
+<div class="line">    -0x1.b731247ae4770p+19,</div>
+<div class="line">    0x1.a3e8b7ff820c5p+20,</div>
+<div class="line">    -0x1.42c43071f8ad0p+21,</div>
+<div class="line">    0x1.901588612a017p+21,</div>
+<div class="line">    -0x1.8f0fe5f7f7edep+21,</div>
+<div class="line">    0x1.3e005eb48a906p+21,</div>
+<div class="line">    -0x1.8f7b889de1d9ep+20,</div>
+<div class="line">    0x1.82eb334b3081bp+19,</div>
+<div class="line">    -0x1.16d3c911d65e0p+18,</div>
+<div class="line">    0x1.19975bd197a7ap+16,</div>
+<div class="line">    -0x1.63ac7aade0255p+13,</div>
+<div class="line">    0x1.a6e43158da47ep+9</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00066">66</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a6aed183b1768bc71d7ac7e950627b2c7" name="a6aed183b1768bc71d7ac7e950627b2c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6aed183b1768bc71d7ac7e950627b2c7">&#9670;&#160;</a></span>kRsqrtMantissaSupRelative</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::minimax::kRsqrtMantissaSupRelative = 0x1.00000003dfffcp-50</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="minimax__coeff_8hpp_source.html#l00087">87</a> of file <a class="el" href="minimax__coeff_8hpp_source.html">minimax_coeff.hpp</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceseams.html">seams</a></li><li class="navelem"><a href="namespaceseams_1_1minimax.html">minimax</a></li>
+  </ul>
+</div>
+</body>
+</html>

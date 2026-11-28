@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: nucleation Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacenucleation.html">
+<meta property="og:title" content="seams-core: nucleation Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacenucleation.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: nucleation Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacenucleation.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">nucleation Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:FrameRecord" id="r_FrameRecord"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structnucleation_1_1FrameRecord.html">FrameRecord</a></td></tr>
+<tr class="memitem:Ascent" id="r_Ascent"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structnucleation_1_1Ascent.html">Ascent</a></td></tr>
+<tr class="memitem:GrowBasin" id="r_GrowBasin"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structnucleation_1_1GrowBasin.html">GrowBasin</a></td></tr>
+<tr class="memitem:CommittorCall" id="r_CommittorCall"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structnucleation_1_1CommittorCall.html">CommittorCall</a></td></tr>
+<tr class="memitem:HalfRise" id="r_HalfRise"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structnucleation_1_1HalfRise.html">HalfRise</a></td></tr>
+<tr class="memitem:Lead" id="r_Lead"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structnucleation_1_1Lead.html">Lead</a></td></tr>
+<tr class="memitem:Shift" id="r_Shift"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structnucleation_1_1Shift.html">Shift</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ab77482862038cd733af94a8bc4802842" id="r_ab77482862038cd733af94a8bc4802842"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ab77482862038cd733af94a8bc4802842">CommittorFate</a> { <a class="el" href="#ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45">uncommitted</a>
+, <a class="el" href="#ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83">committed</a>
+, <a class="el" href="#ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980">truncated</a>
+ }</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a047d583af8b7c503376f262d63dc9ade" id="r_a047d583af8b7c503376f262d63dc9ade"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a047d583af8b7c503376f262d63dc9ade">q6DotScore</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memitem:a64e04b196b84bc47a828f2875823e5b8" id="r_a64e04b196b84bc47a828f2875823e5b8"><td class="memItemLeft"><a class="el" href="structnucleation_1_1FrameRecord.html">FrameRecord</a>&#160;</td><td class="memItemRight"><a class="el" href="#a64e04b196b84bc47a828f2875823e5b8">analyzeFrame</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, double cutoff, int ringDepth, int typeI, double q6Cut, int frame)</td></tr>
+<tr class="memitem:a536f149502c3e4e03088aa2287700cb2" id="r_a536f149502c3e4e03088aa2287700cb2"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a536f149502c3e4e03088aa2287700cb2">stackFraction</a> (int cubic, int hexagonal)</td></tr>
+<tr class="memdesc:a536f149502c3e4e03088aa2287700cb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cubic / (cubic + hexagonal). Quiet NaN when the denominator is 0.  <br /></td></tr>
+<tr class="memitem:a262df71b584718ece21536f3c0235c1c" id="r_a262df71b584718ece21536f3c0235c1c"><td class="memItemLeft"><a class="el" href="structnucleation_1_1Ascent.html">Ascent</a>&#160;</td><td class="memItemRight"><a class="el" href="#a262df71b584718ece21536f3c0235c1c">finalAscent</a> (const std::vector&lt; double &gt; &amp;series)</td></tr>
+<tr class="memitem:af17120d989b41a986f036b3ff5e3fb1b" id="r_af17120d989b41a986f036b3ff5e3fb1b"><td class="memItemLeft"><a class="el" href="structnucleation_1_1GrowBasin.html">GrowBasin</a>&#160;</td><td class="memItemRight"><a class="el" href="#af17120d989b41a986f036b3ff5e3fb1b">growBasin</a> (const std::vector&lt; double &gt; &amp;series)</td></tr>
+<tr class="memitem:a6ab0c778ff2e5e2e9e6ccd004131da2f" id="r_a6ab0c778ff2e5e2e9e6ccd004131da2f"><td class="memItemLeft"><a class="el" href="structnucleation_1_1CommittorCall.html">CommittorCall</a>&#160;</td><td class="memItemRight"><a class="el" href="#a6ab0c778ff2e5e2e9e6ccd004131da2f">committorOf</a> (const std::vector&lt; double &gt; &amp;series, int molecules)</td></tr>
+<tr class="memitem:aa82d23fac82576f11e89429522c25ba8" id="r_aa82d23fac82576f11e89429522c25ba8"><td class="memItemLeft"><a class="el" href="structnucleation_1_1HalfRise.html">HalfRise</a>&#160;</td><td class="memItemRight"><a class="el" href="#aa82d23fac82576f11e89429522c25ba8">halfRise</a> (const std::vector&lt; double &gt; &amp;series)</td></tr>
+<tr class="memitem:a24db8d7542dd5836a3e8026d591accd9" id="r_a24db8d7542dd5836a3e8026d591accd9"><td class="memItemLeft"><a class="el" href="structnucleation_1_1Lead.html">Lead</a>&#160;</td><td class="memItemRight"><a class="el" href="#a24db8d7542dd5836a3e8026d591accd9">ringLead</a> (const std::vector&lt; double &gt; &amp;ringFraction, const std::vector&lt; double &gt; &amp;iceFraction)</td></tr>
+<tr class="memitem:a607b48d72ffc919887fa6243d2eb4e9d" id="r_a607b48d72ffc919887fa6243d2eb4e9d"><td class="memItemLeft"><a class="el" href="structnucleation_1_1Shift.html">Shift</a>&#160;</td><td class="memItemRight"><a class="el" href="#a607b48d72ffc919887fa6243d2eb4e9d">definitionShift</a> (int sizeA, int frameA, int sizeB, int frameB)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a3bc244ef7bf44479500a58d1387a0373" id="r_a3bc244ef7bf44479500a58d1387a0373"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a3bc244ef7bf44479500a58d1387a0373">kCutoffA</a> = 3.5</td></tr>
+<tr class="memdesc:a3bc244ef7bf44479500a58d1387a0373"><td class="mdescLeft">&#160;</td><td class="mdescRight">Published CHILL+ cutoff. Not a fitted parameter.  <br /></td></tr>
+<tr class="memitem:a64fc5d22d7f2818a0d819ee1a947f087" id="r_a64fc5d22d7f2818a0d819ee1a947f087"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a64fc5d22d7f2818a0d819ee1a947f087">kRingDepth</a> = 7</td></tr>
+<tr class="memdesc:a64fc5d22d7f2818a0d819ee1a947f087"><td class="mdescLeft">&#160;</td><td class="mdescRight">Primitive rings through this size. Depth 7 is the adjacency-row search.  <br /></td></tr>
+<tr class="memitem:af2f1477e5e5f99cbe98f4ab5b95091ae" id="r_af2f1477e5e5f99cbe98f4ab5b95091ae"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#af2f1477e5e5f99cbe98f4ab5b95091ae">kQ6BarIceCut</a> = 0.36</td></tr>
+<tr class="memitem:ae22c8a1c01ef593e140430321e5e0408" id="r_ae22c8a1c01ef593e140430321e5e0408"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#ae22c8a1c01ef593e140430321e5e0408">kQ6SolidCutoffA</a> = 3.2</td></tr>
+<tr class="memitem:af73c2233ed742db47c5be20f42681db7" id="r_af73c2233ed742db47c5be20f42681db7"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#af73c2233ed742db47c5be20f42681db7">kQ6SolidCut</a> = 0.5</td></tr>
+</table>
+<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="ab77482862038cd733af94a8bc4802842" name="ab77482862038cd733af94a8bc4802842"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab77482862038cd733af94a8bc4802842">&#9670;&#160;</a></span>CommittorFate</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#ab77482862038cd733af94a8bc4802842">nucleation::CommittorFate</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Outcome of one replica. committed means the final size is still strictly above that replica's own grow-basin barrier. truncated means the series ends on the cap 2N while that cap is also its maximum: the run was cut there and is not a committor sample. The barrier is never 2N itself. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45" name="ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45"></a>uncommitted&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83" name="ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83"></a>committed&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980" name="ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980"></a>truncated&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00163">163</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  163</span>{ <a class="code hl_enumvalue" href="#ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45">uncommitted</a>, <a class="code hl_enumvalue" href="#ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83">committed</a>, <a class="code hl_enumvalue" href="#ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980">truncated</a> };</div>
+<div class="ttc" id="anamespacenucleation_html_ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45"><div class="ttname"><a href="#ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45">nucleation::CommittorFate::uncommitted</a></div><div class="ttdeci">@ uncommitted</div><div class="ttdef"><b>Definition</b> <a href="nucleation__pathway_8hpp_source.html#l00163">nucleation_pathway.hpp:163</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980"><div class="ttname"><a href="#ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980">nucleation::CommittorFate::truncated</a></div><div class="ttdeci">@ truncated</div><div class="ttdef"><b>Definition</b> <a href="nucleation__pathway_8hpp_source.html#l00163">nucleation_pathway.hpp:163</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83"><div class="ttname"><a href="#ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83">nucleation::CommittorFate::committed</a></div><div class="ttdeci">@ committed</div><div class="ttdef"><b>Definition</b> <a href="nucleation__pathway_8hpp_source.html#l00163">nucleation_pathway.hpp:163</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a64e04b196b84bc47a828f2875823e5b8" name="a64e04b196b84bc47a828f2875823e5b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64e04b196b84bc47a828f2875823e5b8">&#9670;&#160;</a></span>analyzeFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnucleation_1_1FrameRecord.html">FrameRecord</a> nucleation::analyzeFrame </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>ringDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>q6Cut</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>frame</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Label one frame. Leaves iceType as the published CHILL+ label. typeI selects the molecules passed to q6-bar. q6Cut is the ice cut on \(\bar{q}_6\). </p>
+
+</div>
+</div>
+<a id="a6ab0c778ff2e5e2e9e6ccd004131da2f" name="a6ab0c778ff2e5e2e9e6ccd004131da2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ab0c778ff2e5e2e9e6ccd004131da2f">&#9670;&#160;</a></span>committorOf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnucleation_1_1CommittorCall.html">CommittorCall</a> nucleation::committorOf </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>series</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>molecules</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a607b48d72ffc919887fa6243d2eb4e9d" name="a607b48d72ffc919887fa6243d2eb4e9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a607b48d72ffc919887fa6243d2eb4e9d">&#9670;&#160;</a></span>definitionShift()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnucleation_1_1Shift.html">Shift</a> nucleation::definitionShift </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>sizeA</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>frameA</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>sizeB</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>frameB</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>How far definition b moves the onset size and the onset frame relative to definition a. dSize = b.size - a.size at each onset. </p>
+
+</div>
+</div>
+<a id="a262df71b584718ece21536f3c0235c1c" name="a262df71b584718ece21536f3c0235c1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a262df71b584718ece21536f3c0235c1c">&#9670;&#160;</a></span>finalAscent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnucleation_1_1Ascent.html">Ascent</a> nucleation::finalAscent </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>series</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af17120d989b41a986f036b3ff5e3fb1b" name="af17120d989b41a986f036b3ff5e3fb1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af17120d989b41a986f036b3ff5e3fb1b">&#9670;&#160;</a></span>growBasin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnucleation_1_1GrowBasin.html">GrowBasin</a> nucleation::growBasin </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>series</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa82d23fac82576f11e89429522c25ba8" name="aa82d23fac82576f11e89429522c25ba8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa82d23fac82576f11e89429522c25ba8">&#9670;&#160;</a></span>halfRise()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnucleation_1_1HalfRise.html">HalfRise</a> nucleation::halfRise </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>series</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a047d583af8b7c503376f262d63dc9ade" name="a047d583af8b7c503376f262d63dc9ade"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a047d583af8b7c503376f262d63dc9ade">&#9670;&#160;</a></span>q6DotScore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; nucleation::q6DotScore </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Per-molecule ten Wolde q6 score: the mean over neighbours within cutoff of <span class="tt">Re q6(i).q6*(j) / (|q6(i)| |q6(j)|)</span>. A molecule without neighbours scores 0. The box is orthorhombic. </p>
+
+</div>
+</div>
+<a id="a24db8d7542dd5836a3e8026d591accd9" name="a24db8d7542dd5836a3e8026d591accd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24db8d7542dd5836a3e8026d591accd9">&#9670;&#160;</a></span>ringLead()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structnucleation_1_1Lead.html">Lead</a> nucleation::ringLead </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ringFraction</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>iceFraction</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Ring signal is n6 / (n5 + n6). Ice signal is the ice-like count divided by the molecule count. Both are intensive. </p>
+
+</div>
+</div>
+<a id="a536f149502c3e4e03088aa2287700cb2" name="a536f149502c3e4e03088aa2287700cb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a536f149502c3e4e03088aa2287700cb2">&#9670;&#160;</a></span>stackFraction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nucleation::stackFraction </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cubic</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hexagonal</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cubic / (cubic + hexagonal). Quiet NaN when the denominator is 0. </p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a3bc244ef7bf44479500a58d1387a0373" name="a3bc244ef7bf44479500a58d1387a0373"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bc244ef7bf44479500a58d1387a0373">&#9670;&#160;</a></span>kCutoffA</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nucleation::kCutoffA = 3.5</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Published CHILL+ cutoff. Not a fitted parameter. </p>
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00046">46</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af2f1477e5e5f99cbe98f4ab5b95091ae" name="af2f1477e5e5f99cbe98f4ab5b95091ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2f1477e5e5f99cbe98f4ab5b95091ae">&#9670;&#160;</a></span>kQ6BarIceCut</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nucleation::kQ6BarIceCut = 0.36</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Lechner-Dellago \(\bar{q}_6\) above this value is an ice-like environment. Set from the gap between a perfect mW Ic crystal and a liquid reference, not from the nucleation trajectory. </p>
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00054">54</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af73c2233ed742db47c5be20f42681db7" name="af73c2233ed742db47c5be20f42681db7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af73c2233ed742db47c5be20f42681db7">&#9670;&#160;</a></span>kQ6SolidCut</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nucleation::kQ6SolidCut = 0.5</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00065">65</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae22c8a1c01ef593e140430321e5e0408" name="ae22c8a1c01ef593e140430321e5e0408"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae22c8a1c01ef593e140430321e5e0408">&#9670;&#160;</a></span>kQ6SolidCutoffA</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nucleation::kQ6SolidCutoffA = 3.2</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>q6 solid criterion of ten Wolde, Ruiz-Montero and Frenkel, J. Chem. Phys. 104, 9932 (1996), in the mW form of Haji-Akbari and Debenedetti, PNAS 112(34) (2015), doi:10.1073/pnas.1509267112, SI Table S1: neighbours within 3.2 A (the first minimum of the mW g(r)), and a molecule is solid when the mean over its neighbours of the normalised q6(i).q6*(j) exceeds 0.5. The solid cluster is the largest component of solid molecules on the same 3.2 A graph. The Reinhardt chain exclusion is not applied. </p>
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00064">64</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a64fc5d22d7f2818a0d819ee1a947f087" name="a64fc5d22d7f2818a0d819ee1a947f087"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64fc5d22d7f2818a0d819ee1a947f087">&#9670;&#160;</a></span>kRingDepth</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::kRingDepth = 7</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Primitive rings through this size. Depth 7 is the adjacency-row search. </p>
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00049">49</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacenucleation.html">nucleation</a></li>
+  </ul>
+</div>
+</body>
+</html>

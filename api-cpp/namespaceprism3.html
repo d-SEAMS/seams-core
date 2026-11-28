@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: prism3 Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespaceprism3.html">
+<meta property="og:title" content="seams-core: prism3 Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespaceprism3.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: prism3 Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespaceprism3.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">prism3 Namespace Reference<div class="ingroups"><a class="el" href="group__prism3.html">Bulk prisms</a></div></div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a1ba0089123227ca022acc1ce38baf7ee" id="r_a1ba0089123227ca022acc1ce38baf7ee"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a1ba0089123227ca022acc1ce38baf7ee">findBulkPrisms</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;rmsdPerAtom, double heightCutoff=8)</td></tr>
+<tr class="memdesc:a1ba0089123227ca022acc1ce38baf7ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find out which rings are prisms.  <br /></td></tr>
+<tr class="memitem:ab03946085dcf2e67583da676ab7f869f" id="r_ab03946085dcf2e67583da676ab7f869f"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ab03946085dcf2e67583da676ab7f869f">basalPrismConditions</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</td></tr>
+<tr class="memitem:abbcd706f2576f374e6037e9073815ee8" id="r_abbcd706f2576f374e6037e9073815ee8"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#abbcd706f2576f374e6037e9073815ee8">relaxedPrismConditions</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</td></tr>
+<tr class="memitem:ad85e1c83d20a91d7e8678f5facc7cb7a" id="r_ad85e1c83d20a91d7e8678f5facc7cb7a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ad85e1c83d20a91d7e8678f5facc7cb7a">basalRingsSeparation</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2, double heightCutoff=8)</td></tr>
+<tr class="memdesc:ad85e1c83d20a91d7e8678f5facc7cb7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check to see that candidate basal prisms are not really far from each other.  <br /></td></tr>
+</table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ab03946085dcf2e67583da676ab7f869f" name="ab03946085dcf2e67583da676ab7f869f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab03946085dcf2e67583da676ab7f869f">&#9670;&#160;</a></span>basalPrismConditions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool prism3::basalPrismConditions </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal2</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Tests whether two rings are basal rings (true) or not (false) for a prism (strict criterion) </p>
+
+</div>
+</div>
+<a id="ad85e1c83d20a91d7e8678f5facc7cb7a" name="ad85e1c83d20a91d7e8678f5facc7cb7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad85e1c83d20a91d7e8678f5facc7cb7a">&#9670;&#160;</a></span>basalRingsSeparation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool prism3::basalRingsSeparation </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal2</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>heightCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">8</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check to see that candidate basal prisms are not really far from each other. </p>
+
+</div>
+</div>
+<a id="a1ba0089123227ca022acc1ce38baf7ee" name="a1ba0089123227ca022acc1ce38baf7ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ba0089123227ca022acc1ce38baf7ee">&#9670;&#160;</a></span>findBulkPrisms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int prism3::findBulkPrisms </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ringType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rmsdPerAtom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>heightCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">8</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Find out which rings are prisms. </p>
+
+</div>
+</div>
+<a id="abbcd706f2576f374e6037e9073815ee8" name="abbcd706f2576f374e6037e9073815ee8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbcd706f2576f374e6037e9073815ee8">&#9670;&#160;</a></span>relaxedPrismConditions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool prism3::relaxedPrismConditions </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal2</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Reduced criterion: Two candidate basal rings of a prism block should have at least one bond between them </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceprism3.html">prism3</a></li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::Distribution
+.. _doxid-structseams_1_1_distribution:
+
+struct seams::Distribution
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Partial radial distribution. :ref:`More...<details-structseams_1_1_distribution>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Distribution {
+		// fields
+	
+		std::vector<double> :ref:`radius<doxid-structseams_1_1_distribution_1ad418f104a9d599bdd0668365e2a00ec3>`;
+		std::vector<double> :ref:`g<doxid-structseams_1_1_distribution_1ad481dca86ac64c56515ba307d7708c94>`;
+		std::vector<int> :ref:`count<doxid-structseams_1_1_distribution_1ae44572f4b7ee4482c63864bbc453d681>`;
+		double :ref:`volume<doxid-structseams_1_1_distribution_1a49d3a73a3d0eb5c50659275e65d1eb46>` = 0;
+	};
+.. _details-structseams_1_1_distribution:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Partial radial distribution.
+
+Fields
+------
+
+.. index:: pair: variable; radius
+.. _doxid-structseams_1_1_distribution_1ad418f104a9d599bdd0668365e2a00ec3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> radius
+
+Bin centers, Angstrom.
+
+.. index:: pair: variable; g
+.. _doxid-structseams_1_1_distribution_1ad481dca86ac64c56515ba307d7708c94:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> g
+
+:ref:`g(r) <doxid-structseams_1_1_distribution_1ad481dca86ac64c56515ba307d7708c94>`, dimensionless.
+
+.. index:: pair: variable; count
+.. _doxid-structseams_1_1_distribution_1ae44572f4b7ee4482c63864bbc453d681:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> count
+
+Pair count in each bin.
+
+.. index:: pair: variable; volume
+.. _doxid-structseams_1_1_distribution_1a49d3a73a3d0eb5c50659275e65d1eb46:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double volume = 0
+
+Cell volume, cubic Angstrom.
+

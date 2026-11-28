@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: C++ API</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/group__seams__cpp.html">
+<meta property="og:title" content="seams-core: C++ API">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/group__seams__cpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: C++ API">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__seams__cpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">C++ API </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Move-only handles and value results over <span class="tt"><a class="el" href="seams_8h.html" title="d-SEAMS stable C API, ABI 1.">seams.h</a></span>.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-files" class="groupheader"><a id="files" name="files"></a>
+Files</h2></td></tr>
+<tr class="memitem:include_2Fseams_2Ehpp" id="r_include_2Fseams_2Ehpp"><td class="memItemLeft">file &#160;</td><td class="memItemRight"><a class="el" href="seams_8hpp.html">include/seams.hpp</a></td></tr>
+<tr class="memdesc:seams_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Idiomatic C++ for the d-SEAMS C API. <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:seams_3A_3AError" id="r_seams_3A_3AError"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Error.html">seams::Error</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Failure from the C API, or from a rejected argument.  <a href="classseams_1_1Error.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AClassification" id="r_seams_3A_3AClassification"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Classification.html">seams::Classification</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL or CHILL+ labels and the nine population counts.  <a href="structseams_1_1Classification.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ASteinhardt" id="r_seams_3A_3ASteinhardt"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Steinhardt.html">seams::Steinhardt</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local <a class="el" href="structseams_1_1Steinhardt.html" title="Local Steinhardt parameter, and the average when it was asked for.">Steinhardt</a> parameter, and the average when it was asked for.  <a href="structseams_1_1Steinhardt.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AQ4Q6" id="r_seams_3A_3AQ4Q6"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Q4Q6.html">seams::Q4Q6</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local q4 and q6 on the cutoff shell.  <a href="structseams_1_1Q4Q6.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AQ6Bar" id="r_seams_3A_3AQ6Bar"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Q6Bar.html">seams::Q6Bar</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lechner-Dellago q6-bar and the ice count above a cut.  <a href="structseams_1_1Q6Bar.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADistribution" id="r_seams_3A_3ADistribution"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Distribution.html">seams::Distribution</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Partial radial distribution.  <a href="structseams_1_1Distribution.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ARunningCoordination" id="r_seams_3A_3ARunningCoordination"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1RunningCoordination.html">seams::RunningCoordination</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Running coordination number along a partial RDF.  <a href="structseams_1_1RunningCoordination.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ACageCounts" id="r_seams_3A_3ACageCounts"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1CageCounts.html">seams::CageCounts</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disjoint cage populations.  <a href="structseams_1_1CageCounts.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ASignatureMatch" id="r_seams_3A_3ASignatureMatch"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1SignatureMatch.html">seams::SignatureMatch</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closed cages whose ring census matches a signature.  <a href="structseams_1_1SignatureMatch.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AContacts" id="r_seams_3A_3AContacts"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Contacts.html">seams::Contacts</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutual nearest unlike contacts of a site table.  <a href="structseams_1_1Contacts.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADomainReport" id="r_seams_3A_3ADomainReport"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1DomainReport.html">seams::DomainReport</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Largest polar or apolar domain.  <a href="structseams_1_1DomainReport.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3APrismCensus" id="r_seams_3A_3APrismCensus"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1PrismCensus.html">seams::PrismCensus</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perfect and imperfect prism counts by ring size.  <a href="structseams_1_1PrismCensus.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADensityProfile" id="r_seams_3A_3ADensityProfile"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1DensityProfile.html">seams::DensityProfile</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number density along one cell axis.  <a href="structseams_1_1DensityProfile.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AFractionalProfile" id="r_seams_3A_3AFractionalProfile"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1FractionalProfile.html">seams::FractionalProfile</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number and mass density of one histogram.  <a href="structseams_1_1FractionalProfile.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AFractionalDensityOptions" id="r_seams_3A_3AFractionalDensityOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1FractionalDensityOptions.html">seams::FractionalDensityOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a fractional or directional density.  <a href="structseams_1_1FractionalDensityOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3APoreFrame" id="r_seams_3A_3APoreFrame"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1PoreFrame.html">seams::PoreFrame</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pore axis and centre.  <a href="structseams_1_1PoreFrame.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3APoreFrameOptions" id="r_seams_3A_3APoreFrameOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1PoreFrameOptions.html">seams::PoreFrameOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for detecting a pore axis and centre.  <a href="structseams_1_1PoreFrameOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3APoreProfiles" id="r_seams_3A_3APoreProfiles"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1PoreProfiles.html">seams::PoreProfiles</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radial, azimuthal, and axial pore profiles.  <a href="structseams_1_1PoreProfiles.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3APoreProfileOptions" id="r_seams_3A_3APoreProfileOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1PoreProfileOptions.html">seams::PoreProfileOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for cylindrical pore profiles.  <a href="structseams_1_1PoreProfileOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AHostGuestOptions" id="r_seams_3A_3AHostGuestOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1HostGuestOptions.html">seams::HostGuestOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for host-guest contacts.  <a href="structseams_1_1HostGuestOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AHostGuestContacts" id="r_seams_3A_3AHostGuestContacts"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1HostGuestContacts.html">seams::HostGuestContacts</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nearest framework site and contact counts.  <a href="structseams_1_1HostGuestContacts.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ABrineFronts" id="r_seams_3A_3ABrineFronts"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1BrineFronts.html">seams::BrineFronts</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The two planar crossings of an ice slab.  <a href="structseams_1_1BrineFronts.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ARejection" id="r_seams_3A_3ARejection"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Rejection.html">seams::Rejection</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Molal rejection coefficient.  <a href="structseams_1_1Rejection.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ABrineProfile" id="r_seams_3A_3ABrineProfile"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1BrineProfile.html">seams::BrineProfile</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concentration profile along the brine axis.  <a href="structseams_1_1BrineProfile.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3APockets" id="r_seams_3A_3APockets"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Pockets.html">seams::Pockets</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classseams_1_1Brine.html" title="Owned planar ice-front measurement.">Brine</a> pockets trapped in the ice.  <a href="structseams_1_1Pockets.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AChillOptions" id="r_seams_3A_3AChillOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1ChillOptions.html">seams::ChillOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for CHILL and CHILL+.  <a href="structseams_1_1ChillOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ASteinhardtOptions" id="r_seams_3A_3ASteinhardtOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1SteinhardtOptions.html">seams::SteinhardtOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a local <a class="el" href="structseams_1_1Steinhardt.html" title="Local Steinhardt parameter, and the average when it was asked for.">Steinhardt</a> parameter on the cutoff shell.  <a href="structseams_1_1SteinhardtOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AOrderOptions" id="r_seams_3A_3AOrderOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1OrderOptions.html">seams::OrderOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for q_l on a named graph.  <a href="structseams_1_1OrderOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AQ6BarOptions" id="r_seams_3A_3AQ6BarOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1Q6BarOptions.html">seams::Q6BarOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for the q6-bar ice summary.  <a href="structseams_1_1Q6BarOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ANeighbourOptions" id="r_seams_3A_3ANeighbourOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1NeighbourOptions.html">seams::NeighbourOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a neighbour list.  <a href="structseams_1_1NeighbourOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AKnnOptions" id="r_seams_3A_3AKnnOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1KnnOptions.html">seams::KnnOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a k-nearest neighbour list.  <a href="structseams_1_1KnnOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ARingOptions" id="r_seams_3A_3ARingOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1RingOptions.html">seams::RingOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for primitive rings.  <a href="structseams_1_1RingOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ACageOptions" id="r_seams_3A_3ACageOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1CageOptions.html">seams::CageOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for hexagonal and double-diamond cages.  <a href="structseams_1_1CageOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ASignatureOptions" id="r_seams_3A_3ASignatureOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1SignatureOptions.html">seams::SignatureOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a signature cage census.  <a href="structseams_1_1SignatureOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADistributionOptions" id="r_seams_3A_3ADistributionOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1DistributionOptions.html">seams::DistributionOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a partial RDF, its running coordination, or the integral.  <a href="structseams_1_1DistributionOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ABondOptions" id="r_seams_3A_3ABondOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1BondOptions.html">seams::BondOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a hydrogen-bond count.  <a href="structseams_1_1BondOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADirectedBond" id="r_seams_3A_3ADirectedBond"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1DirectedBond.html">seams::DirectedBond</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One directed hydrogen bond.  <a href="structseams_1_1DirectedBond.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADirectedBondOptions" id="r_seams_3A_3ADirectedBondOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1DirectedBondOptions.html">seams::DirectedBondOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for directed hydrogen bonds.  <a href="structseams_1_1DirectedBondOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADensityOptions" id="r_seams_3A_3ADensityOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1DensityOptions.html">seams::DensityOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for the axial number density.  <a href="structseams_1_1DensityOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AFingerprintOptions" id="r_seams_3A_3AFingerprintOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1FingerprintOptions.html">seams::FingerprintOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a topological fingerprint.  <a href="structseams_1_1FingerprintOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADomainOptions" id="r_seams_3A_3ADomainOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1DomainOptions.html">seams::DomainOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a domain search.  <a href="structseams_1_1DomainOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3APrismOptions" id="r_seams_3A_3APrismOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1PrismOptions.html">seams::PrismOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for prism stacks.  <a href="structseams_1_1PrismOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ASheetOptions" id="r_seams_3A_3ASheetOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1SheetOptions.html">seams::SheetOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a monolayer ring histogram.  <a href="structseams_1_1SheetOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ABrineOptions" id="r_seams_3A_3ABrineOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1BrineOptions.html">seams::BrineOptions</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Knobs for a planar ice front.  <a href="structseams_1_1BrineOptions.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AMoleculeCentres" id="r_seams_3A_3AMoleculeCentres"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1MoleculeCentres.html">seams::MoleculeCentres</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-molecule intact periodic centres.  <a href="structseams_1_1MoleculeCentres.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AWaterVectors" id="r_seams_3A_3AWaterVectors"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1WaterVectors.html">seams::WaterVectors</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-water orientation vectors under minimum image.  <a href="structseams_1_1WaterVectors.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AMoleculeDipoles" id="r_seams_3A_3AMoleculeDipoles"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1MoleculeDipoles.html">seams::MoleculeDipoles</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-molecule dipole or geometric orientation vectors.  <a href="structseams_1_1MoleculeDipoles.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AOrientationOrder" id="r_seams_3A_3AOrientationOrder"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1OrientationOrder.html">seams::OrientationOrder</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis-projected orientational order parameters P1 and P2.  <a href="structseams_1_1OrientationOrder.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AMsdCurve" id="r_seams_3A_3AMsdCurve"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1MsdCurve.html">seams::MsdCurve</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulated multi-origin MSD curves.  <a href="structseams_1_1MsdCurve.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ADiffusionFit" id="r_seams_3A_3ADiffusionFit"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1DiffusionFit.html">seams::DiffusionFit</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linear Einstein diffusion fit coefficients.  <a href="structseams_1_1DiffusionFit.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AHbondLifetimeCurve" id="r_seams_3A_3AHbondLifetimeCurve"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1HbondLifetimeCurve.html">seams::HbondLifetimeCurve</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Intermittent and continuous H-bond lifetime curves.  <a href="structseams_1_1HbondLifetimeCurve.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AHbondLifetimeFit" id="r_seams_3A_3AHbondLifetimeFit"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1HbondLifetimeFit.html">seams::HbondLifetimeFit</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integrated and single-exponential H-bond lifetimes.  <a href="structseams_1_1HbondLifetimeFit.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AReorientationCurve" id="r_seams_3A_3AReorientationCurve"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1ReorientationCurve.html">seams::ReorientationCurve</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulated C1 and C2 orientational correlation curves.  <a href="structseams_1_1ReorientationCurve.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AReorientationFit" id="r_seams_3A_3AReorientationFit"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1ReorientationFit.html">seams::ReorientationFit</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integrated and single-exponential reorientation times.  <a href="structseams_1_1ReorientationFit.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AChordlessCycles" id="r_seams_3A_3AChordlessCycles"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1ChordlessCycles.html">seams::ChordlessCycles</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chordless cycles of one length.  <a href="structseams_1_1ChordlessCycles.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ANeighbours" id="r_seams_3A_3ANeighbours"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Neighbours.html">seams::Neighbours</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owned neighbour list.  <a href="classseams_1_1Neighbours.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ARings" id="r_seams_3A_3ARings"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Rings.html">seams::Rings</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owned primitive-ring set.  <a href="classseams_1_1Rings.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ACages" id="r_seams_3A_3ACages"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Cages.html">seams::Cages</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owned hexagonal and double-diamond membership.  <a href="classseams_1_1Cages.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AFingerprint" id="r_seams_3A_3AFingerprint"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Fingerprint.html">seams::Fingerprint</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owned topological fingerprint.  <a href="classseams_1_1Fingerprint.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ABrine" id="r_seams_3A_3ABrine"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Brine.html">seams::Brine</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owned planar ice-front measurement.  <a href="classseams_1_1Brine.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AMsd" id="r_seams_3A_3AMsd"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Msd.html">seams::Msd</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owned streaming MSD accumulator.  <a href="classseams_1_1Msd.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AHbondTcf" id="r_seams_3A_3AHbondTcf"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1HbondTcf.html">seams::HbondTcf</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owned streaming hydrogen-bond lifetime accumulator.  <a href="classseams_1_1HbondTcf.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3AReorientation" id="r_seams_3A_3AReorientation"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Reorientation.html">seams::Reorientation</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owned streaming orientational correlation accumulator.  <a href="classseams_1_1Reorientation.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3ASystem" id="r_seams_3A_3ASystem"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1System.html">seams::System</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One frame: coordinates, a cell, and the analyses that read them.  <a href="classseams_1_1System.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ga66e498496a8ac061410534a9f0171779" id="r_ga66e498496a8ac061410534a9f0171779"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ga66e498496a8ac061410534a9f0171779">seams::Status</a> : int { <br />
+&#160;&#160;<a class="el" href="#gga66e498496a8ac061410534a9f0171779aa60852f204ed8028c1c58808b746d115">seams::Status::Ok</a> = SEAMS_OK
+, <a class="el" href="#gga66e498496a8ac061410534a9f0171779abbb93ef26e3c101ff11cdd21cab08a94">seams::Status::Null</a> = SEAMS_ERR_NULL
+, <a class="el" href="#gga66e498496a8ac061410534a9f0171779a87ba2ecc8b6915e8bd6f5089918229fd">seams::Status::Range</a> = SEAMS_ERR_RANGE
+, <a class="el" href="#gga66e498496a8ac061410534a9f0171779a1a66ab62bfc858b7bcf9e01aa9cd1841">seams::Status::Cell</a> = SEAMS_ERR_BOX
+, <br />
+&#160;&#160;<a class="el" href="#gga66e498496a8ac061410534a9f0171779a1853680a6d666b9fea2d789dd00bc7eb">seams::Status::Argument</a> = SEAMS_ERR_ARG
+, <a class="el" href="#gga66e498496a8ac061410534a9f0171779a46a2a41cc6e552044816a2d04634545d">seams::Status::State</a> = SEAMS_ERR_STATE
+, <a class="el" href="#gga66e498496a8ac061410534a9f0171779a4789f23283b3a61f858b641a1bef19a3">seams::Status::Memory</a> = SEAMS_ERR_NOMEM
+, <a class="el" href="#gga66e498496a8ac061410534a9f0171779aafbf0897a5a83fdd873dfb032ec695d3">seams::Status::Internal</a> = SEAMS_ERR_INTERNAL
+<br />
+ }</td></tr>
+<tr class="memdesc:ga66e498496a8ac061410534a9f0171779"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#ga66e498496a8ac061410534a9f0171779" title="Status codes.">Status</a> codes.  <a href="#ga66e498496a8ac061410534a9f0171779">More...</a><br /></td></tr>
+<tr class="memitem:gaadb6ab84dae1fdc4c8b8c9808622abab" id="r_gaadb6ab84dae1fdc4c8b8c9808622abab"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#gaadb6ab84dae1fdc4c8b8c9808622abab">seams::Graph</a> : int { <a class="el" href="#ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084">seams::Graph::Cutoff</a> = SEAMS_GRAPH_CUTOFF
+, <a class="el" href="#ggaadb6ab84dae1fdc4c8b8c9808622ababa16349a66291a087354de6e7926333e9f">seams::Graph::Mutual</a> = SEAMS_GRAPH_MUTUAL
+, <a class="el" href="#ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">seams::Graph::Seeded</a> = SEAMS_GRAPH_SEEDED
+ }</td></tr>
+<tr class="memdesc:gaadb6ab84dae1fdc4c8b8c9808622abab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Neighbour graph.  <a href="#gaadb6ab84dae1fdc4c8b8c9808622abab">More...</a><br /></td></tr>
+<tr class="memitem:ga67eb3c576e152683e1fb0b0092e753c0" id="r_ga67eb3c576e152683e1fb0b0092e753c0"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ga67eb3c576e152683e1fb0b0092e753c0">seams::ChillRule</a> : int { <a class="el" href="#gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5">seams::ChillRule::Published</a> = SEAMS_CHILL_PUBLISHED
+, <a class="el" href="#gga67eb3c576e152683e1fb0b0092e753c0acd69ecf5d970fe87cfb420561667f2b9">seams::ChillRule::Ovito</a> = SEAMS_CHILL_OVITO
+ }</td></tr>
+<tr class="memdesc:ga67eb3c576e152683e1fb0b0092e753c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL+ threshold table.  <a href="#ga67eb3c576e152683e1fb0b0092e753c0">More...</a><br /></td></tr>
+<tr class="memitem:ga68f2414148f093b5d3e3676e20980573" id="r_ga68f2414148f093b5d3e3676e20980573"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ga68f2414148f093b5d3e3676e20980573">seams::Label</a> : int { <br />
+&#160;&#160;<a class="el" href="#gga68f2414148f093b5d3e3676e20980573aec6b5414eb175379ff9efc9b3eef5814">seams::Label::Cubic</a> = SEAMS_LABEL_CUBIC
+, <a class="el" href="#gga68f2414148f093b5d3e3676e20980573a28666f62a0ffe4485fb7c7e878234dda">seams::Label::Hexagonal</a> = SEAMS_LABEL_HEXAGONAL
+, <a class="el" href="#gga68f2414148f093b5d3e3676e20980573a27634ff8002b12e75d98e07ccd005d18">seams::Label::Water</a> = SEAMS_LABEL_WATER
+, <a class="el" href="#gga68f2414148f093b5d3e3676e20980573a719b84f3f18643dd66dfa797ae381bdb">seams::Label::Interfacial</a> = SEAMS_LABEL_INTERFACIAL
+, <br />
+&#160;&#160;<a class="el" href="#gga68f2414148f093b5d3e3676e20980573aa04539687e72a24571ece28e3c82ba64">seams::Label::Clathrate</a> = SEAMS_LABEL_CLATHRATE
+, <a class="el" href="#gga68f2414148f093b5d3e3676e20980573a705091b11ffa09c1ec2e113a979dcd7e">seams::Label::Interclathrate</a> = SEAMS_LABEL_INTERCLATHRATE
+, <a class="el" href="#gga68f2414148f093b5d3e3676e20980573a3336022d50ad5765c5db6964d942f5e1">seams::Label::Unclassified</a> = SEAMS_LABEL_UNCLASSIFIED
+, <a class="el" href="#gga68f2414148f093b5d3e3676e20980573a595a28411a41461131e25358312ac7fd">seams::Label::Recubic</a> = SEAMS_LABEL_RECUBIC
+, <br />
+&#160;&#160;<a class="el" href="#gga68f2414148f093b5d3e3676e20980573acee0807806e5742572188e642019ee50">seams::Label::Rehex</a> = SEAMS_LABEL_REHEX
+<br />
+ }</td></tr>
+<tr class="memdesc:ga68f2414148f093b5d3e3676e20980573"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL and CHILL+ atom label.  <a href="#ga68f2414148f093b5d3e3676e20980573">More...</a><br /></td></tr>
+<tr class="memitem:ga94bdf09abb3e53d0af0848ee467a7af3" id="r_ga94bdf09abb3e53d0af0848ee467a7af3"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ga94bdf09abb3e53d0af0848ee467a7af3">seams::RingSymmetry</a> : int { <br />
+&#160;&#160;<a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a3336022d50ad5765c5db6964d942f5e1">seams::RingSymmetry::Unclassified</a> = SEAMS_RING_UNCLASSIFIED
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3abd97398aebb2ac406930b40077752992">seams::RingSymmetry::Ddc</a> = SEAMS_RING_DDC
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a96edd87b77f36e1cab567202a78aef70">seams::RingSymmetry::HcBasal</a> = SEAMS_RING_HC_BASAL
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a2db1113420967213f69274b33ed9c921">seams::RingSymmetry::HcPrismatic</a> = SEAMS_RING_HC_PRISMATIC
+, <br />
+&#160;&#160;<a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3aa0aa69ad4016e3392884ab994e4c9529">seams::RingSymmetry::BothBasal</a> = SEAMS_RING_BOTH_BASAL
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a5814b076b811c5981941b3633c3b0e76">seams::RingSymmetry::BothPrismatic</a> = SEAMS_RING_BOTH_PRISMATIC
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a6e0d8d1239cb1f2a2d1c495c6b2fbf61">seams::RingSymmetry::Prism</a> = SEAMS_RING_PRISM
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a8d840ca2df29977743a2ff31677db8db">seams::RingSymmetry::DeformedPrism</a> = SEAMS_RING_DEFORMED_PRISM
+, <br />
+&#160;&#160;<a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3ad056bbbd8afc3c6cc648c43bae8987e4">seams::RingSymmetry::MixedPrism</a> = SEAMS_RING_MIXED_PRISM
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a09fcf42bcab804addc759acce8ec9051">seams::RingSymmetry::Pentagon</a> = SEAMS_RING_PENTAGON
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a125e13c182697c5a282e4de6d7999eb0">seams::RingSymmetry::Hexagon</a> = SEAMS_RING_HEXAGON
+, <a class="el" href="#gga94bdf09abb3e53d0af0848ee467a7af3a6311ae17c1ee52b36e68aaf4ad066387">seams::RingSymmetry::Other</a> = SEAMS_RING_OTHER
+<br />
+ }</td></tr>
+<tr class="memdesc:ga94bdf09abb3e53d0af0848ee467a7af3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Primitive-ring symmetry class.  <a href="#ga94bdf09abb3e53d0af0848ee467a7af3">More...</a><br /></td></tr>
+<tr class="memitem:ga20668948221c270d139f207595f2953c" id="r_ga20668948221c270d139f207595f2953c"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ga20668948221c270d139f207595f2953c">seams::CageLabel</a> : int { <a class="el" href="#gga20668948221c270d139f207595f2953ca27634ff8002b12e75d98e07ccd005d18">seams::CageLabel::Water</a> = SEAMS_CAGE_WATER
+, <a class="el" href="#gga20668948221c270d139f207595f2953ca92640bd72988395b326c888614f8937a">seams::CageLabel::Hex</a> = SEAMS_CAGE_HEX
+, <a class="el" href="#gga20668948221c270d139f207595f2953caec6b5414eb175379ff9efc9b3eef5814">seams::CageLabel::Cubic</a> = SEAMS_CAGE_CUBIC
+, <a class="el" href="#gga20668948221c270d139f207595f2953ca130c5b3473c57faa76e2a1c54e26f88e">seams::CageLabel::Both</a> = SEAMS_CAGE_BOTH
+ }</td></tr>
+<tr class="memdesc:ga20668948221c270d139f207595f2953c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-atom cage membership.  <a href="#ga20668948221c270d139f207595f2953c">More...</a><br /></td></tr>
+<tr class="memitem:ga8b14625549bd222cd0c8802fc4a52d40" id="r_ga8b14625549bd222cd0c8802fc4a52d40"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ga8b14625549bd222cd0c8802fc4a52d40">seams::SiteKind</a> : int { <br />
+&#160;&#160;<a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40a6fcdc090caeade09d0efd6253932b6f5">seams::SiteKind::Unspecified</a> = SEAMS_SITE_UNSPECIFIED
+, <a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40ac5d27658781538ced67eb80aeb01df97">seams::SiteKind::Cation</a> = SEAMS_SITE_CATION
+, <a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40ae48cfc3a4fc82355364a27f3865633b2">seams::SiteKind::Anion</a> = SEAMS_SITE_ANION
+, <a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40af492349e9829c9ab03ac01603d4a1c06">seams::SiteKind::Tail</a> = SEAMS_SITE_TAIL
+, <br />
+&#160;&#160;<a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40ac3ec97add9b9f461213cd8a549c8cb23">seams::SiteKind::DonorH</a> = SEAMS_SITE_DONOR_H
+, <a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40ab6ebbfdf8c2a8c002a65c95084bc9be4">seams::SiteKind::Acceptor</a> = SEAMS_SITE_ACCEPTOR
+, <a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40ae266cfd65ad46a67fc54b0efd38e40dd">seams::SiteKind::Polar</a> = SEAMS_SITE_POLAR
+, <a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40a6f575a49d4e9449dbfc22f0c1753384d">seams::SiteKind::Apolar</a> = SEAMS_SITE_APOLAR
+, <br />
+&#160;&#160;<a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40a92b557cc29356911b044cbb738584be7">seams::SiteKind::WaterO</a> = SEAMS_SITE_WATER_O
+, <a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40a4596571c8a42af5732577a83bf7c2062">seams::SiteKind::WaterH</a> = SEAMS_SITE_WATER_H
+, <a class="el" href="#gga8b14625549bd222cd0c8802fc4a52d40a436768c5ad4df9e4e633ee0dcfc7dda4">seams::SiteKind::Solvent</a> = SEAMS_SITE_SOLVENT
+<br />
+ }</td></tr>
+<tr class="memdesc:ga8b14625549bd222cd0c8802fc4a52d40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Site-table kind.  <a href="#ga8b14625549bd222cd0c8802fc4a52d40">More...</a><br /></td></tr>
+<tr class="memitem:gab0a343eee2fee14066d1e497e54cfb82" id="r_gab0a343eee2fee14066d1e497e54cfb82"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#gab0a343eee2fee14066d1e497e54cfb82">seams::Axis</a> : int { <a class="el" href="#ggab0a343eee2fee14066d1e497e54cfb82a02129bb861061d1a052c592e2dc6b383">seams::Axis::X</a> = 0
+, <a class="el" href="#ggab0a343eee2fee14066d1e497e54cfb82a57cec4137b614c87cb4e24a3d003a3e0">seams::Axis::Y</a> = 1
+, <a class="el" href="#ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">seams::Axis::Z</a> = 2
+ }</td></tr>
+<tr class="memdesc:gab0a343eee2fee14066d1e497e54cfb82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell axis.  <a href="#gab0a343eee2fee14066d1e497e54cfb82">More...</a><br /></td></tr>
+<tr class="memitem:gaa26c5e09631ed2e863d7ba9069e64683" id="r_gaa26c5e09631ed2e863d7ba9069e64683"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#gaa26c5e09631ed2e863d7ba9069e64683">seams::DomainSubset</a> : int { <a class="el" href="#ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d">seams::DomainSubset::Apolar</a> = 0
+, <a class="el" href="#ggaa26c5e09631ed2e863d7ba9069e64683ae266cfd65ad46a67fc54b0efd38e40dd">seams::DomainSubset::Polar</a> = 1
+ }</td></tr>
+<tr class="memdesc:gaa26c5e09631ed2e863d7ba9069e64683"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain subset.  <a href="#gaa26c5e09631ed2e863d7ba9069e64683">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga7bb2300e5f3cc519b8e9663109654212" id="r_ga7bb2300e5f3cc519b8e9663109654212"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ga7bb2300e5f3cc519b8e9663109654212">seams::version</a> ()</td></tr>
+<tr class="memdesc:ga7bb2300e5f3cc519b8e9663109654212"><td class="mdescLeft">&#160;</td><td class="mdescRight">Library version text of the built library.  <br /></td></tr>
+<tr class="memitem:ga4c4de5e8bb28d4909c3d843d4b7f4f32" id="r_ga4c4de5e8bb28d4909c3d843d4b7f4f32"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ga4c4de5e8bb28d4909c3d843d4b7f4f32">seams::abi</a> ()</td></tr>
+<tr class="memdesc:ga4c4de5e8bb28d4909c3d843d4b7f4f32"><td class="mdescLeft">&#160;</td><td class="mdescRight">ABI number compiled into this library.  <br /></td></tr>
+<tr class="memitem:gade81b9f566b717d94390a5499824893f" id="r_gade81b9f566b717d94390a5499824893f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#gade81b9f566b717d94390a5499824893f">seams::set_num_threads</a> (int n)</td></tr>
+<tr class="memdesc:gade81b9f566b717d94390a5499824893f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the OpenMP width for the next call.  <br /></td></tr>
+<tr class="memitem:gaf2be34634367aa0061392fe3b3719c74" id="r_gaf2be34634367aa0061392fe3b3719c74"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#gaf2be34634367aa0061392fe3b3719c74">seams::num_threads</a> ()</td></tr>
+<tr class="memdesc:gaf2be34634367aa0061392fe3b3719c74"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenMP width the next call will use.  <br /></td></tr>
+<tr class="memitem:ga1268a47da79bea721d79f97d07c2107f" id="r_ga1268a47da79bea721d79f97d07c2107f"><td class="memItemLeft">std::size_t&#160;</td><td class="memItemRight"><a class="el" href="#ga1268a47da79bea721d79f97d07c2107f">seams::nframes</a> (std::string_view path)</td></tr>
+<tr class="memdesc:ga1268a47da79bea721d79f97d07c2107f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count frames in a trajectory path.  <br /></td></tr>
+<tr class="memitem:ga8a62c2b555f1ced988f77ba361b1832e" id="r_ga8a62c2b555f1ced988f77ba361b1832e"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#ga8a62c2b555f1ced988f77ba361b1832e">seams::label_name</a> (<a class="el" href="#ga68f2414148f093b5d3e3676e20980573">Label</a> label)</td></tr>
+<tr class="memdesc:ga8a62c2b555f1ced988f77ba361b1832e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Short name of a CHILL+ label.  <br /></td></tr>
+<tr class="memitem:ga8d9a78835efe90ebbec76c381c9dbf45" id="r_ga8d9a78835efe90ebbec76c381c9dbf45"><td class="memItemLeft">std::string_view&#160;</td><td class="memItemRight"><a class="el" href="#ga8d9a78835efe90ebbec76c381c9dbf45">seams::ring_symmetry_name</a> (<a class="el" href="#ga94bdf09abb3e53d0af0848ee467a7af3">RingSymmetry</a> symmetry)</td></tr>
+<tr class="memdesc:ga8d9a78835efe90ebbec76c381c9dbf45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Short name of a ring-symmetry code.  <br /></td></tr>
+<tr class="memitem:gae26085bfb117d7c28f2ee250f67c152c" id="r_gae26085bfb117d7c28f2ee250f67c152c"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gae26085bfb117d7c28f2ee250f67c152c">seams::unwrap_positions</a> (std::span&lt; const double &gt; xyz, std::size_t nframes, std::size_t natoms, std::span&lt; const double &gt; boxes)</td></tr>
+<tr class="memdesc:gae26085bfb117d7c28f2ee250f67c152c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unwrap periodic coordinates across frames.  <br /></td></tr>
+<tr class="memitem:ga0874c8fac20f73aea09980bfaea2a720" id="r_ga0874c8fac20f73aea09980bfaea2a720"><td class="memItemLeft"><a class="el" href="structseams_1_1MoleculeCentres.html">MoleculeCentres</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga0874c8fac20f73aea09980bfaea2a720">seams::unwrap_centres</a> (std::span&lt; const double &gt; xyz, std::size_t nframes, std::size_t natoms, std::span&lt; const double &gt; boxes, std::span&lt; const int &gt; mols, std::span&lt; const double &gt; masses={})</td></tr>
+<tr class="memdesc:ga0874c8fac20f73aea09980bfaea2a720"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assemble and unwrap periodic molecule centres across frames.  <br /></td></tr>
+<tr class="memitem:gaf83908227ad19ccd063be0068953ed33" id="r_gaf83908227ad19ccd063be0068953ed33"><td class="memItemLeft"><a class="el" href="structseams_1_1OrientationOrder.html">OrientationOrder</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaf83908227ad19ccd063be0068953ed33">seams::orientation_order</a> (std::span&lt; const double &gt; vectors, std::span&lt; const double, 3 &gt; axis)</td></tr>
+<tr class="memdesc:gaf83908227ad19ccd063be0068953ed33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Axis-projected orientational order parameters P1 and P2.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Move-only handles and value results over <span class="tt"><a class="el" href="seams_8h.html" title="d-SEAMS stable C API, ABI 1.">seams.h</a></span>. </p>
+</div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="gab0a343eee2fee14066d1e497e54cfb82" name="gab0a343eee2fee14066d1e497e54cfb82"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab0a343eee2fee14066d1e497e54cfb82">&#9670;&#160;</a></span>Axis</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#gab0a343eee2fee14066d1e497e54cfb82">seams::Axis</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cell axis. </p>
+<p>Zero is x, one is y, two is z. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggab0a343eee2fee14066d1e497e54cfb82a02129bb861061d1a052c592e2dc6b383" name="ggab0a343eee2fee14066d1e497e54cfb82a02129bb861061d1a052c592e2dc6b383"></a>X&#160;</td><td class="fielddoc"><p>First cell edge. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggab0a343eee2fee14066d1e497e54cfb82a57cec4137b614c87cb4e24a3d003a3e0" name="ggab0a343eee2fee14066d1e497e54cfb82a57cec4137b614c87cb4e24a3d003a3e0"></a>Y&#160;</td><td class="fielddoc"><p>Second cell edge. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5" name="ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5"></a>Z&#160;</td><td class="fielddoc"><p>Third cell edge. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00157">157</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  157</span>                : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">  158</span>  <a class="code hl_enumvalue" href="#ggab0a343eee2fee14066d1e497e54cfb82a02129bb861061d1a052c592e2dc6b383">X</a> = 0, </div>
+<div class="line"><span class="lineno">  159</span>  <a class="code hl_enumvalue" href="#ggab0a343eee2fee14066d1e497e54cfb82a57cec4137b614c87cb4e24a3d003a3e0">Y</a> = 1, </div>
+<div class="line"><span class="lineno">  160</span>  <a class="code hl_enumvalue" href="#ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">Z</a> = 2  </div>
+<div class="line"><span class="lineno">  161</span>};</div>
+<div class="ttc" id="agroup__seams__cpp_html_ggab0a343eee2fee14066d1e497e54cfb82a02129bb861061d1a052c592e2dc6b383"><div class="ttname"><a href="#ggab0a343eee2fee14066d1e497e54cfb82a02129bb861061d1a052c592e2dc6b383">seams::Axis::X</a></div><div class="ttdeci">@ X</div><div class="ttdoc">First cell edge.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00158">seams.hpp:158</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5"><div class="ttname"><a href="#ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">seams::Axis::Z</a></div><div class="ttdeci">@ Z</div><div class="ttdoc">Third cell edge.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00160">seams.hpp:160</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_ggab0a343eee2fee14066d1e497e54cfb82a57cec4137b614c87cb4e24a3d003a3e0"><div class="ttname"><a href="#ggab0a343eee2fee14066d1e497e54cfb82a57cec4137b614c87cb4e24a3d003a3e0">seams::Axis::Y</a></div><div class="ttdeci">@ Y</div><div class="ttdoc">Second cell edge.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00159">seams.hpp:159</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga20668948221c270d139f207595f2953c" name="ga20668948221c270d139f207595f2953c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga20668948221c270d139f207595f2953c">&#9670;&#160;</a></span>CageLabel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#ga20668948221c270d139f207595f2953c">seams::CageLabel</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Per-atom cage membership. </p>
+<p>The four codes are disjoint. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga20668948221c270d139f207595f2953ca27634ff8002b12e75d98e07ccd005d18" name="gga20668948221c270d139f207595f2953ca27634ff8002b12e75d98e07ccd005d18"></a>Water&#160;</td><td class="fielddoc"><p>In neither cage. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga20668948221c270d139f207595f2953ca92640bd72988395b326c888614f8937a" name="gga20668948221c270d139f207595f2953ca92640bd72988395b326c888614f8937a"></a>Hex&#160;</td><td class="fielddoc"><p>Hexagonal cage only. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga20668948221c270d139f207595f2953caec6b5414eb175379ff9efc9b3eef5814" name="gga20668948221c270d139f207595f2953caec6b5414eb175379ff9efc9b3eef5814"></a>Cubic&#160;</td><td class="fielddoc"><p>Double-diamond cage only. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga20668948221c270d139f207595f2953ca130c5b3473c57faa76e2a1c54e26f88e" name="gga20668948221c270d139f207595f2953ca130c5b3473c57faa76e2a1c54e26f88e"></a>Both&#160;</td><td class="fielddoc"><p>Both cages. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00128">128</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  128</span>                     : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">  129</span>  <a class="code hl_enumvalue" href="namespacewater.html#a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18">Water</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fa992682126bfa18bd9c0ce3d582a71d18">SEAMS_CAGE_WATER</a>, </div>
+<div class="line"><span class="lineno">  130</span>  <a class="code hl_enumvalue" href="#gga20668948221c270d139f207595f2953ca92640bd72988395b326c888614f8937a">Hex</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fa61794f8f366b0523e079c79da6d1d8b4">SEAMS_CAGE_HEX</a>,     </div>
+<div class="line"><span class="lineno">  131</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573aec6b5414eb175379ff9efc9b3eef5814">Cubic</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fa53b6189be8ac7ac8b33e6e44e0d2d476">SEAMS_CAGE_CUBIC</a>, </div>
+<div class="line"><span class="lineno">  132</span>  <a class="code hl_enumvalue" href="#gga20668948221c270d139f207595f2953ca130c5b3473c57faa76e2a1c54e26f88e">Both</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fabe2d263016a16c4198ba247ca6d7aa86">SEAMS_CAGE_BOTH</a>    </div>
+<div class="line"><span class="lineno">  133</span>};</div>
+<div class="ttc" id="agroup__capi__types_html_gga39550bff08144408ba1e369f10f8a12fa53b6189be8ac7ac8b33e6e44e0d2d476"><div class="ttname"><a href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fa53b6189be8ac7ac8b33e6e44e0d2d476">SEAMS_CAGE_CUBIC</a></div><div class="ttdeci">@ SEAMS_CAGE_CUBIC</div><div class="ttdoc">Double-diamond cage only.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00228">seams.h:228</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga39550bff08144408ba1e369f10f8a12fa61794f8f366b0523e079c79da6d1d8b4"><div class="ttname"><a href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fa61794f8f366b0523e079c79da6d1d8b4">SEAMS_CAGE_HEX</a></div><div class="ttdeci">@ SEAMS_CAGE_HEX</div><div class="ttdoc">Hexagonal cage only.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00227">seams.h:227</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga39550bff08144408ba1e369f10f8a12fa992682126bfa18bd9c0ce3d582a71d18"><div class="ttname"><a href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fa992682126bfa18bd9c0ce3d582a71d18">SEAMS_CAGE_WATER</a></div><div class="ttdeci">@ SEAMS_CAGE_WATER</div><div class="ttdoc">In neither cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00226">seams.h:226</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga39550bff08144408ba1e369f10f8a12fabe2d263016a16c4198ba247ca6d7aa86"><div class="ttname"><a href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fabe2d263016a16c4198ba247ca6d7aa86">SEAMS_CAGE_BOTH</a></div><div class="ttdeci">@ SEAMS_CAGE_BOTH</div><div class="ttdoc">Both cages.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00229">seams.h:229</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga20668948221c270d139f207595f2953ca130c5b3473c57faa76e2a1c54e26f88e"><div class="ttname"><a href="#gga20668948221c270d139f207595f2953ca130c5b3473c57faa76e2a1c54e26f88e">seams::CageLabel::Both</a></div><div class="ttdeci">@ Both</div><div class="ttdoc">Both cages.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00132">seams.hpp:132</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga20668948221c270d139f207595f2953ca92640bd72988395b326c888614f8937a"><div class="ttname"><a href="#gga20668948221c270d139f207595f2953ca92640bd72988395b326c888614f8937a">seams::CageLabel::Hex</a></div><div class="ttdeci">@ Hex</div><div class="ttdoc">Hexagonal cage only.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00130">seams.hpp:130</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga68f2414148f093b5d3e3676e20980573aec6b5414eb175379ff9efc9b3eef5814"><div class="ttname"><a href="#gga68f2414148f093b5d3e3676e20980573aec6b5414eb175379ff9efc9b3eef5814">seams::Label::Cubic</a></div><div class="ttdeci">@ Cubic</div><div class="ttdoc">Cubic ice.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00094">seams.hpp:94</a></div></div>
+<div class="ttc" id="anamespacewater_html_a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18"><div class="ttname"><a href="namespacewater.html#a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18">water::MolMode::Water</a></div><div class="ttdeci">@ Water</div><div class="ttdef"><b>Definition</b> <a href="water__select_8hpp_source.html#l00021">water_select.hpp:21</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga67eb3c576e152683e1fb0b0092e753c0" name="ga67eb3c576e152683e1fb0b0092e753c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga67eb3c576e152683e1fb0b0092e753c0">&#9670;&#160;</a></span>ChillRule</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#ga67eb3c576e152683e1fb0b0092e753c0">seams::ChillRule</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>CHILL+ threshold table. </p>
+<p>Published edges are inclusive. OVITO edges are open. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5" name="gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5"></a>Published&#160;</td><td class="fielddoc"><p>Nguyen and Molinero, 2015. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga67eb3c576e152683e1fb0b0092e753c0acd69ecf5d970fe87cfb420561667f2b9" name="gga67eb3c576e152683e1fb0b0092e753c0acd69ecf5d970fe87cfb420561667f2b9"></a>Ovito&#160;</td><td class="fielddoc"><p>OVITO Chill+ modifier. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00082">82</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   82</span>                     : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">   83</span>  <a class="code hl_enumvalue" href="namespacechill.html#aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5">Published</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d">SEAMS_CHILL_PUBLISHED</a>, </div>
+<div class="line"><span class="lineno">   84</span>  <a class="code hl_enumvalue" href="namespacechill.html#aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9">Ovito</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea34bec95f23acb591da9f3a70b2b7523d">SEAMS_CHILL_OVITO</a>          </div>
+<div class="line"><span class="lineno">   85</span>};</div>
+<div class="ttc" id="agroup__capi__types_html_ggab74282bf5785b8e09271a9841bfe1a1ea34bec95f23acb591da9f3a70b2b7523d"><div class="ttname"><a href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea34bec95f23acb591da9f3a70b2b7523d">SEAMS_CHILL_OVITO</a></div><div class="ttdeci">@ SEAMS_CHILL_OVITO</div><div class="ttdoc">OVITO Chill+ modifier, every neighbour in the cutoff.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00204">seams.h:204</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d"><div class="ttname"><a href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d">SEAMS_CHILL_PUBLISHED</a></div><div class="ttdeci">@ SEAMS_CHILL_PUBLISHED</div><div class="ttdoc">Nguyen and Molinero, four closest neighbours.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00203">seams.h:203</a></div></div>
+<div class="ttc" id="anamespacechill_html_aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5"><div class="ttname"><a href="namespacechill.html#aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5">chill::ChillPlusRule::Published</a></div><div class="ttdeci">@ Published</div><div class="ttdef"><b>Definition</b> <a href="chill__plus__scheme_8hpp_source.html#l00043">chill_plus_scheme.hpp:43</a></div></div>
+<div class="ttc" id="anamespacechill_html_aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9"><div class="ttname"><a href="namespacechill.html#aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9">chill::ChillPlusRule::Ovito</a></div><div class="ttdeci">@ Ovito</div><div class="ttdef"><b>Definition</b> <a href="chill__plus__scheme_8hpp_source.html#l00043">chill_plus_scheme.hpp:43</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaa26c5e09631ed2e863d7ba9069e64683" name="gaa26c5e09631ed2e863d7ba9069e64683"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa26c5e09631ed2e863d7ba9069e64683">&#9670;&#160;</a></span>DomainSubset</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#gaa26c5e09631ed2e863d7ba9069e64683">seams::DomainSubset</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Domain subset. </p>
+<p>Apolar is 0 and polar is 1, matching the C API. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d" name="ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d"></a>Apolar&#160;</td><td class="fielddoc"><p>Apolar site subset. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaa26c5e09631ed2e863d7ba9069e64683ae266cfd65ad46a67fc54b0efd38e40dd" name="ggaa26c5e09631ed2e863d7ba9069e64683ae266cfd65ad46a67fc54b0efd38e40dd"></a>Polar&#160;</td><td class="fielddoc"><p>Polar site subset. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00167">167</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  167</span>                        : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">  168</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40a6f575a49d4e9449dbfc22f0c1753384d">Apolar</a> = 0, </div>
+<div class="line"><span class="lineno">  169</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40ae266cfd65ad46a67fc54b0efd38e40dd">Polar</a> = 1   </div>
+<div class="line"><span class="lineno">  170</span>};</div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40a6f575a49d4e9449dbfc22f0c1753384d"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40a6f575a49d4e9449dbfc22f0c1753384d">seams::SiteKind::Apolar</a></div><div class="ttdeci">@ Apolar</div><div class="ttdoc">Apolar atom.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00147">seams.hpp:147</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40ae266cfd65ad46a67fc54b0efd38e40dd"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40ae266cfd65ad46a67fc54b0efd38e40dd">seams::SiteKind::Polar</a></div><div class="ttdeci">@ Polar</div><div class="ttdoc">Polar atom.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00146">seams.hpp:146</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaadb6ab84dae1fdc4c8b8c9808622abab" name="gaadb6ab84dae1fdc4c8b8c9808622abab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaadb6ab84dae1fdc4c8b8c9808622abab">&#9670;&#160;</a></span>Graph</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#gaadb6ab84dae1fdc4c8b8c9808622abab">seams::Graph</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Neighbour graph. </p>
+<p>Cutoff keeps every pair inside the cutoff. Mutual keeps the four nearest neighbours inside the cutoff plus 1.5 Angstrom, and only the pairs that name each other. Seeded is the cage graph: mutual seeds and union completions. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084" name="ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084"></a>Cutoff&#160;</td><td class="fielddoc"><p>Every pair inside the cutoff. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaadb6ab84dae1fdc4c8b8c9808622ababa16349a66291a087354de6e7926333e9f" name="ggaadb6ab84dae1fdc4c8b8c9808622ababa16349a66291a087354de6e7926333e9f"></a>Mutual&#160;</td><td class="fielddoc"><p>Mutual four-nearest neighbours. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0" name="ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0"></a>Seeded&#160;</td><td class="fielddoc"><p>Cage graph of seeds and completions. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00070">70</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   70</span>                 : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">   71</span>  <a class="code hl_enumvalue" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, </div>
+<div class="line"><span class="lineno">   72</span>  <a class="code hl_enumvalue" href="#ggaadb6ab84dae1fdc4c8b8c9808622ababa16349a66291a087354de6e7926333e9f">Mutual</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99">SEAMS_GRAPH_MUTUAL</a>, </div>
+<div class="line"><span class="lineno">   73</span>  <a class="code hl_enumvalue" href="#ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">Seeded</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58aaf0915d3bfbd7d9d3e9c3cda74ff448c">SEAMS_GRAPH_SEEDED</a>  </div>
+<div class="line"><span class="lineno">   74</span>};</div>
+<div class="ttc" id="agroup__capi__types_html_ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d"><div class="ttname"><a href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a></div><div class="ttdeci">@ SEAMS_GRAPH_CUTOFF</div><div class="ttdoc">Every neighbour inside the cutoff.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00209">seams.h:209</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaeee5406b3ad13ed94cce7636c1b6de58aaf0915d3bfbd7d9d3e9c3cda74ff448c"><div class="ttname"><a href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58aaf0915d3bfbd7d9d3e9c3cda74ff448c">SEAMS_GRAPH_SEEDED</a></div><div class="ttdeci">@ SEAMS_GRAPH_SEEDED</div><div class="ttdoc">Mutual seeds with union completions, for cages only.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00211">seams.h:211</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99"><div class="ttname"><a href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99">SEAMS_GRAPH_MUTUAL</a></div><div class="ttdeci">@ SEAMS_GRAPH_MUTUAL</div><div class="ttdoc">Mutual four nearest inside cutoff + 1.5.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00210">seams.h:210</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_ggaadb6ab84dae1fdc4c8b8c9808622ababa16349a66291a087354de6e7926333e9f"><div class="ttname"><a href="#ggaadb6ab84dae1fdc4c8b8c9808622ababa16349a66291a087354de6e7926333e9f">seams::Graph::Mutual</a></div><div class="ttdeci">@ Mutual</div><div class="ttdoc">Mutual four-nearest neighbours.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00072">seams.hpp:72</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0"><div class="ttname"><a href="#ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">seams::Graph::Seeded</a></div><div class="ttdeci">@ Seeded</div><div class="ttdoc">Cage graph of seeds and completions.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00073">seams.hpp:73</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_ae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00606">neighbours.hpp:606</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga68f2414148f093b5d3e3676e20980573" name="ga68f2414148f093b5d3e3676e20980573"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga68f2414148f093b5d3e3676e20980573">&#9670;&#160;</a></span>Label</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#ga68f2414148f093b5d3e3676e20980573">seams::Label</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>CHILL and CHILL+ atom label. </p>
+<p>The nine codes are the population order in <span class="tt"><a class="el" href="structseams_1_1Classification.html#a7bcb44792e23e9f68c7f88768fe11f2b" title="Population in label order.">Classification::counts</a></span>. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573aec6b5414eb175379ff9efc9b3eef5814" name="gga68f2414148f093b5d3e3676e20980573aec6b5414eb175379ff9efc9b3eef5814"></a>Cubic&#160;</td><td class="fielddoc"><p>Cubic ice. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573a28666f62a0ffe4485fb7c7e878234dda" name="gga68f2414148f093b5d3e3676e20980573a28666f62a0ffe4485fb7c7e878234dda"></a>Hexagonal&#160;</td><td class="fielddoc"><p>Hexagonal ice. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573a27634ff8002b12e75d98e07ccd005d18" name="gga68f2414148f093b5d3e3676e20980573a27634ff8002b12e75d98e07ccd005d18"></a>Water&#160;</td><td class="fielddoc"><p>Liquid water. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573a719b84f3f18643dd66dfa797ae381bdb" name="gga68f2414148f093b5d3e3676e20980573a719b84f3f18643dd66dfa797ae381bdb"></a>Interfacial&#160;</td><td class="fielddoc"><p>Interfacial ice. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573aa04539687e72a24571ece28e3c82ba64" name="gga68f2414148f093b5d3e3676e20980573aa04539687e72a24571ece28e3c82ba64"></a>Clathrate&#160;</td><td class="fielddoc"><p>Clathrate. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573a705091b11ffa09c1ec2e113a979dcd7e" name="gga68f2414148f093b5d3e3676e20980573a705091b11ffa09c1ec2e113a979dcd7e"></a>Interclathrate&#160;</td><td class="fielddoc"><p>Interfacial clathrate. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573a3336022d50ad5765c5db6964d942f5e1" name="gga68f2414148f093b5d3e3676e20980573a3336022d50ad5765c5db6964d942f5e1"></a>Unclassified&#160;</td><td class="fielddoc"><p>No class matched. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573a595a28411a41461131e25358312ac7fd" name="gga68f2414148f093b5d3e3676e20980573a595a28411a41461131e25358312ac7fd"></a>Recubic&#160;</td><td class="fielddoc"><p>Reclassified cubic. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga68f2414148f093b5d3e3676e20980573acee0807806e5742572188e642019ee50" name="gga68f2414148f093b5d3e3676e20980573acee0807806e5742572188e642019ee50"></a>Rehex&#160;</td><td class="fielddoc"><p>Reclassified hexagonal. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00093">93</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   93</span>                 : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">   94</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573aec6b5414eb175379ff9efc9b3eef5814">Cubic</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fab0b02993351bffd41176da5458827059">SEAMS_LABEL_CUBIC</a>,                 </div>
+<div class="line"><span class="lineno">   95</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573a28666f62a0ffe4485fb7c7e878234dda">Hexagonal</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970faddd0bce16f276c206e32e3fa8b6007ba">SEAMS_LABEL_HEXAGONAL</a>,         </div>
+<div class="line"><span class="lineno">   96</span>  <a class="code hl_enumvalue" href="namespacewater.html#a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18">Water</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa7764d218c6acfcb8e8b74a7a4433f1d9">SEAMS_LABEL_WATER</a>,                 </div>
+<div class="line"><span class="lineno">   97</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573a719b84f3f18643dd66dfa797ae381bdb">Interfacial</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa7476636f7f0d2d4f48aff5bd79dc3c39">SEAMS_LABEL_INTERFACIAL</a>,     </div>
+<div class="line"><span class="lineno">   98</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573aa04539687e72a24571ece28e3c82ba64">Clathrate</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970faec622b9bb221465a3127b05f9e31efa1">SEAMS_LABEL_CLATHRATE</a>,         </div>
+<div class="line"><span class="lineno">   99</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573a705091b11ffa09c1ec2e113a979dcd7e">Interclathrate</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa657e06df572f625a1b5353f69e05f957">SEAMS_LABEL_INTERCLATHRATE</a>, </div>
+<div class="line"><span class="lineno">  100</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573a3336022d50ad5765c5db6964d942f5e1">Unclassified</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa6d45114bef951f5f367584b37677c9ae">SEAMS_LABEL_UNCLASSIFIED</a>,   </div>
+<div class="line"><span class="lineno">  101</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573a595a28411a41461131e25358312ac7fd">Recubic</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa7ffefbd8044a39a98036f8cd082c2ec7">SEAMS_LABEL_RECUBIC</a>,             </div>
+<div class="line"><span class="lineno">  102</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573acee0807806e5742572188e642019ee50">Rehex</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fade943fe489357e34a97022210250ce75">SEAMS_LABEL_REHEX</a>                  </div>
+<div class="line"><span class="lineno">  103</span>};</div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970fa657e06df572f625a1b5353f69e05f957"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa657e06df572f625a1b5353f69e05f957">SEAMS_LABEL_INTERCLATHRATE</a></div><div class="ttdeci">@ SEAMS_LABEL_INTERCLATHRATE</div><div class="ttdoc">Interfacial clathrate.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00172">seams.h:172</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970fa6d45114bef951f5f367584b37677c9ae"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa6d45114bef951f5f367584b37677c9ae">SEAMS_LABEL_UNCLASSIFIED</a></div><div class="ttdeci">@ SEAMS_LABEL_UNCLASSIFIED</div><div class="ttdoc">Not classified, or dropped by the species filter.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00173">seams.h:173</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970fa7476636f7f0d2d4f48aff5bd79dc3c39"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa7476636f7f0d2d4f48aff5bd79dc3c39">SEAMS_LABEL_INTERFACIAL</a></div><div class="ttdeci">@ SEAMS_LABEL_INTERFACIAL</div><div class="ttdoc">Interfacial ice.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00170">seams.h:170</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970fa7764d218c6acfcb8e8b74a7a4433f1d9"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa7764d218c6acfcb8e8b74a7a4433f1d9">SEAMS_LABEL_WATER</a></div><div class="ttdeci">@ SEAMS_LABEL_WATER</div><div class="ttdoc">Liquid water.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00169">seams.h:169</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970fa7ffefbd8044a39a98036f8cd082c2ec7"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fa7ffefbd8044a39a98036f8cd082c2ec7">SEAMS_LABEL_RECUBIC</a></div><div class="ttdeci">@ SEAMS_LABEL_RECUBIC</div><div class="ttdoc">Cubic after reclassification.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00174">seams.h:174</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970fab0b02993351bffd41176da5458827059"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fab0b02993351bffd41176da5458827059">SEAMS_LABEL_CUBIC</a></div><div class="ttdeci">@ SEAMS_LABEL_CUBIC</div><div class="ttdoc">Cubic ice (Ic).</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00167">seams.h:167</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970faddd0bce16f276c206e32e3fa8b6007ba"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970faddd0bce16f276c206e32e3fa8b6007ba">SEAMS_LABEL_HEXAGONAL</a></div><div class="ttdeci">@ SEAMS_LABEL_HEXAGONAL</div><div class="ttdoc">Hexagonal ice (Ih).</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00168">seams.h:168</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970fade943fe489357e34a97022210250ce75"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970fade943fe489357e34a97022210250ce75">SEAMS_LABEL_REHEX</a></div><div class="ttdeci">@ SEAMS_LABEL_REHEX</div><div class="ttdoc">Hexagonal after reclassification.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00175">seams.h:175</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggad876da4dfac2f2bff8f929d59f9f970faec622b9bb221465a3127b05f9e31efa1"><div class="ttname"><a href="group__capi__types.html#ggad876da4dfac2f2bff8f929d59f9f970faec622b9bb221465a3127b05f9e31efa1">SEAMS_LABEL_CLATHRATE</a></div><div class="ttdeci">@ SEAMS_LABEL_CLATHRATE</div><div class="ttdoc">Clathrate.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00171">seams.h:171</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga68f2414148f093b5d3e3676e20980573a28666f62a0ffe4485fb7c7e878234dda"><div class="ttname"><a href="#gga68f2414148f093b5d3e3676e20980573a28666f62a0ffe4485fb7c7e878234dda">seams::Label::Hexagonal</a></div><div class="ttdeci">@ Hexagonal</div><div class="ttdoc">Hexagonal ice.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00095">seams.hpp:95</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga68f2414148f093b5d3e3676e20980573a3336022d50ad5765c5db6964d942f5e1"><div class="ttname"><a href="#gga68f2414148f093b5d3e3676e20980573a3336022d50ad5765c5db6964d942f5e1">seams::Label::Unclassified</a></div><div class="ttdeci">@ Unclassified</div><div class="ttdoc">No class matched.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00100">seams.hpp:100</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga68f2414148f093b5d3e3676e20980573a595a28411a41461131e25358312ac7fd"><div class="ttname"><a href="#gga68f2414148f093b5d3e3676e20980573a595a28411a41461131e25358312ac7fd">seams::Label::Recubic</a></div><div class="ttdeci">@ Recubic</div><div class="ttdoc">Reclassified cubic.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00101">seams.hpp:101</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga68f2414148f093b5d3e3676e20980573a705091b11ffa09c1ec2e113a979dcd7e"><div class="ttname"><a href="#gga68f2414148f093b5d3e3676e20980573a705091b11ffa09c1ec2e113a979dcd7e">seams::Label::Interclathrate</a></div><div class="ttdeci">@ Interclathrate</div><div class="ttdoc">Interfacial clathrate.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00099">seams.hpp:99</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga68f2414148f093b5d3e3676e20980573a719b84f3f18643dd66dfa797ae381bdb"><div class="ttname"><a href="#gga68f2414148f093b5d3e3676e20980573a719b84f3f18643dd66dfa797ae381bdb">seams::Label::Interfacial</a></div><div class="ttdeci">@ Interfacial</div><div class="ttdoc">Interfacial ice.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00097">seams.hpp:97</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga68f2414148f093b5d3e3676e20980573aa04539687e72a24571ece28e3c82ba64"><div class="ttname"><a href="#gga68f2414148f093b5d3e3676e20980573aa04539687e72a24571ece28e3c82ba64">seams::Label::Clathrate</a></div><div class="ttdeci">@ Clathrate</div><div class="ttdoc">Clathrate.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00098">seams.hpp:98</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga68f2414148f093b5d3e3676e20980573acee0807806e5742572188e642019ee50"><div class="ttname"><a href="#gga68f2414148f093b5d3e3676e20980573acee0807806e5742572188e642019ee50">seams::Label::Rehex</a></div><div class="ttdeci">@ Rehex</div><div class="ttdoc">Reclassified hexagonal.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00102">seams.hpp:102</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga94bdf09abb3e53d0af0848ee467a7af3" name="ga94bdf09abb3e53d0af0848ee467a7af3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga94bdf09abb3e53d0af0848ee467a7af3">&#9670;&#160;</a></span>RingSymmetry</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#ga94bdf09abb3e53d0af0848ee467a7af3">seams::RingSymmetry</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Primitive-ring symmetry class. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a3336022d50ad5765c5db6964d942f5e1" name="gga94bdf09abb3e53d0af0848ee467a7af3a3336022d50ad5765c5db6964d942f5e1"></a>Unclassified&#160;</td><td class="fielddoc"><p>No class yet. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3abd97398aebb2ac406930b40077752992" name="gga94bdf09abb3e53d0af0848ee467a7af3abd97398aebb2ac406930b40077752992"></a>Ddc&#160;</td><td class="fielddoc"><p>Double-diamond six-ring. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a96edd87b77f36e1cab567202a78aef70" name="gga94bdf09abb3e53d0af0848ee467a7af3a96edd87b77f36e1cab567202a78aef70"></a>HcBasal&#160;</td><td class="fielddoc"><p>Basal face of a hexagonal cage. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a2db1113420967213f69274b33ed9c921" name="gga94bdf09abb3e53d0af0848ee467a7af3a2db1113420967213f69274b33ed9c921"></a>HcPrismatic&#160;</td><td class="fielddoc"><p>Prismatic face of a hexagonal cage. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3aa0aa69ad4016e3392884ab994e4c9529" name="gga94bdf09abb3e53d0af0848ee467a7af3aa0aa69ad4016e3392884ab994e4c9529"></a>BothBasal&#160;</td><td class="fielddoc"><p>Basal face of both cage types. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a5814b076b811c5981941b3633c3b0e76" name="gga94bdf09abb3e53d0af0848ee467a7af3a5814b076b811c5981941b3633c3b0e76"></a>BothPrismatic&#160;</td><td class="fielddoc"><p>Prismatic face of both cage types. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a6e0d8d1239cb1f2a2d1c495c6b2fbf61" name="gga94bdf09abb3e53d0af0848ee467a7af3a6e0d8d1239cb1f2a2d1c495c6b2fbf61"></a>Prism&#160;</td><td class="fielddoc"><p>Prismatic six-ring. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a8d840ca2df29977743a2ff31677db8db" name="gga94bdf09abb3e53d0af0848ee467a7af3a8d840ca2df29977743a2ff31677db8db"></a>DeformedPrism&#160;</td><td class="fielddoc"><p>Deformed prismatic six-ring. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3ad056bbbd8afc3c6cc648c43bae8987e4" name="gga94bdf09abb3e53d0af0848ee467a7af3ad056bbbd8afc3c6cc648c43bae8987e4"></a>MixedPrism&#160;</td><td class="fielddoc"><p>Prism mixing the two cage types. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a09fcf42bcab804addc759acce8ec9051" name="gga94bdf09abb3e53d0af0848ee467a7af3a09fcf42bcab804addc759acce8ec9051"></a>Pentagon&#160;</td><td class="fielddoc"><p>Five-membered ring. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a125e13c182697c5a282e4de6d7999eb0" name="gga94bdf09abb3e53d0af0848ee467a7af3a125e13c182697c5a282e4de6d7999eb0"></a>Hexagon&#160;</td><td class="fielddoc"><p>Six-ring that is not a cage face. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga94bdf09abb3e53d0af0848ee467a7af3a6311ae17c1ee52b36e68aaf4ad066387" name="gga94bdf09abb3e53d0af0848ee467a7af3a6311ae17c1ee52b36e68aaf4ad066387"></a>Other&#160;</td><td class="fielddoc"><p>Neither a pentagon nor a hexagon face. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00109">109</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  109</span>                        : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">  110</span>  <a class="code hl_enumvalue" href="#gga68f2414148f093b5d3e3676e20980573a3336022d50ad5765c5db6964d942f5e1">Unclassified</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa54c9fa9ab30681e2542e9f4f50515306">SEAMS_RING_UNCLASSIFIED</a>,       </div>
+<div class="line"><span class="lineno">  111</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3abd97398aebb2ac406930b40077752992">Ddc</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baad53ca75e7197c0439c72a9254ee0fd03">SEAMS_RING_DDC</a>,                         </div>
+<div class="line"><span class="lineno">  112</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3a96edd87b77f36e1cab567202a78aef70">HcBasal</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baab765d568715e45c9241fb15fb8e4f42a">SEAMS_RING_HC_BASAL</a>,                </div>
+<div class="line"><span class="lineno">  113</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3a2db1113420967213f69274b33ed9c921">HcPrismatic</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa551f1167239a897a15ba6da4c042b617">SEAMS_RING_HC_PRISMATIC</a>,        </div>
+<div class="line"><span class="lineno">  114</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3aa0aa69ad4016e3392884ab994e4c9529">BothBasal</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa9482991a905fc9e381ba3ef337526d12">SEAMS_RING_BOTH_BASAL</a>,            </div>
+<div class="line"><span class="lineno">  115</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3a5814b076b811c5981941b3633c3b0e76">BothPrismatic</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa7e8d16eb99b9112d5eebcb2d9aa85f82">SEAMS_RING_BOTH_PRISMATIC</a>,    </div>
+<div class="line"><span class="lineno">  116</span>  <a class="code hl_enumvalue" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1a6e0d8d1239cb1f2a2d1c495c6b2fbf61">Prism</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baab23740b7c692e6679ce77f1ac0a865fb">SEAMS_RING_PRISM</a>,                     </div>
+<div class="line"><span class="lineno">  117</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3a8d840ca2df29977743a2ff31677db8db">DeformedPrism</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa7c8a58cf8be479b5f4041c90a910e5bd">SEAMS_RING_DEFORMED_PRISM</a>,    </div>
+<div class="line"><span class="lineno">  118</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3ad056bbbd8afc3c6cc648c43bae8987e4">MixedPrism</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa7868434033c0ed9012a28e67c641ea78">SEAMS_RING_MIXED_PRISM</a>,          </div>
+<div class="line"><span class="lineno">  119</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3a09fcf42bcab804addc759acce8ec9051">Pentagon</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa8eb688e663c955129272b20b0a2316f8">SEAMS_RING_PENTAGON</a>,               </div>
+<div class="line"><span class="lineno">  120</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3a125e13c182697c5a282e4de6d7999eb0">Hexagon</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa474f1820c92cf06dbc2992ee2a12971a">SEAMS_RING_HEXAGON</a>,                 </div>
+<div class="line"><span class="lineno">  121</span>  <a class="code hl_enumvalue" href="#gga94bdf09abb3e53d0af0848ee467a7af3a6311ae17c1ee52b36e68aaf4ad066387">Other</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baabc94e54756ee227441633678d2a2ed64">SEAMS_RING_OTHER</a>                      </div>
+<div class="line"><span class="lineno">  122</span>};</div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baa474f1820c92cf06dbc2992ee2a12971a"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa474f1820c92cf06dbc2992ee2a12971a">SEAMS_RING_HEXAGON</a></div><div class="ttdeci">@ SEAMS_RING_HEXAGON</div><div class="ttdoc">Six-ring outside any cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00190">seams.h:190</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baa54c9fa9ab30681e2542e9f4f50515306"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa54c9fa9ab30681e2542e9f4f50515306">SEAMS_RING_UNCLASSIFIED</a></div><div class="ttdeci">@ SEAMS_RING_UNCLASSIFIED</div><div class="ttdoc">No topology assigned.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00180">seams.h:180</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baa551f1167239a897a15ba6da4c042b617"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa551f1167239a897a15ba6da4c042b617">SEAMS_RING_HC_PRISMATIC</a></div><div class="ttdeci">@ SEAMS_RING_HC_PRISMATIC</div><div class="ttdoc">Prismatic face of a hexagonal cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00183">seams.h:183</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baa7868434033c0ed9012a28e67c641ea78"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa7868434033c0ed9012a28e67c641ea78">SEAMS_RING_MIXED_PRISM</a></div><div class="ttdeci">@ SEAMS_RING_MIXED_PRISM</div><div class="ttdoc">Face of a mixed prism.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00188">seams.h:188</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baa7c8a58cf8be479b5f4041c90a910e5bd"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa7c8a58cf8be479b5f4041c90a910e5bd">SEAMS_RING_DEFORMED_PRISM</a></div><div class="ttdeci">@ SEAMS_RING_DEFORMED_PRISM</div><div class="ttdoc">Face of a deformed prism.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00187">seams.h:187</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baa7e8d16eb99b9112d5eebcb2d9aa85f82"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa7e8d16eb99b9112d5eebcb2d9aa85f82">SEAMS_RING_BOTH_PRISMATIC</a></div><div class="ttdeci">@ SEAMS_RING_BOTH_PRISMATIC</div><div class="ttdoc">Shared by both cage kinds, prismatic.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00185">seams.h:185</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baa8eb688e663c955129272b20b0a2316f8"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa8eb688e663c955129272b20b0a2316f8">SEAMS_RING_PENTAGON</a></div><div class="ttdeci">@ SEAMS_RING_PENTAGON</div><div class="ttdoc">Five-ring outside any cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00189">seams.h:189</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baa9482991a905fc9e381ba3ef337526d12"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baa9482991a905fc9e381ba3ef337526d12">SEAMS_RING_BOTH_BASAL</a></div><div class="ttdeci">@ SEAMS_RING_BOTH_BASAL</div><div class="ttdoc">Shared by both cage kinds, basal.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00184">seams.h:184</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baab23740b7c692e6679ce77f1ac0a865fb"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baab23740b7c692e6679ce77f1ac0a865fb">SEAMS_RING_PRISM</a></div><div class="ttdeci">@ SEAMS_RING_PRISM</div><div class="ttdoc">Face of a perfect prism.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00186">seams.h:186</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baab765d568715e45c9241fb15fb8e4f42a"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baab765d568715e45c9241fb15fb8e4f42a">SEAMS_RING_HC_BASAL</a></div><div class="ttdeci">@ SEAMS_RING_HC_BASAL</div><div class="ttdoc">Basal face of a hexagonal cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00182">seams.h:182</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baabc94e54756ee227441633678d2a2ed64"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baabc94e54756ee227441633678d2a2ed64">SEAMS_RING_OTHER</a></div><div class="ttdeci">@ SEAMS_RING_OTHER</div><div class="ttdoc">Any other size outside any cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00191">seams.h:191</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaa24f1b5dcb893adf866a871184d983baad53ca75e7197c0439c72a9254ee0fd03"><div class="ttname"><a href="group__capi__types.html#ggaa24f1b5dcb893adf866a871184d983baad53ca75e7197c0439c72a9254ee0fd03">SEAMS_RING_DDC</a></div><div class="ttdeci">@ SEAMS_RING_DDC</div><div class="ttdoc">Face of a double-diamond cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00181">seams.h:181</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3a09fcf42bcab804addc759acce8ec9051"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3a09fcf42bcab804addc759acce8ec9051">seams::RingSymmetry::Pentagon</a></div><div class="ttdeci">@ Pentagon</div><div class="ttdoc">Five-membered ring.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00119">seams.hpp:119</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3a125e13c182697c5a282e4de6d7999eb0"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3a125e13c182697c5a282e4de6d7999eb0">seams::RingSymmetry::Hexagon</a></div><div class="ttdeci">@ Hexagon</div><div class="ttdoc">Six-ring that is not a cage face.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00120">seams.hpp:120</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3a2db1113420967213f69274b33ed9c921"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3a2db1113420967213f69274b33ed9c921">seams::RingSymmetry::HcPrismatic</a></div><div class="ttdeci">@ HcPrismatic</div><div class="ttdoc">Prismatic face of a hexagonal cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00113">seams.hpp:113</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3a5814b076b811c5981941b3633c3b0e76"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3a5814b076b811c5981941b3633c3b0e76">seams::RingSymmetry::BothPrismatic</a></div><div class="ttdeci">@ BothPrismatic</div><div class="ttdoc">Prismatic face of both cage types.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00115">seams.hpp:115</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3a6311ae17c1ee52b36e68aaf4ad066387"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3a6311ae17c1ee52b36e68aaf4ad066387">seams::RingSymmetry::Other</a></div><div class="ttdeci">@ Other</div><div class="ttdoc">Neither a pentagon nor a hexagon face.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00121">seams.hpp:121</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3a8d840ca2df29977743a2ff31677db8db"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3a8d840ca2df29977743a2ff31677db8db">seams::RingSymmetry::DeformedPrism</a></div><div class="ttdeci">@ DeformedPrism</div><div class="ttdoc">Deformed prismatic six-ring.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00117">seams.hpp:117</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3a96edd87b77f36e1cab567202a78aef70"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3a96edd87b77f36e1cab567202a78aef70">seams::RingSymmetry::HcBasal</a></div><div class="ttdeci">@ HcBasal</div><div class="ttdoc">Basal face of a hexagonal cage.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00112">seams.hpp:112</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3aa0aa69ad4016e3392884ab994e4c9529"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3aa0aa69ad4016e3392884ab994e4c9529">seams::RingSymmetry::BothBasal</a></div><div class="ttdeci">@ BothBasal</div><div class="ttdoc">Basal face of both cage types.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00114">seams.hpp:114</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3abd97398aebb2ac406930b40077752992"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3abd97398aebb2ac406930b40077752992">seams::RingSymmetry::Ddc</a></div><div class="ttdeci">@ Ddc</div><div class="ttdoc">Double-diamond six-ring.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00111">seams.hpp:111</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga94bdf09abb3e53d0af0848ee467a7af3ad056bbbd8afc3c6cc648c43bae8987e4"><div class="ttname"><a href="#gga94bdf09abb3e53d0af0848ee467a7af3ad056bbbd8afc3c6cc648c43bae8987e4">seams::RingSymmetry::MixedPrism</a></div><div class="ttdeci">@ MixedPrism</div><div class="ttdoc">Prism mixing the two cage types.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00118">seams.hpp:118</a></div></div>
+<div class="ttc" id="anamespacering_html_a301cfdc88452cfe51bd4f745d223a7e1a6e0d8d1239cb1f2a2d1c495c6b2fbf61"><div class="ttname"><a href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1a6e0d8d1239cb1f2a2d1c495c6b2fbf61">ring::strucType::Prism</a></div><div class="ttdeci">@ Prism</div><div class="ttdoc">The ring belongs to a prism block, classified according to the prism identification scheme.</div><div class="ttdef"><b>Definition</b> <a href="ring_8hpp_source.html#l00122">ring.hpp:122</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga8b14625549bd222cd0c8802fc4a52d40" name="ga8b14625549bd222cd0c8802fc4a52d40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8b14625549bd222cd0c8802fc4a52d40">&#9670;&#160;</a></span>SiteKind</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#ga8b14625549bd222cd0c8802fc4a52d40">seams::SiteKind</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Site-table kind. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40a6fcdc090caeade09d0efd6253932b6f5" name="gga8b14625549bd222cd0c8802fc4a52d40a6fcdc090caeade09d0efd6253932b6f5"></a>Unspecified&#160;</td><td class="fielddoc"><p>The table did not name this atom. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40ac5d27658781538ced67eb80aeb01df97" name="gga8b14625549bd222cd0c8802fc4a52d40ac5d27658781538ced67eb80aeb01df97"></a>Cation&#160;</td><td class="fielddoc"><p>Cation head. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40ae48cfc3a4fc82355364a27f3865633b2" name="gga8b14625549bd222cd0c8802fc4a52d40ae48cfc3a4fc82355364a27f3865633b2"></a>Anion&#160;</td><td class="fielddoc"><p>Anion. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40af492349e9829c9ab03ac01603d4a1c06" name="gga8b14625549bd222cd0c8802fc4a52d40af492349e9829c9ab03ac01603d4a1c06"></a>Tail&#160;</td><td class="fielddoc"><p>Tail atom. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40ac3ec97add9b9f461213cd8a549c8cb23" name="gga8b14625549bd222cd0c8802fc4a52d40ac3ec97add9b9f461213cd8a549c8cb23"></a>DonorH&#160;</td><td class="fielddoc"><p>Donor hydrogen. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40ab6ebbfdf8c2a8c002a65c95084bc9be4" name="gga8b14625549bd222cd0c8802fc4a52d40ab6ebbfdf8c2a8c002a65c95084bc9be4"></a>Acceptor&#160;</td><td class="fielddoc"><p>Acceptor. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40ae266cfd65ad46a67fc54b0efd38e40dd" name="gga8b14625549bd222cd0c8802fc4a52d40ae266cfd65ad46a67fc54b0efd38e40dd"></a>Polar&#160;</td><td class="fielddoc"><p>Polar atom. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40a6f575a49d4e9449dbfc22f0c1753384d" name="gga8b14625549bd222cd0c8802fc4a52d40a6f575a49d4e9449dbfc22f0c1753384d"></a>Apolar&#160;</td><td class="fielddoc"><p>Apolar atom. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40a92b557cc29356911b044cbb738584be7" name="gga8b14625549bd222cd0c8802fc4a52d40a92b557cc29356911b044cbb738584be7"></a>WaterO&#160;</td><td class="fielddoc"><p>Water oxygen. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40a4596571c8a42af5732577a83bf7c2062" name="gga8b14625549bd222cd0c8802fc4a52d40a4596571c8a42af5732577a83bf7c2062"></a>WaterH&#160;</td><td class="fielddoc"><p>Water hydrogen. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga8b14625549bd222cd0c8802fc4a52d40a436768c5ad4df9e4e633ee0dcfc7dda4" name="gga8b14625549bd222cd0c8802fc4a52d40a436768c5ad4df9e4e633ee0dcfc7dda4"></a>Solvent&#160;</td><td class="fielddoc"><p>Solvent atom. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00139">139</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  139</span>                    : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">  140</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40a6fcdc090caeade09d0efd6253932b6f5">Unspecified</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8aea4f6947b56e2e237330e8ead43c9e9e">SEAMS_SITE_UNSPECIFIED</a>, </div>
+<div class="line"><span class="lineno">  141</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40ac5d27658781538ced67eb80aeb01df97">Cation</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a35c7bc9ce202a5fa11a4f48cd924955b">SEAMS_SITE_CATION</a>,           </div>
+<div class="line"><span class="lineno">  142</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40ae48cfc3a4fc82355364a27f3865633b2">Anion</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8adb9183510456e0613ee733dc76f09ac8">SEAMS_SITE_ANION</a>,             </div>
+<div class="line"><span class="lineno">  143</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40af492349e9829c9ab03ac01603d4a1c06">Tail</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a8fc2334f34a6ac91ab44da90c3ed5615">SEAMS_SITE_TAIL</a>,               </div>
+<div class="line"><span class="lineno">  144</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40ac3ec97add9b9f461213cd8a549c8cb23">DonorH</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a49a86c4054827debcbd93ed7f2a54a2a">SEAMS_SITE_DONOR_H</a>,          </div>
+<div class="line"><span class="lineno">  145</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40ab6ebbfdf8c2a8c002a65c95084bc9be4">Acceptor</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a51636138742ff8f4462c642757cf22ba">SEAMS_SITE_ACCEPTOR</a>,       </div>
+<div class="line"><span class="lineno">  146</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40ae266cfd65ad46a67fc54b0efd38e40dd">Polar</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8aed1bfad0d6017a405501abdd725c278e">SEAMS_SITE_POLAR</a>,             </div>
+<div class="line"><span class="lineno">  147</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40a6f575a49d4e9449dbfc22f0c1753384d">Apolar</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a919ac0fb193ef51d3cb1b738e44426d3">SEAMS_SITE_APOLAR</a>,           </div>
+<div class="line"><span class="lineno">  148</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40a92b557cc29356911b044cbb738584be7">WaterO</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a172e331befac214f58613021286c1ea6">SEAMS_SITE_WATER_O</a>,          </div>
+<div class="line"><span class="lineno">  149</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40a4596571c8a42af5732577a83bf7c2062">WaterH</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a09db7b6a11349c4bb5b3a459a6d8528a">SEAMS_SITE_WATER_H</a>,          </div>
+<div class="line"><span class="lineno">  150</span>  <a class="code hl_enumvalue" href="#gga8b14625549bd222cd0c8802fc4a52d40a436768c5ad4df9e4e633ee0dcfc7dda4">Solvent</a> = <a class="code hl_enumvalue" href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8ab7e2c869d70ee56c4f01e874d3857137">SEAMS_SITE_SOLVENT</a>          </div>
+<div class="line"><span class="lineno">  151</span>};</div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8a09db7b6a11349c4bb5b3a459a6d8528a"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a09db7b6a11349c4bb5b3a459a6d8528a">SEAMS_SITE_WATER_H</a></div><div class="ttdeci">@ SEAMS_SITE_WATER_H</div><div class="ttdoc">Water hydrogen.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00243">seams.h:243</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8a172e331befac214f58613021286c1ea6"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a172e331befac214f58613021286c1ea6">SEAMS_SITE_WATER_O</a></div><div class="ttdeci">@ SEAMS_SITE_WATER_O</div><div class="ttdoc">Water oxygen.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00242">seams.h:242</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8a35c7bc9ce202a5fa11a4f48cd924955b"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a35c7bc9ce202a5fa11a4f48cd924955b">SEAMS_SITE_CATION</a></div><div class="ttdeci">@ SEAMS_SITE_CATION</div><div class="ttdoc">Cation head.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00235">seams.h:235</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8a49a86c4054827debcbd93ed7f2a54a2a"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a49a86c4054827debcbd93ed7f2a54a2a">SEAMS_SITE_DONOR_H</a></div><div class="ttdeci">@ SEAMS_SITE_DONOR_H</div><div class="ttdoc">Hydrogen-bond donor hydrogen.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00238">seams.h:238</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8a51636138742ff8f4462c642757cf22ba"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a51636138742ff8f4462c642757cf22ba">SEAMS_SITE_ACCEPTOR</a></div><div class="ttdeci">@ SEAMS_SITE_ACCEPTOR</div><div class="ttdoc">Hydrogen-bond acceptor.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00239">seams.h:239</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8a8fc2334f34a6ac91ab44da90c3ed5615"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a8fc2334f34a6ac91ab44da90c3ed5615">SEAMS_SITE_TAIL</a></div><div class="ttdeci">@ SEAMS_SITE_TAIL</div><div class="ttdoc">Alkyl tail.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00237">seams.h:237</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8a919ac0fb193ef51d3cb1b738e44426d3"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8a919ac0fb193ef51d3cb1b738e44426d3">SEAMS_SITE_APOLAR</a></div><div class="ttdeci">@ SEAMS_SITE_APOLAR</div><div class="ttdoc">Other apolar site.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00241">seams.h:241</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8ab7e2c869d70ee56c4f01e874d3857137"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8ab7e2c869d70ee56c4f01e874d3857137">SEAMS_SITE_SOLVENT</a></div><div class="ttdeci">@ SEAMS_SITE_SOLVENT</div><div class="ttdoc">Other solvent.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00244">seams.h:244</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8adb9183510456e0613ee733dc76f09ac8"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8adb9183510456e0613ee733dc76f09ac8">SEAMS_SITE_ANION</a></div><div class="ttdeci">@ SEAMS_SITE_ANION</div><div class="ttdoc">Anion.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00236">seams.h:236</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8aea4f6947b56e2e237330e8ead43c9e9e"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8aea4f6947b56e2e237330e8ead43c9e9e">SEAMS_SITE_UNSPECIFIED</a></div><div class="ttdeci">@ SEAMS_SITE_UNSPECIFIED</div><div class="ttdoc">Not named in the site table.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00234">seams.h:234</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_gga2a05b96a2b2bf1d1f3a56207f99524a8aed1bfad0d6017a405501abdd725c278e"><div class="ttname"><a href="group__capi__types.html#gga2a05b96a2b2bf1d1f3a56207f99524a8aed1bfad0d6017a405501abdd725c278e">SEAMS_SITE_POLAR</a></div><div class="ttdeci">@ SEAMS_SITE_POLAR</div><div class="ttdoc">Other polar site.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00240">seams.h:240</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40a436768c5ad4df9e4e633ee0dcfc7dda4"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40a436768c5ad4df9e4e633ee0dcfc7dda4">seams::SiteKind::Solvent</a></div><div class="ttdeci">@ Solvent</div><div class="ttdoc">Solvent atom.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00150">seams.hpp:150</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40a4596571c8a42af5732577a83bf7c2062"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40a4596571c8a42af5732577a83bf7c2062">seams::SiteKind::WaterH</a></div><div class="ttdeci">@ WaterH</div><div class="ttdoc">Water hydrogen.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00149">seams.hpp:149</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40a6fcdc090caeade09d0efd6253932b6f5"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40a6fcdc090caeade09d0efd6253932b6f5">seams::SiteKind::Unspecified</a></div><div class="ttdeci">@ Unspecified</div><div class="ttdoc">The table did not name this atom.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00140">seams.hpp:140</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40a92b557cc29356911b044cbb738584be7"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40a92b557cc29356911b044cbb738584be7">seams::SiteKind::WaterO</a></div><div class="ttdeci">@ WaterO</div><div class="ttdoc">Water oxygen.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00148">seams.hpp:148</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40ab6ebbfdf8c2a8c002a65c95084bc9be4"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40ab6ebbfdf8c2a8c002a65c95084bc9be4">seams::SiteKind::Acceptor</a></div><div class="ttdeci">@ Acceptor</div><div class="ttdoc">Acceptor.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00145">seams.hpp:145</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40ac3ec97add9b9f461213cd8a549c8cb23"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40ac3ec97add9b9f461213cd8a549c8cb23">seams::SiteKind::DonorH</a></div><div class="ttdeci">@ DonorH</div><div class="ttdoc">Donor hydrogen.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00144">seams.hpp:144</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40ac5d27658781538ced67eb80aeb01df97"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40ac5d27658781538ced67eb80aeb01df97">seams::SiteKind::Cation</a></div><div class="ttdeci">@ Cation</div><div class="ttdoc">Cation head.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00141">seams.hpp:141</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40ae48cfc3a4fc82355364a27f3865633b2"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40ae48cfc3a4fc82355364a27f3865633b2">seams::SiteKind::Anion</a></div><div class="ttdeci">@ Anion</div><div class="ttdoc">Anion.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00142">seams.hpp:142</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga8b14625549bd222cd0c8802fc4a52d40af492349e9829c9ab03ac01603d4a1c06"><div class="ttname"><a href="#gga8b14625549bd222cd0c8802fc4a52d40af492349e9829c9ab03ac01603d4a1c06">seams::SiteKind::Tail</a></div><div class="ttdeci">@ Tail</div><div class="ttdoc">Tail atom.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00143">seams.hpp:143</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga66e498496a8ac061410534a9f0171779" name="ga66e498496a8ac061410534a9f0171779"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga66e498496a8ac061410534a9f0171779">&#9670;&#160;</a></span>Status</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#ga66e498496a8ac061410534a9f0171779">seams::Status</a> : int</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="#ga66e498496a8ac061410534a9f0171779" title="Status codes.">Status</a> codes. </p>
+<p>Zero is success.</p>
+<p>The numeric values match <span class="tt"><a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d" title="Status codes.">seams_status</a></span>. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga66e498496a8ac061410534a9f0171779aa60852f204ed8028c1c58808b746d115" name="gga66e498496a8ac061410534a9f0171779aa60852f204ed8028c1c58808b746d115"></a>Ok&#160;</td><td class="fielddoc"><p>The call succeeded. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga66e498496a8ac061410534a9f0171779abbb93ef26e3c101ff11cdd21cab08a94" name="gga66e498496a8ac061410534a9f0171779abbb93ef26e3c101ff11cdd21cab08a94"></a>Null&#160;</td><td class="fielddoc"><p>A required pointer is null. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga66e498496a8ac061410534a9f0171779a87ba2ecc8b6915e8bd6f5089918229fd" name="gga66e498496a8ac061410534a9f0171779a87ba2ecc8b6915e8bd6f5089918229fd"></a>Range&#160;</td><td class="fielddoc"><p>A number is outside the accepted range. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga66e498496a8ac061410534a9f0171779a1a66ab62bfc858b7bcf9e01aa9cd1841" name="gga66e498496a8ac061410534a9f0171779a1a66ab62bfc858b7bcf9e01aa9cd1841"></a>Cell&#160;</td><td class="fielddoc"><p>The cell is missing or has no volume. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga66e498496a8ac061410534a9f0171779a1853680a6d666b9fea2d789dd00bc7eb" name="gga66e498496a8ac061410534a9f0171779a1853680a6d666b9fea2d789dd00bc7eb"></a>Argument&#160;</td><td class="fielddoc"><p>A caller argument is the wrong shape. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga66e498496a8ac061410534a9f0171779a46a2a41cc6e552044816a2d04634545d" name="gga66e498496a8ac061410534a9f0171779a46a2a41cc6e552044816a2d04634545d"></a>State&#160;</td><td class="fielddoc"><p>The handle has no frame yet. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga66e498496a8ac061410534a9f0171779a4789f23283b3a61f858b641a1bef19a3" name="gga66e498496a8ac061410534a9f0171779a4789f23283b3a61f858b641a1bef19a3"></a>Memory&#160;</td><td class="fielddoc"><p>An allocation failed. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga66e498496a8ac061410534a9f0171779aafbf0897a5a83fdd873dfb032ec695d3" name="gga66e498496a8ac061410534a9f0171779aafbf0897a5a83fdd873dfb032ec695d3"></a>Internal&#160;</td><td class="fielddoc"><p>The library hit an internal failure. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00050">50</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   50</span>                  : <span class="keywordtype">int</span> {</div>
+<div class="line"><span class="lineno">   51</span>  <a class="code hl_enumvalue" href="#gga66e498496a8ac061410534a9f0171779aa60852f204ed8028c1c58808b746d115">Ok</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a>,             </div>
+<div class="line"><span class="lineno">   52</span>  <a class="code hl_enumvalue" href="#gga66e498496a8ac061410534a9f0171779abbb93ef26e3c101ff11cdd21cab08a94">Null</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9">SEAMS_ERR_NULL</a>,     </div>
+<div class="line"><span class="lineno">   53</span>  <a class="code hl_enumvalue" href="#gga66e498496a8ac061410534a9f0171779a87ba2ecc8b6915e8bd6f5089918229fd">Range</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129">SEAMS_ERR_RANGE</a>,   </div>
+<div class="line"><span class="lineno">   54</span>  <a class="code hl_enumvalue" href="#gga66e498496a8ac061410534a9f0171779a1a66ab62bfc858b7bcf9e01aa9cd1841">Cell</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322">SEAMS_ERR_BOX</a>,      </div>
+<div class="line"><span class="lineno">   55</span>  <a class="code hl_enumvalue" href="#gga66e498496a8ac061410534a9f0171779a1853680a6d666b9fea2d789dd00bc7eb">Argument</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79">SEAMS_ERR_ARG</a>,  </div>
+<div class="line"><span class="lineno">   56</span>  <a class="code hl_enumvalue" href="#gga66e498496a8ac061410534a9f0171779a46a2a41cc6e552044816a2d04634545d">State</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818">SEAMS_ERR_STATE</a>,   </div>
+<div class="line"><span class="lineno">   57</span>  <a class="code hl_enumvalue" href="#gga66e498496a8ac061410534a9f0171779a4789f23283b3a61f858b641a1bef19a3">Memory</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7">SEAMS_ERR_NOMEM</a>,  </div>
+<div class="line"><span class="lineno">   58</span>  <a class="code hl_enumvalue" href="#gga66e498496a8ac061410534a9f0171779aafbf0897a5a83fdd873dfb032ec695d3">Internal</a> = <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c">SEAMS_ERR_INTERNAL</a> </div>
+<div class="line"><span class="lineno">   59</span>};</div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129">SEAMS_ERR_RANGE</a></div><div class="ttdeci">@ SEAMS_ERR_RANGE</div><div class="ttdoc">A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00157">seams.h:157</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7">SEAMS_ERR_NOMEM</a></div><div class="ttdeci">@ SEAMS_ERR_NOMEM</div><div class="ttdoc">An allocation failed.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00161">seams.h:161</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9">SEAMS_ERR_NULL</a></div><div class="ttdeci">@ SEAMS_ERR_NULL</div><div class="ttdoc">A required pointer is null.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00156">seams.h:156</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818">SEAMS_ERR_STATE</a></div><div class="ttdeci">@ SEAMS_ERR_STATE</div><div class="ttdoc">The handle has no frame yet.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00160">seams.h:160</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322">SEAMS_ERR_BOX</a></div><div class="ttdeci">@ SEAMS_ERR_BOX</div><div class="ttdoc">The cell is missing, non-finite, or has no volume.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00158">seams.h:158</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c">SEAMS_ERR_INTERNAL</a></div><div class="ttdeci">@ SEAMS_ERR_INTERNAL</div><div class="ttdoc">The library hit an internal failure.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00162">seams.h:162</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79">SEAMS_ERR_ARG</a></div><div class="ttdeci">@ SEAMS_ERR_ARG</div><div class="ttdoc">A caller argument is the wrong shape, or a coordinate is not finite.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00159">seams.h:159</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a></div><div class="ttdeci">@ SEAMS_OK</div><div class="ttdoc">The call succeeded.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00155">seams.h:155</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga66e498496a8ac061410534a9f0171779a1853680a6d666b9fea2d789dd00bc7eb"><div class="ttname"><a href="#gga66e498496a8ac061410534a9f0171779a1853680a6d666b9fea2d789dd00bc7eb">seams::Status::Argument</a></div><div class="ttdeci">@ Argument</div><div class="ttdoc">A caller argument is the wrong shape.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00055">seams.hpp:55</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga66e498496a8ac061410534a9f0171779a1a66ab62bfc858b7bcf9e01aa9cd1841"><div class="ttname"><a href="#gga66e498496a8ac061410534a9f0171779a1a66ab62bfc858b7bcf9e01aa9cd1841">seams::Status::Cell</a></div><div class="ttdeci">@ Cell</div><div class="ttdoc">The cell is missing or has no volume.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00054">seams.hpp:54</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga66e498496a8ac061410534a9f0171779a46a2a41cc6e552044816a2d04634545d"><div class="ttname"><a href="#gga66e498496a8ac061410534a9f0171779a46a2a41cc6e552044816a2d04634545d">seams::Status::State</a></div><div class="ttdeci">@ State</div><div class="ttdoc">The handle has no frame yet.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00056">seams.hpp:56</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga66e498496a8ac061410534a9f0171779a4789f23283b3a61f858b641a1bef19a3"><div class="ttname"><a href="#gga66e498496a8ac061410534a9f0171779a4789f23283b3a61f858b641a1bef19a3">seams::Status::Memory</a></div><div class="ttdeci">@ Memory</div><div class="ttdoc">An allocation failed.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00057">seams.hpp:57</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga66e498496a8ac061410534a9f0171779a87ba2ecc8b6915e8bd6f5089918229fd"><div class="ttname"><a href="#gga66e498496a8ac061410534a9f0171779a87ba2ecc8b6915e8bd6f5089918229fd">seams::Status::Range</a></div><div class="ttdeci">@ Range</div><div class="ttdoc">A number is outside the accepted range.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00053">seams.hpp:53</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga66e498496a8ac061410534a9f0171779aa60852f204ed8028c1c58808b746d115"><div class="ttname"><a href="#gga66e498496a8ac061410534a9f0171779aa60852f204ed8028c1c58808b746d115">seams::Status::Ok</a></div><div class="ttdeci">@ Ok</div><div class="ttdoc">The call succeeded.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00051">seams.hpp:51</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga66e498496a8ac061410534a9f0171779aafbf0897a5a83fdd873dfb032ec695d3"><div class="ttname"><a href="#gga66e498496a8ac061410534a9f0171779aafbf0897a5a83fdd873dfb032ec695d3">seams::Status::Internal</a></div><div class="ttdeci">@ Internal</div><div class="ttdoc">The library hit an internal failure.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00058">seams.hpp:58</a></div></div>
+<div class="ttc" id="agroup__seams__cpp_html_gga66e498496a8ac061410534a9f0171779abbb93ef26e3c101ff11cdd21cab08a94"><div class="ttname"><a href="#gga66e498496a8ac061410534a9f0171779abbb93ef26e3c101ff11cdd21cab08a94">seams::Status::Null</a></div><div class="ttdeci">@ Null</div><div class="ttdoc">A required pointer is null.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00052">seams.hpp:52</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ga4c4de5e8bb28d4909c3d843d4b7f4f32" name="ga4c4de5e8bb28d4909c3d843d4b7f4f32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4c4de5e8bb28d4909c3d843d4b7f4f32">&#9670;&#160;</a></span>abi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::abi </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ABI number compiled into this library. </p>
+<dl class="section return"><dt>Returns</dt><dd><span class="tt"><a class="el" href="seams_8h.html#a02e818d684aff98999fadd984533e454" title="ABI generation of this header.">SEAMS_ABI</a></span>, which is 1. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02085">2085</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2085</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="group__capi__meta.html#gab46245b885002b7838f84bd71280a40a">seams_abi</a>(); }</div>
+<div class="ttc" id="agroup__capi__meta_html_gab46245b885002b7838f84bd71280a40a"><div class="ttname"><a href="group__capi__meta.html#gab46245b885002b7838f84bd71280a40a">seams_abi</a></div><div class="ttdeci">SEAMS_API int seams_abi(void)</div><div class="ttdoc">ABI number compiled into this library.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga8a62c2b555f1ced988f77ba361b1832e" name="ga8a62c2b555f1ced988f77ba361b1832e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8a62c2b555f1ced988f77ba361b1832e">&#9670;&#160;</a></span>label_name()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string_view seams::label_name </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ga68f2414148f093b5d3e3676e20980573">Label</a></td>          <td class="paramname"><span class="paramname"><em>label</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Short name of a CHILL+ label. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">label</td><td><a class="el" href="#ga68f2414148f093b5d3e3676e20980573" title="CHILL and CHILL+ atom label.">Label</a> code. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A static name. The caller does not free it. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02120">2120</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2120</span>                                                            {</div>
+<div class="line"><span class="lineno"> 2121</span>  <span class="keyword">const</span> <span class="keywordtype">char</span> *text = <a class="code hl_function" href="group__capi__meta.html#ga272ce2bf86c6fd564091c14c4fdee15b">seams_label_name</a>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(label));</div>
+<div class="line"><span class="lineno"> 2122</span>  <span class="keywordflow">return</span> text == <span class="keyword">nullptr</span> ? std::string_view() : std::string_view(text);</div>
+<div class="line"><span class="lineno"> 2123</span>}</div>
+<div class="ttc" id="agroup__capi__meta_html_ga272ce2bf86c6fd564091c14c4fdee15b"><div class="ttname"><a href="group__capi__meta.html#ga272ce2bf86c6fd564091c14c4fdee15b">seams_label_name</a></div><div class="ttdeci">SEAMS_API const char * seams_label_name(int label)</div><div class="ttdoc">Name of a CHILL label.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga1268a47da79bea721d79f97d07c2107f" name="ga1268a47da79bea721d79f97d07c2107f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1268a47da79bea721d79f97d07c2107f">&#9670;&#160;</a></span>nframes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t seams::nframes </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>path</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Count frames in a trajectory path. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>Trajectory path. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The frame count. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02107">2107</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2107</span>                                                            {</div>
+<div class="line"><span class="lineno"> 2108</span>  <span class="keyword">const</span> std::string text(path);</div>
+<div class="line"><span class="lineno"> 2109</span>  std::size_t count = 0;</div>
+<div class="line"><span class="lineno"> 2110</span>  <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__frame.html#ga23ca97884bad0af03fd33ed781bef902">seams_path_nframes</a>(text.c_str(), &amp;count), <span class="keyword">nullptr</span>);</div>
+<div class="line"><span class="lineno"> 2111</span>  <span class="keywordflow">return</span> count;</div>
+<div class="line"><span class="lineno"> 2112</span>}</div>
+<div class="ttc" id="agroup__capi__frame_html_ga23ca97884bad0af03fd33ed781bef902"><div class="ttname"><a href="group__capi__frame.html#ga23ca97884bad0af03fd33ed781bef902">seams_path_nframes</a></div><div class="ttdeci">SEAMS_API seams_status seams_path_nframes(const char *path, size_t *nframes)</div><div class="ttdoc">Number of frames in a trajectory path.</div></div>
+<div class="ttc" id="anamespaceseams_1_1detail_html_a2318c07d1ce9ec1e7b770df041fda676"><div class="ttname"><a href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">seams::detail::check</a></div><div class="ttdeci">void check(int status, const void *handle)</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00802">seams.hpp:802</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaf2be34634367aa0061392fe3b3719c74" name="gaf2be34634367aa0061392fe3b3719c74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf2be34634367aa0061392fe3b3719c74">&#9670;&#160;</a></span>num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::num_threads </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>OpenMP width the next call will use. </p>
+<dl class="section return"><dt>Returns</dt><dd>A positive thread count. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02099">2099</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2099</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="group__capi__meta.html#gadb33734040c81163b9ce98715d1ea4a6">seams_get_num_threads</a>(); }</div>
+<div class="ttc" id="agroup__capi__meta_html_gadb33734040c81163b9ce98715d1ea4a6"><div class="ttname"><a href="group__capi__meta.html#gadb33734040c81163b9ce98715d1ea4a6">seams_get_num_threads</a></div><div class="ttdeci">SEAMS_API int seams_get_num_threads(void)</div><div class="ttdoc">Team width the next analysis call will request.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaf83908227ad19ccd063be0068953ed33" name="gaf83908227ad19ccd063be0068953ed33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf83908227ad19ccd063be0068953ed33">&#9670;&#160;</a></span>orientation_order()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1OrientationOrder.html">OrientationOrder</a> seams::orientation_order </td>
+          <td>(</td>
+          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>vectors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::span&lt; const double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Axis-projected orientational order parameters P1 and P2. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02193">2193</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2194</span>                                                                                       {</div>
+<div class="line"><span class="lineno"> 2195</span>  <span class="keywordflow">if</span> (vectors.size() % 3 != 0) {</div>
+<div class="line"><span class="lineno"> 2196</span>    <span class="keywordflow">throw</span> <a class="code hl_function" href="classseams_1_1Error.html#afa1a477ab0ed901f607dccf49b67680b">Error</a>(<a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79">SEAMS_ERR_ARG</a>, <span class="stringliteral">&quot;vectors length is not a multiple of 3&quot;</span>);</div>
+<div class="line"><span class="lineno"> 2197</span>  }</div>
+<div class="line"><span class="lineno"> 2198</span>  <span class="keyword">const</span> std::size_t nv = vectors.size() / 3;</div>
+<div class="line"><span class="lineno"> 2199</span>  OrientationOrder out;</div>
+<div class="line"><span class="lineno"> 2200</span>  out.cos_theta.resize(nv);</div>
+<div class="line"><span class="lineno"> 2201</span>  out.p2.resize(nv);</div>
+<div class="line"><span class="lineno"> 2202</span>  <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#ga630179c79fb72a8b4b76dfe4acf1d078">seams_orientation_order</a>(nv == 0 ? <span class="keyword">nullptr</span> : vectors.data(), nv, axis.data(),</div>
+<div class="line"><span class="lineno"> 2203</span>                                        nv == 0 ? <span class="keyword">nullptr</span> : out.cos_theta.data(),</div>
+<div class="line"><span class="lineno"> 2204</span>                                        nv == 0 ? <span class="keyword">nullptr</span> : out.p2.data(), nv, &amp;out.mean_p1,</div>
+<div class="line"><span class="lineno"> 2205</span>                                        &amp;out.mean_p2),</div>
+<div class="line"><span class="lineno"> 2206</span>                <span class="keyword">nullptr</span>);</div>
+<div class="line"><span class="lineno"> 2207</span>  <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno"> 2208</span>}</div>
+<div class="ttc" id="aclassseams_1_1Error_html_afa1a477ab0ed901f607dccf49b67680b"><div class="ttname"><a href="classseams_1_1Error.html#afa1a477ab0ed901f607dccf49b67680b">seams::Error::Error</a></div><div class="ttdeci">Error(int status, std::string message)</div><div class="ttdoc">Build an error from a status and a message.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00186">seams.hpp:186</a></div></div>
+<div class="ttc" id="agroup__capi__traj_html_ga630179c79fb72a8b4b76dfe4acf1d078"><div class="ttname"><a href="group__capi__traj.html#ga630179c79fb72a8b4b76dfe4acf1d078">seams_orientation_order</a></div><div class="ttdeci">SEAMS_API seams_status seams_orientation_order(const double *vectors, size_t n_vectors, const double axis[3], double *cos_theta, double *p2, size_t cap, double *mean_p1, double *mean_p2)</div><div class="ttdoc">Project molecular vectors onto an axis for P1 and P2 order parameters.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga8d9a78835efe90ebbec76c381c9dbf45" name="ga8d9a78835efe90ebbec76c381c9dbf45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8d9a78835efe90ebbec76c381c9dbf45">&#9670;&#160;</a></span>ring_symmetry_name()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string_view seams::ring_symmetry_name </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#ga94bdf09abb3e53d0af0848ee467a7af3">RingSymmetry</a></td>          <td class="paramname"><span class="paramname"><em>symmetry</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Short name of a ring-symmetry code. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">symmetry</td><td>Symmetry code. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A static name. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02131">2131</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2131</span>                                                                              {</div>
+<div class="line"><span class="lineno"> 2132</span>  <span class="keyword">const</span> <span class="keywordtype">char</span> *text = <a class="code hl_function" href="group__capi__meta.html#ga49cce2c621551ee7eb6bf29dba7182ed">seams_ring_symmetry_name</a>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(symmetry));</div>
+<div class="line"><span class="lineno"> 2133</span>  <span class="keywordflow">return</span> text == <span class="keyword">nullptr</span> ? std::string_view() : std::string_view(text);</div>
+<div class="line"><span class="lineno"> 2134</span>}</div>
+<div class="ttc" id="agroup__capi__meta_html_ga49cce2c621551ee7eb6bf29dba7182ed"><div class="ttname"><a href="group__capi__meta.html#ga49cce2c621551ee7eb6bf29dba7182ed">seams_ring_symmetry_name</a></div><div class="ttdeci">SEAMS_API const char * seams_ring_symmetry_name(int symmetry)</div><div class="ttdoc">Name of a ring-symmetry code.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gade81b9f566b717d94390a5499824893f" name="gade81b9f566b717d94390a5499824893f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gade81b9f566b717d94390a5499824893f">&#9670;&#160;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the OpenMP width for the next call. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Thread count. Zero restores the library default. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02092">2092</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2092</span>{ <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__meta.html#gaab320868f51aa98ac6bf5bef0df1b3de">seams_set_num_threads</a>(n), <span class="keyword">nullptr</span>); }</div>
+<div class="ttc" id="agroup__capi__meta_html_gaab320868f51aa98ac6bf5bef0df1b3de"><div class="ttname"><a href="group__capi__meta.html#gaab320868f51aa98ac6bf5bef0df1b3de">seams_set_num_threads</a></div><div class="ttdeci">SEAMS_API seams_status seams_set_num_threads(int n)</div><div class="ttdoc">Set the OpenMP team used by later analysis calls.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga0874c8fac20f73aea09980bfaea2a720" name="ga0874c8fac20f73aea09980bfaea2a720"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0874c8fac20f73aea09980bfaea2a720">&#9670;&#160;</a></span>unwrap_centres()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1MoleculeCentres.html">MoleculeCentres</a> seams::unwrap_centres </td>
+          <td>(</td>
+          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>nframes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>natoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>boxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::span&lt; const int &gt;</td>          <td class="paramname"><span class="paramname"><em>mols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>masses</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assemble and unwrap periodic molecule centres across frames. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classseams_1_1Error.html" title="Failure from the C API, or from a rejected argument.">Error</a></td><td><span class="tt"><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a></span> when <span class="tt">xyz.size()</span> is not <span class="tt"><a class="el" href="#ga1268a47da79bea721d79f97d07c2107f" title="Count frames in a trajectory path.">nframes</a> * 3 * natoms</span>, that product overflows <span class="tt">size_t</span>, or <span class="tt">boxes.size()</span> is not a multiple of 9. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02162">2162</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2166</span>                                                                                 {}) {</div>
+<div class="line"><span class="lineno"> 2167</span>  <span class="keyword">static_cast&lt;</span><span class="keywordtype">void</span><span class="keyword">&gt;</span>(<a class="code hl_function" href="namespaceseams_1_1detail.html#abc4d7f268e4d57f43c146503282f6a82">detail::trajectory_coordinates</a>(xyz, <a class="code hl_function" href="#ga1268a47da79bea721d79f97d07c2107f">nframes</a>, natoms));</div>
+<div class="line"><span class="lineno"> 2168</span>  <span class="keywordflow">if</span> (boxes.size() % 9 != 0) {</div>
+<div class="line"><span class="lineno"> 2169</span>    <span class="keywordflow">throw</span> <a class="code hl_function" href="classseams_1_1Error.html#afa1a477ab0ed901f607dccf49b67680b">Error</a>(<a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129">SEAMS_ERR_RANGE</a>, <span class="stringliteral">&quot;boxes length is not a multiple of 9&quot;</span>);</div>
+<div class="line"><span class="lineno"> 2170</span>  }</div>
+<div class="line"><span class="lineno"> 2171</span>  <span class="keyword">const</span> std::size_t nboxes = boxes.size() / 9;</div>
+<div class="line"><span class="lineno"> 2172</span>  std::size_t nm = 0;</div>
+<div class="line"><span class="lineno"> 2173</span>  <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#gaae87d8838530ea8f468766a6a84d3544">seams_traj_unwrap_centres</a>(xyz.data(), <a class="code hl_function" href="#ga1268a47da79bea721d79f97d07c2107f">nframes</a>, natoms, boxes.data(), nboxes,</div>
+<div class="line"><span class="lineno"> 2174</span>                                          mols.data(), mols.size(),</div>
+<div class="line"><span class="lineno"> 2175</span>                                          masses.empty() ? <span class="keyword">nullptr</span> : masses.data(), masses.size(),</div>
+<div class="line"><span class="lineno"> 2176</span>                                          <span class="keyword">nullptr</span>, 0, <span class="keyword">nullptr</span>, 0, &amp;nm),</div>
+<div class="line"><span class="lineno"> 2177</span>                <span class="keyword">nullptr</span>);</div>
+<div class="line"><span class="lineno"> 2178</span>  <a class="code hl_struct" href="structseams_1_1MoleculeCentres.html">MoleculeCentres</a> out;</div>
+<div class="line"><span class="lineno"> 2179</span>  out.<a class="code hl_variable" href="structseams_1_1MoleculeCentres.html#aea18e56e6d1b47ee1339cacbf4efb0bc">mol_ids</a>.resize(nm);</div>
+<div class="line"><span class="lineno"> 2180</span>  out.centres.resize(<a class="code hl_function" href="#ga1268a47da79bea721d79f97d07c2107f">nframes</a> * 3 * nm);</div>
+<div class="line"><span class="lineno"> 2181</span>  <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#gaae87d8838530ea8f468766a6a84d3544">seams_traj_unwrap_centres</a>(</div>
+<div class="line"><span class="lineno"> 2182</span>                    xyz.data(), <a class="code hl_function" href="#ga1268a47da79bea721d79f97d07c2107f">nframes</a>, natoms, boxes.data(), nboxes, mols.data(), mols.size(),</div>
+<div class="line"><span class="lineno"> 2183</span>                    masses.empty() ? <span class="keyword">nullptr</span> : masses.data(), masses.size(), out.mol_ids.data(), nm,</div>
+<div class="line"><span class="lineno"> 2184</span>                    out.centres.data(), out.centres.size(), &amp;nm),</div>
+<div class="line"><span class="lineno"> 2185</span>                <span class="keyword">nullptr</span>);</div>
+<div class="line"><span class="lineno"> 2186</span>  <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno"> 2187</span>}</div>
+<div class="ttc" id="agroup__capi__traj_html_gaae87d8838530ea8f468766a6a84d3544"><div class="ttname"><a href="group__capi__traj.html#gaae87d8838530ea8f468766a6a84d3544">seams_traj_unwrap_centres</a></div><div class="ttdeci">SEAMS_API seams_status seams_traj_unwrap_centres(const double *xyz, size_t nframes, size_t natoms, const double *boxes, size_t nboxes, const int *mols, size_t mols_len, const double *masses, size_t masses_len, int *mol_ids_out, size_t mol_ids_cap, double *centres_out, size_t centres_len, size_t *n_mols)</div><div class="ttdoc">Assemble per-molecule centres and unwrap them across frames.</div></div>
+<div class="ttc" id="agroup__seams__cpp_html_ga1268a47da79bea721d79f97d07c2107f"><div class="ttname"><a href="#ga1268a47da79bea721d79f97d07c2107f">seams::nframes</a></div><div class="ttdeci">std::size_t nframes(std::string_view path)</div><div class="ttdoc">Count frames in a trajectory path.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l02107">seams.hpp:2107</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1detail_html_abc4d7f268e4d57f43c146503282f6a82"><div class="ttname"><a href="namespaceseams_1_1detail.html#abc4d7f268e4d57f43c146503282f6a82">seams::detail::trajectory_coordinates</a></div><div class="ttdeci">std::size_t trajectory_coordinates(std::span&lt; const double &gt; xyz, std::size_t nframes, std::size_t natoms)</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00842">seams.hpp:842</a></div></div>
+<div class="ttc" id="astructseams_1_1MoleculeCentres_html"><div class="ttname"><a href="structseams_1_1MoleculeCentres.html">seams::MoleculeCentres</a></div><div class="ttdoc">Per-molecule intact periodic centres.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00693">seams.hpp:693</a></div></div>
+<div class="ttc" id="astructseams_1_1MoleculeCentres_html_aea18e56e6d1b47ee1339cacbf4efb0bc"><div class="ttname"><a href="structseams_1_1MoleculeCentres.html#aea18e56e6d1b47ee1339cacbf4efb0bc">seams::MoleculeCentres::mol_ids</a></div><div class="ttdeci">std::vector&lt; int &gt; mol_ids</div><div class="ttdoc">Unique molecule ids in appearance order.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00694">seams.hpp:694</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gae26085bfb117d7c28f2ee250f67c152c" name="gae26085bfb117d7c28f2ee250f67c152c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae26085bfb117d7c28f2ee250f67c152c">&#9670;&#160;</a></span>unwrap_positions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; seams::unwrap_positions </td>
+          <td>(</td>
+          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>nframes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>natoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>boxes</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Unwrap periodic coordinates across frames. </p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname"><a class="el" href="classseams_1_1Error.html" title="Failure from the C API, or from a rejected argument.">Error</a></td><td><span class="tt"><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a></span> when <span class="tt">xyz.size()</span> is not <span class="tt"><a class="el" href="#ga1268a47da79bea721d79f97d07c2107f" title="Count frames in a trajectory path.">nframes</a> * 3 * natoms</span>, that product overflows <span class="tt">size_t</span>, or <span class="tt">boxes.size()</span> is not a multiple of 9. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02142">2142</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2144</span>                                                                                       {</div>
+<div class="line"><span class="lineno"> 2145</span>  <span class="keyword">const</span> std::size_t total = <a class="code hl_function" href="namespaceseams_1_1detail.html#abc4d7f268e4d57f43c146503282f6a82">detail::trajectory_coordinates</a>(xyz, <a class="code hl_function" href="#ga1268a47da79bea721d79f97d07c2107f">nframes</a>, natoms);</div>
+<div class="line"><span class="lineno"> 2146</span>  <span class="keywordflow">if</span> (boxes.size() % 9 != 0) {</div>
+<div class="line"><span class="lineno"> 2147</span>    <span class="keywordflow">throw</span> <a class="code hl_function" href="classseams_1_1Error.html#afa1a477ab0ed901f607dccf49b67680b">Error</a>(<a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129">SEAMS_ERR_RANGE</a>, <span class="stringliteral">&quot;boxes length is not a multiple of 9&quot;</span>);</div>
+<div class="line"><span class="lineno"> 2148</span>  }</div>
+<div class="line"><span class="lineno"> 2149</span>  std::vector&lt;double&gt; out(total);</div>
+<div class="line"><span class="lineno"> 2150</span>  <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#gaec29816a91313bf4d062f44851de985f">seams_traj_unwrap_positions</a>(xyz.data(), <a class="code hl_function" href="#ga1268a47da79bea721d79f97d07c2107f">nframes</a>, natoms, boxes.data(),</div>
+<div class="line"><span class="lineno"> 2151</span>                                            boxes.size() / 9, out.data(), out.size()),</div>
+<div class="line"><span class="lineno"> 2152</span>                <span class="keyword">nullptr</span>);</div>
+<div class="line"><span class="lineno"> 2153</span>  <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno"> 2154</span>}</div>
+<div class="ttc" id="agroup__capi__traj_html_gaec29816a91313bf4d062f44851de985f"><div class="ttname"><a href="group__capi__traj.html#gaec29816a91313bf4d062f44851de985f">seams_traj_unwrap_positions</a></div><div class="ttdeci">SEAMS_API seams_status seams_traj_unwrap_positions(const double *xyz, size_t nframes, size_t natoms, const double *boxes, size_t nboxes, double *unwrapped, size_t unwrapped_len)</div><div class="ttdoc">Unwrap periodic coordinates across consecutive frames.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga7bb2300e5f3cc519b8e9663109654212" name="ga7bb2300e5f3cc519b8e9663109654212"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7bb2300e5f3cc519b8e9663109654212">&#9670;&#160;</a></span>version()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string seams::version </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Library version text of the built library. </p>
+<dl class="section return"><dt>Returns</dt><dd>A copy of the static version string. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l02075">2075</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2075</span>                                         {</div>
+<div class="line"><span class="lineno"> 2076</span>  <span class="keyword">const</span> <span class="keywordtype">char</span> *text = <a class="code hl_function" href="group__capi__meta.html#gab79b277f6399c4ffca46cd893f2b61e6">seams_version_string</a>();</div>
+<div class="line"><span class="lineno"> 2077</span>  <span class="keywordflow">return</span> text == <span class="keyword">nullptr</span> ? std::string() : std::string(text);</div>
+<div class="line"><span class="lineno"> 2078</span>}</div>
+<div class="ttc" id="agroup__capi__meta_html_gab79b277f6399c4ffca46cd893f2b61e6"><div class="ttname"><a href="group__capi__meta.html#gab79b277f6399c4ffca46cd893f2b61e6">seams_version_string</a></div><div class="ttdeci">SEAMS_API const char * seams_version_string(void)</div><div class="ttdoc">Version text of the built library.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

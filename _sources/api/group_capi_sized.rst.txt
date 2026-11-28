@@ -1,0 +1,23 @@
+.. index:: pair: group; Status-returning and length-checked entry points
+.. _doxid-group__capi__sized:
+
+Status-returning and length-checked entry points
+================================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Preferred spellings for new callers. :ref:`More...<details-group__capi__sized>`
+
+.. _details-group__capi__sized:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Preferred spellings for new callers.
+
+Each one reports errors through :ref:`seams_status <doxid-group__capi__types_1gac77ff4b4eced39c40520bb71495b0b0d>` and takes a size_t length for every caller buffer.
+

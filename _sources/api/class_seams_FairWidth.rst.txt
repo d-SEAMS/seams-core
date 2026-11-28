@@ -1,0 +1,29 @@
+.. index:: pair: class; seams::FairWidth
+.. _doxid-classseams_1_1_fair_width:
+
+class seams::FairWidth
+======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/thread_team.hpp>
+	
+	class FairWidth {
+	public:
+		// construction
+	
+		:target:`FairWidth<doxid-classseams_1_1_fair_width_1a6d084b717363884af15517d3da80ac00>`(bool adopt = false);
+		:target:`FairWidth<doxid-classseams_1_1_fair_width_1a2802d260e5696bfaea5e2b73e1203197>`(const FairWidth&);
+		:target:`~FairWidth<doxid-classseams_1_1_fair_width_1a7b71be0388e179106614108c1a50a666>`();
+
+		// methods
+	
+		:ref:`FairWidth<doxid-classseams_1_1_fair_width_1a6d084b717363884af15517d3da80ac00>`& :target:`operator=<doxid-classseams_1_1_fair_width_1ac42c23aabf7ba217801429ec80b1b0d6>`(const :ref:`FairWidth<doxid-classseams_1_1_fair_width_1a6d084b717363884af15517d3da80ac00>`&);
+	};

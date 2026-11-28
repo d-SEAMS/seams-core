@@ -1,0 +1,23 @@
+.. index:: pair: group; Frame reload and read-back
+.. _doxid-group__capi__frame__io:
+
+Frame reload and read-back
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Overwrite coordinates in place and copy the stored frame out. :ref:`More...<details-group__capi__frame__io>`
+
+.. _details-group__capi__frame__io:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Overwrite coordinates in place and copy the stored frame out.
+
+There is no borrowed-pointer load. Every analysis reads the library's per-atom records, so a view onto caller memory would be copied on each analysis call instead of once per frame. A trajectory loop calls :ref:`seams_system_set_atoms() <doxid-group__capi__frame_1ga483ad3783a7f233611be4b7d367a750f>` once and :ref:`seams_system_set_positions() <doxid-group__capi__frame__io_1ga6d1b3f2819220c5e4081789d7612b572>` for each later frame, which writes only the coordinates.
+

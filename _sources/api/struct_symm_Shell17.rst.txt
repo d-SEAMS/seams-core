@@ -1,0 +1,22 @@
+.. index:: pair: struct; symm::Shell17
+.. _doxid-structsymm_1_1_shell17:
+
+struct symm::Shell17
+====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/shell_hot.hpp>
+	
+	struct Shell17 {
+		// fields
+	
+		double :target:`p<doxid-structsymm_1_1_shell17_1aa910190d1d52667cd8e096dc7e48981d>`[17][3];
+	};

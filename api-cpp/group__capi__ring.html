@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: Rings</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/group__capi__ring.html">
+<meta property="og:title" content="seams-core: Rings">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/group__capi__ring.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: Rings">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__capi__ring.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Rings </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Primitive rings (Franzblau) and their labels.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:gaafe8218c78687207df6f4b895233c4d2" id="r_gaafe8218c78687207df6f4b895233c4d2"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaafe8218c78687207df6f4b895233c4d2">seams_rings_find</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, int graph, int max_depth, <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> **out)</td></tr>
+<tr class="memdesc:gaafe8218c78687207df6f4b895233c4d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Primitive rings (Franzblau) up to a maximum size.  <br /></td></tr>
+<tr class="memitem:ga6cd1cdeebf679b6908e24ac868eb3e7b" id="r_ga6cd1cdeebf679b6908e24ac868eb3e7b"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga6cd1cdeebf679b6908e24ac868eb3e7b">seams_rings_from_csr</a> (const int *offsets, size_t offsets_len, const int *columns, size_t columns_len, int max_depth, const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *geometry, <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> **out)</td></tr>
+<tr class="memdesc:ga6cd1cdeebf679b6908e24ac868eb3e7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Primitive rings from an explicit caller-supplied CSR graph.  <br /></td></tr>
+<tr class="memitem:ga4132eff1399e519fbc0ada2925512082" id="r_ga4132eff1399e519fbc0ada2925512082"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void&#160;</td><td class="memItemRight"><a class="el" href="#ga4132eff1399e519fbc0ada2925512082">seams_rings_destroy</a> (<a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *rings)</td></tr>
+<tr class="memdesc:ga4132eff1399e519fbc0ada2925512082"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a ring set.  <br /></td></tr>
+<tr class="memitem:ga5c8ce5e328d95864dbed541b5a99ed28" id="r_ga5c8ce5e328d95864dbed541b5a99ed28"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> int&#160;</td><td class="memItemRight"><a class="el" href="#ga5c8ce5e328d95864dbed541b5a99ed28">seams_rings_count</a> (const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *rings)</td></tr>
+<tr class="memdesc:ga5c8ce5e328d95864dbed541b5a99ed28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of primitive rings, as an int.  <br /></td></tr>
+<tr class="memitem:gab6fc83164a185ef7f86ff38cb756511e" id="r_gab6fc83164a185ef7f86ff38cb756511e"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gab6fc83164a185ef7f86ff38cb756511e">seams_rings_histogram</a> (const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *rings, int *counts, int counts_len)</td></tr>
+<tr class="memdesc:gab6fc83164a185ef7f86ff38cb756511e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count primitive rings by size, with an int length.  <br /></td></tr>
+<tr class="memitem:ga6e916434663fe2a6a5541353ed504284" id="r_ga6e916434663fe2a6a5541353ed504284"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga6e916434663fe2a6a5541353ed504284">seams_rings_labels</a> (const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *rings, int *sizes, int *symmetry)</td></tr>
+<tr class="memdesc:ga6e916434663fe2a6a5541353ed504284"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size and symmetry of each ring, without buffer lengths.  <br /></td></tr>
+<tr class="memitem:gad3b5a355f504d710b46f2c799260a32e" id="r_gad3b5a355f504d710b46f2c799260a32e"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gad3b5a355f504d710b46f2c799260a32e">seams_rings_vertices</a> (const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *rings, int index, int *atoms, size_t cap, size_t *n_out)</td></tr>
+<tr class="memdesc:gad3b5a355f504d710b46f2c799260a32e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Atom indices of one ring.  <br /></td></tr>
+<tr class="memitem:ga93d177003322424296c69bd0781965cd" id="r_ga93d177003322424296c69bd0781965cd"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga93d177003322424296c69bd0781965cd">seams_rings_winding</a> (const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *rings, int axis, int *axis_winding, size_t axis_winding_len, int *contractible, size_t contractible_len)</td></tr>
+<tr class="memdesc:ga93d177003322424296c69bd0781965cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Periodic-axis winding and contractibility of every ring.  <br /></td></tr>
+<tr class="memitem:ga00b6878dc305e1c97220cb31c5503c92" id="r_ga00b6878dc305e1c97220cb31c5503c92"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga00b6878dc305e1c97220cb31c5503c92">seams_rings_chordless</a> (const <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *nb, int size, int *rings, size_t rings_len, size_t *n_rings, int *per_atom, size_t per_atom_len)</td></tr>
+<tr class="memdesc:ga00b6878dc305e1c97220cb31c5503c92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chordless cycles of one size.  <br /></td></tr>
+<tr class="memitem:gad420e7f240b6080f09b7856da904b55f" id="r_gad420e7f240b6080f09b7856da904b55f"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gad420e7f240b6080f09b7856da904b55f">seams_rings_fraction</a> (const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *rings, int size, double *fraction)</td></tr>
+<tr class="memdesc:gad420e7f240b6080f09b7856da904b55f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fraction of atoms that sit on a ring.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Primitive rings (Franzblau) and their labels. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ga00b6878dc305e1c97220cb31c5503c92" name="ga00b6878dc305e1c97220cb31c5503c92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga00b6878dc305e1c97220cb31c5503c92">&#9670;&#160;</a></span>seams_rings_chordless()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_rings_chordless </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *</td>          <td class="paramname"><span class="paramname"><em>nb</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>rings_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>per_atom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>per_atom_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Chordless cycles of one size. </p>
+<p>A cycle is chordless when no edge of the graph joins two of its vertices that are not next to each other on the cycle. Every primitive ring is chordless; a chordless cycle need not be primitive. Each cycle is written once as size atom indices: it starts at its lowest index and runs towards the smaller of that atom's two cycle neighbours. Cycles are sorted lexicographically, so the list does not depend on the thread count. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nb</td><td>Graph from <a class="el" href="group__capi__neigh.html#gae6e9f1e27aca24acb551b2847db23489" title="Build a cutoff or mutual neighbour list.">seams_neighbours_build()</a>. </td></tr>
+    <tr><td class="paramname">size</td><td>Cycle length, from 3 through 12. </td></tr>
+    <tr><td class="paramname">rings</td><td>Caller buffer of size times the cycle count ints, or NULL to skip the list. </td></tr>
+    <tr><td class="paramname">rings_len</td><td>Length of rings in ints. Ignored when rings is NULL. </td></tr>
+    <tr><td class="paramname">n_rings</td><td>Receives the cycle count. Required when rings is not NULL. </td></tr>
+    <tr><td class="paramname">per_atom</td><td>Caller buffer of one int per atom, or NULL. Receives the number of cycles through each atom. </td></tr>
+    <tr><td class="paramname">per_atom_len</td><td>Length of per_atom. Ignored when per_atom is NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. rings, n_rings and per_atom may not all be NULL. A short rings buffer returns <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a> after n_rings and per_atom are written. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns rings and per_atom. Indices are positions in the frame. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of nb. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> n_six = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga00b6878dc305e1c97220cb31c5503c92">seams_rings_chordless</a>(nb, 6, NULL, 0, &amp;n_six, NULL, 0);</div>
+<div class="ttc" id="agroup__capi__ring_html_ga00b6878dc305e1c97220cb31c5503c92"><div class="ttname"><a href="#ga00b6878dc305e1c97220cb31c5503c92">seams_rings_chordless</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings, size_t rings_len, size_t *n_rings, int *per_atom, size_t per_atom_len)</div><div class="ttdoc">Chordless cycles of one size.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga5c8ce5e328d95864dbed541b5a99ed28" name="ga5c8ce5e328d95864dbed541b5a99ed28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5c8ce5e328d95864dbed541b5a99ed28">&#9670;&#160;</a></span>seams_rings_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> int seams_rings_count </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *</td>          <td class="paramname"><span class="paramname"><em>rings</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Number of primitive rings, as an int. </p>
+<p>ABI 1 query. <a class="el" href="group__capi__sized.html#gaf7674bc96660eefaa4a63fa68da8162d" title="Number of primitive rings.">seams_rings_nrings()</a> reports errors.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rings</td><td>Ring handle, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The ring count, or 0 when rings is NULL. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns rings; the call borrows it. The library keeps no pointer to any argument. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">int</span> nr = <a class="code hl_function" href="#ga5c8ce5e328d95864dbed541b5a99ed28">seams_rings_count</a>(rings);</div>
+<div class="ttc" id="agroup__capi__ring_html_ga5c8ce5e328d95864dbed541b5a99ed28"><div class="ttname"><a href="#ga5c8ce5e328d95864dbed541b5a99ed28">seams_rings_count</a></div><div class="ttdeci">SEAMS_API int seams_rings_count(const seams_rings *rings)</div><div class="ttdoc">Number of primitive rings, as an int.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga4132eff1399e519fbc0ada2925512082" name="ga4132eff1399e519fbc0ada2925512082"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4132eff1399e519fbc0ada2925512082">&#9670;&#160;</a></span>seams_rings_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void seams_rings_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *</td>          <td class="paramname"><span class="paramname"><em>rings</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free a ring set. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rings</td><td>Handle from <a class="el" href="#gaafe8218c78687207df6f4b895233c4d2" title="Primitive rings (Franzblau) up to a maximum size.">seams_rings_find()</a>, or NULL. NULL is ignored. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Ownership</dt><dd>Releases the handle and every ring it holds. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>The caller must not use rings after this returns. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#ga4132eff1399e519fbc0ada2925512082">seams_rings_destroy</a>(rings);</div>
+<div class="ttc" id="agroup__capi__ring_html_ga4132eff1399e519fbc0ada2925512082"><div class="ttname"><a href="#ga4132eff1399e519fbc0ada2925512082">seams_rings_destroy</a></div><div class="ttdeci">SEAMS_API void seams_rings_destroy(seams_rings *rings)</div><div class="ttdoc">Free a ring set.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaafe8218c78687207df6f4b895233c4d2" name="gaafe8218c78687207df6f4b895233c4d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaafe8218c78687207df6f4b895233c4d2">&#9670;&#160;</a></span>seams_rings_find()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_rings_find </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>max_depth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> **</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Primitive rings (Franzblau) up to a maximum size. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. </td></tr>
+    <tr><td class="paramname">graph</td><td><a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d" title="Every neighbour inside the cutoff.">SEAMS_GRAPH_CUTOFF</a> or <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99" title="Mutual four nearest inside cutoff + 1.5.">SEAMS_GRAPH_MUTUAL</a>. </td></tr>
+    <tr><td class="paramname">max_depth</td><td>Largest ring size, from 3 through 12. </td></tr>
+    <tr><td class="paramname">out</td><td>Receives a new handle. On failure *out is NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller frees *out with <a class="el" href="#ga4132eff1399e519fbc0ada2925512082" title="Free a ring set.">seams_rings_destroy()</a>. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *rings = NULL;</div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="#gaafe8218c78687207df6f4b895233c4d2">seams_rings_find</a>(sys, 3.5, 0, <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, 6, &amp;rings) == <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a>) {</div>
+<div class="line">  <a class="code hl_function" href="#ga4132eff1399e519fbc0ada2925512082">seams_rings_destroy</a>(rings);</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__capi__ring_html_gaafe8218c78687207df6f4b895233c4d2"><div class="ttname"><a href="#gaafe8218c78687207df6f4b895233c4d2">seams_rings_find</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int graph, int max_depth, seams_rings **out)</div><div class="ttdoc">Primitive rings (Franzblau) up to a maximum size.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ga760947973b61de0c66f59d12c6f7427e"><div class="ttname"><a href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a></div><div class="ttdeci">struct seams_rings seams_rings</div><div class="ttdoc">One primitive-ring set.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00252">seams.h:252</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a></div><div class="ttdeci">@ SEAMS_OK</div><div class="ttdoc">The call succeeded.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00155">seams.h:155</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d"><div class="ttname"><a href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a></div><div class="ttdeci">@ SEAMS_GRAPH_CUTOFF</div><div class="ttdoc">Every neighbour inside the cutoff.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00209">seams.h:209</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gad420e7f240b6080f09b7856da904b55f" name="gad420e7f240b6080f09b7856da904b55f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad420e7f240b6080f09b7856da904b55f">&#9670;&#160;</a></span>seams_rings_fraction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_rings_fraction </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>fraction</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fraction of atoms that sit on a ring. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rings</td><td>Ring handle. </td></tr>
+    <tr><td class="paramname">size</td><td>Ring size to count. Zero counts atoms that sit on any ring. </td></tr>
+    <tr><td class="paramname">fraction</td><td>Receives a value in [0, 1]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns rings; the call borrows it. fraction is caller storage that the call fills. The library keeps no pointer to any argument. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">double</span> f6 = 0;</div>
+<div class="line"><a class="code hl_function" href="#gad420e7f240b6080f09b7856da904b55f">seams_rings_fraction</a>(rings, 6, &amp;f6);</div>
+<div class="ttc" id="agroup__capi__ring_html_gad420e7f240b6080f09b7856da904b55f"><div class="ttname"><a href="#gad420e7f240b6080f09b7856da904b55f">seams_rings_fraction</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fraction)</div><div class="ttdoc">Fraction of atoms that sit on a ring.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga6cd1cdeebf679b6908e24ac868eb3e7b" name="ga6cd1cdeebf679b6908e24ac868eb3e7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6cd1cdeebf679b6908e24ac868eb3e7b">&#9670;&#160;</a></span>seams_rings_from_csr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_rings_from_csr </td>
+          <td>(</td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>offsets_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>columns</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>columns_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>max_depth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>geometry</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> **</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Primitive rings from an explicit caller-supplied CSR graph. </p>
+<p>offsets has n_vertices + 1 entries and starts at zero. columns contains zero-based vertex indices. Directed input is symmetrized by edge union; self edges and duplicates are ignored. The Franzblau search is the same implementation used by <a class="el" href="#gaafe8218c78687207df6f4b895233c4d2" title="Primitive rings (Franzblau) up to a maximum size.">seams_rings_find()</a>. geometry may be NULL. When supplied, its atom count must equal n_vertices and winding queries are enabled.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">offsets</td><td>CSR offsets. </td></tr>
+    <tr><td class="paramname">offsets_len</td><td>Number of offsets; at least one. </td></tr>
+    <tr><td class="paramname">columns</td><td>CSR columns, or NULL when columns_len is zero. </td></tr>
+    <tr><td class="paramname">columns_len</td><td>Number of columns. </td></tr>
+    <tr><td class="paramname">max_depth</td><td>Largest ring size, from 3 through 12. </td></tr>
+    <tr><td class="paramname">geometry</td><td>Optional frame supplying coordinates and periodic cell. </td></tr>
+    <tr><td class="paramname">out</td><td>Receives a new ring handle. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Read-only access to geometry. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all arrays and frees *out with <a class="el" href="#ga4132eff1399e519fbc0ada2925512082" title="Free a ring set.">seams_rings_destroy()</a>. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only calls may share geometry. The returned handle is independent. </dd></dl>
+
+</div>
+</div>
+<a id="gab6fc83164a185ef7f86ff38cb756511e" name="gab6fc83164a185ef7f86ff38cb756511e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab6fc83164a185ef7f86ff38cb756511e">&#9670;&#160;</a></span>seams_rings_histogram()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_rings_histogram </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>counts</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>counts_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Count primitive rings by size, with an int length. </p>
+<p>ABI 1 entry. New callers use <a class="el" href="group__capi__sized.html#gac2109f318446e21ac9f64078f62c1d9f" title="Count primitive rings by size into a buffer of known length.">seams_rings_histogram_n()</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rings</td><td>Ring handle. </td></tr>
+    <tr><td class="paramname">counts</td><td>Caller buffer. counts[k] receives the number of rings of size k. Sizes outside the buffer are ignored. </td></tr>
+    <tr><td class="paramname">counts_len</td><td>Length of counts. Must be positive. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns counts. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">int</span> hist[13];</div>
+<div class="line"><a class="code hl_function" href="#gab6fc83164a185ef7f86ff38cb756511e">seams_rings_histogram</a>(rings, hist, 13);</div>
+<div class="ttc" id="agroup__capi__ring_html_gab6fc83164a185ef7f86ff38cb756511e"><div class="ttname"><a href="#gab6fc83164a185ef7f86ff38cb756511e">seams_rings_histogram</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_histogram(const seams_rings *rings, int *counts, int counts_len)</div><div class="ttdoc">Count primitive rings by size, with an int length.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga6e916434663fe2a6a5541353ed504284" name="ga6e916434663fe2a6a5541353ed504284"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6e916434663fe2a6a5541353ed504284">&#9670;&#160;</a></span>seams_rings_labels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_rings_labels </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>sizes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>symmetry</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Size and symmetry of each ring, without buffer lengths. </p>
+<p>ABI 1 entry. Each non-NULL buffer has length seams_rings_count(rings). New callers use <a class="el" href="group__capi__sized.html#gaaddd89ed55ef0d9a75721964426a2f6c" title="Size and symmetry of each ring into buffers of known length.">seams_rings_labels_n()</a>, which checks the lengths.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rings</td><td>Ring handle. </td></tr>
+    <tr><td class="paramname">sizes</td><td>One int per ring, or NULL. </td></tr>
+    <tr><td class="paramname">symmetry</td><td>One <a class="el" href="group__capi__types.html#gaa24f1b5dcb893adf866a871184d983ba" title="Ring topology.">seams_ring_symmetry</a> code per ring, or NULL. The two pointers may not both be NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns both arrays. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. The first symmetry request fills a cache on the handle under a lock; later requests only read it. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#ga6e916434663fe2a6a5541353ed504284">seams_rings_labels</a>(rings, sizes, symmetry);</div>
+<div class="ttc" id="agroup__capi__ring_html_ga6e916434663fe2a6a5541353ed504284"><div class="ttname"><a href="#ga6e916434663fe2a6a5541353ed504284">seams_rings_labels</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symmetry)</div><div class="ttdoc">Size and symmetry of each ring, without buffer lengths.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gad3b5a355f504d710b46f2c799260a32e" name="gad3b5a355f504d710b46f2c799260a32e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad3b5a355f504d710b46f2c799260a32e">&#9670;&#160;</a></span>seams_rings_vertices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_rings_vertices </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>atoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Atom indices of one ring. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rings</td><td>Ring handle. </td></tr>
+    <tr><td class="paramname">index</td><td>Ring index, from 0 to seams_rings_count(rings) - 1. </td></tr>
+    <tr><td class="paramname">atoms</td><td>Caller buffer, or NULL to query. </td></tr>
+    <tr><td class="paramname">cap</td><td>Capacity of atoms. Ignored when atoms is NULL. </td></tr>
+    <tr><td class="paramname">n_out</td><td>Receives the vertex count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns atoms. Indices are positions in the frame. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">int</span> atoms[12];</div>
+<div class="line"><span class="keywordtype">size_t</span> len = 0;</div>
+<div class="line"><a class="code hl_function" href="#gad3b5a355f504d710b46f2c799260a32e">seams_rings_vertices</a>(rings, 0, atoms, 12, &amp;len);</div>
+<div class="ttc" id="agroup__capi__ring_html_gad3b5a355f504d710b46f2c799260a32e"><div class="ttname"><a href="#gad3b5a355f504d710b46f2c799260a32e">seams_rings_vertices</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_vertices(const seams_rings *rings, int index, int *atoms, size_t cap, size_t *n_out)</div><div class="ttdoc">Atom indices of one ring.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga93d177003322424296c69bd0781965cd" name="ga93d177003322424296c69bd0781965cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga93d177003322424296c69bd0781965cd">&#9670;&#160;</a></span>seams_rings_winding()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_rings_winding </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>axis_winding</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>axis_winding_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>contractible</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>contractible_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Periodic-axis winding and contractibility of every ring. </p>
+<p>axis_winding receives the oriented integer winding along axis (0, 1, or 2): the minimum-image bond steps summed in the order <a class="el" href="#gad3b5a355f504d710b46f2c799260a32e" title="Atom indices of one ring.">seams_rings_vertices()</a> lists the ring, in units of that cell vector. A ring that crosses the cell once along +x is +1 on axis 0; the reverse traversal is -1. contractible receives 1 exactly when all three winding components are zero. Either output may be NULL, but not both. Geometry must have been supplied to <a class="el" href="#ga6cd1cdeebf679b6908e24ac868eb3e7b" title="Primitive rings from an explicit caller-supplied CSR graph.">seams_rings_from_csr()</a>, or carried by <a class="el" href="#gaafe8218c78687207df6f4b895233c4d2" title="Primitive rings (Franzblau) up to a maximum size.">seams_rings_find()</a>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rings</td><td>Ring handle. </td></tr>
+    <tr><td class="paramname">axis</td><td>Periodic cell axis, 0, 1, or 2. </td></tr>
+    <tr><td class="paramname">axis_winding</td><td>Signed winding output, or NULL. </td></tr>
+    <tr><td class="paramname">axis_winding_len</td><td>Length of axis_winding. </td></tr>
+    <tr><td class="paramname">contractible</td><td>One for a zero three-component winding, or NULL. </td></tr>
+    <tr><td class="paramname">contractible_len</td><td>Length of contractible. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns both output buffers. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on rings. </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

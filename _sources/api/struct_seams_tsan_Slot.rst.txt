@@ -1,0 +1,23 @@
+.. index:: pair: struct; seams::tsan::Slot
+.. _doxid-structseams_1_1tsan_1_1_slot:
+
+struct seams::tsan::Slot
+========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/omp_tsan.hpp>
+	
+	struct Slot {
+		// fields
+	
+		std::atomic<int> :target:`arrived<doxid-structseams_1_1tsan_1_1_slot_1aa3557f46bd7db33fd22604d9357db816>` {0};
+		std::atomic<int> :target:`epoch<doxid-structseams_1_1tsan_1_1_slot_1af947c31e9b5289a692eaf7385ac0bd56>` {0};
+	};

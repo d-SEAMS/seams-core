@@ -1,0 +1,25 @@
+.. index:: pair: struct; pore::Profile
+.. _doxid-structpore_1_1_profile:
+
+struct pore::Profile
+====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/pore.hpp>
+	
+	struct Profile {
+		// fields
+	
+		std::vector<double> :target:`coordinate<doxid-structpore_1_1_profile_1acc230a47a58e39085ca69b80288c5ac9>`;
+		std::vector<double> :target:`number_density<doxid-structpore_1_1_profile_1af950e0dd7e5ac092109bc3a274cf5c54>`;
+		std::vector<double> :target:`mass_density<doxid-structpore_1_1_profile_1ac06a7afcc34c1f4a892af5330243b1ee>`;
+		std::vector<double> :target:`volume<doxid-structpore_1_1_profile_1a7adac73097eee7ee368ee7359f2fbd4f>`;
+	};

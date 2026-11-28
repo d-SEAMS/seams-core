@@ -1,0 +1,113 @@
+.. index:: pair: struct; seams_directed_hbond
+.. _doxid-structseams__directed__hbond:
+
+struct seams_directed_hbond
+===========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+One directed hydrogen bond: donor, hydrogen, acceptor. :ref:`More...<details-structseams__directed__hbond>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.h>
+	
+	struct seams_directed_hbond {
+		// fields
+	
+		uint32_t :ref:`size<doxid-structseams__directed__hbond_1a89e19fdce1b274207abf5c3d72f1ac43>`;
+		uint32_t :ref:`donor<doxid-structseams__directed__hbond_1ac6ff3b152eb84ba7512de408b861186c>`;
+		uint32_t :ref:`hydrogen<doxid-structseams__directed__hbond_1a3dc843da3337b075d203941b63517633>`;
+		uint32_t :ref:`acceptor<doxid-structseams__directed__hbond_1ab5d845d4deba85ed5ef9d814976866c4>`;
+		double :ref:`d_AH<doxid-structseams__directed__hbond_1afecd66f43890c87f163f2e0cc767a7b8>`;
+		double :ref:`d_DA<doxid-structseams__directed__hbond_1a25e3a180a9474de539dd1f6f320c285f>`;
+		double :ref:`angle<doxid-structseams__directed__hbond_1a697ffae2137b9ca7433a0114d094698f>`;
+	};
+.. _details-structseams__directed__hbond:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+One directed hydrogen bond: donor, hydrogen, acceptor.
+
+Fields
+------
+
+.. index:: pair: variable; size
+.. _doxid-structseams__directed__hbond_1a89e19fdce1b274207abf5c3d72f1ac43:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	uint32_t size
+
+Caller-set sizeof(seams_directed_hbond) on every element.
+
+.. index:: pair: variable; donor
+.. _doxid-structseams__directed__hbond_1ac6ff3b152eb84ba7512de408b861186c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	uint32_t donor
+
+Donor heavy-atom index in the frame.
+
+.. index:: pair: variable; hydrogen
+.. _doxid-structseams__directed__hbond_1a3dc843da3337b075d203941b63517633:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	uint32_t hydrogen
+
+Hydrogen index in the frame.
+
+.. index:: pair: variable; acceptor
+.. _doxid-structseams__directed__hbond_1ab5d845d4deba85ed5ef9d814976866c4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	uint32_t acceptor
+
+Acceptor heavy-atom index in the frame.
+
+.. index:: pair: variable; d_AH
+.. _doxid-structseams__directed__hbond_1afecd66f43890c87f163f2e0cc767a7b8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double d_AH
+
+Acceptor-hydrogen minimum-image distance, Angstrom.
+
+.. index:: pair: variable; d_DA
+.. _doxid-structseams__directed__hbond_1a25e3a180a9474de539dd1f6f320c285f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double d_DA
+
+Donor-acceptor minimum-image distance, Angstrom.
+
+.. index:: pair: variable; angle
+.. _doxid-structseams__directed__hbond_1a697ffae2137b9ca7433a0114d094698f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double angle
+
+Acceptor-first angle, degrees.
+
+Linear is 0.
+

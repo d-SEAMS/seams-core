@@ -1,0 +1,22 @@
+.. index:: pair: group; Bulk prisms
+.. _doxid-group__prism3:
+
+Bulk prisms
+===========
+
+.. toctree::
+	:hidden:
+
+	namespace_prism3.rst
+
+Candidate basal rings and prism blocks in bulk ice.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`prism3<doxid-namespaceprism3>`;
+

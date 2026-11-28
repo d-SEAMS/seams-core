@@ -1,0 +1,24 @@
+.. index:: pair: group; Ring
+.. _doxid-group__ring:
+
+Ring
+====
+
+.. toctree::
+	:hidden:
+
+	namespace_ring.rst
+	namespace_tum3.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`ring<doxid-namespacering>`;
+	namespace :ref:`tum3<doxid-namespacetum3>`;
+

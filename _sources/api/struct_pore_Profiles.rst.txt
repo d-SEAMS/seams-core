@@ -1,0 +1,24 @@
+.. index:: pair: struct; pore::Profiles
+.. _doxid-structpore_1_1_profiles:
+
+struct pore::Profiles
+=====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/pore.hpp>
+	
+	struct Profiles {
+		// fields
+	
+		:ref:`Profile<doxid-structpore_1_1_profile>` :target:`radial<doxid-structpore_1_1_profiles_1ac21a56f307d600bf005a80d71c7b2fb3>`;
+		:ref:`Profile<doxid-structpore_1_1_profile>` :target:`azimuthal<doxid-structpore_1_1_profiles_1aae32b51300d48491456a07ea7e6bef66>`;
+		:ref:`Profile<doxid-structpore_1_1_profile>` :target:`axial<doxid-structpore_1_1_profiles_1a1c03475257f05a276682d282115d9492>`;
+	};

@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::HbondLifetimeFit
+.. _doxid-structseams_1_1_hbond_lifetime_fit:
+
+struct seams::HbondLifetimeFit
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Integrated and single-exponential H-bond lifetimes. :ref:`More...<details-structseams_1_1_hbond_lifetime_fit>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct HbondLifetimeFit {
+		// fields
+	
+		double :ref:`tau_c_int<doxid-structseams_1_1_hbond_lifetime_fit_1a10c901a021d76ab2e81eb317f8457952>` = 0;
+		double :ref:`tau_c_exp<doxid-structseams_1_1_hbond_lifetime_fit_1a31a9fe94301b92200af4d4cc26578813>` = 0;
+		double :ref:`tau_s_int<doxid-structseams_1_1_hbond_lifetime_fit_1add7b9a17ec6e0183c86c129b2632ef2e>` = 0;
+		double :ref:`tau_s_exp<doxid-structseams_1_1_hbond_lifetime_fit_1a65ff57383424cb7def967bd133911964>` = 0;
+	};
+.. _details-structseams_1_1_hbond_lifetime_fit:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Integrated and single-exponential H-bond lifetimes.
+
+Fields
+------
+
+.. index:: pair: variable; tau_c_int
+.. _doxid-structseams_1_1_hbond_lifetime_fit_1a10c901a021d76ab2e81eb317f8457952:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double tau_c_int = 0
+
+Trapezoidal integral of C_HB.
+
+.. index:: pair: variable; tau_c_exp
+.. _doxid-structseams_1_1_hbond_lifetime_fit_1a31a9fe94301b92200af4d4cc26578813:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double tau_c_exp = 0
+
+Exponential decay time of C_HB.
+
+.. index:: pair: variable; tau_s_int
+.. _doxid-structseams_1_1_hbond_lifetime_fit_1add7b9a17ec6e0183c86c129b2632ef2e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double tau_s_int = 0
+
+Trapezoidal integral of S_HB.
+
+.. index:: pair: variable; tau_s_exp
+.. _doxid-structseams_1_1_hbond_lifetime_fit_1a65ff57383424cb7def967bd133911964:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double tau_s_exp = 0
+
+Exponential decay time of S_HB.
+

@@ -1,0 +1,89 @@
+.. index:: pair: struct; seams::MsdCurve
+.. _doxid-structseams_1_1_msd_curve:
+
+struct seams::MsdCurve
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Accumulated multi-origin MSD curves. :ref:`More...<details-structseams_1_1_msd_curve>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct MsdCurve {
+		// fields
+	
+		std::vector<double> :ref:`lag_time<doxid-structseams_1_1_msd_curve_1aa63fa999bb63f9c5e0c2055e189d29c9>`;
+		std::vector<double> :ref:`total<doxid-structseams_1_1_msd_curve_1a11201c11ede1d479a9e3db90e98aebd1>`;
+		std::vector<double> :ref:`axial<doxid-structseams_1_1_msd_curve_1a3e76d3f1bff8ae0e479fe7811903be68>`;
+		std::vector<double> :ref:`lateral<doxid-structseams_1_1_msd_curve_1a3fb747775405a2be779fa4fc5278989a>`;
+		std::vector<std::size_t> :ref:`n_origins<doxid-structseams_1_1_msd_curve_1ac5a0ffb50c35ceba7b2dec7023a1348f>`;
+	};
+.. _details-structseams_1_1_msd_curve:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Accumulated multi-origin MSD curves.
+
+Fields
+------
+
+.. index:: pair: variable; lag_time
+.. _doxid-structseams_1_1_msd_curve_1aa63fa999bb63f9c5e0c2055e189d29c9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> lag_time
+
+Lag times k \* dt.
+
+.. index:: pair: variable; total
+.. _doxid-structseams_1_1_msd_curve_1a11201c11ede1d479a9e3db90e98aebd1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> total
+
+3D total MSD.
+
+.. index:: pair: variable; axial
+.. _doxid-structseams_1_1_msd_curve_1a3e76d3f1bff8ae0e479fe7811903be68:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> axial
+
+1D axial MSD.
+
+.. index:: pair: variable; lateral
+.. _doxid-structseams_1_1_msd_curve_1a3fb747775405a2be779fa4fc5278989a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> lateral
+
+2D lateral MSD.
+
+.. index:: pair: variable; n_origins
+.. _doxid-structseams_1_1_msd_curve_1ac5a0ffb50c35ceba7b2dec7023a1348f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::size_t> n_origins
+
+Time-origin count at each lag.
+

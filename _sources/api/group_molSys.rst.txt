@@ -1,0 +1,22 @@
+.. index:: pair: group; MolSys
+.. _doxid-group__mol_sys:
+
+MolSys
+======
+
+.. toctree::
+	:hidden:
+
+	namespace_molSys.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`molSys<doxid-namespacemol_sys>`;
+

@@ -1,0 +1,25 @@
+.. index:: pair: struct; science::SlopeInterval
+.. _doxid-structscience_1_1_slope_interval:
+
+struct science::SlopeInterval
+=============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/science_front.hpp>
+	
+	struct SlopeInterval {
+		// fields
+	
+		double :target:`slope<doxid-structscience_1_1_slope_interval_1a97ae20b0d34cc3e759b5e58702e7771f>` = 0;
+		double :target:`lo<doxid-structscience_1_1_slope_interval_1aa23f79d00a31c5b8fbdbf8977dff20d6>` = 0;
+		double :target:`hi<doxid-structscience_1_1_slope_interval_1a97e1b9527d5dcef0a3b623f0489bc348>` = 0;
+		int :target:`n<doxid-structscience_1_1_slope_interval_1a485a5e8c6ab29dace0735c8ebcc4b398>` = 0;
+	};

@@ -1,0 +1,67 @@
+.. index:: pair: struct; seams::Contacts
+.. _doxid-structseams_1_1_contacts:
+
+struct seams::Contacts
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Mutual nearest unlike contacts of a site table. :ref:`More...<details-structseams_1_1_contacts>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Contacts {
+		// fields
+	
+		std::size_t :ref:`pairs<doxid-structseams_1_1_contacts_1ab53cb02ca47b4484e43592c0ba67ce3c>` = 0;
+		int :ref:`cations<doxid-structseams_1_1_contacts_1afa641ffe26b46424a5b163af974eba32>` = 0;
+		int :ref:`anions<doxid-structseams_1_1_contacts_1acce95ee95baec5a18071c1d6ad283b8f>` = 0;
+	};
+.. _details-structseams_1_1_contacts:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Mutual nearest unlike contacts of a site table.
+
+Fields
+------
+
+.. index:: pair: variable; pairs
+.. _doxid-structseams_1_1_contacts_1ab53cb02ca47b4484e43592c0ba67ce3c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t pairs = 0
+
+Contact count.
+
+.. index:: pair: variable; cations
+.. _doxid-structseams_1_1_contacts_1afa641ffe26b46424a5b163af974eba32:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int cations = 0
+
+Cation molecules in the ion cloud.
+
+.. index:: pair: variable; anions
+.. _doxid-structseams_1_1_contacts_1acce95ee95baec5a18071c1d6ad283b8f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int anions = 0
+
+Anion molecules in the ion cloud.
+

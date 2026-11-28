@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: File Members</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/globals_func.html">
+<meta property="og:title" content="seams-core: File Members">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/globals_func.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: File Members">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('globals_func.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="contents">
+<div class="textblock">Here is a list of all functions with links to the files they belong to:</div><br/>
+<div class="qindex"><a class="qindex" href="#index_l">L</a><div class="alphasepar"></div><a class="qindex" href="#index_s">S</a></div>
+
+
+<h3 class="doxsection"><a id="index_l" name="index_l"></a>- l -</h3><ul>
+<li>lc_num_threads()&#160;:&#160;<a class="el" href="thread__team_8hpp.html#af5582f67f5a0e934909242cf69906676">thread_team.hpp</a></li>
+<li>lc_set_places()&#160;:&#160;<a class="el" href="thread__team_8hpp.html#aa29d52d05c8537df577170e3d01c5401">thread_team.hpp</a></li>
+<li>lc_set_threads()&#160;:&#160;<a class="el" href="thread__team_8hpp.html#a06195ae10c6517c497c4d0b11d8722b1">thread_team.hpp</a></li>
+<li>lc_team_run()&#160;:&#160;<a class="el" href="team__run_8hpp.html#ab970b747c4141c129fddac78412f0ff4">team_run.hpp</a></li>
+<li>libira_analmat()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a7673650bc73c2edb2ea09b7b1c78e06b">iralib_interf.h</a></li>
+<li>libira_check_collinear()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a58d36f3eac3b7eec698378079aa0263a">iralib_interf.h</a></li>
+<li>libira_compute_all()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a5606132a5ff41191976528b882874232">iralib_interf.h</a></li>
+<li>libira_construct_operation()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#ac14e07c91cb4dad5efae1163c1821ccd">iralib_interf.h</a></li>
+<li>libira_cshda()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#aa8a7fbd33077ea2bb23a69a87ec25ab2">iralib_interf.h</a></li>
+<li>libira_cshda_from_cost()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#af1f7561da936881e86c1470e65b1e920">iralib_interf.h</a></li>
+<li>libira_cshda_pbc()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a43b4ccf513280a85d6954bf58bc8bd8c">iralib_interf.h</a></li>
+<li>libira_cshda_svd()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#afbd705cc56c08cae0d6c24a149c37a4b">iralib_interf.h</a></li>
+<li>libira_ext_bfield()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#af6cda864e3b093fd509a7bb1277dd02e">iralib_interf.h</a></li>
+<li>libira_get_combos()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a5268a50f9e0be0b3904bcbfe6285cf0c">iralib_interf.h</a></li>
+<li>libira_get_err_msg()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a975f49132bdbf1e2bb44929d8454cfde">iralib_interf.h</a></li>
+<li>libira_get_perm()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a92bf190b59b87796a4e15907c7f0f450">iralib_interf.h</a></li>
+<li>libira_get_pg()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#ae8c594ce9aefc456b529fe357fd04a75">iralib_interf.h</a></li>
+<li>libira_get_symm_ops()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a62d22ffeec7542f49671abaa48efa8ff">iralib_interf.h</a></li>
+<li>libira_get_version()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a8bb56c34d1da7e9a97fda278da84246c">iralib_interf.h</a></li>
+<li>libira_mat_combos()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#afcc0b2ddfaeeda67182e8f52046316af">iralib_interf.h</a></li>
+<li>libira_match()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a8773d7c8c8c2aa1fdda7a571b18cad8a">iralib_interf.h</a></li>
+<li>libira_matrix_distance()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a22f0c3a4170961639bf5d124f003a1fc">iralib_interf.h</a></li>
+<li>libira_svdrot()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#aa4bdea026816fa57b4fbd9a26184065b">iralib_interf.h</a></li>
+<li>libira_try_mat()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a2ff0087569e7e744bd0105b29a036ed8">iralib_interf.h</a></li>
+<li>libira_unique_ax_angle()&#160;:&#160;<a class="el" href="iralib__interf_8h.html#a5eaede0f0aa62f2d04da940d97031e6e">iralib_interf.h</a></li>
+</ul>
+
+
+<h3 class="doxsection"><a id="index_s" name="index_s"></a>- s -</h3><ul>
+<li>seams_abi()&#160;:&#160;<a class="el" href="group__capi__meta.html#gab46245b885002b7838f84bd71280a40a">seams.h</a></li>
+<li>seams_brine_analyse()&#160;:&#160;<a class="el" href="group__capi__brine.html#ga5e69ad111a469c0c30dc4349e011abbe">seams.h</a></li>
+<li>seams_brine_destroy()&#160;:&#160;<a class="el" href="group__capi__brine.html#gaac3e8227807940daaaa41cf70a89d9da">seams.h</a></li>
+<li>seams_brine_fronts()&#160;:&#160;<a class="el" href="group__capi__brine.html#ga7a42922803b646fe2ca573a4dbbff17e">seams.h</a></li>
+<li>seams_brine_pockets()&#160;:&#160;<a class="el" href="group__capi__brine.html#ga4f33c50180e9ac63fa855e902ce67d1d">seams.h</a></li>
+<li>seams_brine_profile()&#160;:&#160;<a class="el" href="group__capi__brine.html#ga558d64e1215de72fc7e6bc173ad4869a">seams.h</a></li>
+<li>seams_brine_rejection()&#160;:&#160;<a class="el" href="group__capi__brine.html#gaf0763119586d4818a0d0a51d9dccb42f">seams.h</a></li>
+<li>seams_c_error()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#ae2efe84c8d250d2fce58fb7da028484d">seams_c_api.h</a></li>
+<li>seams_c_last_stages()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#adfe45483219fd9882d34d16c74fbca43">seams_c_api.h</a></li>
+<li>seams_cages()&#160;:&#160;<a class="el" href="group__capi__more.html#ga0a81fbcf2123584d03ba297a9b8718bf">seams.h</a></li>
+<li>seams_cages_counts()&#160;:&#160;<a class="el" href="group__capi__cage.html#gaef5b3de565e462890e882a243003b80a">seams.h</a></li>
+<li>seams_cages_destroy()&#160;:&#160;<a class="el" href="group__capi__cage.html#gaa7ca594d2a336eb3e276b9bc6867abf3">seams.h</a></li>
+<li>seams_cages_find()&#160;:&#160;<a class="el" href="group__capi__cage.html#gae8b8cc80521cbe925e8fd93165fc8262">seams.h</a></li>
+<li>seams_cages_labels()&#160;:&#160;<a class="el" href="group__capi__cage.html#gac9619f018381e402302c7d49b48a73e5">seams.h</a></li>
+<li>seams_cages_signature()&#160;:&#160;<a class="el" href="group__capi__cage.html#ga326e31e70a7faf5cfd98c965865bd827">seams.h</a></li>
+<li>seams_chill()&#160;:&#160;<a class="el" href="group__capi__order.html#ga4658c82b60171ca44ff5bfaa1a287b00">seams.h</a></li>
+<li>seams_chill_plus()&#160;:&#160;<a class="el" href="group__capi__order.html#gaac628ae6d69d41baadc60a67cdd4e28f">seams.h</a></li>
+<li>seams_chill_plus_flat()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a4779c3619c307b0e9f4aa8b82f01e73d">seams_c_api.h</a></li>
+<li>seams_chill_plus_graph()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a3cdbb04d3443c73b4f3067360bea8bf7">seams_c_api.h</a></li>
+<li>seams_chill_plus_graph_lammps()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a905d0436a8fd534e4177ff7627143e04">seams_c_api.h</a></li>
+<li>seams_chill_plus_n()&#160;:&#160;<a class="el" href="group__capi__sized.html#ga337540a5832d8181ab1143ae18de1ee6">seams.h</a></li>
+<li>seams_chill_plus_rule()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a15b8a71d8194a40d3a495a6d6103dd7b">seams_c_api.h</a></li>
+<li>seams_chill_plus_species()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a2b8636a1c0255423098b356dfbaa2b50">seams_c_api.h</a></li>
+<li>seams_contact_pairs()&#160;:&#160;<a class="el" href="group__capi__more.html#ga6030b730d822b627f3c8f3fae4808c01">seams.h</a></li>
+<li>seams_coordination()&#160;:&#160;<a class="el" href="group__capi__more.html#gab79717121f533c96d22377f48afed239">seams.h</a></li>
+<li>seams_cutoff_csr()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a050628a119d97a5fd5070aef345853ee">seams_c_api.h</a></li>
+<li>seams_density_axis()&#160;:&#160;<a class="el" href="group__capi__more.html#ga182c4f0d19f57fc549fad8768f3c863a">seams.h</a></li>
+<li>seams_density_fractional()&#160;:&#160;<a class="el" href="group__capi__pore.html#ga70f8dac2996c29a249e02a512aace3e0">seams.h</a></li>
+<li>seams_diamond_cna()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#af044fde824bc475804a89763c9a74120">seams_c_api.h</a></li>
+<li>seams_directed_hbonds()&#160;:&#160;<a class="el" href="group__capi__more.html#ga2d4393c4054d7553bb59cd18ea7ec833">seams.h</a></li>
+<li>seams_domains()&#160;:&#160;<a class="el" href="group__capi__more.html#gaa99c1e99fb54bb1e0bef2c5679623eb6">seams.h</a></li>
+<li>seams_fingerprint()&#160;:&#160;<a class="el" href="group__capi__more.html#ga3f658f3a066a852dc34473c934849816">seams.h</a></li>
+<li>seams_fingerprint_atom()&#160;:&#160;<a class="el" href="group__capi__more.html#ga8f503f6ff0853e2fa8b108611235ee3f">seams.h</a></li>
+<li>seams_fingerprint_destroy()&#160;:&#160;<a class="el" href="group__capi__more.html#ga7a5ae34a3cbfb4da97d25cefd935ba28">seams.h</a></li>
+<li>seams_fingerprint_key()&#160;:&#160;<a class="el" href="group__capi__more.html#ga273ca96165fe36db66562b0c3cb4e04e">seams.h</a></li>
+<li>seams_fingerprint_rings()&#160;:&#160;<a class="el" href="group__capi__more.html#gadae8d612b63cc8b62e8be321fac91108">seams.h</a></li>
+<li>seams_get_num_threads()&#160;:&#160;<a class="el" href="group__capi__meta.html#gadb33734040c81163b9ce98715d1ea4a6">seams.h</a></li>
+<li>seams_handle_error()&#160;:&#160;<a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be">seams.h</a></li>
+<li>seams_hbond_edges()&#160;:&#160;<a class="el" href="group__capi__more.html#gaf4b383e882f0c3d28280968ef6080cc2">seams.h</a></li>
+<li>seams_hbond_tcf_create()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga89f9d9a503808ac10065d6988f45c3fc">seams.h</a></li>
+<li>seams_hbond_tcf_curve()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga74f029e450e2e8df0fd20c333842a25b">seams.h</a></li>
+<li>seams_hbond_tcf_destroy()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">seams.h</a></li>
+<li>seams_hbond_tcf_fit()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga9f7d03054da7f56f35465aa88901e050">seams.h</a></li>
+<li>seams_hbond_tcf_push()&#160;:&#160;<a class="el" href="group__capi__traj.html#gac2923387350d1bb0ccdb2316728183af">seams.h</a></li>
+<li>seams_hbonds()&#160;:&#160;<a class="el" href="group__capi__more.html#ga104c25359d3f9ac09519a3236d03ec44">seams.h</a></li>
+<li>seams_host_guest()&#160;:&#160;<a class="el" href="group__capi__pore.html#ga54c0bd43c37cea4f9b27ee60af41e02f">seams.h</a></li>
+<li>seams_label_name()&#160;:&#160;<a class="el" href="group__capi__meta.html#ga272ce2bf86c6fd564091c14c4fdee15b">seams.h</a></li>
+<li>seams_last_error()&#160;:&#160;<a class="el" href="group__capi__meta.html#ga48525e5c62b76a6073d2b86df680f260">seams.h</a></li>
+<li>seams_last_error_message()&#160;:&#160;<a class="el" href="group__capi__sized.html#gac59c0170f1de72232f15996fcf613fa7">seams.h</a></li>
+<li>seams_lsi()&#160;:&#160;<a class="el" href="group__capi__order.html#ga59073a17775c6bb28fe493f8b784ef66">seams.h</a></li>
+<li>seams_molecule_centres()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga49779975dc3d1bbd2629a5cc303cf372">seams.h</a></li>
+<li>seams_molecule_dipoles()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga5601e0fac275f7bc709b052dc24ff3df">seams.h</a></li>
+<li>seams_mols()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga5e1d54e7d0723366dbad199abc80b5a4">seams.h</a></li>
+<li>seams_monolayer()&#160;:&#160;<a class="el" href="group__capi__more.html#gab447e0a3c02ee4c66412e494c7ea8f0c">seams.h</a></li>
+<li>seams_msd_create()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga3dab150c4c96b85975df84e1707cc74d">seams.h</a></li>
+<li>seams_msd_curve()&#160;:&#160;<a class="el" href="group__capi__traj.html#gac24a302f5d80b545b230ce700830a70d">seams.h</a></li>
+<li>seams_msd_destroy()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga06f1a57764f5ac14c663e095ce1ce3be">seams.h</a></li>
+<li>seams_msd_fit()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga151419523df9bcb0051ab38f4a92054d">seams.h</a></li>
+<li>seams_msd_push()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga5a3748c88317d4c73186ca455de5e867">seams.h</a></li>
+<li>seams_neighbours_build()&#160;:&#160;<a class="el" href="group__capi__neigh.html#gae6e9f1e27aca24acb551b2847db23489">seams.h</a></li>
+<li>seams_neighbours_copy()&#160;:&#160;<a class="el" href="group__capi__neigh.html#gadd139b6a27b0a0e346abfb71eeae6e3b">seams.h</a></li>
+<li>seams_neighbours_count()&#160;:&#160;<a class="el" href="group__capi__neigh.html#ga1090112947d62594e559e1af724fbd52">seams.h</a></li>
+<li>seams_neighbours_csr()&#160;:&#160;<a class="el" href="group__capi__neigh.html#gaa2bc21d618d6b44680b16abc6660ae38">seams.h</a></li>
+<li>seams_neighbours_destroy()&#160;:&#160;<a class="el" href="group__capi__neigh.html#gad3ea7df9ba10660aefc9d04201a386bb">seams.h</a></li>
+<li>seams_neighbours_knn()&#160;:&#160;<a class="el" href="group__capi__more.html#ga8e4d359947114d1b766ebd8861665920">seams.h</a></li>
+<li>seams_neighbours_nrows()&#160;:&#160;<a class="el" href="group__capi__sized.html#ga6575b8ce3d0dbb1bfb758ec10f3cfd59">seams.h</a></li>
+<li>seams_orientation_order()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga630179c79fb72a8b4b76dfe4acf1d078">seams.h</a></li>
+<li>seams_oxygen_cutoff_degree()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a945ab239fc029a7acbe76f72121ec83e">seams_c_api.h</a></li>
+<li>seams_path_nframes()&#160;:&#160;<a class="el" href="group__capi__frame.html#ga23ca97884bad0af03fd33ed781bef902">seams.h</a></li>
+<li>seams_pore_frame()&#160;:&#160;<a class="el" href="group__capi__pore.html#ga7515c28e202e7515e641f42a0bce45bd">seams.h</a></li>
+<li>seams_pore_profiles()&#160;:&#160;<a class="el" href="group__capi__pore.html#ga7908edc02bfd212ee6fd6c7c4246f12b">seams.h</a></li>
+<li>seams_primitive_rings()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a84bdcf96e064a16b174b7a8a8392b49b">seams_c_api.h</a></li>
+<li>seams_prisms()&#160;:&#160;<a class="el" href="group__capi__more.html#gaa19ac02eaa798416f3a59f511e61bdb9">seams.h</a></li>
+<li>seams_q4_q6()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a0c793871e8522bd91c910effc9decde7">seams_c_api.h</a></li>
+<li>seams_q4_q6_lammps()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#aaf35eae4a6cfbc834ef146ed56555b45">seams_c_api.h</a></li>
+<li>seams_q4q6()&#160;:&#160;<a class="el" href="group__capi__order.html#gae263dbfa3c78d76fe248e1aee53b344f">seams.h</a></li>
+<li>seams_q4q6_n()&#160;:&#160;<a class="el" href="group__capi__sized.html#ga46882671f641a5b0228b791b16630752">seams.h</a></li>
+<li>seams_q6bar()&#160;:&#160;<a class="el" href="group__capi__order.html#gabc201941d1f260d1eb50d5ee96042329">seams.h</a></li>
+<li>seams_ql()&#160;:&#160;<a class="el" href="group__capi__order.html#gac993c1bafa50237ca79d8ece1d8cca16">seams.h</a></li>
+<li>seams_ql_cutoff()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a61177c6e29fbc9f4431662d7b77f6b3b">seams_c_api.h</a></li>
+<li>seams_quenched_analysis()&#160;:&#160;<a class="el" href="group__capi__more.html#ga6d630c65a764ab7cab7511684e82e8e1">seams.h</a></li>
+<li>seams_rdf()&#160;:&#160;<a class="el" href="group__capi__more.html#ga040125cdd1e6566b574e8936deecbc25">seams.h</a></li>
+<li>seams_reorient_create()&#160;:&#160;<a class="el" href="group__capi__traj.html#gaa886ba06b8e811d05d8e63804298578b">seams.h</a></li>
+<li>seams_reorient_curve()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga031fc0986ed8eb8cc3ba7788d5636aad">seams.h</a></li>
+<li>seams_reorient_destroy()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga1aa8b2169eae4e9b76f367c90be4c88e">seams.h</a></li>
+<li>seams_reorient_fit()&#160;:&#160;<a class="el" href="group__capi__traj.html#gab2c93609986098b1df15ebeab4efa973">seams.h</a></li>
+<li>seams_reorient_push()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga3aa930465b7964cc847d252027624d9f">seams.h</a></li>
+<li>seams_ring_symmetry_name()&#160;:&#160;<a class="el" href="group__capi__meta.html#ga49cce2c621551ee7eb6bf29dba7182ed">seams.h</a></li>
+<li>seams_rings_chordless()&#160;:&#160;<a class="el" href="group__capi__ring.html#ga00b6878dc305e1c97220cb31c5503c92">seams.h</a></li>
+<li>seams_rings_count()&#160;:&#160;<a class="el" href="group__capi__ring.html#ga5c8ce5e328d95864dbed541b5a99ed28">seams.h</a></li>
+<li>seams_rings_destroy()&#160;:&#160;<a class="el" href="group__capi__ring.html#ga4132eff1399e519fbc0ada2925512082">seams.h</a></li>
+<li>seams_rings_find()&#160;:&#160;<a class="el" href="group__capi__ring.html#gaafe8218c78687207df6f4b895233c4d2">seams.h</a></li>
+<li>seams_rings_fraction()&#160;:&#160;<a class="el" href="group__capi__ring.html#gad420e7f240b6080f09b7856da904b55f">seams.h</a></li>
+<li>seams_rings_from_csr()&#160;:&#160;<a class="el" href="group__capi__ring.html#ga6cd1cdeebf679b6908e24ac868eb3e7b">seams.h</a></li>
+<li>seams_rings_histogram()&#160;:&#160;<a class="el" href="group__capi__ring.html#gab6fc83164a185ef7f86ff38cb756511e">seams.h</a></li>
+<li>seams_rings_histogram_n()&#160;:&#160;<a class="el" href="group__capi__sized.html#gac2109f318446e21ac9f64078f62c1d9f">seams.h</a></li>
+<li>seams_rings_labels()&#160;:&#160;<a class="el" href="group__capi__ring.html#ga6e916434663fe2a6a5541353ed504284">seams.h</a></li>
+<li>seams_rings_labels_n()&#160;:&#160;<a class="el" href="group__capi__sized.html#gaaddd89ed55ef0d9a75721964426a2f6c">seams.h</a></li>
+<li>seams_rings_nrings()&#160;:&#160;<a class="el" href="group__capi__sized.html#gaf7674bc96660eefaa4a63fa68da8162d">seams.h</a></li>
+<li>seams_rings_vertices()&#160;:&#160;<a class="el" href="group__capi__ring.html#gad3b5a355f504d710b46f2c799260a32e">seams.h</a></li>
+<li>seams_rings_winding()&#160;:&#160;<a class="el" href="group__capi__ring.html#ga93d177003322424296c69bd0781965cd">seams.h</a></li>
+<li>seams_running_cn()&#160;:&#160;<a class="el" href="group__capi__more.html#ga9a27abd9bb09d087145a533b703b4e54">seams.h</a></li>
+<li>seams_set_mols()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga66225929fd455eeaa8966a3fd665957f">seams.h</a></li>
+<li>seams_set_num_threads()&#160;:&#160;<a class="el" href="group__capi__meta.html#gaab320868f51aa98ac6bf5bef0df1b3de">seams.h</a></li>
+<li>seams_signature_cages()&#160;:&#160;<a class="el" href="group__capi__more.html#gad7b6914b1515fece21f8753d055862fe">seams.h</a></li>
+<li>seams_signature_cages_edge()&#160;:&#160;<a class="el" href="group__capi__more.html#gab6b197fa6ded45cacd4ac890a9555a68">seams.h</a></li>
+<li>seams_site_table()&#160;:&#160;<a class="el" href="group__capi__more.html#ga3a5af733132be2045fdfebc03ea609ed">seams.h</a></li>
+<li>seams_status_string()&#160;:&#160;<a class="el" href="group__capi__meta.html#ga4d20b66f76f04db2f7f434e14ee7894d">seams.h</a></li>
+<li>seams_steinhardt()&#160;:&#160;<a class="el" href="group__capi__more.html#gafb6d58b17d3b707f26d0c18fa84faaba">seams.h</a></li>
+<li>seams_symmetry_backend()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a286fe6a9075c6439ef46ed62e24e3418">seams_c_api.h</a></li>
+<li>seams_symmetry_classify()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#af1a71a01de96262b637c4f96281db221">seams_c_api.h</a></li>
+<li>seams_symmetry_classify_gates()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#aed9cb6f8a05fb3491f6fab4f5794724f">seams_c_api.h</a></li>
+<li>seams_symmetry_classify_tol()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a2a8ad5ce8d5997725826f2b0d81d000f">seams_c_api.h</a></li>
+<li>seams_symmetry_crystal()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#af3d4dc8bf1573a9e50de07be31190cc1">seams_c_api.h</a></li>
+<li>seams_symmetry_match()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a7b2a4f4bf57d15eb7feb3f526b2bc998">seams_c_api.h</a></li>
+<li>seams_symmetry_point_group()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#ad577898ecee04de6a1a7963f5605a52d">seams_c_api.h</a></li>
+<li>seams_symmetry_space_group()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#a2c3719eca0b342deb63fdaad3a4c9287">seams_c_api.h</a></li>
+<li>seams_symmetry_template()&#160;:&#160;<a class="el" href="seams__c__api_8h.html#afd32896dc0affc747fc4135223d5b681">seams_c_api.h</a></li>
+<li>seams_system_box()&#160;:&#160;<a class="el" href="group__capi__frame__io.html#ga7b17ccb495b95692e7579d5b38f6aea9">seams.h</a></li>
+<li>seams_system_count()&#160;:&#160;<a class="el" href="group__capi__frame.html#gab56b497ad524828eb231bae36c579509">seams.h</a></li>
+<li>seams_system_create()&#160;:&#160;<a class="el" href="group__capi__frame.html#gaf0e9a0a22ff17c91cc70ec309d486c4b">seams.h</a></li>
+<li>seams_system_destroy()&#160;:&#160;<a class="el" href="group__capi__frame.html#gaf907563fb294d1d8cc97faa4ff2f64b4">seams.h</a></li>
+<li>seams_system_ids()&#160;:&#160;<a class="el" href="group__capi__frame__io.html#ga41976cdc6664e8a7e93cb97bb2fae905">seams.h</a></li>
+<li>seams_system_natoms()&#160;:&#160;<a class="el" href="group__capi__sized.html#gadf78621a50ec69c4db03b3e9f01f8c07">seams.h</a></li>
+<li>seams_system_positions()&#160;:&#160;<a class="el" href="group__capi__frame__io.html#ga9c09246c404648a3504ef6c93ded7dbb">seams.h</a></li>
+<li>seams_system_read()&#160;:&#160;<a class="el" href="group__capi__frame.html#ga9a8419b1d09376d1897bf96f8d9309dc">seams.h</a></li>
+<li>seams_system_set_atoms()&#160;:&#160;<a class="el" href="group__capi__frame.html#ga73b0c2b2e4843095e3be0147e8e2f92c">seams.h</a></li>
+<li>seams_system_set_frame()&#160;:&#160;<a class="el" href="group__capi__frame.html#ga47b420cd9444a69dd497f4fb59132a6a">seams.h</a></li>
+<li>seams_system_set_hydrogen_frame()&#160;:&#160;<a class="el" href="group__capi__more.html#gae3dd68cf6dca18213c39dbc3372aeecc">seams.h</a></li>
+<li>seams_system_set_ortho()&#160;:&#160;<a class="el" href="group__capi__frame.html#ga226f1ec2b0f55ec281e8ae4fe03bcb27">seams.h</a></li>
+<li>seams_system_set_positions()&#160;:&#160;<a class="el" href="group__capi__frame__io.html#ga7b5da55261945dc14d74aab160f14f8c">seams.h</a></li>
+<li>seams_system_stage_positions()&#160;:&#160;<a class="el" href="group__capi__frame__io.html#gafd9d62e4de0402afaa787a610d25be17">seams.h</a></li>
+<li>seams_system_symmetry()&#160;:&#160;<a class="el" href="group__capi__cage.html#ga449e85e5b84add649a9aeb1a959cb219">seams.h</a></li>
+<li>seams_system_types()&#160;:&#160;<a class="el" href="group__capi__frame__io.html#ga5c40e0575b9abf86db8f1d908fe5082e">seams.h</a></li>
+<li>seams_tetrahedral_order()&#160;:&#160;<a class="el" href="group__capi__order.html#gaa6e8e5c4fbb72613e831ad2bd81eddce">seams.h</a></li>
+<li>seams_traj_unwrap_centres()&#160;:&#160;<a class="el" href="group__capi__traj.html#gaae87d8838530ea8f468766a6a84d3544">seams.h</a></li>
+<li>seams_traj_unwrap_positions()&#160;:&#160;<a class="el" href="group__capi__traj.html#gaec29816a91313bf4d062f44851de985f">seams.h</a></li>
+<li>seams_version()&#160;:&#160;<a class="el" href="group__capi__meta.html#ga7551b03afcbb32f5c0ee472f5d8a58d2">seams.h</a></li>
+<li>seams_version_major()&#160;:&#160;<a class="el" href="group__capi__meta.html#ga305ccbb8bd6af37c321fde08bb1669dd">seams.h</a></li>
+<li>seams_version_minor()&#160;:&#160;<a class="el" href="group__capi__meta.html#gada41ec5ab0b25456b941d82971ebaa73">seams.h</a></li>
+<li>seams_version_patch()&#160;:&#160;<a class="el" href="group__capi__meta.html#gaaeff571d4ce9b9f3b3b56bda5bfded7f">seams.h</a></li>
+<li>seams_version_string()&#160;:&#160;<a class="el" href="group__capi__meta.html#gab79b277f6399c4ffca46cd893f2b61e6">seams.h</a></li>
+<li>seams_water_vectors()&#160;:&#160;<a class="el" href="group__capi__traj.html#ga43b73c9466e811317f6dce78837cd550">seams.h</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

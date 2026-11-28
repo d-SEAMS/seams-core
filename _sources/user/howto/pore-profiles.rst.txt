@@ -1,0 +1,82 @@
+=============
+Pore profiles
+=============
+
+
+Water in a hexagonal COF pore sits in a triclinic cell. The profiles
+below bin that water in the cell's own coordinates and in a cylinder
+about the pore.
+
+Fractional density
+------------------
+
+``seams_density_fractional`` bins atoms by a fractional coordinate. Along
+cell axis 0, 1, or 2 the coordinate is the reduced coordinate on that
+edge, wrapped into [0, 1). Every bin has volume V/n, where V is
+``|det H|`` for the LAMMPS cell. A uniform gas is therefore flat at N/V
+on an orthorhombic cell and on a triclinic cell.
+
+Pass a three-component Cartesian direction to bin the projection of the
+reduced cell instead. Each bin volume is the measure of that slice of
+the unit cube, times V, so the same uniform gas stays flat at N/V.
+``origin`` shifts the coordinate and is wrapped into [0, 1). A null mass
+array uses mass 1, so the mass density equals the number density. A
+caller-supplied mass array has one entry per stored atom.
+
+The C++ method is ``System::fractional_density``.
+
+Pore frame
+----------
+
+``seams_pore_frame`` returns a unit axis and a centre. Axis -1 with a
+null direction selects the longest cell edge. Any other negative axis
+is rejected. A direction is accepted
+when it is parallel to one cell edge. A null centre is the periodic
+centroid of the framework atoms in the plane perpendicular to that
+edge. ``framework_type`` 0 uses every atom for the centroid.
+
+Cylindrical volumes are defined for a cell-edge axis. A direction that
+is not a cell edge is rejected.
+
+Cylindrical profiles
+--------------------
+
+``seams_pore_profiles`` returns three histograms.
+
+- Radial bins run from 0 to ``r_max``. ``r_max`` 0 covers the perpendicular
+  face. The radial coordinate is the distance to the nearest periodic
+  image of the pore axis. Within the inscribed radius of the centred
+  face that image is the face origin. Beyond the inscribed radius a
+  point near a corner can be closer to a neighbouring image, and the
+  coordinate follows that image. A shell volume is the area of the
+  Euclidean annulus inside the Voronoi cell of the perpendicular
+  lattice, times the length of the pore edge.
+
+- Azimuthal bins cover [-pi, pi). The angle is taken in the centred
+  face. Azimuth zero points along the perpendicular projection of cell
+  edge (axis + 1) mod 3, with the component parallel to the pore axis
+  removed, and the angle increases towards the pore axis crossed with
+  that direction. A sector volume is the area of that wedge inside the
+  face, times the same edge length.
+
+- Axial bins are the fractional slabs of ``seams_density_fractional``
+  along the pore edge.
+
+Number density and mass density are both written. Mass density is the
+caller's mass unit per cubic Angstrom. A mass in amu is amu per cubic
+Angstrom, and multiplying by 1.66054 gives grams per cubic centimetre.
+The library does not apply that factor. An atom beyond ``r_max`` is left
+out of the radial histogram and kept in the azimuthal histogram.
+
+Host and guest
+--------------
+
+``seams_host_guest`` takes a positive guest type. ``framework_type`` 0
+keeps every atom of another type. A framework type equal to the guest
+type is an error. For each guest the call reports the
+nearest framework atom under the triclinic minimum image, whether
+or not the optional minimage library is linked, and the
+number of framework atoms of each type at or inside ``cutoff``. The
+contact matrix is row-major, one row per guest and one column per
+framework type, types sorted. A guest with no framework atom has
+nearest index -1 and a negative distance.

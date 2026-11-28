@@ -1,0 +1,56 @@
+=========================
+Release-candidate sitting
+=========================
+
+
+The tables are the release-candidate sitting of d-SEAMS 2.14.0.
+Ideal ice Ic supplies the neighbour list, :math:`q_4`, :math:`q_6`, CHILL+,
+the ring search, and the row stored as PTM, at 110592 and 884736
+molecules. Cages are GenIce sI (46 molecules), sII (136), and the
+sI 2x2x2 cell (368). King's shortest-path count is the fastatomstruct
+table.
+
+One warm-up is discarded. ``n`` is 6 on every row. The median of an even
+count is the mean of the two central samples. The interquartile range
+is the type-7 gap: the linear quantile at 0.75 minus the linear
+quantile at 0.25.
+
+``threads`` is the width of that row. The worker starts with
+``OMP_NUM_THREADS`` set to that width and ``OMP_DYNAMIC=FALSE``. One
+thread is pinned with ``taskset -c 0``. Eight threads are pinned with
+``taskset -c 0-7``. ``cores`` is the affinity list recorded for the timed
+process. freud, mdapy, vesin, OVITO, and rings-statistics-matter then
+receive that width through their own setters. The PLUMED worker sets
+``OMP_NUM_THREADS`` and does not set ``PLUMED_NUM_THREADS``. Its observable
+is :math:`Q_l` with a rational switch, ``R_0`` 0.35, ``D_MAX`` 0.35, ``NN`` 100
+and ``MM`` 200, multiplied by the square root of :math:`4\pi/(2l+1)`.
+
+The d-SEAMS rings call is ``seams_frame_rings`` on the cutoff graph, depth
+6, so the neighbour list and the search are one timed call. The rows at
+1000, 4096, 10648, 21952, 32768 and 64000 molecules are the reference
+stored beside King's count. A King size is stored only when the call
+returns inside 600 seconds. At 110592 molecules the rings block stores
+two d-SEAMS rows, both with ``n`` of 6. The table does not mark which of
+those two is the head-to-head call and which is the King reference.
+The 884736-molecule rings row is the head-to-head call.
+
+The d-SEAMS row stored as PTM is ``seams_frame_symmetry`` with shell RMSD
+0.12. The OVITO row stored as PTM is ``PolyhedralTemplateMatchingModifier``
+with structure ids 6 and 7 enabled.
+
+Ice and a TIP4P/ice liquid at 884736 molecules, with widths 1, 2, 4
+and 8, are `the head-to-head <performance-h2h.rst>`_.
+Neighbour and ring rows from the other records are
+`the size range <performance-range.rst>`_.
+What each sitting measures is
+`the overview <performance-overview.rst>`_.
+
+The algorithm pages are
+`primitive rings <primitive-rings.rst>`_,
+`TRACE and signature cages <trace-assembly.rst>`_,
+`the symmetry classifier <symmetry.rst>`_, and
+`carried rings <hop-ball.rst>`_.
+The signature-search widths are
+`thread controls <trace-threads.rst>`_.
+
+.. include:: performance-tables.rst

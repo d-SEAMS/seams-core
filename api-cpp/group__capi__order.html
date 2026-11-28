@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: Order parameters</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/group__capi__order.html">
+<meta property="og:title" content="seams-core: Order parameters">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/group__capi__order.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: Order parameters">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__capi__order.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Order parameters </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>CHILL, CHILL+, Steinhardt q_l, and the ice shell label.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga4658c82b60171ca44ff5bfaa1a287b00" id="r_ga4658c82b60171ca44ff5bfaa1a287b00"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga4658c82b60171ca44ff5bfaa1a287b00">seams_chill</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, int graph, int rule, int *labels, size_t labels_len, int counts9[9])</td></tr>
+<tr class="memdesc:ga4658c82b60171ca44ff5bfaa1a287b00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Original CHILL labels, published or OVITO edges.  <br /></td></tr>
+<tr class="memitem:gaac628ae6d69d41baadc60a67cdd4e28f" id="r_gaac628ae6d69d41baadc60a67cdd4e28f"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaac628ae6d69d41baadc60a67cdd4e28f">seams_chill_plus</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, int graph, int rule, int *labels, int counts9[9])</td></tr>
+<tr class="memdesc:gaac628ae6d69d41baadc60a67cdd4e28f"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL+ labels, without a buffer length.  <br /></td></tr>
+<tr class="memitem:gac993c1bafa50237ca79d8ece1d8cca16" id="r_gac993c1bafa50237ca79d8ece1d8cca16"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gac993c1bafa50237ca79d8ece1d8cca16">seams_ql</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, int order_l, int graph, double *ql, size_t ql_len, double *qlbar, size_t qlbar_len)</td></tr>
+<tr class="memdesc:gac993c1bafa50237ca79d8ece1d8cca16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local Steinhardt q_l, and the Lechner-Dellago average on request.  <br /></td></tr>
+<tr class="memitem:gae263dbfa3c78d76fe248e1aee53b344f" id="r_gae263dbfa3c78d76fe248e1aee53b344f"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gae263dbfa3c78d76fe248e1aee53b344f">seams_q4q6</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, double *q4, double *q6)</td></tr>
+<tr class="memdesc:gae263dbfa3c78d76fe248e1aee53b344f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local q4 and q6 on the cutoff shell, without buffer lengths.  <br /></td></tr>
+<tr class="memitem:gabc201941d1f260d1eb50d5ee96042329" id="r_gabc201941d1f260d1eb50d5ee96042329"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gabc201941d1f260d1eb50d5ee96042329">seams_q6bar</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, double ice_cut, double *q6bar, size_t q6bar_len, double *mean, double *median, int *n_ice)</td></tr>
+<tr class="memdesc:gabc201941d1f260d1eb50d5ee96042329"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lechner-Dellago q6-bar and the ice count above a cut.  <br /></td></tr>
+<tr class="memitem:gaa6e8e5c4fbb72613e831ad2bd81eddce" id="r_gaa6e8e5c4fbb72613e831ad2bd81eddce"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaa6e8e5c4fbb72613e831ad2bd81eddce">seams_tetrahedral_order</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, const int *centres, size_t n_centres, const int *partners, size_t n_partners, int convention, double cutoff, double *q, size_t q_len)</td></tr>
+<tr class="memdesc:gaa6e8e5c4fbb72613e831ad2bd81eddce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Errington-Debenedetti tetrahedral order for arbitrary selections.  <br /></td></tr>
+<tr class="memitem:ga59073a17775c6bb28fe493f8b784ef66" id="r_ga59073a17775c6bb28fe493f8b784ef66"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga59073a17775c6bb28fe493f8b784ef66">seams_lsi</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, const int *centres, size_t n_centres, const int *partners, size_t n_partners, double cutoff, double *lsi, size_t lsi_len)</td></tr>
+<tr class="memdesc:ga59073a17775c6bb28fe493f8b784ef66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local Structure Index for arbitrary selections.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>CHILL, CHILL+, Steinhardt q_l, and the ice shell label. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ga4658c82b60171ca44ff5bfaa1a287b00" name="ga4658c82b60171ca44ff5bfaa1a287b00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4658c82b60171ca44ff5bfaa1a287b00">&#9670;&#160;</a></span>seams_chill()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_chill </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>labels_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>counts9</em></span>[9]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Original CHILL labels, published or OVITO edges. </p>
+<p>Published CHILL is Moore's four-neighbour rule with inclusive c_ij edges. OVITO mode uses the same thresholds and the open edges. Labels match <a class="el" href="group__capi__types.html#gad876da4dfac2f2bff8f929d59f9f970f" title="CHILL and CHILL+ atom labels.">seams_label</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. Zero and negative keep every atom. </td></tr>
+    <tr><td class="paramname">graph</td><td><a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d" title="Every neighbour inside the cutoff.">SEAMS_GRAPH_CUTOFF</a> or <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99" title="Mutual four nearest inside cutoff + 1.5.">SEAMS_GRAPH_MUTUAL</a>. </td></tr>
+    <tr><td class="paramname">rule</td><td><a class="el" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d" title="Nguyen and Molinero, four closest neighbours.">SEAMS_CHILL_PUBLISHED</a> or <a class="el" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea34bec95f23acb591da9f3a70b2b7523d" title="OVITO Chill+ modifier, every neighbour in the cutoff.">SEAMS_CHILL_OVITO</a>. </td></tr>
+    <tr><td class="paramname">labels</td><td>Caller buffer of labels_len ints. </td></tr>
+    <tr><td class="paramname">labels_len</td><td>Must be at least the frame count. </td></tr>
+    <tr><td class="paramname">counts9</td><td>Nine ints that receive the population of each label, or NULL to skip the histogram. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const: writes each atom's CHILL+ label into the stored frame and clears the handle's error slot on entry. Coordinates, cell, types, and ids are not changed. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns labels and counts9. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">int</span> counts[9];</div>
+<div class="line"><a class="code hl_function" href="#ga4658c82b60171ca44ff5bfaa1a287b00">seams_chill</a>(sys, 3.5, 0, <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, <a class="code hl_enumvalue" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d">SEAMS_CHILL_PUBLISHED</a>, labels, n, counts);</div>
+<div class="ttc" id="agroup__capi__order_html_ga4658c82b60171ca44ff5bfaa1a287b00"><div class="ttname"><a href="#ga4658c82b60171ca44ff5bfaa1a287b00">seams_chill</a></div><div class="ttdeci">SEAMS_API seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, int rule, int *labels, size_t labels_len, int counts9[9])</div><div class="ttdoc">Original CHILL labels, published or OVITO edges.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d"><div class="ttname"><a href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d">SEAMS_CHILL_PUBLISHED</a></div><div class="ttdeci">@ SEAMS_CHILL_PUBLISHED</div><div class="ttdoc">Nguyen and Molinero, four closest neighbours.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00203">seams.h:203</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d"><div class="ttname"><a href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a></div><div class="ttdeci">@ SEAMS_GRAPH_CUTOFF</div><div class="ttdoc">Every neighbour inside the cutoff.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00209">seams.h:209</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaac628ae6d69d41baadc60a67cdd4e28f" name="gaac628ae6d69d41baadc60a67cdd4e28f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaac628ae6d69d41baadc60a67cdd4e28f">&#9670;&#160;</a></span>seams_chill_plus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_chill_plus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>counts9</em></span>[9]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>CHILL+ labels, without a buffer length. </p>
+<p>ABI 1 entry. labels must hold one int per atom in the frame. New callers use <a class="el" href="group__capi__sized.html#ga337540a5832d8181ab1143ae18de1ee6" title="CHILL+ labels into a buffer of known length.">seams_chill_plus_n()</a>, which checks the length.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. Zero and negative keep every atom. </td></tr>
+    <tr><td class="paramname">graph</td><td><a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d" title="Every neighbour inside the cutoff.">SEAMS_GRAPH_CUTOFF</a> or <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99" title="Mutual four nearest inside cutoff + 1.5.">SEAMS_GRAPH_MUTUAL</a>. </td></tr>
+    <tr><td class="paramname">rule</td><td><a class="el" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d" title="Nguyen and Molinero, four closest neighbours.">SEAMS_CHILL_PUBLISHED</a> or <a class="el" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea34bec95f23acb591da9f3a70b2b7523d" title="OVITO Chill+ modifier, every neighbour in the cutoff.">SEAMS_CHILL_OVITO</a>. </td></tr>
+    <tr><td class="paramname">labels</td><td>Caller buffer of one label per atom. </td></tr>
+    <tr><td class="paramname">counts9</td><td>Nine ints, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Same codes as <a class="el" href="group__capi__sized.html#ga337540a5832d8181ab1143ae18de1ee6" title="CHILL+ labels into a buffer of known length.">seams_chill_plus_n()</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const: writes each atom's CHILL+ label into the stored frame and clears the handle's error slot on entry. Coordinates, cell, types, and ids are not changed. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns labels and counts9. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#gaac628ae6d69d41baadc60a67cdd4e28f">seams_chill_plus</a>(sys, 3.5, 0, <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, <a class="code hl_enumvalue" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d">SEAMS_CHILL_PUBLISHED</a>, labels, NULL);</div>
+<div class="ttc" id="agroup__capi__order_html_gaac628ae6d69d41baadc60a67cdd4e28f"><div class="ttname"><a href="#gaac628ae6d69d41baadc60a67cdd4e28f">seams_chill_plus</a></div><div class="ttdeci">SEAMS_API seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int graph, int rule, int *labels, int counts9[9])</div><div class="ttdoc">CHILL+ labels, without a buffer length.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga59073a17775c6bb28fe493f8b784ef66" name="ga59073a17775c6bb28fe493f8b784ef66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga59073a17775c6bb28fe493f8b784ef66">&#9670;&#160;</a></span>seams_lsi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_lsi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>centres</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_centres</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>partners</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_partners</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>lsi</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>lsi_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Local Structure Index for arbitrary selections. </p>
+<p>Shiratani-Sasai index. For each centre, selected-partner distances are sorted, r_1 &lt; ... &lt; r_N &lt;= cutoff &lt; r_{N+1}. The result is the population variance of the N gaps r_{i+1} - r_i, i = 1..N; the last gap reaches the first partner beyond cutoff. A centre with no partner inside cutoff, or none beyond it, receives quiet NaN.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">centres</td><td>Centre indices, or NULL when n_centres is zero. </td></tr>
+    <tr><td class="paramname">n_centres</td><td>Centre count. Zero means every atom. </td></tr>
+    <tr><td class="paramname">partners</td><td>Partner indices, or NULL when n_partners is zero. </td></tr>
+    <tr><td class="paramname">n_partners</td><td>Partner count. Zero means every atom. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite shell cutoff. </td></tr>
+    <tr><td class="paramname">lsi</td><td>Caller buffer, one value per selected centre. </td></tr>
+    <tr><td class="paramname">lsi_len</td><td>Length of lsi. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle error slot. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns every selection and output buffer. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+
+</div>
+</div>
+<a id="gae263dbfa3c78d76fe248e1aee53b344f" name="gae263dbfa3c78d76fe248e1aee53b344f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae263dbfa3c78d76fe248e1aee53b344f">&#9670;&#160;</a></span>seams_q4q6()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_q4q6 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q4</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q6</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Local q4 and q6 on the cutoff shell, without buffer lengths. </p>
+<p>ABI 1 pair. Each non-NULL array has one double per atom. New callers use <a class="el" href="group__capi__sized.html#ga46882671f641a5b0228b791b16630752" title="Local q4 and q6 on the cutoff shell into buffers of known length.">seams_q4q6_n()</a>, which checks the lengths.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. </td></tr>
+    <tr><td class="paramname">q4</td><td>Local q4, or NULL. </td></tr>
+    <tr><td class="paramname">q6</td><td>Local q6, or NULL. q4 and q6 may not both be NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry; it reads the frame and nothing else on the handle. The q_lm work arrays belong to the calling thread, so calls on different handles may run at the same time. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns q4 and q6. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. Any q call on another handle may run beside it. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#gae263dbfa3c78d76fe248e1aee53b344f">seams_q4q6</a>(sys, 3.5, 0, q4, q6);</div>
+<div class="ttc" id="agroup__capi__order_html_gae263dbfa3c78d76fe248e1aee53b344f"><div class="ttname"><a href="#gae263dbfa3c78d76fe248e1aee53b344f">seams_q4q6</a></div><div class="ttdeci">SEAMS_API seams_status seams_q4q6(seams_system *sys, double cutoff, int type, double *q4, double *q6)</div><div class="ttdoc">Local q4 and q6 on the cutoff shell, without buffer lengths.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gabc201941d1f260d1eb50d5ee96042329" name="gabc201941d1f260d1eb50d5ee96042329"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gabc201941d1f260d1eb50d5ee96042329">&#9670;&#160;</a></span>seams_q6bar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_q6bar </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>ice_cut</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q6bar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>q6bar_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>mean</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>median</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_ice</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lechner-Dellago q6-bar and the ice count above a cut. </p>
+<p>The average is the same neighbour mean of q_6m as <a class="el" href="#gac993c1bafa50237ca79d8ece1d8cca16" title="Local Steinhardt q_l, and the Lechner-Dellago average on request.">seams_ql()</a> of order 6 on the cutoff graph. n_ice counts finite values strictly above ice_cut. The nucleation census uses 0.36. mean and median ignore non-finite values. An empty finite set stores 0.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. </td></tr>
+    <tr><td class="paramname">ice_cut</td><td>Finite threshold on q6-bar. </td></tr>
+    <tr><td class="paramname">q6bar</td><td>Per-atom average, or NULL to keep only the summary. </td></tr>
+    <tr><td class="paramname">q6bar_len</td><td>Length of q6bar. Ignored when q6bar is NULL. </td></tr>
+    <tr><td class="paramname">mean</td><td>Receives the mean, or NULL. </td></tr>
+    <tr><td class="paramname">median</td><td>Receives the median, or NULL. </td></tr>
+    <tr><td class="paramname">n_ice</td><td>Receives the count above ice_cut, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. At least one of q6bar, mean, median, and n_ice must be non-NULL. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry; it reads the frame and nothing else on the handle. The q_lm work arrays belong to the calling thread, so calls on different handles may run at the same time. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns q6bar. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. Any q call on another handle may run beside it. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">double</span> mean = 0, median = 0;</div>
+<div class="line"><span class="keywordtype">int</span> n_ice = 0;</div>
+<div class="line"><a class="code hl_function" href="#gabc201941d1f260d1eb50d5ee96042329">seams_q6bar</a>(sys, 3.5, 0, 0.36, NULL, 0, &amp;mean, &amp;median, &amp;n_ice);</div>
+<div class="ttc" id="agroup__capi__order_html_gabc201941d1f260d1eb50d5ee96042329"><div class="ttname"><a href="#gabc201941d1f260d1eb50d5ee96042329">seams_q6bar</a></div><div class="ttdeci">SEAMS_API seams_status seams_q6bar(seams_system *sys, double cutoff, int type, double ice_cut, double *q6bar, size_t q6bar_len, double *mean, double *median, int *n_ice)</div><div class="ttdoc">Lechner-Dellago q6-bar and the ice count above a cut.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gac993c1bafa50237ca79d8ece1d8cca16" name="gac993c1bafa50237ca79d8ece1d8cca16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac993c1bafa50237ca79d8ece1d8cca16">&#9670;&#160;</a></span>seams_ql()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_ql </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>order_l</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>ql</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>ql_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>qlbar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>qlbar_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Local Steinhardt q_l, and the Lechner-Dellago average on request. </p>
+<p>order_l is 3, 4, 6, 8, or 12. Either array may be NULL. A non-NULL array has one double per atom and its length must be at least the frame count. The average is the neighbour mean of q_lm. The cutoff graph reads the cutoff shell. The mutual graph reads the four nearest neighbours inside cutoff + 1.5.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. Zero and negative keep every atom. </td></tr>
+    <tr><td class="paramname">order_l</td><td>Spherical-harmonic degree. </td></tr>
+    <tr><td class="paramname">graph</td><td><a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d" title="Every neighbour inside the cutoff.">SEAMS_GRAPH_CUTOFF</a> or <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99" title="Mutual four nearest inside cutoff + 1.5.">SEAMS_GRAPH_MUTUAL</a>. </td></tr>
+    <tr><td class="paramname">ql</td><td>Local q_l, or NULL. </td></tr>
+    <tr><td class="paramname">ql_len</td><td>Length of ql. Ignored when ql is NULL. </td></tr>
+    <tr><td class="paramname">qlbar</td><td>Averaged q_l, or NULL to skip the average. </td></tr>
+    <tr><td class="paramname">qlbar_len</td><td>Length of qlbar. Ignored when qlbar is NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry; it reads the frame and nothing else on the handle. The q_lm work arrays belong to the calling thread, so calls on different handles may run at the same time. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns both arrays. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. Any q call on another handle may run beside it. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#gac993c1bafa50237ca79d8ece1d8cca16">seams_ql</a>(sys, 3.5, 0, 6, <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, q6, n, q6bar, n);</div>
+<div class="ttc" id="agroup__capi__order_html_gac993c1bafa50237ca79d8ece1d8cca16"><div class="ttname"><a href="#gac993c1bafa50237ca79d8ece1d8cca16">seams_ql</a></div><div class="ttdeci">SEAMS_API seams_status seams_ql(seams_system *sys, double cutoff, int type, int order_l, int graph, double *ql, size_t ql_len, double *qlbar, size_t qlbar_len)</div><div class="ttdoc">Local Steinhardt q_l, and the Lechner-Dellago average on request.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaa6e8e5c4fbb72613e831ad2bd81eddce" name="gaa6e8e5c4fbb72613e831ad2bd81eddce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa6e8e5c4fbb72613e831ad2bd81eddce">&#9670;&#160;</a></span>seams_tetrahedral_order()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_tetrahedral_order </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>centres</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_centres</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>partners</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_partners</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>convention</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>q_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Errington-Debenedetti tetrahedral order for arbitrary selections. </p>
+<p>centres and partners contain zero-based frame indices. A NULL pointer with zero length selects every atom. A centre is excluded from its own partner shell. q = 1 - 9/(2 N (N-1)) sum_{j&lt;k} (cos psi_jk + 1/3)^2 over the N shell neighbours: a perfect tetrahedron is 1 and an ideal gas averages 0. NEAREST_FOUR uses the four nearest selected partners, N = 4 and the Errington-Debenedetti factor 3/8, and ignores cutoff. WITHIN_CUTOFF uses every selected partner at or inside cutoff. In both modes a centre with fewer than four neighbours receives quiet NaN.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">centres</td><td>Centre indices, or NULL when n_centres is zero. </td></tr>
+    <tr><td class="paramname">n_centres</td><td>Centre count. Zero means every atom. </td></tr>
+    <tr><td class="paramname">partners</td><td>Partner indices, or NULL when n_partners is zero. </td></tr>
+    <tr><td class="paramname">n_partners</td><td>Partner count. Zero means every atom. </td></tr>
+    <tr><td class="paramname">convention</td><td>One <a class="el" href="group__capi__types.html#gad8e7f14ba14c18683bbd343f925fcf5d" title="Neighbour convention for tetrahedral order.">seams_tetrahedral_neighbours</a> value. Any other value returns <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff in WITHIN_CUTOFF mode; ignored in NEAREST_FOUR mode. </td></tr>
+    <tr><td class="paramname">q</td><td>Caller buffer, one value per selected centre. </td></tr>
+    <tr><td class="paramname">q_len</td><td>Length of q. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle error slot. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns every selection and output buffer. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

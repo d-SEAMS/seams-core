@@ -1,0 +1,161 @@
+.. index:: pair: namespace; sph
+.. _doxid-namespacesph:
+
+namespace sph
+=============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Functions used for spherical harmonics. :ref:`More...<details-namespacesph>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace sph {
+
+	// global functions
+
+	std::vector<std::complex<double>> :target:`spheriHarmo<doxid-namespacesph_1aa9220b76da7400c9d934fa08ceeeba7a>`(int orderL, std::array<double, 2> radialCoord);
+	void :ref:`spheriHarmoInto<doxid-namespacesph_1a54a26a87d40f9d1be9253f71ecac02c0>`(int orderL, std::array<double, 2> radialCoord, std::vector<std::complex<double>>& out);
+	std::array<double, 2> :target:`radialCoord<doxid-namespacesph_1a514fadfbfeabee5d144ef4102fb3004d>`(std::array<double, 3> cartCoord);
+	std::vector<std::complex<double>> :ref:`lookupTableQ3Vec<doxid-namespacesph_1a08491bfa3fa2f6bacdf997be433508c4>`(std::array<double, 2> angles);
+	std::complex<double> :ref:`lookupTableQ3<doxid-namespacesph_1accbcfa30cf3762a55c59e7b632117af5>`(int m, std::array<double, 2> angles);
+	std::vector<std::complex<double>> :ref:`lookupTableQ4Vec<doxid-namespacesph_1a453c3de59a751a26cad5e01a7cb26ed0>`(std::array<double, 2> angles);
+	std::complex<double> :ref:`lookupTableQ4<doxid-namespacesph_1af85e8aaa32c95aae99c0824db59e3f6f>`(int m, std::array<double, 2> angles);
+	std::vector<std::complex<double>> :ref:`lookupTableQ6Vec<doxid-namespacesph_1a004e7b144d261654c556c7e66fdd9b2e>`(std::array<double, 2> angles);
+	std::vector<std::complex<double>> :ref:`lookupTableQ8Vec<doxid-namespacesph_1adf0ba61f373430a782cbee2886628211>`(std::array<double, 2> angles);
+	std::complex<double> :ref:`lookupTableQ8<doxid-namespacesph_1ac7a53e67f5244c83d541c78d7d7bf710>`(int m, std::array<double, 2> angles);
+	std::complex<double> :ref:`lookupTableQ6<doxid-namespacesph_1a63be01f86931b2a45e70606f5b8f545d>`(int m, std::array<double, 2> angles);
+
+	} // namespace sph
+.. _details-namespacesph:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Functions used for spherical harmonics.
+
+The recommended function for calculating the spherical-harmonics based complex vector is :ref:`sph::spheriHarmo <doxid-namespacesph_1aa9220b76da7400c9d934fa08ceeeba7a>`. This function uses the `Boost <https://www.boost.org/>`__ libraries.
+
+
+
+.. _doxid-namespacesph_1autotoc_md2_1s1:
+
+
+
+
+
+.. _doxid-namespacesph_1autotoc_md2_1s2:
+
+
+
+
+
+.. _doxid-namespacesph_1autotoc_md2:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Sept 19, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; spheriHarmoInto
+.. _doxid-namespacesph_1a54a26a87d40f9d1be9253f71ecac02c0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void spheriHarmoInto(int orderL, std::array<double, 2> radialCoord, std::vector<std::complex<double>>& out)
+
+Fill ``out`` with Y_lm, m = -l .. +l. Reuses ``out`` capacity.
+
+.. index:: pair: function; lookupTableQ3Vec
+.. _doxid-namespacesph_1a08491bfa3fa2f6bacdf997be433508c4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::complex<double>> lookupTableQ3Vec(std::array<double, 2> angles)
+
+Lookup table for Q3.
+
+.. index:: pair: function; lookupTableQ3
+.. _doxid-namespacesph_1accbcfa30cf3762a55c59e7b632117af5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::complex<double> lookupTableQ3(int m, std::array<double, 2> angles)
+
+Lookup table for Q3 (m=0 to m=6).
+
+.. index:: pair: function; lookupTableQ4Vec
+.. _doxid-namespacesph_1a453c3de59a751a26cad5e01a7cb26ed0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::complex<double>> lookupTableQ4Vec(std::array<double, 2> angles)
+
+Lookup table for Q4.
+
+.. index:: pair: function; lookupTableQ4
+.. _doxid-namespacesph_1af85e8aaa32c95aae99c0824db59e3f6f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::complex<double> lookupTableQ4(int m, std::array<double, 2> angles)
+
+Lookup table for Q4 (m=0 to m=8).
+
+.. index:: pair: function; lookupTableQ6Vec
+.. _doxid-namespacesph_1a004e7b144d261654c556c7e66fdd9b2e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::complex<double>> lookupTableQ6Vec(std::array<double, 2> angles)
+
+Lookup table for Q6.
+
+.. index:: pair: function; lookupTableQ8Vec
+.. _doxid-namespacesph_1adf0ba61f373430a782cbee2886628211:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::complex<double>> lookupTableQ8Vec(std::array<double, 2> angles)
+
+Lookup table for Q8.
+
+.. index:: pair: function; lookupTableQ8
+.. _doxid-namespacesph_1ac7a53e67f5244c83d541c78d7d7bf710:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::complex<double> lookupTableQ8(int m, std::array<double, 2> angles)
+
+Lookup table for Q8 (m=0 to m=16).
+
+.. index:: pair: function; lookupTableQ6
+.. _doxid-namespacesph_1a63be01f86931b2a45e70606f5b8f545d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::complex<double> lookupTableQ6(int m, std::array<double, 2> angles)
+
+Lookup table for Q6 (m=0 to m=12).
+

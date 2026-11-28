@@ -1,0 +1,22 @@
+==========
+User guide
+==========
+
+
+Recipes and worked examples, grouped by the job you came to do. The
+background for those jobs is
+`the explanation pages <../explanation/index.rst>`_.
+
+.. toctree::
+   :maxdepth: 1
+
+   classify
+   order
+   interfaces
+   confined
+   engines
+   languages
+   versions
+   paper
+   performance
+   ../explanation/index

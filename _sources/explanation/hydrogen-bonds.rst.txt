@@ -1,0 +1,38 @@
+=======================
+Directed hydrogen bonds
+=======================
+
+
+A directed hydrogen bond names the donor heavy atom, the hydrogen, and
+the acceptor heavy atom.
+
+The angle is acceptor-first. The donor-acceptor vector is the minimum
+image of the acceptor minus the donor. The acceptor-hydrogen vector is
+the minimum image of the acceptor minus the hydrogen. A linear
+donor-hydrogen-acceptor geometry has angle 0 degrees. The
+acceptor-hydrogen distance is kept when it is strictly below 2.42 Å by
+default. The angle is kept when it is less than or equal to 30 degrees
+by default. The donor and the acceptor are neighbours when their
+minimum image is strictly below 3.5 Å by default. The same cutoffs apply
+on an orthorhombic cell and on a restricted triclinic LAMMPS cell
+(origin, edge lengths, then the tilts :math:`xy`, :math:`xz`, :math:`yz`). For a
+triclinic cell, every face separation must be at least twice the
+donor-acceptor cutoff; the current neighbour search can miss valid pairs
+in a thinner cell.
+
+Each hydrogen is assigned to the nearest heavy atom that shares its
+molecule id, then kept only when that heavy atom has a requested donor
+type. The lower frame index wins an equal distance. A carbonyl oxygen
+with no hydrogen is only an acceptor, and an N-H group with one hydrogen
+can donate. ``exclude_same_mol`` drops a pair that shares a molecule id.
+Passing 0 keeps that pair, which is the intramolecular chelate.
+
+``seams_system_set_hydrogen_frame`` stores the heavy atoms first and the
+hydrogen cloud after them. Frame index ``n_heavy + h`` is hydrogen ``h`` of
+that cloud. Water-water and water-framework counts are two calls of
+``seams_directed_hbonds`` with different donor and acceptor type sets.
+An empty type set writes zero edges.
+
+The two-hydrogen water list from ``populateHbondsWithInputClouds`` is
+unchanged. On a pure two-hydrogen water set, the unordered pairs of the
+directed edges are the pairs of that list.

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/brine_front.hpp File Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/brine__front_8hpp.html">
+<meta property="og:title" content="seams-core: src/include/internal/brine_front.hpp File Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/brine__front_8hpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/brine_front.hpp File Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('brine__front_8hpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">brine_front.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>In-situ measurements at a planar ice/brine front.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="site_8hpp_source.html">site.hpp</a>&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+</div>
+<p><a href="brine__front_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:site_3A_3AConcentrationBin" id="r_site_3A_3AConcentrationBin"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1ConcentrationBin.html">site::ConcentrationBin</a></td></tr>
+<tr class="memitem:site_3A_3AConcentrationProfile" id="r_site_3A_3AConcentrationProfile"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1ConcentrationProfile.html">site::ConcentrationProfile</a></td></tr>
+<tr class="memitem:site_3A_3AFrontPair" id="r_site_3A_3AFrontPair"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1FrontPair.html">site::FrontPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Two planar fronts of one ice slab in a periodic box.  <a href="structsite_1_1FrontPair.html#details">More...</a><br /></td></tr>
+<tr class="memitem:site_3A_3ARejectionCoefficient" id="r_site_3A_3ARejectionCoefficient"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1RejectionCoefficient.html">site::RejectionCoefficient</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">k = c_ice / c_liquid, both molalities of formula units.  <a href="structsite_1_1RejectionCoefficient.html#details">More...</a><br /></td></tr>
+<tr class="memitem:site_3A_3ALinearFit" id="r_site_3A_3ALinearFit"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1LinearFit.html">site::LinearFit</a></td></tr>
+<tr class="memitem:site_3A_3ABrinePocket" id="r_site_3A_3ABrinePocket"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1BrinePocket.html">site::BrinePocket</a></td></tr>
+<tr class="memitem:site_3A_3APocketCensus" id="r_site_3A_3APocketCensus"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1PocketCensus.html">site::PocketCensus</a></td></tr>
+<tr class="memitem:site_3A_3AFrontLayerReport" id="r_site_3A_3AFrontLayerReport"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1FrontLayerReport.html">site::FrontLayerReport</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waters within <span class="tt">halfWidth</span> of either front, their primitive-ring census, and the coordination defects (a water whose oxygen neighbour count is not 4).  <a href="structsite_1_1FrontLayerReport.html#details">More...</a><br /></td></tr>
+<tr class="memitem:site_3A_3ATrapEvent" id="r_site_3A_3ATrapEvent"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1TrapEvent.html">site::TrapEvent</a></td></tr>
+<tr class="memitem:site_3A_3AFrontOptions" id="r_site_3A_3AFrontOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1FrontOptions.html">site::FrontOptions</a></td></tr>
+<tr class="memitem:site_3A_3AFrontSnapshot" id="r_site_3A_3AFrontSnapshot"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1FrontSnapshot.html">site::FrontSnapshot</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:site" id="r_site"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html">site</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ad2c663055abfccc0db54cad890f6865c" id="r_ad2c663055abfccc0db54cad890f6865c"><td class="memItemLeft"><a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#ad2c663055abfccc0db54cad890f6865c">site::concentrationProfile</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;waterIndices, const std::vector&lt; int &gt; &amp;ionIndices, int nBins, int axis=2, int ionsPerFormula=2)</td></tr>
+<tr class="memitem:a03abaa05da31ce30d440505f4507a8d8" id="r_a03abaa05da31ce30d440505f4507a8d8"><td class="memItemLeft"><a class="el" href="structsite_1_1FrontPair.html">FrontPair</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a03abaa05da31ce30d440505f4507a8d8">site::locateFronts</a> (const <a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a> &amp;profile, double cut=0.5)</td></tr>
+<tr class="memitem:a7b0b14e15325d993b4acdd83ff8014a4" id="r_a7b0b14e15325d993b4acdd83ff8014a4"><td class="memItemLeft"><a class="el" href="structsite_1_1RejectionCoefficient.html">RejectionCoefficient</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a7b0b14e15325d993b4acdd83ff8014a4">site::rejectionCoefficient</a> (const <a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a> &amp;profile, double bulkIce=0.85, double bulkLiquid=0.15)</td></tr>
+<tr class="memitem:ab5e571561bc356c66fac347d8f8924e2" id="r_ab5e571561bc356c66fac347d8f8924e2"><td class="memItemLeft"><a class="el" href="structsite_1_1LinearFit.html">LinearFit</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#ab5e571561bc356c66fac347d8f8924e2">site::linearFit</a> (const std::vector&lt; double &gt; &amp;time, const std::vector&lt; double &gt; &amp;value)</td></tr>
+<tr class="memitem:a50195ca7ff3fd7ab4e2e251f4b4aaccf" id="r_a50195ca7ff3fd7ab4e2e251f4b4aaccf"><td class="memItemLeft"><a class="el" href="structsite_1_1PocketCensus.html">PocketCensus</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a50195ca7ff3fd7ab4e2e251f4b4aaccf">site::brinePockets</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;waterIndices, const std::vector&lt; int &gt; &amp;ionIndices, double cutoff)</td></tr>
+<tr class="memitem:a7694aef3e4594497247dfece31f0285b" id="r_a7694aef3e4594497247dfece31f0285b"><td class="memItemLeft"><a class="el" href="structsite_1_1FrontLayerReport.html">FrontLayerReport</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a7694aef3e4594497247dfece31f0285b">site::frontLayer</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; int &gt; &amp;waterIndices, const <a class="el" href="structsite_1_1FrontPair.html">FrontPair</a> &amp;fronts, double halfWidth, double cutoff, int maxRing, int axis=2)</td></tr>
+<tr class="memitem:ad9acb3de62cc0af6b28a6f8197f2d24c" id="r_ad9acb3de62cc0af6b28a6f8197f2d24c"><td class="memItemLeft">std::vector&lt; <a class="el" href="structsite_1_1TrapEvent.html">TrapEvent</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#ad9acb3de62cc0af6b28a6f8197f2d24c">site::trappingTransitions</a> (const <a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a> &amp;before, const <a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a> &amp;after)</td></tr>
+<tr class="memdesc:ad9acb3de62cc0af6b28a6f8197f2d24c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A trapping event is a change of <a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791" title="Ions read against a per-atom ice assignment.">IonState</a> into ice.  <br /></td></tr>
+<tr class="memitem:a55dc246b8a7c6b02d1a57349bdbf98a8" id="r_a55dc246b8a7c6b02d1a57349bdbf98a8"><td class="memItemLeft"><a class="el" href="structsite_1_1FrontSnapshot.html">FrontSnapshot</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a55dc246b8a7c6b02d1a57349bdbf98a8">site::analyseFront</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;waterIndices, const std::vector&lt; int &gt; &amp;ionIndices, const <a class="el" href="structsite_1_1FrontOptions.html">FrontOptions</a> &amp;options={})</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a830c5d5e28d9456dcc61abd3d558ab7f" id="r_a830c5d5e28d9456dcc61abd3d558ab7f"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a830c5d5e28d9456dcc61abd3d558ab7f">site::kWaterMolarMassKg</a> = 0.01801528</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>In-situ measurements at a planar ice/brine front. </p>
+<p>The ice label is an input. CHILL+ (or any other classifier) stays outside these functions, so a synthetic slab tests the arithmetic without a trajectory. Lengths are the cloud's length unit. </p>
+
+<p class="definition">Definition in file <a class="el" href="brine__front_8hpp_source.html">brine_front.hpp</a>.</p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="brine__front_8hpp.html">brine_front.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

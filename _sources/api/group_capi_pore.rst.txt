@@ -1,0 +1,23 @@
+.. index:: pair: group; Pore geometry
+.. _doxid-group__capi__pore:
+
+Pore geometry
+=============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Fractional density, cylindrical pore profiles, and host-guest contacts. :ref:`More...<details-group__capi__pore>`
+
+.. _details-group__capi__pore:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Fractional density, cylindrical pore profiles, and host-guest contacts.
+
+Slab and shell volumes use the triclinic cell, det(H). A fractional bin along a cell edge has volume V/n. An arbitrary direction bins the projection of the reduced cell, and each bin volume is the measure of that slice. Number density is atoms per cubic Angstrom. Mass density is the caller's mass unit per cubic Angstrom, or mass 1 when masses is NULL. A mass given in amu is therefore amu per cubic Angstrom, and multiplying by 1.66054 converts that density to grams per cubic centimetre. The library does not apply the factor.
+

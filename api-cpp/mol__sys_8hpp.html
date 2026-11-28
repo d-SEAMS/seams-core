@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/mol_sys.hpp File Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/mol__sys_8hpp.html">
+<meta property="og:title" content="seams-core: src/include/internal/mol_sys.hpp File Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/mol__sys_8hpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/mol_sys.hpp File Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('mol__sys_8hpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">mol_sys.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>The main molecular system handler.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
+<code>#include &lt;concepts&gt;</code><br />
+<code>#include &lt;fstream&gt;</code><br />
+<code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;sstream&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+</div>
+<p><a href="mol__sys_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:molSys_3A_3AResult" id="r_molSys_3A_3AResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structmolSys_1_1Result.html">molSys::Result</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains the bond classifier of enum class type <a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328">bond_type</a>, and the bond correlation factor.  <a href="structmolSys_1_1Result.html#details">More...</a><br /></td></tr>
+<tr class="memitem:molSys_3A_3APoint_3C_20T_20_3E" id="r_molSys_3A_3APoint_3C_20T_20_3E"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structmolSys_1_1Point.html">molSys::Point&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains per-particle information.  <a href="structmolSys_1_1Point.html#details">More...</a><br /></td></tr>
+<tr class="memitem:molSys_3A_3APointCloud_3C_20S_2C_20T_20_3E" id="r_molSys_3A_3APointCloud_3C_20S_2C_20T_20_3E"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt; S, T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains a collection of points; contains information for a particular frame.  <a href="structmolSys_1_1PointCloud.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:molSys" id="r_molSys"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacemolSys.html">molSys</a></td></tr>
+<tr class="memdesc:namespacemolSys"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bare-bones structs used throughout the architecture. <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-concepts" class="groupheader"><a id="concepts" name="concepts"></a>
+Concepts</h2></td></tr>
+<tr class="memitem:molSys_3A_3ACoordinateScalar" id="r_molSys_3A_3ACoordinateScalar"><td class="memItemLeft">concept &#160;</td><td class="memItemRight"><a class="el" href="conceptmolSys_1_1CoordinateScalar.html">molSys::CoordinateScalar</a></td></tr>
+<tr class="memitem:molSys_3A_3AmolSys_3A_3ACoordinateScalar" id="r_molSys_3A_3AmolSys_3A_3ACoordinateScalar"><td class="memItemLeft">concept &#160;</td><td class="memItemRight"><a class="el" href="conceptmolSys_1_1molSys_1_1CoordinateScalar.html">molSys::molSys::CoordinateScalar</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The arithmetic type a coordinate may take. <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a1c858200c3d088bf02839453d0f46328" id="r_a1c858200c3d088bf02839453d0f46328"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328">molSys::bond_type</a> { <a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c">molSys::staggered</a>
+, <a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df">molSys::eclipsed</a>
+, <a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0">molSys::out_of_range</a>
+ }</td></tr>
+<tr class="memitem:a13ffe3a39a0816627553f195e102abb5" id="r_a13ffe3a39a0816627553f195e102abb5"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> { <br />
+&#160;&#160;<a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843">molSys::cubic</a>
+, <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac">molSys::hexagonal</a>
+, <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5a9460370bb0ca1c98a779b1bcc6861c2c">molSys::water</a>
+, <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5a59efaf6a5e576d4e93fb285c00dbd428">molSys::interfacial</a>
+, <br />
+&#160;&#160;<a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5abf2e20bcb148b586d01ecb98cc701fb5">molSys::clathrate</a>
+, <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5a7cc309cdf3bce661fa160b370b7bd8fa">molSys::interClathrate</a>
+, <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4">molSys::unclassified</a>
+, <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5a4d7144359266dc2d0eb957ddeaed8b9b">molSys::reCubic</a>
+, <br />
+&#160;&#160;<a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5aba57d7df3e2abf6f2b88fa8e278db9c5">molSys::reHex</a>
+<br />
+ }</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ad236d6a772972d62643eb5d135e3d50d" id="r_ad236d6a772972d62643eb5d135e3d50d"><td class="memItemLeft">std::unordered_map&lt; int, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacemolSys.html#ad236d6a772972d62643eb5d135e3d50d">molSys::createIDMolIDmap</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:afb65f01cfbb0d80cfa7b311d68d9c109" id="r_afb65f01cfbb0d80cfa7b311d68d9c109"><td class="memItemLeft">std::unordered_multimap&lt; int, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacemolSys.html#afb65f01cfbb0d80cfa7b311d68d9c109">molSys::createMolIDAtomIDMultiMap</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:aafb58fd2a00105ec154c18116cdea9ae" id="r_aafb58fd2a00105ec154c18116cdea9ae"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacemolSys.html#aafb58fd2a00105ec154c18116cdea9ae">molSys::hAtomMolList</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;hCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;oCloud)</td></tr>
+<tr class="memitem:a4c1de58730efe0454ce4a92f1a96231b" id="r_a4c1de58730efe0454ce4a92f1a96231b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacemolSys.html#a4c1de58730efe0454ce4a92f1a96231b">molSys::searchMolList</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;molList, int molIDtoFind)</td></tr>
+<tr class="memitem:a68c5a77ae0efb6cbc02686676f2125c6" id="r_a68c5a77ae0efb6cbc02686676f2125c6"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacemolSys.html#a68c5a77ae0efb6cbc02686676f2125c6">molSys::clearPointCloud</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memdesc:a68c5a77ae0efb6cbc02686676f2125c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">//! Function for clearing vectors in <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">PointCloud</a> after multiple usage  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>The main molecular system handler. </p>
+
+<p class="definition">Definition in file <a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>.</p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

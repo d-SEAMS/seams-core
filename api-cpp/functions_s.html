@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: Class Members</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/functions_s.html">
+<meta property="og:title" content="seams-core: Class Members">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/functions_s.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: Class Members">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('functions_s.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="contents">
+<div class="textblock">Here is a list of all class members with links to the classes they belong to:</div><br/>
+<div class="qindex"><a class="qindex" href="functions.html#index_a">A</a><div class="alphasepar"></div><a class="qindex" href="functions_b.html#index_b">B</a><div class="alphasepar"></div><a class="qindex" href="functions_c.html#index_c">C</a><div class="alphasepar"></div><a class="qindex" href="functions_d.html#index_d">D</a><div class="alphasepar"></div><a class="qindex" href="functions_e.html#index_e">E</a><div class="alphasepar"></div><a class="qindex" href="functions_f.html#index_f">F</a><div class="alphasepar"></div><a class="qindex" href="functions_g.html#index_g">G</a><div class="alphasepar"></div><a class="qindex" href="functions_h.html#index_h">H</a><div class="alphasepar"></div><a class="qindex" href="functions_i.html#index_i">I</a><div class="alphasepar"></div><a class="qindex" href="functions_j.html#index_j">J</a><div class="alphasepar"></div><a class="qindex" href="functions_k.html#index_k">K</a><div class="alphasepar"></div><a class="qindex" href="functions_l.html#index_l">L</a><div class="alphasepar"></div><a class="qindex" href="functions_m.html#index_m">M</a><div class="alphasepar"></div><a class="qindex" href="functions_n.html#index_n">N</a><div class="alphasepar"></div><a class="qindex" href="functions_o.html#index_o">O</a><div class="alphasepar"></div><a class="qindex" href="functions_p.html#index_p">P</a><div class="alphasepar"></div><a class="qindex" href="functions_q.html#index_q">Q</a><div class="alphasepar"></div><a class="qindex" href="functions_r.html#index_r">R</a><div class="alphasepar"></div><a class="qindex" href="functions_s.html#index_s">S</a><div class="alphasepar"></div><a class="qindex" href="functions_t.html#index_t">T</a><div class="alphasepar"></div><a class="qindex" href="functions_u.html#index_u">U</a><div class="alphasepar"></div><a class="qindex" href="functions_v.html#index_v">V</a><div class="alphasepar"></div><a class="qindex" href="functions_w.html#index_w">W</a><div class="alphasepar"></div><a class="qindex" href="functions_x.html#index_x">X</a><div class="alphasepar"></div><a class="qindex" href="functions_y.html#index_y">Y</a><div class="alphasepar"></div><a class="qindex" href="functions_z.html#index_z">Z</a><div class="alphasepar"></div><a class="qindex" href="functions_~.html#index__7E">~</a></div>
+
+
+<h3 class="doxsection"><a id="index_s" name="index_s"></a>- s -</h3><ul>
+<li>s_continuous&#160;:&#160;<a class="el" href="structseams_1_1HbondLifetimeCurve.html#af302d21aea72ea59993d77f506b4883b">seams::HbondLifetimeCurve</a></li>
+<li>saved&#160;:&#160;<a class="el" href="structseams_1_1TeamWidth.html#a06b316a6d02ce31cbe77fe9b3f613af1">seams::TeamWidth</a></li>
+<li>search_ms&#160;:&#160;<a class="el" href="structring_1_1DdcSplit.html#afc2418f108d7222363633cdf3b53033c">ring::DdcSplit</a>, <a class="el" href="structring_1_1PackParts.html#a2c4e6c49daf51840c7e8945373209968">ring::PackParts</a></li>
+<li>searchMs&#160;:&#160;<a class="el" href="structseams_1_1domain_1_1RingPhases.html#a3e02701dafc5db9447d9d29651c35910">seams::domain::RingPhases</a></li>
+<li>second&#160;:&#160;<a class="el" href="structsymm_1_1CanonShell.html#af768d87038b1758f502510e5f6fc5c31">symm::CanonShell</a></li>
+<li>sequence&#160;:&#160;<a class="el" href="structtopoparam_1_1LayerStack.html#a7d3bd78c11d6cb4e414fdf8e5e5dc7fe">topoparam::LayerStack</a></li>
+<li>set&#160;:&#160;<a class="el" href="structchill_1_1QlCutoffStages.html#acee15a46af796a168279c7e3c43db61c">chill::QlCutoffStages</a></li>
+<li>set_frame()&#160;:&#160;<a class="el" href="classseams_1_1System.html#ae61de30cae54c423c079e9b1ec02a972">seams::System</a></li>
+<li>set_hydrogen_frame()&#160;:&#160;<a class="el" href="classseams_1_1System.html#a436cc3439e72744b4fb72cb81d77d507">seams::System</a></li>
+<li>set_mols()&#160;:&#160;<a class="el" href="classseams_1_1System.html#a284ceff427a3921416afe3edc4cd7a1f">seams::System</a></li>
+<li>set_ortho()&#160;:&#160;<a class="el" href="classseams_1_1System.html#ad4d74603f143fbac7bdb86497e762627">seams::System</a></li>
+<li>setBatchFraction()&#160;:&#160;<a class="el" href="classring_1_1AffiliationUpdater.html#ab5599551dae9aa4986772d45bd3e8bc3">ring::AffiliationUpdater</a></li>
+<li>setBondCrossover()&#160;:&#160;<a class="el" href="classprimitive_1_1RingUpdater.html#af2cd5037b3a1e2c67f84bf482ab8c6eb">primitive::RingUpdater</a></li>
+<li>setFullPassFraction()&#160;:&#160;<a class="el" href="classprimitive_1_1RingUpdater.html#a53a273ea8d071c67a311fc29dd88ee2d">primitive::RingUpdater</a></li>
+<li>sheet_area&#160;:&#160;<a class="el" href="structseams_1_1SheetOptions.html#af138b59fdcacf970c5483a623ca59f95">seams::SheetOptions</a></li>
+<li>shell&#160;:&#160;<a class="el" href="structscience_1_1AtomRow.html#a94ab053a0b57cb4fef4248019555de4b">science::AtomRow</a>, <a class="el" href="structscience_1_1NucleusFrame.html#abe866c183a8781bf15d39285db7efdbc">science::NucleusFrame</a>, <a class="el" href="structsite_1_1IonEnvironment.html#a277b78dca0eb1dddf9a9ff7698a60706">site::IonEnvironment</a></li>
+<li>shellAgree&#160;:&#160;<a class="el" href="structiface_1_1Study.html#aa1e44a579e9232a2efd9fd1c35ba619f">iface::Study</a></li>
+<li>shellCubic&#160;:&#160;<a class="el" href="structscience_1_1ClusterPart.html#a5d0d5de851d73a7dbd56c661740c0001">science::ClusterPart</a>, <a class="el" href="structscience_1_1LayerRow.html#a392a3fe7157c69de2d4bf6598d7755a8">science::LayerRow</a>, <a class="el" href="structscience_1_1NucleusFrame.html#a667faf32288c7eced3afb2bae8c67619">science::NucleusFrame</a></li>
+<li>shellCutoff&#160;:&#160;<a class="el" href="structsite_1_1FrontOptions.html#a614a3fcacf0da6d6b1bfa7ac65b23583">site::FrontOptions</a></li>
+<li>shellDisagree&#160;:&#160;<a class="el" href="structiface_1_1Study.html#add6faf5db5ff24e27cefe1eb8f60e85e">iface::Study</a></li>
+<li>shellHex&#160;:&#160;<a class="el" href="structscience_1_1ClusterPart.html#a475d2312808a1d99088038f689e09e1c">science::ClusterPart</a>, <a class="el" href="structscience_1_1LayerRow.html#aa32337b9f94433bef0fe4c352a9681b4">science::LayerRow</a>, <a class="el" href="structscience_1_1NucleusFrame.html#a9793bcf3f6eeac967a5a4587273f1b2f">science::NucleusFrame</a></li>
+<li>shellOther&#160;:&#160;<a class="el" href="structscience_1_1ClusterPart.html#a24982e096ba3904c8cc246c22ffb9812">science::ClusterPart</a>, <a class="el" href="structscience_1_1LayerRow.html#a0e3403ef3d651dd3d628a2a422859aa8">science::LayerRow</a>, <a class="el" href="structscience_1_1NucleusFrame.html#ac4da89facc1476eb8c8fcf336772b41c">science::NucleusFrame</a></li>
+<li>shellStack&#160;:&#160;<a class="el" href="structscience_1_1ClusterPart.html#a76d11cf1623fc7bda03f7b6f4f7509a1">science::ClusterPart</a>, <a class="el" href="structscience_1_1LayerRow.html#aa31cf0cca1e6e0b300e996a9d43cd198">science::LayerRow</a>, <a class="el" href="structscience_1_1NucleusFrame.html#a865540b3457e7a49b2034f75db045bc7">science::NucleusFrame</a></li>
+<li>sigma&#160;:&#160;<a class="el" href="structscience_1_1CriticalSize.html#abb8a4c635689aeee731f720be9eb490a">science::CriticalSize</a></li>
+<li>signature&#160;:&#160;<a class="el" href="structcage_1_1FoundCage.html#a5de16a1306e895fd65cd4b44b9fdddc0">cage::FoundCage</a></li>
+<li>signature_cages()&#160;:&#160;<a class="el" href="classseams_1_1System.html#a2725db4dfd10f187d428636af413c058">seams::System</a></li>
+<li>site_table()&#160;:&#160;<a class="el" href="classseams_1_1System.html#a8d5f5b1be32204fe8cbb385b08bd5ea5">seams::System</a></li>
+<li>sixCount&#160;:&#160;<a class="el" href="structgpu_1_1BatchResult.html#a7ad83b1890c8860121d34b52669ece96">gpu::BatchResult</a></li>
+<li>size&#160;:&#160;<a class="el" href="structscience_1_1ClusterPart.html#a8faf1f60027585d218d7c3f76395e0ad">science::ClusterPart</a>, <a class="el" href="structseams_1_1ChordlessCycles.html#a5f95f7eec618c43954613bbe0a384efb">seams::ChordlessCycles</a>, <a class="el" href="classseams_1_1Rings.html#a8f4d567dfc956ba765e61efd7615be4c">seams::Rings</a>, <a class="el" href="structseams__directed__hbond.html#a89e19fdce1b274207abf5c3d72f1ac43">seams_directed_hbond</a>, <a class="el" href="structseams__hbond__edge.html#adf3fd911641383d8f7a7c742b45b36cd">seams_hbond_edge</a></li>
+<li>sizeCount&#160;:&#160;<a class="el" href="structseams_1_1domain_1_1RingSummary.html#a1e4953e17db15ae07393b9ab0a35b667">seams::domain::RingSummary</a></li>
+<li>sizes&#160;:&#160;<a class="el" href="structsite_1_1PocketCensus.html#a97bf43da75537c578d29a7d0309633f1">site::PocketCensus</a></li>
+<li>SkinNeighborList()&#160;:&#160;<a class="el" href="classnneigh_1_1SkinNeighborList.html#a80f555acadad22b5edcc4af8285006ed">nneigh::SkinNeighborList</a></li>
+<li>sliceWidth&#160;:&#160;<a class="el" href="structseams_1_1product_1_1GemmInfo.html#a20d16a0ce6bc905549e8aa1bb8e637c9">seams::product::GemmInfo</a></li>
+<li>slope&#160;:&#160;<a class="el" href="structscience_1_1SlopeInterval.html#a97ae20b0d34cc3e759b5e58702e7771f">science::SlopeInterval</a>, <a class="el" href="structsite_1_1LinearFit.html#aa72e22adb4b61619387d990485bd88dd">site::LinearFit</a></li>
+<li>slopeStdErr&#160;:&#160;<a class="el" href="structsite_1_1LinearFit.html#a00e060acf10c883ff41a99d71f74504c">site::LinearFit</a></li>
+<li>slow&#160;:&#160;<a class="el" href="structseams_1_1FairState.html#a305c1a3dab4cee4f711e38588ab5e9cd">seams::FairState</a></li>
+<li>solid&#160;:&#160;<a class="el" href="structiface_1_1Profile.html#a411c2fe4e684c2c3bf63f5b6955247d0">iface::Profile</a></li>
+<li>solidOvi&#160;:&#160;<a class="el" href="structiface_1_1Bin.html#a45732dc246ec22216c1ce798ec77b7c8">iface::Bin</a>, <a class="el" href="structiface_1_1Study.html#a5a7f2c730e012eaf0616bb68efbd4bd7">iface::Study</a></li>
+<li>solidPub&#160;:&#160;<a class="el" href="structiface_1_1Bin.html#ab887e7117cb9c73dccf9402cc60629bd">iface::Bin</a>, <a class="el" href="structiface_1_1Study.html#ac92f03a72b3ceeea09a82315fefe5cbb">iface::Study</a></li>
+<li>solidWidthOvi&#160;:&#160;<a class="el" href="structiface_1_1WillardChandler.html#a40d9dc21c7e9b44f37dae6571ce1af7a">iface::WillardChandler</a></li>
+<li>solidWidthPub&#160;:&#160;<a class="el" href="structiface_1_1WillardChandler.html#a6c0ae6c5564e0e887bc7eea3a5b2e1ff">iface::WillardChandler</a></li>
+<li>source&#160;:&#160;<a class="el" href="structseams_1_1cfg_1_1Runtime.html#a05a989351227a5a0ab8dacb165e6d894">seams::cfg::Runtime</a></li>
+<li>spec&#160;:&#160;<a class="el" href="structseams_1_1DomainOptions.html#ab963c7d6c613cc140334286499f4dc3c">seams::DomainOptions</a>, <a class="el" href="structseams_1_1SignatureOptions.html#af74974598f7ee36b0d390f29547af425">seams::SignatureOptions</a></li>
+<li>species&#160;:&#160;<a class="el" href="structcage_1_1FormerRow.html#af59daf6d60866bd457e3628a934dd67f">cage::FormerRow</a>, <a class="el" href="structseams_1_1CageOptions.html#a56eeeecf9a79fd74513e3cb2ae90323c">seams::CageOptions</a>, <a class="el" href="structseams_1_1ChillOptions.html#ad00c218a58fd73792a9198cfe83ba454">seams::ChillOptions</a>, <a class="el" href="structseams_1_1DensityOptions.html#a149a66a829bb6febb4bc4959b221df3a">seams::DensityOptions</a>, <a class="el" href="structseams_1_1FingerprintOptions.html#a7321bcd363cd8f3a178f2a7075437ff0">seams::FingerprintOptions</a>, <a class="el" href="structseams_1_1FractionalDensityOptions.html#aa84630532ac7130f6c9a27003b4729e3">seams::FractionalDensityOptions</a>, <a class="el" href="structseams_1_1KnnOptions.html#a38f49715496943c232fe550e7d140ce8">seams::KnnOptions</a>, <a class="el" href="structseams_1_1NeighbourOptions.html#a0ec323a7609353e61286b8acb52aede2">seams::NeighbourOptions</a>, <a class="el" href="structseams_1_1OrderOptions.html#af81301cb12e0ed3fe8bbbc7ef8801420">seams::OrderOptions</a>, <a class="el" href="structseams_1_1PoreProfileOptions.html#a69d5f1bfd2972639f8d4dca4296ea4c7">seams::PoreProfileOptions</a>, <a class="el" href="structseams_1_1PrismOptions.html#a0b95df986a86f000b3c826a8d0669789">seams::PrismOptions</a>, <a class="el" href="structseams_1_1Q6BarOptions.html#a3306661d8ff85f2c0477cdff16015f07">seams::Q6BarOptions</a>, <a class="el" href="structseams_1_1RingOptions.html#a03060dbbc50cf2d1497aa3835d019bc3">seams::RingOptions</a>, <a class="el" href="structseams_1_1SheetOptions.html#a32d914f56f72212088a2dbb006efb42c">seams::SheetOptions</a>, <a class="el" href="structseams_1_1SignatureOptions.html#a0c9c4affe1d089cc864a819010026209">seams::SignatureOptions</a>, <a class="el" href="structseams_1_1SteinhardtOptions.html#a213be5429e0a7db8bdd4eb8099ef5c6a">seams::SteinhardtOptions</a></li>
+<li>split_ms&#160;:&#160;<a class="el" href="structring_1_1DdcSplit.html#aa72c211b9d8dfb4e5518bd5400d7fea2">ring::DdcSplit</a>, <a class="el" href="structring_1_1PackParts.html#a9762ed8bcde4ef1c244c9ce6fa101b3d">ring::PackParts</a></li>
+<li>stackAsCubic&#160;:&#160;<a class="el" href="structscience_1_1NucleusFrame.html#a9e7e493f259de3886cf32e9751b66965">science::NucleusFrame</a></li>
+<li>stackAsHex&#160;:&#160;<a class="el" href="structscience_1_1NucleusFrame.html#a1ace7f774f3978ba559bd0fa91413c07">science::NucleusFrame</a></li>
+<li>stackAsInter&#160;:&#160;<a class="el" href="structscience_1_1NucleusFrame.html#a745906ca39180dc42a1ae25e62384f64">science::NucleusFrame</a></li>
+<li>stackAsLiquid&#160;:&#160;<a class="el" href="structscience_1_1NucleusFrame.html#a7d2e68f7a3c5704fb0d9a0f068dfdda1">science::NucleusFrame</a></li>
+<li>staggeredMax&#160;:&#160;<a class="el" href="structchill_1_1BondClassifier.html#a146b6b87ef413723796680f70c8ecca5">chill::BondClassifier</a></li>
+<li>start&#160;:&#160;<a class="el" href="structnucleation_1_1HalfRise.html#adfca7258b76c1b185fa1c00c76773973">nucleation::HalfRise</a></li>
+<li>state&#160;:&#160;<a class="el" href="structsite_1_1IonEnvironment.html#acc7b909a25297a34f700ba58a835dcc3">site::IonEnvironment</a></li>
+<li>status&#160;:&#160;<a class="el" href="structcage_1_1CageShape.html#afeea49168dac071ae90babcc1065a365">cage::CageShape</a>, <a class="el" href="classseams_1_1Error.html#a262ad62a5e21a2922d47b6fb816ff052">seams::Error</a>, <a class="el" href="structsymm_1_1Group.html#aa862430858d38b8f1e522356023371b5">symm::Group</a>, <a class="el" href="structsymm_1_1Overlay.html#aa695ee0edaefcaa53f5d2e2502dfa761">symm::Overlay</a>, <a class="el" href="structsymm_1_1Space.html#a6a33c1e9c3ea18fc63975179f6f16053">symm::Space</a></li>
+<li>steinhardt()&#160;:&#160;<a class="el" href="classseams_1_1System.html#ac1de17b0dea554a2c1264d61fa881ece">seams::System</a></li>
+<li>str()&#160;:&#160;<a class="el" href="structcage_1_1Signature.html#ac8c529682fe69784b3a0df99c096ecc2">cage::Signature</a></li>
+<li>study&#160;:&#160;<a class="el" href="structiface_1_1GrowthFrame.html#a32990a9920273c184100193778eaa185">iface::GrowthFrame</a></li>
+<li>subset&#160;:&#160;<a class="el" href="structclump_1_1Domain.html#a51cef87b47075b4c44641511e66247b0">clump::Domain</a>, <a class="el" href="structseams_1_1DomainOptions.html#acbf5b9f490a2a8e6579197658f4c73b0">seams::DomainOptions</a>, <a class="el" href="structseams_1_1DomainReport.html#a32dcc210e9ff9161ad7beb41e30051b4">seams::DomainReport</a></li>
+<li>surfaceRms&#160;:&#160;<a class="el" href="structiface_1_1WillardChandler.html#a8bbeefb1fdd49b031bd88770af4e131e">iface::WillardChandler</a></li>
+<li>symbol&#160;:&#160;<a class="el" href="structira_1_1PointGroup.html#adae4a9fa2ea71c4b628ac94bfe79a4f7">ira::PointGroup</a>, <a class="el" href="structsymm_1_1Group.html#afc99b3a48ef32ff44a78d6790559a762">symm::Group</a>, <a class="el" href="structsymm_1_1Space.html#a426cc467d7c46d60d004e9a5051fd623">symm::Space</a></li>
+<li>symCubic&#160;:&#160;<a class="el" href="structnucleation_1_1FrameRecord.html#a9443aacb9ca52493d4ec9ad6fa9a592d">nucleation::FrameRecord</a></li>
+<li>symHex&#160;:&#160;<a class="el" href="structnucleation_1_1FrameRecord.html#aa1d3e714650ce473976dbc7553f9b82e">nucleation::FrameRecord</a></li>
+<li>symmetry()&#160;:&#160;<a class="el" href="classseams_1_1System.html#af7707ba5be76aa88e3f1e8e94210f61c">seams::System</a></li>
+<li>System()&#160;:&#160;<a class="el" href="classseams_1_1System.html#a8f6a67e67ca298b5dfe9af6483ab62e5">seams::System</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

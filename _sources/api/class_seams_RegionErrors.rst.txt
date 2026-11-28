@@ -1,0 +1,27 @@
+.. index:: pair: class; seams::RegionErrors
+.. _doxid-classseams_1_1_region_errors:
+
+class seams::RegionErrors
+=========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/region_errors.hpp>
+	
+	class RegionErrors {
+	public:
+		// methods
+	
+		template <class F>
+		void :target:`run<doxid-classseams_1_1_region_errors_1a0e21c477e0fc496b832ff0a21d7afe19>`(F&& body);
+	
+		bool :target:`failed<doxid-classseams_1_1_region_errors_1a3318bb2c4707b5863a5ada0f1344667e>`() const;
+		void :target:`rethrow<doxid-classseams_1_1_region_errors_1a05aa0e19ecd86f09d068f70064c0351c>`() const;
+	};

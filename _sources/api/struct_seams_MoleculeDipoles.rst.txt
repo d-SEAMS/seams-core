@@ -1,0 +1,67 @@
+.. index:: pair: struct; seams::MoleculeDipoles
+.. _doxid-structseams_1_1_molecule_dipoles:
+
+struct seams::MoleculeDipoles
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Per-molecule dipole or geometric orientation vectors. :ref:`More...<details-structseams_1_1_molecule_dipoles>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct MoleculeDipoles {
+		// fields
+	
+		std::vector<int> :ref:`mol_ids<doxid-structseams_1_1_molecule_dipoles_1adf83d08f627d27f744d06432d8627830>`;
+		std::vector<double> :ref:`dipoles<doxid-structseams_1_1_molecule_dipoles_1a758526e246a7259e3d0877c37775efcd>`;
+		std::vector<double> :ref:`unit_vectors<doxid-structseams_1_1_molecule_dipoles_1ae35b8a8fef4512fb0afcc1cbd1e46a06>`;
+	};
+.. _details-structseams_1_1_molecule_dipoles:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Per-molecule dipole or geometric orientation vectors.
+
+Fields
+------
+
+.. index:: pair: variable; mol_ids
+.. _doxid-structseams_1_1_molecule_dipoles_1adf83d08f627d27f744d06432d8627830:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> mol_ids
+
+Unique molecule ids.
+
+.. index:: pair: variable; dipoles
+.. _doxid-structseams_1_1_molecule_dipoles_1a758526e246a7259e3d0877c37775efcd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> dipoles
+
+Raw dipole or bond vectors, 3 \* n_mols.
+
+.. index:: pair: variable; unit_vectors
+.. _doxid-structseams_1_1_molecule_dipoles_1ae35b8a8fef4512fb0afcc1cbd1e46a06:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> unit_vectors
+
+Normalized orientation vectors, 3 \* n_mols.
+

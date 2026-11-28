@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: seams::Rings Class Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/classseams_1_1Rings.html">
+<meta property="og:title" content="seams-core: seams::Rings Class Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/classseams_1_1Rings.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: seams::Rings Class Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('classseams_1_1Rings.html','','classseams_1_1Rings-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams::Rings Class Reference<div class="ingroups"><a class="el" href="group__seams__cpp.html">C++ API</a></div></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Owned primitive-ring set.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="seams_8hpp_source.html">include/seams.hpp</a>&gt;</code></p>
+<div id="dynsection-0" class="dynheader closed"><span class="dynarrow"><span class="arrowhead closed"></span></span>Inheritance diagram for seams::Rings:</div>
+<div id="dynsection-0-summary" class="dynsummary">
+</div>
+<div id="dynsection-0-content" class="dyncontent hidden">
+ <div class="center">
+  <img src="classseams_1_1Rings.png" usemap="#seams_3A_3ARings_map" alt=""/>
+  <map id="seams_3A_3ARings_map" name="seams_3A_3ARings_map">
+<area href="classseams_1_1detail_1_1Handle.html" alt="seams::detail::Handle&lt; seams_rings, seams_rings_destroy &gt;" shape="rect" coords="0,0,351,24"/>
+  </map>
+</div></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:iterator" id="r_iterator"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1Rings_1_1iterator.html">iterator</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input iterator.  <a href="classseams_1_1Rings_1_1iterator.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a8f4d567dfc956ba765e61efd7615be4c" id="r_a8f4d567dfc956ba765e61efd7615be4c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a8f4d567dfc956ba765e61efd7615be4c">size</a> () const</td></tr>
+<tr class="memdesc:a8f4d567dfc956ba765e61efd7615be4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of primitive rings.  <br /></td></tr>
+<tr class="memitem:ab64a4d0b73b2a9ead71b3e9963fa2220" id="r_ab64a4d0b73b2a9ead71b3e9963fa2220"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ab64a4d0b73b2a9ead71b3e9963fa2220">vertices</a> (int index) const</td></tr>
+<tr class="memdesc:ab64a4d0b73b2a9ead71b3e9963fa2220"><td class="mdescLeft">&#160;</td><td class="mdescRight">Atom indices of one ring.  <br /></td></tr>
+<tr class="memitem:a0e2e276b5b38e404dae71e295cb0abfb" id="r_a0e2e276b5b38e404dae71e295cb0abfb"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a0e2e276b5b38e404dae71e295cb0abfb">histogram</a> (int up_to) const</td></tr>
+<tr class="memdesc:a0e2e276b5b38e404dae71e295cb0abfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Histogram of ring size.  <br /></td></tr>
+<tr class="memitem:acfab520584df981bc771426f1044344b" id="r_acfab520584df981bc771426f1044344b"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#acfab520584df981bc771426f1044344b">fraction</a> (int ring_size) const</td></tr>
+<tr class="memdesc:acfab520584df981bc771426f1044344b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fraction of atoms that sit on a ring of one size.  <br /></td></tr>
+<tr class="memitem:a3a503b36e7192dd58ce09db1f75c2664" id="r_a3a503b36e7192dd58ce09db1f75c2664"><td class="memItemLeft"><a class="el" href="classseams_1_1Rings_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight"><a class="el" href="#a3a503b36e7192dd58ce09db1f75c2664">begin</a> () const</td></tr>
+<tr class="memdesc:a3a503b36e7192dd58ce09db1f75c2664"><td class="mdescLeft">&#160;</td><td class="mdescRight">First ring.  <br /></td></tr>
+<tr class="memitem:a2776439d24c3f74b0e26587f4aed29e7" id="r_a2776439d24c3f74b0e26587f4aed29e7"><td class="memItemLeft"><a class="el" href="classseams_1_1Rings_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2776439d24c3f74b0e26587f4aed29e7">end</a> () const</td></tr>
+<tr class="memdesc:a2776439d24c3f74b0e26587f4aed29e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Past the last ring.  <br /></td></tr>
+<tr class="inherit_header pub_methods_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Public Member Functions inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_rings, seams_rings_destroy &gt;</a></td></tr>
+<tr class="memitem:a70fca214a6d43d58a4219a108e82f91d inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_a70fca214a6d43d58a4219a108e82f91d"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> ()=default</td></tr>
+<tr class="memitem:a0dd2050fdf4ea17474fcfd3297824dab inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_a0dd2050fdf4ea17474fcfd3297824dab"><td class="memItemLeft"><a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a0dd2050fdf4ea17474fcfd3297824dab">operator=</a> (const <a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> &amp;)=delete</td></tr>
+<tr class="memitem:ac44646bcdb18568576350cd63d2e18d4 inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_ac44646bcdb18568576350cd63d2e18d4"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ac44646bcdb18568576350cd63d2e18d4">~Handle</a> ()</td></tr>
+<tr class="memitem:ae58d780619badcc49127f4b5e6e78d4e inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_ae58d780619badcc49127f4b5e6e78d4e"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ae58d780619badcc49127f4b5e6e78d4e">operator bool</a> () const noexcept</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-inherited" class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_methods_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Member Functions inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_rings, seams_rings_destroy &gt;</a></td></tr>
+<tr class="memitem:a7d9cd594be5e78ed0a9081d48f487b90 inherit pro_methods_classseams_1_1detail_1_1Handle" id="r_a7d9cd594be5e78ed0a9081d48f487b90"><td class="memItemLeft"><a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a> () const noexcept</td></tr>
+<tr class="memitem:a668c158ddc5521b409de638b725bcf5f inherit pro_methods_classseams_1_1detail_1_1Handle" id="r_a668c158ddc5521b409de638b725bcf5f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a668c158ddc5521b409de638b725bcf5f">reset</a> () noexcept</td></tr>
+<tr class="inherit_header pro_attribs_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Attributes inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_rings, seams_rings_destroy &gt;</a></td></tr>
+<tr class="memitem:ac8ec612e046a771320a5d055156447ba inherit pro_attribs_classseams_1_1detail_1_1Handle" id="r_ac8ec612e046a771320a5d055156447ba"><td class="memItemLeft"><a class="el" href="group__capi__types.html#ga760947973b61de0c66f59d12c6f7427e">seams_rings</a> *&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ac8ec612e046a771320a5d055156447ba">ptr_</a></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Owned primitive-ring set. </p>
+<p>Move-only. <span class="tt"><a class="el" href="#a3a503b36e7192dd58ce09db1f75c2664" title="First ring.">begin</a></span> and <span class="tt"><a class="el" href="#a2776439d24c3f74b0e26587f4aed29e7" title="Past the last ring.">end</a></span> walk the rings and yield vertex indices. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00990">990</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a3a503b36e7192dd58ce09db1f75c2664" name="a3a503b36e7192dd58ce09db1f75c2664"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a503b36e7192dd58ce09db1f75c2664">&#9670;&#160;</a></span>begin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classseams_1_1Rings_1_1iterator.html">iterator</a> seams::Rings::begin </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>First ring. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01056">1056</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1056</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="classseams_1_1Rings_1_1iterator.html#ab05d59be148e83fc4f7c38c851e603c4">iterator</a>(<span class="keyword">this</span>, 0); }</div>
+<div class="ttc" id="aclassseams_1_1Rings_1_1iterator_html_ab05d59be148e83fc4f7c38c851e603c4"><div class="ttname"><a href="classseams_1_1Rings_1_1iterator.html#ab05d59be148e83fc4f7c38c851e603c4">seams::Rings::iterator::iterator</a></div><div class="ttdeci">iterator(const Rings *owner, int index)</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l01041">seams.hpp:1041</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a2776439d24c3f74b0e26587f4aed29e7" name="a2776439d24c3f74b0e26587f4aed29e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2776439d24c3f74b0e26587f4aed29e7">&#9670;&#160;</a></span>end()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classseams_1_1Rings_1_1iterator.html">iterator</a> seams::Rings::end </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Past the last ring. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01058">1058</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1058</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="classseams_1_1Rings_1_1iterator.html#ab05d59be148e83fc4f7c38c851e603c4">iterator</a>(<span class="keyword">this</span>, <a class="code hl_function" href="#a8f4d567dfc956ba765e61efd7615be4c">size</a>()); }</div>
+<div class="ttc" id="aclassseams_1_1Rings_html_a8f4d567dfc956ba765e61efd7615be4c"><div class="ttname"><a href="#a8f4d567dfc956ba765e61efd7615be4c">seams::Rings::size</a></div><div class="ttdeci">int size() const</div><div class="ttdoc">Number of primitive rings.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00998">seams.hpp:998</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="acfab520584df981bc771426f1044344b" name="acfab520584df981bc771426f1044344b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfab520584df981bc771426f1044344b">&#9670;&#160;</a></span>fraction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::Rings::fraction </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>ring_size</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fraction of atoms that sit on a ring of one size. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ring_size</td><td>Size to count. Zero counts every ring. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Dimensionless fraction. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01030">1030</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1030</span>                                                     {</div>
+<div class="line"><span class="lineno"> 1031</span>    <span class="keywordtype">double</span> value = 0;</div>
+<div class="line"><span class="lineno"> 1032</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__ring.html#gad420e7f240b6080f09b7856da904b55f">seams_rings_fraction</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), ring_size, &amp;value), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno"> 1033</span>    <span class="keywordflow">return</span> value;</div>
+<div class="line"><span class="lineno"> 1034</span>  }</div>
+<div class="ttc" id="aclassseams_1_1detail_1_1Handle_html_a7d9cd594be5e78ed0a9081d48f487b90"><div class="ttname"><a href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">seams::detail::Handle&lt; seams_rings, seams_rings_destroy &gt;::get</a></div><div class="ttdeci">seams_rings * get() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00830">seams.hpp:830</a></div></div>
+<div class="ttc" id="agroup__capi__ring_html_gad420e7f240b6080f09b7856da904b55f"><div class="ttname"><a href="group__capi__ring.html#gad420e7f240b6080f09b7856da904b55f">seams_rings_fraction</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fraction)</div><div class="ttdoc">Fraction of atoms that sit on a ring.</div></div>
+<div class="ttc" id="anamespaceseams_1_1detail_html_a2318c07d1ce9ec1e7b770df041fda676"><div class="ttname"><a href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">seams::detail::check</a></div><div class="ttdeci">void check(int status, const void *handle)</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00802">seams.hpp:802</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a0e2e276b5b38e404dae71e295cb0abfb" name="a0e2e276b5b38e404dae71e295cb0abfb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e2e276b5b38e404dae71e295cb0abfb">&#9670;&#160;</a></span>histogram()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; seams::Rings::histogram </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>up_to</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Histogram of ring size. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">up_to</td><td>Highest size stored. <span class="tt">counts[k]</span> is the number of rings of size k. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The histogram. Length is <span class="tt">up_to + 1</span>. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01019">1019</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1019</span>                                                          {</div>
+<div class="line"><span class="lineno"> 1020</span>    std::vector&lt;int&gt; counts(<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(up_to + 1));</div>
+<div class="line"><span class="lineno"> 1021</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__ring.html#gab6fc83164a185ef7f86ff38cb756511e">seams_rings_histogram</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), counts.data(), up_to + 1), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno"> 1022</span>    <span class="keywordflow">return</span> counts;</div>
+<div class="line"><span class="lineno"> 1023</span>  }</div>
+<div class="ttc" id="agroup__capi__ring_html_gab6fc83164a185ef7f86ff38cb756511e"><div class="ttname"><a href="group__capi__ring.html#gab6fc83164a185ef7f86ff38cb756511e">seams_rings_histogram</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_histogram(const seams_rings *rings, int *counts, int counts_len)</div><div class="ttdoc">Count primitive rings by size, with an int length.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a8f4d567dfc956ba765e61efd7615be4c" name="a8f4d567dfc956ba765e61efd7615be4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f4d567dfc956ba765e61efd7615be4c">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::Rings::size </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of primitive rings. </p>
+<dl class="section return"><dt>Returns</dt><dd>The ring count. A moved-from handle reports 0. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00998">998</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  998</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="group__capi__ring.html#ga5c8ce5e328d95864dbed541b5a99ed28">seams_rings_count</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>()); }</div>
+<div class="ttc" id="agroup__capi__ring_html_ga5c8ce5e328d95864dbed541b5a99ed28"><div class="ttname"><a href="group__capi__ring.html#ga5c8ce5e328d95864dbed541b5a99ed28">seams_rings_count</a></div><div class="ttdeci">SEAMS_API int seams_rings_count(const seams_rings *rings)</div><div class="ttdoc">Number of primitive rings, as an int.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ab64a4d0b73b2a9ead71b3e9963fa2220" name="ab64a4d0b73b2a9ead71b3e9963fa2220"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab64a4d0b73b2a9ead71b3e9963fa2220">&#9670;&#160;</a></span>vertices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; seams::Rings::vertices </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>index</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Atom indices of one ring. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">index</td><td>Ring index, from 0 to <span class="tt"><a class="el" href="#a8f4d567dfc956ba765e61efd7615be4c" title="Number of primitive rings.">size()</a> - 1</span>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Frame indices, in ring order. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01005">1005</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1005</span>                                                         {</div>
+<div class="line"><span class="lineno"> 1006</span>    std::size_t n_out = 0;</div>
+<div class="line"><span class="lineno"> 1007</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__ring.html#gad3b5a355f504d710b46f2c799260a32e">seams_rings_vertices</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), index, <span class="keyword">nullptr</span>, 0, &amp;n_out), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno"> 1008</span>    std::vector&lt;int&gt; atoms(n_out);</div>
+<div class="line"><span class="lineno"> 1009</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__ring.html#gad3b5a355f504d710b46f2c799260a32e">seams_rings_vertices</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), index, atoms.data(), n_out, &amp;n_out), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno"> 1010</span>    atoms.resize(n_out);</div>
+<div class="line"><span class="lineno"> 1011</span>    <span class="keywordflow">return</span> atoms;</div>
+<div class="line"><span class="lineno"> 1012</span>  }</div>
+<div class="ttc" id="agroup__capi__ring_html_gad3b5a355f504d710b46f2c799260a32e"><div class="ttname"><a href="group__capi__ring.html#gad3b5a355f504d710b46f2c799260a32e">seams_rings_vertices</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_vertices(const seams_rings *rings, int index, int *atoms, size_t cap, size_t *n_out)</div><div class="ttdoc">Atom indices of one ring.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>include/<a class="el" href="seams_8hpp_source.html">seams.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceseams.html">seams</a></li><li class="navelem"><a href="classseams_1_1Rings.html">Rings</a></li>
+  </ul>
+</div>
+</body>
+</html>

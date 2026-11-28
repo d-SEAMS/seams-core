@@ -1,0 +1,31 @@
+.. index:: pair: struct; science::AtomRow
+.. _doxid-structscience_1_1_atom_row:
+
+struct science::AtomRow
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/science_front.hpp>
+	
+	struct AtomRow {
+		// fields
+	
+		int :target:`id<doxid-structscience_1_1_atom_row_1a655790e1c85b8c43a650371ff50949db>` = 0;
+		double :target:`x<doxid-structscience_1_1_atom_row_1a16c7a975bd04a3490c347c3da2977a21>` = 0;
+		double :target:`y<doxid-structscience_1_1_atom_row_1a0db737801c39366482f869cae6761721>` = 0;
+		double :target:`z<doxid-structscience_1_1_atom_row_1aa333762974a5674c08846e04fc2987e9>` = 0;
+		int :target:`chill<doxid-structscience_1_1_atom_row_1a0dc0416ec6be0314d96ddc2a4a23ea92>` = 2;
+		int :target:`chillOvito<doxid-structscience_1_1_atom_row_1aeb90e46ad1cfb3996c1160839710a5c3>` = 2;
+		int :target:`shell<doxid-structscience_1_1_atom_row_1a94ab053a0b57cb4fef4248019555de4b>` = -1;
+		double :target:`q6<doxid-structscience_1_1_atom_row_1a8d8c0632df71dcbdc769ff4116fb66eb>` = 0;
+		double :target:`q6bar<doxid-structscience_1_1_atom_row_1aba23c17706d8b4cd67fe452d39c279fe>` = 0;
+		int :target:`inExtended<doxid-structscience_1_1_atom_row_1a561f052d10c3738fc0e13e9c6abbdd1a>` = 0;
+	};

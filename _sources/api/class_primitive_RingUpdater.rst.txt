@@ -1,0 +1,125 @@
+.. index:: pair: class; primitive::RingUpdater
+.. _doxid-classprimitive_1_1_ring_updater:
+
+class primitive::RingUpdater
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Exact frame-to-frame maintenance of the primitive ring network. :ref:`More...<details-classprimitive_1_1_ring_updater>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/franzblau.hpp>
+	
+	class RingUpdater {
+	public:
+		// construction
+	
+		:target:`RingUpdater<doxid-classprimitive_1_1_ring_updater_1a61b88624c282b4573177cba65781a2f1>`(int maxDepth);
+		:target:`RingUpdater<doxid-classprimitive_1_1_ring_updater_1a5d186144c78bff338a8c6d3bc88b5d47>`(RingUpdater&&);
+		:target:`RingUpdater<doxid-classprimitive_1_1_ring_updater_1a8cc0a54ed956da02142a250c4c7bf8c2>`(const RingUpdater&);
+		:target:`~RingUpdater<doxid-classprimitive_1_1_ring_updater_1a59677a1b2d3083f426396eeb218012f1>`();
+
+		// methods
+	
+		:ref:`RingUpdater<doxid-classprimitive_1_1_ring_updater_1a61b88624c282b4573177cba65781a2f1>`& :target:`operator=<doxid-classprimitive_1_1_ring_updater_1a04ae3941d0bac6c89d5b44ea525a52c6>`(:ref:`RingUpdater<doxid-classprimitive_1_1_ring_updater_1a61b88624c282b4573177cba65781a2f1>`&&);
+		:ref:`RingUpdater<doxid-classprimitive_1_1_ring_updater_1a61b88624c282b4573177cba65781a2f1>`& :target:`operator=<doxid-classprimitive_1_1_ring_updater_1a55d76a1a5bff46d8f3f42e0116e3c783>`(const :ref:`RingUpdater<doxid-classprimitive_1_1_ring_updater_1a61b88624c282b4573177cba65781a2f1>`&);
+		const std::vector<std::vector<int>>& :ref:`update<doxid-classprimitive_1_1_ring_updater_1a7684b53e6a0fe8a5ca2e327536c67536>`(const std::vector<std::vector<int>>& nList);
+		int :ref:`lastRecomputedSources<doxid-classprimitive_1_1_ring_updater_1a084d21f04e9aa5ef91faf6e536fb2412>`() const;
+		int :ref:`lastBallsRefreshed<doxid-classprimitive_1_1_ring_updater_1adb46ee075b664d8ec659250008d13c94>`() const;
+		int :ref:`lastChangedBonds<doxid-classprimitive_1_1_ring_updater_1a6ab3da57a3352a9a79fe93c814970923>`() const;
+		double :ref:`lastChangedBondFraction<doxid-classprimitive_1_1_ring_updater_1ac1d82c61f12cb666700e6b97bd12641c>`() const;
+		void :ref:`setFullPassFraction<doxid-classprimitive_1_1_ring_updater_1a53a273ea8d071c67a311fc29dd88ee2d>`(double fraction);
+		void :ref:`setBondCrossover<doxid-classprimitive_1_1_ring_updater_1af2cd5037b3a1e2c67f84bf482ab8c6eb>`(double changedBondsPerMolecule);
+	};
+.. _details-classprimitive_1_1_ring_updater:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Exact frame-to-frame maintenance of the primitive ring network.
+
+Consecutive trajectory frames share almost all of their bond topology. A ring of at most maxDepth members can appear or vanish between frames only if it passes within (maxDepth/2 - 2)/2 bonds of a vertex whose neighbour row changed, which is on the ring itself up to maxDepth
+
+#. On a new frame the stored rings that meet that set are dropped and the rings through it are enumerated afresh. The output equals ringNetwork element by element, at a cost that scales with the number of changed rows rather than with system size.
+
+Methods
+-------
+
+.. index:: pair: function; update
+.. _doxid-classprimitive_1_1_ring_updater_1a7684b53e6a0fe8a5ca2e327536c67536:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	const std::vector<std::vector<int>>& update(const std::vector<std::vector<int>>& nList)
+
+Primitive rings for this frame's neighbour list (row-ordered, by index, first element of each row the vertex itself)
+
+.. index:: pair: function; lastRecomputedSources
+.. _doxid-classprimitive_1_1_ring_updater_1a084d21f04e9aa5ef91faf6e536fb2412:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int lastRecomputedSources() const
+
+Vertices the last update enumerated rings through; the full vertex count on a whole-frame pass, zero when nothing changed
+
+.. index:: pair: function; lastBallsRefreshed
+.. _doxid-classprimitive_1_1_ring_updater_1adb46ee075b664d8ec659250008d13c94:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int lastBallsRefreshed() const
+
+Vertices whose bounded balls were rebuilt on the last update.
+
+.. index:: pair: function; lastChangedBonds
+.. _doxid-classprimitive_1_1_ring_updater_1a6ab3da57a3352a9a79fe93c814970923:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int lastChangedBonds() const
+
+Undirected bonds whose endpoints differ from the previous frame. Zero on the first frame and when the bond set is unchanged. The fraction below is this count divided by the molecule count, maintained while the rows are compared and readable in constant time afterwards.
+
+.. index:: pair: function; lastChangedBondFraction
+.. _doxid-classprimitive_1_1_ring_updater_1ac1d82c61f12cb666700e6b97bd12641c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double lastChangedBondFraction() const
+
+Changed bonds per molecule on the last update.
+
+.. index:: pair: function; setFullPassFraction
+.. _doxid-classprimitive_1_1_ring_updater_1a53a273ea8d071c67a311fc29dd88ee2d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void setFullPassFraction(double fraction)
+
+Kept for callers that used to force a whole-frame pass. The update enumerates the sources in T and no others, so a whole-frame pass happens only when T is every vertex. The stored fraction does not replace that search. The result equals a rebuild at every fraction.
+
+.. index:: pair: function; setBondCrossover
+.. _doxid-classprimitive_1_1_ring_updater_1af2cd5037b3a1e2c67f84bf482ab8c6eb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void setBondCrossover(double changedBondsPerMolecule)
+
+Kept for callers that used to force a whole-frame pass from the changed-bond rate. The default is negative. The rate does not replace the search of T.
+

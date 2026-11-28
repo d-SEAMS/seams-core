@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: Neighbour lists</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/group__capi__neigh.html">
+<meta property="og:title" content="seams-core: Neighbour lists">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/group__capi__neigh.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: Neighbour lists">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__capi__neigh.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Neighbour lists </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Cutoff, mutual, and k-nearest graphs as CSR.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:gae6e9f1e27aca24acb551b2847db23489" id="r_gae6e9f1e27aca24acb551b2847db23489"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gae6e9f1e27aca24acb551b2847db23489">seams_neighbours_build</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, int graph, <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> **out)</td></tr>
+<tr class="memdesc:gae6e9f1e27aca24acb551b2847db23489"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a cutoff or mutual neighbour list.  <br /></td></tr>
+<tr class="memitem:gad3ea7df9ba10660aefc9d04201a386bb" id="r_gad3ea7df9ba10660aefc9d04201a386bb"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void&#160;</td><td class="memItemRight"><a class="el" href="#gad3ea7df9ba10660aefc9d04201a386bb">seams_neighbours_destroy</a> (<a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *nb)</td></tr>
+<tr class="memdesc:gad3ea7df9ba10660aefc9d04201a386bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a neighbour list.  <br /></td></tr>
+<tr class="memitem:ga1090112947d62594e559e1af724fbd52" id="r_ga1090112947d62594e559e1af724fbd52"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> int&#160;</td><td class="memItemRight"><a class="el" href="#ga1090112947d62594e559e1af724fbd52">seams_neighbours_count</a> (const <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *nb)</td></tr>
+<tr class="memdesc:ga1090112947d62594e559e1af724fbd52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of neighbour rows, as an int.  <br /></td></tr>
+<tr class="memitem:gaa2bc21d618d6b44680b16abc6660ae38" id="r_gaa2bc21d618d6b44680b16abc6660ae38"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaa2bc21d618d6b44680b16abc6660ae38">seams_neighbours_csr</a> (const <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *nb, const int **offsets, int *n_offsets, const int **cols, int *nnz)</td></tr>
+<tr class="memdesc:gaa2bc21d618d6b44680b16abc6660ae38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Borrow the neighbour list as CSR.  <br /></td></tr>
+<tr class="memitem:gadd139b6a27b0a0e346abfb71eeae6e3b" id="r_gadd139b6a27b0a0e346abfb71eeae6e3b"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a> (const <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *nb, int *offsets, size_t offsets_cap, size_t *n_offsets, int *cols, size_t cols_cap, size_t *nnz)</td></tr>
+<tr class="memdesc:gadd139b6a27b0a0e346abfb71eeae6e3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the neighbour CSR into caller buffers.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Cutoff, mutual, and k-nearest graphs as CSR. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="gae6e9f1e27aca24acb551b2847db23489" name="gae6e9f1e27aca24acb551b2847db23489"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae6e9f1e27aca24acb551b2847db23489">&#9670;&#160;</a></span>seams_neighbours_build()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_neighbours_build </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> **</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Build a cutoff or mutual neighbour list. </p>
+<p>A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle that already holds a frame. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. The mutual graph keeps the four nearest neighbours inside cutoff + 1.5. </td></tr>
+    <tr><td class="paramname">type</td><td>Species to keep. Zero and negative keep every atom. </td></tr>
+    <tr><td class="paramname">graph</td><td><a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d" title="Every neighbour inside the cutoff.">SEAMS_GRAPH_CUTOFF</a> or <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99" title="Mutual four nearest inside cutoff + 1.5.">SEAMS_GRAPH_MUTUAL</a>. <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58aaf0915d3bfbd7d9d3e9c3cda74ff448c" title="Mutual seeds with union completions, for cages only.">SEAMS_GRAPH_SEEDED</a> is rejected here. </td></tr>
+    <tr><td class="paramname">out</td><td>Receives a new handle. On failure *out is NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller frees *out with <a class="el" href="#gad3ea7df9ba10660aefc9d04201a386bb" title="Free a neighbour list.">seams_neighbours_destroy()</a>. The list is a copy and does not borrow sys. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. The new handle is private to the caller. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *nb = NULL;</div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="#gae6e9f1e27aca24acb551b2847db23489">seams_neighbours_build</a>(sys, 3.5, 0, <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, &amp;nb) == <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a>) {</div>
+<div class="line">  <a class="code hl_function" href="#gad3ea7df9ba10660aefc9d04201a386bb">seams_neighbours_destroy</a>(nb);</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__capi__neigh_html_gad3ea7df9ba10660aefc9d04201a386bb"><div class="ttname"><a href="#gad3ea7df9ba10660aefc9d04201a386bb">seams_neighbours_destroy</a></div><div class="ttdeci">SEAMS_API void seams_neighbours_destroy(seams_neighbours *nb)</div><div class="ttdoc">Free a neighbour list.</div></div>
+<div class="ttc" id="agroup__capi__neigh_html_gae6e9f1e27aca24acb551b2847db23489"><div class="ttname"><a href="#gae6e9f1e27aca24acb551b2847db23489">seams_neighbours_build</a></div><div class="ttdeci">SEAMS_API seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type, int graph, seams_neighbours **out)</div><div class="ttdoc">Build a cutoff or mutual neighbour list.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ga7e78453f0a0d6f60ea42a12985ffbe63"><div class="ttname"><a href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a></div><div class="ttdeci">struct seams_neighbours seams_neighbours</div><div class="ttdoc">One neighbour list.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00250">seams.h:250</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a></div><div class="ttdeci">@ SEAMS_OK</div><div class="ttdoc">The call succeeded.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00155">seams.h:155</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d"><div class="ttname"><a href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a></div><div class="ttdeci">@ SEAMS_GRAPH_CUTOFF</div><div class="ttdoc">Every neighbour inside the cutoff.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00209">seams.h:209</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gadd139b6a27b0a0e346abfb71eeae6e3b" name="gadd139b6a27b0a0e346abfb71eeae6e3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gadd139b6a27b0a0e346abfb71eeae6e3b">&#9670;&#160;</a></span>seams_neighbours_copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_neighbours_copy </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *</td>          <td class="paramname"><span class="paramname"><em>nb</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>offsets_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cols_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>nnz</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy the neighbour CSR into caller buffers. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nb</td><td>Neighbour handle. </td></tr>
+    <tr><td class="paramname">offsets</td><td>Caller buffer of offsets_cap ints, or NULL to query. </td></tr>
+    <tr><td class="paramname">offsets_cap</td><td>Capacity of offsets. Ignored when offsets is NULL. </td></tr>
+    <tr><td class="paramname">n_offsets</td><td>Receives the required offset count (n + 1). </td></tr>
+    <tr><td class="paramname">cols</td><td>Caller buffer of cols_cap ints, or NULL to query. </td></tr>
+    <tr><td class="paramname">cols_cap</td><td>Capacity of cols. Ignored when cols is NULL. </td></tr>
+    <tr><td class="paramname">nnz</td><td>Receives the required column count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a> when every non-NULL buffer was filled, or when both buffers were NULL and the lengths were written. <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a> when a non-NULL buffer is short. <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a> when nb, n_offsets, or nnz is NULL. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns the buffers. The handle is not modified. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on nb, and not alongside a non-const call on nb. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> n_off = 0, nnz = 0;</div>
+<div class="line"><a class="code hl_function" href="#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a>(nb, NULL, 0, &amp;n_off, NULL, 0, &amp;nnz);</div>
+<div class="line"><span class="keywordtype">int</span> *off = malloc(n_off * <span class="keyword">sizeof</span> *off), *cols = malloc(nnz * <span class="keyword">sizeof</span> *cols);</div>
+<div class="line"><a class="code hl_function" href="#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a>(nb, off, n_off, &amp;n_off, cols, nnz, &amp;nnz);</div>
+<div class="line">free(off);</div>
+<div class="line">free(cols);</div>
+<div class="ttc" id="agroup__capi__neigh_html_gadd139b6a27b0a0e346abfb71eeae6e3b"><div class="ttname"><a href="#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a></div><div class="ttdeci">SEAMS_API seams_status seams_neighbours_copy(const seams_neighbours *nb, int *offsets, size_t offsets_cap, size_t *n_offsets, int *cols, size_t cols_cap, size_t *nnz)</div><div class="ttdoc">Copy the neighbour CSR into caller buffers.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga1090112947d62594e559e1af724fbd52" name="ga1090112947d62594e559e1af724fbd52"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1090112947d62594e559e1af724fbd52">&#9670;&#160;</a></span>seams_neighbours_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> int seams_neighbours_count </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *</td>          <td class="paramname"><span class="paramname"><em>nb</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Number of neighbour rows, as an int. </p>
+<p>ABI 1 query. <a class="el" href="group__capi__sized.html#ga6575b8ce3d0dbb1bfb758ec10f3cfd59" title="Number of neighbour rows.">seams_neighbours_nrows()</a> reports errors.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nb</td><td>Neighbour handle, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The row count, or 0 when nb is NULL. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns nb; the call borrows it. The library keeps no pointer to any argument. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on nb, and not alongside a non-const call on nb. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">int</span> rows = <a class="code hl_function" href="#ga1090112947d62594e559e1af724fbd52">seams_neighbours_count</a>(nb);</div>
+<div class="ttc" id="agroup__capi__neigh_html_ga1090112947d62594e559e1af724fbd52"><div class="ttname"><a href="#ga1090112947d62594e559e1af724fbd52">seams_neighbours_count</a></div><div class="ttdeci">SEAMS_API int seams_neighbours_count(const seams_neighbours *nb)</div><div class="ttdoc">Number of neighbour rows, as an int.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaa2bc21d618d6b44680b16abc6660ae38" name="gaa2bc21d618d6b44680b16abc6660ae38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa2bc21d618d6b44680b16abc6660ae38">&#9670;&#160;</a></span>seams_neighbours_csr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_neighbours_csr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *</td>          <td class="paramname"><span class="paramname"><em>nb</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int **</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int **</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>nnz</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Borrow the neighbour list as CSR. </p>
+<p>Offsets has n + 1 entries. Columns omit the self entry.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nb</td><td>Neighbour handle. </td></tr>
+    <tr><td class="paramname">offsets</td><td>Receives the offset pointer. </td></tr>
+    <tr><td class="paramname">n_offsets</td><td>Receives the offset count, n + 1. </td></tr>
+    <tr><td class="paramname">cols</td><td>Receives the column pointer. May be NULL when the list has no pairs; *nnz is then 0. </td></tr>
+    <tr><td class="paramname">nnz</td><td>Receives the column count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The pointers are owned by nb and remain valid until seams_neighbours_destroy(nb). Use <a class="el" href="#gadd139b6a27b0a0e346abfb71eeae6e3b" title="Copy the neighbour CSR into caller buffers.">seams_neighbours_copy()</a> for caller buffers. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of nb. The returned pointers must not be used concurrently with a call that frees nb. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> *off = NULL, *cols = NULL;</div>
+<div class="line"><span class="keywordtype">int</span> n_off = 0, nnz = 0;</div>
+<div class="line"><a class="code hl_function" href="#gaa2bc21d618d6b44680b16abc6660ae38">seams_neighbours_csr</a>(nb, &amp;off, &amp;n_off, &amp;cols, &amp;nnz);</div>
+<div class="ttc" id="agroup__capi__neigh_html_gaa2bc21d618d6b44680b16abc6660ae38"><div class="ttname"><a href="#gaa2bc21d618d6b44680b16abc6660ae38">seams_neighbours_csr</a></div><div class="ttdeci">SEAMS_API seams_status seams_neighbours_csr(const seams_neighbours *nb, const int **offsets, int *n_offsets, const int **cols, int *nnz)</div><div class="ttdoc">Borrow the neighbour list as CSR.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gad3ea7df9ba10660aefc9d04201a386bb" name="gad3ea7df9ba10660aefc9d04201a386bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad3ea7df9ba10660aefc9d04201a386bb">&#9670;&#160;</a></span>seams_neighbours_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void seams_neighbours_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *</td>          <td class="paramname"><span class="paramname"><em>nb</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free a neighbour list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nb</td><td>Handle from <a class="el" href="#gae6e9f1e27aca24acb551b2847db23489" title="Build a cutoff or mutual neighbour list.">seams_neighbours_build()</a> or <a class="el" href="group__capi__more.html#ga8e4d359947114d1b766ebd8861665920" title="k-nearest neighbour list.">seams_neighbours_knn()</a>, or NULL. NULL is ignored. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Ownership</dt><dd>Releases the handle and its CSR arrays. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>The caller must not use nb after this returns. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#gad3ea7df9ba10660aefc9d04201a386bb">seams_neighbours_destroy</a>(nb);</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

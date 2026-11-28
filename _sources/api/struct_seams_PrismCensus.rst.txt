@@ -1,0 +1,58 @@
+.. index:: pair: struct; seams::PrismCensus
+.. _doxid-structseams_1_1_prism_census:
+
+struct seams::PrismCensus
+=========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Perfect and imperfect prism counts by ring size. :ref:`More...<details-structseams_1_1_prism_census>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct PrismCensus {
+		// fields
+	
+		std::array<int, 7> :ref:`perfect<doxid-structseams_1_1_prism_census_1adb2a0ed068c687bfe860805c85e9d85c>` {};
+		std::array<int, 7> :ref:`imperfect<doxid-structseams_1_1_prism_census_1a7e83d2b3d1fc860fca877c7a906c1fb8>` {};
+	};
+.. _details-structseams_1_1_prism_census:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Perfect and imperfect prism counts by ring size.
+
+Index is the ring size. Sizes 3 through 6 are filled.
+
+Fields
+------
+
+.. index:: pair: variable; perfect
+.. _doxid-structseams_1_1_prism_census_1adb2a0ed068c687bfe860805c85e9d85c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<int, 7> perfect {}
+
+Perfect stacks.
+
+.. index:: pair: variable; imperfect
+.. _doxid-structseams_1_1_prism_census_1a7e83d2b3d1fc860fca877c7a906c1fb8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<int, 7> imperfect {}
+
+Imperfect stacks.
+

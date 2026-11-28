@@ -1,0 +1,28 @@
+.. index:: pair: struct; ring::EquatorChoice
+.. _doxid-structring_1_1_equator_choice:
+
+struct ring::EquatorChoice
+==========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/topo_bulk.hpp>
+	
+	struct EquatorChoice {
+		// fields
+	
+		int :target:`ring<doxid-structring_1_1_equator_choice_1ab89f64fa075b360c70306c6b46747d34>`[6] {};
+		int :target:`n<doxid-structring_1_1_equator_choice_1a51db6155bcb66059917161200ed20b2c>` = 0;
+
+		// methods
+	
+		int :target:`idAt<doxid-structring_1_1_equator_choice_1a419dd14bc198b919ca7e93522faf39b5>`(int k) const;
+		void :target:`put<doxid-structring_1_1_equator_choice_1ad5fea7aca33bd26edb46c5ba9600db21>`(int k, int value);
+	};

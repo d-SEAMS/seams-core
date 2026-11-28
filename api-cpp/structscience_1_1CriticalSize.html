@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: science::CriticalSize Struct Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/structscience_1_1CriticalSize.html">
+<meta property="og:title" content="seams-core: science::CriticalSize Struct Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/structscience_1_1CriticalSize.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: science::CriticalSize Struct Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('structscience_1_1CriticalSize.html','','structscience_1_1CriticalSize-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">science::CriticalSize Struct Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="science__front_8hpp_source.html">src/include/internal/science_front.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a67de93679e8d6de3e7dd8cef6496bfa9" id="r_a67de93679e8d6de3e7dd8cef6496bfa9"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a67de93679e8d6de3e7dd8cef6496bfa9">nStar</a> = 0</td></tr>
+<tr class="memitem:abb8a4c635689aeee731f720be9eb490a" id="r_abb8a4c635689aeee731f720be9eb490a"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#abb8a4c635689aeee731f720be9eb490a">sigma</a> = 0</td></tr>
+<tr class="memitem:ad0c0047c0e27bf386a82ab201462962d" id="r_ad0c0047c0e27bf386a82ab201462962d"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ad0c0047c0e27bf386a82ab201462962d">lo</a> = 0</td></tr>
+<tr class="memdesc:ad0c0047c0e27bf386a82ab201462962d"><td class="mdescLeft">&#160;</td><td class="mdescRight">sample standard deviation of the window  <br /></td></tr>
+<tr class="memitem:acb6440db92267627044400b006960822" id="r_acb6440db92267627044400b006960822"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#acb6440db92267627044400b006960822">hi</a> = 0</td></tr>
+<tr class="memitem:a2a615346a61586080ecaaecf89673889" id="r_a2a615346a61586080ecaaecf89673889"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a2a615346a61586080ecaaecf89673889">onset</a> = -1</td></tr>
+<tr class="memitem:a23f0fa700abd28dce6e09f104838c0b3" id="r_a23f0fa700abd28dce6e09f104838c0b3"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a23f0fa700abd28dce6e09f104838c0b3">window</a> = 0</td></tr>
+<tr class="memitem:afb4903edfeb3fca066f3fe0aadb36537" id="r_afb4903edfeb3fca066f3fe0aadb36537"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#afb4903edfeb3fca066f3fe0aadb36537">upperBound</a> = false</td></tr>
+<tr class="memitem:ad56f939d1b3e9a4a1145ef98d906921c" id="r_ad56f939d1b3e9a4a1145ef98d906921c"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ad56f939d1b3e9a4a1145ef98d906921c">defined</a> = false</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00105">105</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ad56f939d1b3e9a4a1145ef98d906921c" name="ad56f939d1b3e9a4a1145ef98d906921c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad56f939d1b3e9a4a1145ef98d906921c">&#9670;&#160;</a></span>defined</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool science::CriticalSize::defined = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00113">113</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="acb6440db92267627044400b006960822" name="acb6440db92267627044400b006960822"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb6440db92267627044400b006960822">&#9670;&#160;</a></span>hi</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double science::CriticalSize::hi = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00109">109</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ad0c0047c0e27bf386a82ab201462962d" name="ad0c0047c0e27bf386a82ab201462962d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0c0047c0e27bf386a82ab201462962d">&#9670;&#160;</a></span>lo</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double science::CriticalSize::lo = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>sample standard deviation of the window </p>
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00108">108</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a67de93679e8d6de3e7dd8cef6496bfa9" name="a67de93679e8d6de3e7dd8cef6496bfa9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67de93679e8d6de3e7dd8cef6496bfa9">&#9670;&#160;</a></span>nStar</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double science::CriticalSize::nStar = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00106">106</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a2a615346a61586080ecaaecf89673889" name="a2a615346a61586080ecaaecf89673889"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a615346a61586080ecaaecf89673889">&#9670;&#160;</a></span>onset</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::CriticalSize::onset = -1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00110">110</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="abb8a4c635689aeee731f720be9eb490a" name="abb8a4c635689aeee731f720be9eb490a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb8a4c635689aeee731f720be9eb490a">&#9670;&#160;</a></span>sigma</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double science::CriticalSize::sigma = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00107">107</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="afb4903edfeb3fca066f3fe0aadb36537" name="afb4903edfeb3fca066f3fe0aadb36537"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb4903edfeb3fca066f3fe0aadb36537">&#9670;&#160;</a></span>upperBound</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool science::CriticalSize::upperBound = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00112">112</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a23f0fa700abd28dce6e09f104838c0b3" name="a23f0fa700abd28dce6e09f104838c0b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23f0fa700abd28dce6e09f104838c0b3">&#9670;&#160;</a></span>window</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::CriticalSize::window = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00111">111</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>src/include/internal/<a class="el" href="science__front_8hpp_source.html">science_front.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacescience.html">science</a></li><li class="navelem"><a href="structscience_1_1CriticalSize.html">CriticalSize</a></li>
+  </ul>
+</div>
+</body>
+</html>

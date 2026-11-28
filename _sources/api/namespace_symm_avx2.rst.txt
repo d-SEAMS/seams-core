@@ -1,0 +1,24 @@
+.. index:: pair: namespace; symm::avx2
+.. _doxid-namespacesymm_1_1avx2:
+
+namespace symm::avx2
+====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace avx2 {
+
+	// global functions
+
+	void :target:`classifyPrepared<doxid-namespacesymm_1_1avx2_1afead2370bcc49b889bedf2cdeea18886>`(const double* x, const double* y, const double* z, int n, const double lat[3][3], const :ref:`CanonShell<doxid-structsymm_1_1_canon_shell>`& canon, double gate, int* kind, double thermalQ, double bondRatio, bool openFace);
+	int :target:`diamondCna<doxid-namespacesymm_1_1avx2_1a70ad08c7e1e9569c61faabf4a914530f>`(const double* sx, const double* sy, const double* sz, int ambiguous, int* n421, int* n422, int* nGood);
+
+	} // namespace avx2

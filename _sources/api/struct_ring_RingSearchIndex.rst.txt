@@ -1,0 +1,80 @@
+.. index:: pair: struct; ring::RingSearchIndex
+.. _doxid-structring_1_1_ring_search_index:
+
+struct ring::RingSearchIndex
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Inverted index from an atom to the rings that contain it. :ref:`More...<details-structring_1_1_ring_search_index>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/topo_bulk.hpp>
+	
+	struct RingSearchIndex {
+		// fields
+	
+		std::vector<std::vector<int>> :target:`ringsContainingAtom<doxid-structring_1_1_ring_search_index_1a8e4433086bf9bec113ee61bc3c17b8bb>`;
+		std::vector<int, :ref:`seams::FilledByTeam<doxid-structseams_1_1_filled_by_team>`<int>> :ref:`ringOff<doxid-structring_1_1_ring_search_index_1af441edebdda78d7968c7b8dca76b6667>`;
+		std::vector<int, :ref:`seams::FilledByTeam<doxid-structseams_1_1_filled_by_team>`<int>> :target:`ringCol<doxid-structring_1_1_ring_search_index_1a31274484c56595c0a3fdf01a9157fd78>`;
+		std::vector<int> :target:`atomRank<doxid-structring_1_1_ring_search_index_1a891fe48d2dccc51ea7f043b562a42cbd>`;
+		std::vector<std::array<int, 3>> :ref:`ringShift<doxid-structring_1_1_ring_search_index_1a756c5dfcd0a8e96744dfff6775c1e31b>`;
+
+		// methods
+	
+		int :ref:`atomCount<doxid-structring_1_1_ring_search_index_1a4a3b1bad0b060ee2e5aa4d8a268f41c5>`() const;
+	};
+.. _details-structring_1_1_ring_search_index:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Inverted index from an atom to the rings that contain it.
+
+The cage searches repeatedly ask which rings a given atom belongs to. Answering that by scanning every ring makes the searches quadratic in the ring count. One pass over the ring network answers it in constant time thereafter, and the ring indices in each row stay ascending, which is the order the searches previously visited them in.
+
+findHC visits rings in the order of a key that does not use absolute coordinates: the sorted atom indices, then the unwrapped shift of the cycle. findDDC reports a maximum set of cages under the same key, so the cage count is independent of the order in which rings are claimed and does not change when the frame is translated.
+
+Fields
+------
+
+.. index:: pair: variable; ringOff
+.. _doxid-structring_1_1_ring_search_index_1af441edebdda78d7968c7b8dca76b6667:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int, :ref:`seams::FilledByTeam<doxid-structseams_1_1_filled_by_team>`<int>> ringOff
+
+Same rows as ringsContainingAtom, packed. ringCol[ringOff[a] .. ringOff[a+1]) is the ascending ring list of atom a. Empty when the index was not built.
+
+.. index:: pair: variable; ringShift
+.. _doxid-structring_1_1_ring_search_index_1a756c5dfcd0a8e96744dfff6775c1e31b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::array<int, 3>> ringShift
+
+Summed minimum-image bond lattice images of each ring, the negative of ringWindings. Empty if no box was supplied.
+
+Methods
+-------
+
+.. index:: pair: function; atomCount
+.. _doxid-structring_1_1_ring_search_index_1a4a3b1bad0b060ee2e5aa4d8a268f41c5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int atomCount() const
+
+Atoms the packed rows cover.
+

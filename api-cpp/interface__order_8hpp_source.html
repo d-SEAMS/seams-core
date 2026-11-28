@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/interface_order.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/interface__order_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/interface_order.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/interface__order_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/interface_order.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('interface__order_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">interface_order.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="interface__order_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) d-SEAMS developers</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef SEAMS_INTERFACE_ORDER_H_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define SEAMS_INTERFACE_ORDER_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="namespaceiface.html">   45</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceiface.html">iface</a> {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="namespaceiface.html#a880354044e1248a351860d033c05721ba6a6334b478289b4fb3060c4f803eafd3">   47</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespaceiface.html#a880354044e1248a351860d033c05721b">Cause</a> { <a class="code hl_enumvalue" href="namespaceiface.html#a880354044e1248a351860d033c05721ba6a6334b478289b4fb3060c4f803eafd3">agree</a> = 0, <a class="code hl_enumvalue" href="namespaceiface.html#a880354044e1248a351860d033c05721ba98b929ea2521b6f39fc260eea7d496af">neighbour</a> = 1, <a class="code hl_enumvalue" href="namespaceiface.html#a880354044e1248a351860d033c05721ba28cb0457fcfa595f8f36771026c95ee1">q3Shell</a> = 2, <a class="code hl_enumvalue" href="namespaceiface.html#a880354044e1248a351860d033c05721ba8775a734047c8689a28062db1ac36d5f">openEdge</a> = 3, mixed = 4 };</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395">   49</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395">Kind</a> { <a class="code hl_enumvalue" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395ae52ce0141772cd5abea43f36ab85f387">slab</a> = 0, <a class="code hl_enumvalue" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395a91c7e4ea85be233a81041a3eefedc8ad">nucleus</a> = 1 };</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="};">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structiface_1_1Front.html">   51</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structiface_1_1Front.html">Front</a> {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structiface_1_1Front.html#a8d4e951bae4f14232a3d152cc45637d3">   52</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Front.html#a8d4e951bae4f14232a3d152cc45637d3">position</a> = 0; </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="structiface_1_1Front.html#acc149af87785232b22eb356aa520f61f">   53</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Front.html#acc149af87785232b22eb356aa520f61f">width</a> = 0;    </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="structiface_1_1Front.html#a16d6f11e37b90eceb761644b350f3328">   54</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structiface_1_1Front.html#a16d6f11e37b90eceb761644b350f3328">defined</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>};</div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00057" data-start="{" data-end="};">
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="structiface_1_1Profile.html">   57</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structiface_1_1Profile.html">Profile</a> {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="structiface_1_1Profile.html#a2c127c519fb30527115826b951f8ea84">   58</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Profile.html#a2c127c519fb30527115826b951f8ea84">crystal</a> = 0;      </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="structiface_1_1Profile.html#a19d1a698a13b9070e8d473ac846babc0">   59</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Profile.html#a19d1a698a13b9070e8d473ac846babc0">interfacial</a> = 0;  </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="structiface_1_1Profile.html#a411c2fe4e684c2c3bf63f5b6955247d0">   60</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Profile.html#a411c2fe4e684c2c3bf63f5b6955247d0">solid</a> = 0;        </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="structiface_1_1Profile.html#a202d42f287ecc5ad81f34b76eb713e6f">   61</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Profile.html#a202d42f287ecc5ad81f34b76eb713e6f">thickness</a> = 0;    </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="structiface_1_1Profile.html#ab77ce65569d6ed1411a986f007b337a5">   62</a></span>  std::vector&lt;Front&gt; <a class="code hl_variable" href="structiface_1_1Profile.html#ab77ce65569d6ed1411a986f007b337a5">fronts</a>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="structiface_1_1Profile.html#a0c5da37eff6b9622425e537e4e51f260">   63</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structiface_1_1Profile.html#a0c5da37eff6b9622425e537e4e51f260">defined</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>};</div>
+</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="foldopen" id="foldopen00066" data-start="{" data-end="};">
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="structiface_1_1Bin.html">   66</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structiface_1_1Bin.html">Bin</a> {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="structiface_1_1Bin.html#a2b154e582b5aa2838fd5560e4fada26b">   67</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Bin.html#a2b154e582b5aa2838fd5560e4fada26b">mid</a> = 0;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="structiface_1_1Bin.html#a1510e3cb48555d036cc20824a3b1c058">   68</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Bin.html#a1510e3cb48555d036cc20824a3b1c058">n</a> = 0;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="structiface_1_1Bin.html#aa2119088056a27cd6a0ff09bf9301dcd">   69</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Bin.html#aa2119088056a27cd6a0ff09bf9301dcd">disagree</a> = 0;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="structiface_1_1Bin.html#af9db603e1cad1bd6e4787db51d06552e">   70</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Bin.html#af9db603e1cad1bd6e4787db51d06552e">crystalPub</a> = 0;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="structiface_1_1Bin.html#ab887e7117cb9c73dccf9402cc60629bd">   71</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Bin.html#ab887e7117cb9c73dccf9402cc60629bd">solidPub</a> = 0;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="structiface_1_1Bin.html#a07727eafa84ac11c31ce06e8e0c73ea0">   72</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Bin.html#a07727eafa84ac11c31ce06e8e0c73ea0">crystalOvi</a> = 0;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="structiface_1_1Bin.html#a45732dc246ec22216c1ce798ec77b7c8">   73</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Bin.html#a45732dc246ec22216c1ce798ec77b7c8">solidOvi</a> = 0;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>};</div>
+</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="foldopen" id="foldopen00076" data-start="{" data-end="};">
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html">   76</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structiface_1_1Study.html">Study</a> {</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a4a5a8c3051bc35f9be5d457c08263b60">   77</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a4a5a8c3051bc35f9be5d457c08263b60">n</a> = 0;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a14898b7c04b362144ec8ae7d25319625">   78</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a14898b7c04b362144ec8ae7d25319625">nDisagree</a> = 0;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a099c157e423b188add797c5909bf58a9">   79</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a099c157e423b188add797c5909bf58a9">causeCount</a>[5] = {};</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#af461f007cd947e708b0f3ab33f53272b">   80</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#af461f007cd947e708b0f3ab33f53272b">countPub</a>[9] = {};</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a66130754bbdb2628aaf90627c58bdbb5">   81</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a66130754bbdb2628aaf90627c58bdbb5">countOvi</a>[9] = {};</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a1ffe0f010f9cc15fa9b3136fd67523c8">   82</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a1ffe0f010f9cc15fa9b3136fd67523c8">transition</a>[9][9] = {};</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#add6faf5db5ff24e27cefe1eb8f60e85e">   83</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#add6faf5db5ff24e27cefe1eb8f60e85e">shellDisagree</a>[8] = {}; </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#aa1e44a579e9232a2efd9fd1c35ba619f">   84</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#aa1e44a579e9232a2efd9fd1c35ba619f">shellAgree</a>[8] = {};</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a13c931580fcd57994b8c01ac23ccbbba">   85</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a13c931580fcd57994b8c01ac23ccbbba">ringDisagree</a>[3] = {}; </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#af8d96e9fb849520d932c5917ff17f3db">   86</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#af8d96e9fb849520d932c5917ff17f3db">ringAgree</a>[3] = {};</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a4381152a880f99ae7329144b753e7cca">   87</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a4381152a880f99ae7329144b753e7cca">prismAtoms</a> = 0;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a6aa92c8b615e49f589c9fe0d6607c63d">   88</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a6aa92c8b615e49f589c9fe0d6607c63d">prismBlocks</a> = 0;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a98508f616b45d1279d3228974a4f4f65">   89</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a98508f616b45d1279d3228974a4f4f65">bilayerAtoms</a> = 0;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#ad825a8163744dc6b84ba939a6aff243e">   90</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#ad825a8163744dc6b84ba939a6aff243e">polygonAtoms</a> = 0;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#ae692ea13d88798005a2d32f883419908">   91</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#ae692ea13d88798005a2d32f883419908">thinSheets</a> = 0;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a79bf381313f1515fea338f3565200477">   92</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a79bf381313f1515fea338f3565200477">diamondOther</a> = 0;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a4f29c357a4bb69f36bfd18e0dea38e2a">   93</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a4f29c357a4bb69f36bfd18e0dea38e2a">diamondCubic</a> = 0;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a35198c3867d2893e49121862d8c72809">   94</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a35198c3867d2893e49121862d8c72809">diamondHex</a> = 0;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#af7dd4a39146a3ac06b77d419f04ec2a1">   95</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#af7dd4a39146a3ac06b77d419f04ec2a1">cnaOther</a> = 0;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a02f7cf4c604ee77f16fc31ff0011a539">   96</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a02f7cf4c604ee77f16fc31ff0011a539">cnaCrystal</a> = 0; </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#ab5b1acc67cba6d7bf4188801222cfd3a">   97</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#ab5b1acc67cba6d7bf4188801222cfd3a">ptmPass</a> = 0;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a86e1f3d52ae6304ba2cc34413001fc5d">   98</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a86e1f3d52ae6304ba2cc34413001fc5d">ptmPassDisagree</a> = 0;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a4b928032f56ee6665b51c0553f6b4f2c">   99</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Study.html#a4b928032f56ee6665b51c0553f6b4f2c">q6Disagree</a> = 0;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a2148a46548ca3b37650dcd525323168a">  100</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Study.html#a2148a46548ca3b37650dcd525323168a">q6Agree</a> = 0;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a48e96760472e8a1f45d6dcff189c9a69">  101</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Study.html#a48e96760472e8a1f45d6dcff189c9a69">depthDisagree</a> = 0; </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a360994b36b17763bb185bcd82a45a22d">  102</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Study.html#a360994b36b17763bb185bcd82a45a22d">depthAgree</a> = 0;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a15b4a45ed794541f7f5655e34a9fb151">  103</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a15b4a45ed794541f7f5655e34a9fb151">depthDisagreeN</a> = 0;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a650724652de17ba7517a0512afc53245">  104</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a650724652de17ba7517a0512afc53245">depthAgreeN</a> = 0;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a9c9bd20630f3111a3406b01fcb1cb324">  105</a></span>  <a class="code hl_enumeration" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395">Kind</a> <a class="code hl_variable" href="structiface_1_1Study.html#a9c9bd20630f3111a3406b01fcb1cb324">kind</a> = <a class="code hl_enumvalue" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395a91c7e4ea85be233a81041a3eefedc8ad">Kind::nucleus</a>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a6fac2d95f344ebcbe25700059572679f">  106</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1Study.html#a6fac2d95f344ebcbe25700059572679f">axis</a> = 2;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#ac92f03a72b3ceeea09a82315fefe5cbb">  107</a></span>  <a class="code hl_struct" href="structiface_1_1Profile.html">Profile</a> <a class="code hl_variable" href="structiface_1_1Study.html#ac92f03a72b3ceeea09a82315fefe5cbb">solidPub</a>;    </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a68ff8d5293ad3ca88acec7f4a200c45e">  108</a></span>  <a class="code hl_struct" href="structiface_1_1Profile.html">Profile</a> <a class="code hl_variable" href="structiface_1_1Study.html#a68ff8d5293ad3ca88acec7f4a200c45e">crystalPub</a>;  </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a5a7f2c730e012eaf0616bb68efbd4bd7">  109</a></span>  <a class="code hl_struct" href="structiface_1_1Profile.html">Profile</a> <a class="code hl_variable" href="structiface_1_1Study.html#a5a7f2c730e012eaf0616bb68efbd4bd7">solidOvi</a>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#a374b1003a41309c4a86a9b0049425367">  110</a></span>  <a class="code hl_struct" href="structiface_1_1Profile.html">Profile</a> <a class="code hl_variable" href="structiface_1_1Study.html#a374b1003a41309c4a86a9b0049425367">crystalOvi</a>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="structiface_1_1Study.html#ada37224d2abb541c5c124ae043b5bc4f">  111</a></span>  std::vector&lt;Bin&gt; <a class="code hl_variable" href="structiface_1_1Study.html#ada37224d2abb541c5c124ae043b5bc4f">bins</a>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>};</div>
+</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="namespaceiface.html#ae766328e3e793278b61ae939e2cc2dfe">  118</a></span>[[nodiscard]] <a class="code hl_struct" href="structiface_1_1Study.html">Study</a> <a class="code hl_function" href="namespaceiface.html#ae766328e3e793278b61ae939e2cc2dfe">studyCloud</a>(</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; cloud, <span class="keywordtype">double</span> cutoff = 3.5,</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keywordtype">double</span> binWidth = 1.0, <span class="keywordtype">bool</span> census = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="namespaceiface.html#a2eaebae6d82142d09a0c4e1b0f7c4a67">  122</a></span>[[nodiscard]] <a class="code hl_struct" href="structiface_1_1Study.html">Study</a> <a class="code hl_function" href="namespaceiface.html#a2eaebae6d82142d09a0c4e1b0f7c4a67">studyDump</a>(<span class="keyword">const</span> std::string &amp;path, <span class="keywordtype">int</span> frame, <span class="keywordtype">double</span> cutoff = 3.5,</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>                              <span class="keywordtype">double</span> binWidth = 1.0, <span class="keywordtype">bool</span> census = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="namespaceiface.html#a2bf660dc8d0666212a6e2350c6494d9e">  125</a></span>[[nodiscard]] std::string <a class="code hl_function" href="namespaceiface.html#a2bf660dc8d0666212a6e2350c6494d9e">formatStudy</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structiface_1_1Study.html">Study</a> &amp;study, <span class="keyword">const</span> std::string &amp;tag);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="namespaceiface.html#a7615303594a4624586db8fc7dad682d0">  128</a></span>[[nodiscard]] <span class="keywordtype">double</span> <a class="code hl_function" href="namespaceiface.html#a7615303594a4624586db8fc7dad682d0">slope</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;x, <span class="keyword">const</span> std::vector&lt;double&gt; &amp;y);</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="foldopen" id="foldopen00130" data-start="{" data-end="};">
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="structiface_1_1GrowthFrame.html">  130</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structiface_1_1GrowthFrame.html">GrowthFrame</a> {</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="structiface_1_1GrowthFrame.html#a1964ec73b6ee72c963a190256e75b221">  131</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1GrowthFrame.html#a1964ec73b6ee72c963a190256e75b221">frame</a> = 0;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="structiface_1_1GrowthFrame.html#a21ff9273d7b5b264935e9424880559ab">  132</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1GrowthFrame.html#a21ff9273d7b5b264935e9424880559ab">timePs</a> = 0;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno"><a class="line" href="structiface_1_1GrowthFrame.html#a32990a9920273c184100193778eaa185">  133</a></span>  <a class="code hl_struct" href="structiface_1_1Study.html">Study</a> <a class="code hl_variable" href="structiface_1_1GrowthFrame.html#a32990a9920273c184100193778eaa185">study</a>;</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>};</div>
+</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="foldopen" id="foldopen00136" data-start="{" data-end="};">
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="structiface_1_1Growth.html">  136</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structiface_1_1Growth.html">Growth</a> {</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="structiface_1_1Growth.html#aa000031f2bd4dfa8230fa7b5eb0108ac">  137</a></span>  std::vector&lt;GrowthFrame&gt; <a class="code hl_variable" href="structiface_1_1Growth.html#aa000031f2bd4dfa8230fa7b5eb0108ac">frames</a>;</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="structiface_1_1Growth.html#acfd12c3ee1f5a3af0a0147f3e58f49b3">  138</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Growth.html#acfd12c3ee1f5a3af0a0147f3e58f49b3">rateSolidPub</a> = 0; </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="structiface_1_1Growth.html#aa8a12cba9213aad87689c995c64ab729">  139</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Growth.html#aa8a12cba9213aad87689c995c64ab729">rateSolidOvi</a> = 0;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="structiface_1_1Growth.html#a614f0421755fd97d0eb208488d828200">  140</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Growth.html#a614f0421755fd97d0eb208488d828200">rateCrystalPub</a> = 0;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="structiface_1_1Growth.html#a458eabbca08c50b487b12b63af95a108">  141</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1Growth.html#a458eabbca08c50b487b12b63af95a108">rateCrystalOvi</a> = 0;</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>};</div>
+</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="namespaceiface.html#a4c169525df7e2f69700c7116bf18b707">  145</a></span>[[nodiscard]] <a class="code hl_struct" href="structiface_1_1Growth.html">Growth</a> <a class="code hl_function" href="namespaceiface.html#a4c169525df7e2f69700c7116bf18b707">studyTrajectory</a>(<span class="keyword">const</span> std::string &amp;path, <span class="keywordtype">double</span> dumpEveryPs,</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                                     <span class="keywordtype">double</span> cutoff = 3.5);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno"><a class="line" href="namespaceiface.html#a5cd477867991a043b897b4e58148ff86">  148</a></span>[[nodiscard]] std::string <a class="code hl_function" href="namespaceiface.html#a5cd477867991a043b897b4e58148ff86">formatGrowth</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structiface_1_1Growth.html">Growth</a> &amp;growth);</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="namespaceiface.html#acc0c4800681d1d5d1397be73a0cf9f77">  155</a></span>[[nodiscard]] std::string <a class="code hl_function" href="namespaceiface.html#acc0c4800681d1d5d1397be73a0cf9f77">formatQ6Growth</a>(<span class="keyword">const</span> std::string &amp;path, <span class="keywordtype">double</span> dumpEveryPs,</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>                                         <span class="keywordtype">double</span> cutoff = 3.5);</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span></div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>[[nodiscard]] <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="namespaceiface.html#a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4">  162</a></span><a class="code hl_function" href="namespaceiface.html#a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4">nanotube</a>(<span class="keywordtype">int</span> <a class="code hl_namespace" href="namespacering.html">ring</a>, <span class="keywordtype">int</span> stacks, <span class="keywordtype">double</span> <a class="code hl_namespace" href="namespacebond.html">bond</a> = 2.75);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>[[nodiscard]] <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="namespaceiface.html#af79131ed074f5600451e7d73408097e4">  165</a></span><a class="code hl_function" href="namespaceiface.html#af79131ed074f5600451e7d73408097e4">honeycombSheet</a>(<span class="keywordtype">int</span> nx, <span class="keywordtype">int</span> ny, <span class="keywordtype">int</span> layers, <span class="keywordtype">double</span> <a class="code hl_namespace" href="namespacebond.html">bond</a> = 2.75);</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span></div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno"><a class="line" href="namespaceiface.html#ac3554da1361c67160b4d59db9e1034e1">  169</a></span>[[nodiscard]] <span class="keywordtype">double</span> <a class="code hl_function" href="namespaceiface.html#ac3554da1361c67160b4d59db9e1034e1">gaussianStepWidth</a>(<span class="keywordtype">double</span> xi);</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="foldopen" id="foldopen00171" data-start="{" data-end="};">
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="structiface_1_1BootstrapInterval.html">  171</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structiface_1_1BootstrapInterval.html">BootstrapInterval</a> {</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="structiface_1_1BootstrapInterval.html#a91ed3508a29787ed0310e90a09ce9d87">  172</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1BootstrapInterval.html#a91ed3508a29787ed0310e90a09ce9d87">mean</a> = 0;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="structiface_1_1BootstrapInterval.html#aba5d3f85d573232a38cbd10954ed2ab4">  173</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1BootstrapInterval.html#aba5d3f85d573232a38cbd10954ed2ab4">lo</a> = 0; </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="structiface_1_1BootstrapInterval.html#a56d8887eee4888597872f8edab783b00">  174</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1BootstrapInterval.html#a56d8887eee4888597872f8edab783b00">hi</a> = 0; </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="structiface_1_1BootstrapInterval.html#a8cb977cd85041a93beb5a66944fe7b04">  175</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structiface_1_1BootstrapInterval.html#a8cb977cd85041a93beb5a66944fe7b04">excludesZero</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>};</div>
+</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno"><a class="line" href="namespaceiface.html#a0665e3f3b47a112af0e9543fd68f0d95">  179</a></span>[[nodiscard]] <a class="code hl_struct" href="structiface_1_1BootstrapInterval.html">BootstrapInterval</a> <a class="code hl_function" href="namespaceiface.html#a0665e3f3b47a112af0e9543fd68f0d95">bootstrapMean</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;samples, <span class="keywordtype">int</span> nDraw,</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                                              std::uint64_t seed);</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="namespaceiface.html#a88cfd68ef2f533bc67e97ecb489f975d">  183</a></span>[[nodiscard]] <a class="code hl_struct" href="structiface_1_1BootstrapInterval.html">BootstrapInterval</a> <a class="code hl_function" href="namespaceiface.html#a88cfd68ef2f533bc67e97ecb489f975d">pairedDifference</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;a,</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>                                                 <span class="keyword">const</span> std::vector&lt;double&gt; &amp;b, <span class="keywordtype">int</span> nDraw,</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>                                                 std::uint64_t seed);</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="foldopen" id="foldopen00187" data-start="{" data-end="};">
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html">  187</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structiface_1_1WillardChandler.html">WillardChandler</a> {</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html#aea0ff84abb2c360c282fb2b84bc81f8f">  188</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1WillardChandler.html#aea0ff84abb2c360c282fb2b84bc81f8f">xi</a> = 2.4;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html#a43b066cc850d59fbb014c49d9b14e4d0">  189</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1WillardChandler.html#a43b066cc850d59fbb014c49d9b14e4d0">meanRadius</a> = 0;</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html#a8bbeefb1fdd49b031bd88770af4e131e">  190</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1WillardChandler.html#a8bbeefb1fdd49b031bd88770af4e131e">surfaceRms</a> = 0;     </div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html#aa5291bdc63998373f8c85270d8ac87ee">  191</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1WillardChandler.html#aa5291bdc63998373f8c85270d8ac87ee">densityWidth</a> = 0;   </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html#a6c0ae6c5564e0e887bc7eea3a5b2e1ff">  192</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1WillardChandler.html#a6c0ae6c5564e0e887bc7eea3a5b2e1ff">solidWidthPub</a> = 0;  </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html#a40d9dc21c7e9b44f37dae6571ce1af7a">  193</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structiface_1_1WillardChandler.html#a40d9dc21c7e9b44f37dae6571ce1af7a">solidWidthOvi</a> = 0;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html#a2f58f5e82ecbc2fd0eb0a2a0343875a9">  194</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structiface_1_1WillardChandler.html#a2f58f5e82ecbc2fd0eb0a2a0343875a9">nRays</a> = 0;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno"><a class="line" href="structiface_1_1WillardChandler.html#a19b25781c0272c17f766504c193193b7">  195</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structiface_1_1WillardChandler.html#a19b25781c0272c17f766504c193193b7">defined</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>};</div>
+</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="namespaceiface.html#a05f59884d0d3896c70075a635609406e">  202</a></span>[[nodiscard]] <a class="code hl_struct" href="structiface_1_1WillardChandler.html">WillardChandler</a> <a class="code hl_function" href="namespaceiface.html#a05f59884d0d3896c70075a635609406e">willardChandler</a>(</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; cloud, <span class="keywordtype">double</span> xi = 2.4);</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno"><a class="line" href="namespaceiface.html#a1c6874fef9c0ed43cbe05451952c5e87">  205</a></span>[[nodiscard]] std::string <a class="code hl_function" href="namespaceiface.html#a1c6874fef9c0ed43cbe05451952c5e87">formatWillardChandler</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structiface_1_1WillardChandler.html">WillardChandler</a> &amp;surface);</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>} <span class="comment">// namespace iface</span></div>
+</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespacebond_html"><div class="ttname"><a href="namespacebond.html">bond</a></div><div class="ttdoc">Functions for bond-related analyses.</div><div class="ttdef"><b>Definition</b> <a href="bond_8hpp_source.html#l00073">bond.hpp:73</a></div></div>
+<div class="ttc" id="anamespaceiface_html"><div class="ttname"><a href="namespaceiface.html">iface</a></div><div class="ttdef"><b>Definition</b> <a href="#l00045">interface_order.hpp:45</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a05f59884d0d3896c70075a635609406e"><div class="ttname"><a href="namespaceiface.html#a05f59884d0d3896c70075a635609406e">iface::willardChandler</a></div><div class="ttdeci">WillardChandler willardChandler(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; cloud, double xi=2.4)</div></div>
+<div class="ttc" id="anamespaceiface_html_a0665e3f3b47a112af0e9543fd68f0d95"><div class="ttname"><a href="namespaceiface.html#a0665e3f3b47a112af0e9543fd68f0d95">iface::bootstrapMean</a></div><div class="ttdeci">BootstrapInterval bootstrapMean(const std::vector&lt; double &gt; &amp;samples, int nDraw, std::uint64_t seed)</div><div class="ttdoc">Percentile bootstrap of the mean. nDraw samples with replacement.</div></div>
+<div class="ttc" id="anamespaceiface_html_a1c6874fef9c0ed43cbe05451952c5e87"><div class="ttname"><a href="namespaceiface.html#a1c6874fef9c0ed43cbe05451952c5e87">iface::formatWillardChandler</a></div><div class="ttdeci">std::string formatWillardChandler(const WillardChandler &amp;surface)</div></div>
+<div class="ttc" id="anamespaceiface_html_a2bf660dc8d0666212a6e2350c6494d9e"><div class="ttname"><a href="namespaceiface.html#a2bf660dc8d0666212a6e2350c6494d9e">iface::formatStudy</a></div><div class="ttdeci">std::string formatStudy(const Study &amp;study, const std::string &amp;tag)</div></div>
+<div class="ttc" id="anamespaceiface_html_a2eaebae6d82142d09a0c4e1b0f7c4a67"><div class="ttname"><a href="namespaceiface.html#a2eaebae6d82142d09a0c4e1b0f7c4a67">iface::studyDump</a></div><div class="ttdeci">Study studyDump(const std::string &amp;path, int frame, double cutoff=3.5, double binWidth=1.0, bool census=true)</div></div>
+<div class="ttc" id="anamespaceiface_html_a3b2d1ed3ca7f783de29e8fde851b5395"><div class="ttname"><a href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395">iface::Kind</a></div><div class="ttdeci">Kind</div><div class="ttdef"><b>Definition</b> <a href="#l00049">interface_order.hpp:49</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a3b2d1ed3ca7f783de29e8fde851b5395a91c7e4ea85be233a81041a3eefedc8ad"><div class="ttname"><a href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395a91c7e4ea85be233a81041a3eefedc8ad">iface::Kind::nucleus</a></div><div class="ttdeci">@ nucleus</div><div class="ttdef"><b>Definition</b> <a href="#l00049">interface_order.hpp:49</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a3b2d1ed3ca7f783de29e8fde851b5395ae52ce0141772cd5abea43f36ab85f387"><div class="ttname"><a href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395ae52ce0141772cd5abea43f36ab85f387">iface::Kind::slab</a></div><div class="ttdeci">@ slab</div><div class="ttdef"><b>Definition</b> <a href="#l00049">interface_order.hpp:49</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4"><div class="ttname"><a href="namespaceiface.html#a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4">iface::nanotube</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; nanotube(int ring, int stacks, double bond=2.75)</div></div>
+<div class="ttc" id="anamespaceiface_html_a4c169525df7e2f69700c7116bf18b707"><div class="ttname"><a href="namespaceiface.html#a4c169525df7e2f69700c7116bf18b707">iface::studyTrajectory</a></div><div class="ttdeci">Growth studyTrajectory(const std::string &amp;path, double dumpEveryPs, double cutoff=3.5)</div><div class="ttdoc">Every frame of a dump. time of frame i is (i - 1) * dumpEveryPs.</div></div>
+<div class="ttc" id="anamespaceiface_html_a5cd477867991a043b897b4e58148ff86"><div class="ttname"><a href="namespaceiface.html#a5cd477867991a043b897b4e58148ff86">iface::formatGrowth</a></div><div class="ttdeci">std::string formatGrowth(const Growth &amp;growth)</div></div>
+<div class="ttc" id="anamespaceiface_html_a7615303594a4624586db8fc7dad682d0"><div class="ttname"><a href="namespaceiface.html#a7615303594a4624586db8fc7dad682d0">iface::slope</a></div><div class="ttdeci">double slope(const std::vector&lt; double &gt; &amp;x, const std::vector&lt; double &gt; &amp;y)</div><div class="ttdoc">Ordinary least squares slope. Empty or a single point returns 0.</div></div>
+<div class="ttc" id="anamespaceiface_html_a880354044e1248a351860d033c05721b"><div class="ttname"><a href="namespaceiface.html#a880354044e1248a351860d033c05721b">iface::Cause</a></div><div class="ttdeci">Cause</div><div class="ttdef"><b>Definition</b> <a href="#l00047">interface_order.hpp:47</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a880354044e1248a351860d033c05721ba28cb0457fcfa595f8f36771026c95ee1"><div class="ttname"><a href="namespaceiface.html#a880354044e1248a351860d033c05721ba28cb0457fcfa595f8f36771026c95ee1">iface::Cause::q3Shell</a></div><div class="ttdeci">@ q3Shell</div><div class="ttdef"><b>Definition</b> <a href="#l00047">interface_order.hpp:47</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a880354044e1248a351860d033c05721ba6a6334b478289b4fb3060c4f803eafd3"><div class="ttname"><a href="namespaceiface.html#a880354044e1248a351860d033c05721ba6a6334b478289b4fb3060c4f803eafd3">iface::Cause::agree</a></div><div class="ttdeci">@ agree</div><div class="ttdef"><b>Definition</b> <a href="#l00047">interface_order.hpp:47</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a880354044e1248a351860d033c05721ba8775a734047c8689a28062db1ac36d5f"><div class="ttname"><a href="namespaceiface.html#a880354044e1248a351860d033c05721ba8775a734047c8689a28062db1ac36d5f">iface::Cause::openEdge</a></div><div class="ttdeci">@ openEdge</div><div class="ttdef"><b>Definition</b> <a href="#l00047">interface_order.hpp:47</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a880354044e1248a351860d033c05721ba98b929ea2521b6f39fc260eea7d496af"><div class="ttname"><a href="namespaceiface.html#a880354044e1248a351860d033c05721ba98b929ea2521b6f39fc260eea7d496af">iface::Cause::neighbour</a></div><div class="ttdeci">@ neighbour</div><div class="ttdef"><b>Definition</b> <a href="#l00047">interface_order.hpp:47</a></div></div>
+<div class="ttc" id="anamespaceiface_html_a88cfd68ef2f533bc67e97ecb489f975d"><div class="ttname"><a href="namespaceiface.html#a88cfd68ef2f533bc67e97ecb489f975d">iface::pairedDifference</a></div><div class="ttdeci">BootstrapInterval pairedDifference(const std::vector&lt; double &gt; &amp;a, const std::vector&lt; double &gt; &amp;b, int nDraw, std::uint64_t seed)</div><div class="ttdoc">Mean of a[i] - b[i], resampled by shared index.</div></div>
+<div class="ttc" id="anamespaceiface_html_ac3554da1361c67160b4d59db9e1034e1"><div class="ttname"><a href="namespaceiface.html#ac3554da1361c67160b4d59db9e1034e1">iface::gaussianStepWidth</a></div><div class="ttdeci">double gaussianStepWidth(double xi)</div></div>
+<div class="ttc" id="anamespaceiface_html_acc0c4800681d1d5d1397be73a0cf9f77"><div class="ttname"><a href="namespaceiface.html#acc0c4800681d1d5d1397be73a0cf9f77">iface::formatQ6Growth</a></div><div class="ttdeci">std::string formatQ6Growth(const std::string &amp;path, double dumpEveryPs, double cutoff=3.5)</div></div>
+<div class="ttc" id="anamespaceiface_html_ae766328e3e793278b61ae939e2cc2dfe"><div class="ttname"><a href="namespaceiface.html#ae766328e3e793278b61ae939e2cc2dfe">iface::studyCloud</a></div><div class="ttdeci">Study studyCloud(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; cloud, double cutoff=3.5, double binWidth=1.0, bool census=true)</div></div>
+<div class="ttc" id="anamespaceiface_html_af79131ed074f5600451e7d73408097e4"><div class="ttname"><a href="namespaceiface.html#af79131ed074f5600451e7d73408097e4">iface::honeycombSheet</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; honeycombSheet(int nx, int ny, int layers, double bond=2.75)</div></div>
+<div class="ttc" id="anamespacering_html"><div class="ttname"><a href="namespacering.html">ring</a></div><div class="ttdoc">Topological network criteria functions.</div><div class="ttdef"><b>Definition</b> <a href="cage__affiliation_8hpp_source.html#l00055">cage_affiliation.hpp:55</a></div></div>
+<div class="ttc" id="astructiface_1_1Bin_html"><div class="ttname"><a href="structiface_1_1Bin.html">iface::Bin</a></div><div class="ttdef"><b>Definition</b> <a href="#l00066">interface_order.hpp:66</a></div></div>
+<div class="ttc" id="astructiface_1_1Bin_html_a07727eafa84ac11c31ce06e8e0c73ea0"><div class="ttname"><a href="structiface_1_1Bin.html#a07727eafa84ac11c31ce06e8e0c73ea0">iface::Bin::crystalOvi</a></div><div class="ttdeci">double crystalOvi</div><div class="ttdef"><b>Definition</b> <a href="#l00072">interface_order.hpp:72</a></div></div>
+<div class="ttc" id="astructiface_1_1Bin_html_a1510e3cb48555d036cc20824a3b1c058"><div class="ttname"><a href="structiface_1_1Bin.html#a1510e3cb48555d036cc20824a3b1c058">iface::Bin::n</a></div><div class="ttdeci">int n</div><div class="ttdef"><b>Definition</b> <a href="#l00068">interface_order.hpp:68</a></div></div>
+<div class="ttc" id="astructiface_1_1Bin_html_a2b154e582b5aa2838fd5560e4fada26b"><div class="ttname"><a href="structiface_1_1Bin.html#a2b154e582b5aa2838fd5560e4fada26b">iface::Bin::mid</a></div><div class="ttdeci">double mid</div><div class="ttdef"><b>Definition</b> <a href="#l00067">interface_order.hpp:67</a></div></div>
+<div class="ttc" id="astructiface_1_1Bin_html_a45732dc246ec22216c1ce798ec77b7c8"><div class="ttname"><a href="structiface_1_1Bin.html#a45732dc246ec22216c1ce798ec77b7c8">iface::Bin::solidOvi</a></div><div class="ttdeci">double solidOvi</div><div class="ttdef"><b>Definition</b> <a href="#l00073">interface_order.hpp:73</a></div></div>
+<div class="ttc" id="astructiface_1_1Bin_html_aa2119088056a27cd6a0ff09bf9301dcd"><div class="ttname"><a href="structiface_1_1Bin.html#aa2119088056a27cd6a0ff09bf9301dcd">iface::Bin::disagree</a></div><div class="ttdeci">int disagree</div><div class="ttdef"><b>Definition</b> <a href="#l00069">interface_order.hpp:69</a></div></div>
+<div class="ttc" id="astructiface_1_1Bin_html_ab887e7117cb9c73dccf9402cc60629bd"><div class="ttname"><a href="structiface_1_1Bin.html#ab887e7117cb9c73dccf9402cc60629bd">iface::Bin::solidPub</a></div><div class="ttdeci">double solidPub</div><div class="ttdef"><b>Definition</b> <a href="#l00071">interface_order.hpp:71</a></div></div>
+<div class="ttc" id="astructiface_1_1Bin_html_af9db603e1cad1bd6e4787db51d06552e"><div class="ttname"><a href="structiface_1_1Bin.html#af9db603e1cad1bd6e4787db51d06552e">iface::Bin::crystalPub</a></div><div class="ttdeci">double crystalPub</div><div class="ttdef"><b>Definition</b> <a href="#l00070">interface_order.hpp:70</a></div></div>
+<div class="ttc" id="astructiface_1_1BootstrapInterval_html"><div class="ttname"><a href="structiface_1_1BootstrapInterval.html">iface::BootstrapInterval</a></div><div class="ttdef"><b>Definition</b> <a href="#l00171">interface_order.hpp:171</a></div></div>
+<div class="ttc" id="astructiface_1_1BootstrapInterval_html_a56d8887eee4888597872f8edab783b00"><div class="ttname"><a href="structiface_1_1BootstrapInterval.html#a56d8887eee4888597872f8edab783b00">iface::BootstrapInterval::hi</a></div><div class="ttdeci">double hi</div><div class="ttdoc">2.5 percentile, Hyndman-Fan type 7</div><div class="ttdef"><b>Definition</b> <a href="#l00174">interface_order.hpp:174</a></div></div>
+<div class="ttc" id="astructiface_1_1BootstrapInterval_html_a8cb977cd85041a93beb5a66944fe7b04"><div class="ttname"><a href="structiface_1_1BootstrapInterval.html#a8cb977cd85041a93beb5a66944fe7b04">iface::BootstrapInterval::excludesZero</a></div><div class="ttdeci">bool excludesZero</div><div class="ttdoc">97.5 percentile</div><div class="ttdef"><b>Definition</b> <a href="#l00175">interface_order.hpp:175</a></div></div>
+<div class="ttc" id="astructiface_1_1BootstrapInterval_html_a91ed3508a29787ed0310e90a09ce9d87"><div class="ttname"><a href="structiface_1_1BootstrapInterval.html#a91ed3508a29787ed0310e90a09ce9d87">iface::BootstrapInterval::mean</a></div><div class="ttdeci">double mean</div><div class="ttdef"><b>Definition</b> <a href="#l00172">interface_order.hpp:172</a></div></div>
+<div class="ttc" id="astructiface_1_1BootstrapInterval_html_aba5d3f85d573232a38cbd10954ed2ab4"><div class="ttname"><a href="structiface_1_1BootstrapInterval.html#aba5d3f85d573232a38cbd10954ed2ab4">iface::BootstrapInterval::lo</a></div><div class="ttdeci">double lo</div><div class="ttdef"><b>Definition</b> <a href="#l00173">interface_order.hpp:173</a></div></div>
+<div class="ttc" id="astructiface_1_1Front_html"><div class="ttname"><a href="structiface_1_1Front.html">iface::Front</a></div><div class="ttdef"><b>Definition</b> <a href="#l00051">interface_order.hpp:51</a></div></div>
+<div class="ttc" id="astructiface_1_1Front_html_a16d6f11e37b90eceb761644b350f3328"><div class="ttname"><a href="structiface_1_1Front.html#a16d6f11e37b90eceb761644b350f3328">iface::Front::defined</a></div><div class="ttdeci">bool defined</div><div class="ttdoc">10-90 width along the same path</div><div class="ttdef"><b>Definition</b> <a href="#l00054">interface_order.hpp:54</a></div></div>
+<div class="ttc" id="astructiface_1_1Front_html_a8d4e951bae4f14232a3d152cc45637d3"><div class="ttname"><a href="structiface_1_1Front.html#a8d4e951bae4f14232a3d152cc45637d3">iface::Front::position</a></div><div class="ttdeci">double position</div><div class="ttdef"><b>Definition</b> <a href="#l00052">interface_order.hpp:52</a></div></div>
+<div class="ttc" id="astructiface_1_1Front_html_acc149af87785232b22eb356aa520f61f"><div class="ttname"><a href="structiface_1_1Front.html#acc149af87785232b22eb356aa520f61f">iface::Front::width</a></div><div class="ttdeci">double width</div><div class="ttdoc">0.5 crossing, or the nucleus radius</div><div class="ttdef"><b>Definition</b> <a href="#l00053">interface_order.hpp:53</a></div></div>
+<div class="ttc" id="astructiface_1_1GrowthFrame_html"><div class="ttname"><a href="structiface_1_1GrowthFrame.html">iface::GrowthFrame</a></div><div class="ttdef"><b>Definition</b> <a href="#l00130">interface_order.hpp:130</a></div></div>
+<div class="ttc" id="astructiface_1_1GrowthFrame_html_a1964ec73b6ee72c963a190256e75b221"><div class="ttname"><a href="structiface_1_1GrowthFrame.html#a1964ec73b6ee72c963a190256e75b221">iface::GrowthFrame::frame</a></div><div class="ttdeci">int frame</div><div class="ttdef"><b>Definition</b> <a href="#l00131">interface_order.hpp:131</a></div></div>
+<div class="ttc" id="astructiface_1_1GrowthFrame_html_a21ff9273d7b5b264935e9424880559ab"><div class="ttname"><a href="structiface_1_1GrowthFrame.html#a21ff9273d7b5b264935e9424880559ab">iface::GrowthFrame::timePs</a></div><div class="ttdeci">double timePs</div><div class="ttdef"><b>Definition</b> <a href="#l00132">interface_order.hpp:132</a></div></div>
+<div class="ttc" id="astructiface_1_1GrowthFrame_html_a32990a9920273c184100193778eaa185"><div class="ttname"><a href="structiface_1_1GrowthFrame.html#a32990a9920273c184100193778eaa185">iface::GrowthFrame::study</a></div><div class="ttdeci">Study study</div><div class="ttdef"><b>Definition</b> <a href="#l00133">interface_order.hpp:133</a></div></div>
+<div class="ttc" id="astructiface_1_1Growth_html"><div class="ttname"><a href="structiface_1_1Growth.html">iface::Growth</a></div><div class="ttdef"><b>Definition</b> <a href="#l00136">interface_order.hpp:136</a></div></div>
+<div class="ttc" id="astructiface_1_1Growth_html_a458eabbca08c50b487b12b63af95a108"><div class="ttname"><a href="structiface_1_1Growth.html#a458eabbca08c50b487b12b63af95a108">iface::Growth::rateCrystalOvi</a></div><div class="ttdeci">double rateCrystalOvi</div><div class="ttdef"><b>Definition</b> <a href="#l00141">interface_order.hpp:141</a></div></div>
+<div class="ttc" id="astructiface_1_1Growth_html_a614f0421755fd97d0eb208488d828200"><div class="ttname"><a href="structiface_1_1Growth.html#a614f0421755fd97d0eb208488d828200">iface::Growth::rateCrystalPub</a></div><div class="ttdeci">double rateCrystalPub</div><div class="ttdef"><b>Definition</b> <a href="#l00140">interface_order.hpp:140</a></div></div>
+<div class="ttc" id="astructiface_1_1Growth_html_aa000031f2bd4dfa8230fa7b5eb0108ac"><div class="ttname"><a href="structiface_1_1Growth.html#aa000031f2bd4dfa8230fa7b5eb0108ac">iface::Growth::frames</a></div><div class="ttdeci">std::vector&lt; GrowthFrame &gt; frames</div><div class="ttdef"><b>Definition</b> <a href="#l00137">interface_order.hpp:137</a></div></div>
+<div class="ttc" id="astructiface_1_1Growth_html_aa8a12cba9213aad87689c995c64ab729"><div class="ttname"><a href="structiface_1_1Growth.html#aa8a12cba9213aad87689c995c64ab729">iface::Growth::rateSolidOvi</a></div><div class="ttdeci">double rateSolidOvi</div><div class="ttdoc">d(thickness)/dt in A/ps</div><div class="ttdef"><b>Definition</b> <a href="#l00139">interface_order.hpp:139</a></div></div>
+<div class="ttc" id="astructiface_1_1Growth_html_acfd12c3ee1f5a3af0a0147f3e58f49b3"><div class="ttname"><a href="structiface_1_1Growth.html#acfd12c3ee1f5a3af0a0147f3e58f49b3">iface::Growth::rateSolidPub</a></div><div class="ttdeci">double rateSolidPub</div><div class="ttdef"><b>Definition</b> <a href="#l00138">interface_order.hpp:138</a></div></div>
+<div class="ttc" id="astructiface_1_1Profile_html"><div class="ttname"><a href="structiface_1_1Profile.html">iface::Profile</a></div><div class="ttdef"><b>Definition</b> <a href="#l00057">interface_order.hpp:57</a></div></div>
+<div class="ttc" id="astructiface_1_1Profile_html_a0c5da37eff6b9622425e537e4e51f260"><div class="ttname"><a href="structiface_1_1Profile.html#a0c5da37eff6b9622425e537e4e51f260">iface::Profile::defined</a></div><div class="ttdeci">bool defined</div><div class="ttdef"><b>Definition</b> <a href="#l00063">interface_order.hpp:63</a></div></div>
+<div class="ttc" id="astructiface_1_1Profile_html_a19d1a698a13b9070e8d473ac846babc0"><div class="ttname"><a href="structiface_1_1Profile.html#a19d1a698a13b9070e8d473ac846babc0">iface::Profile::interfacial</a></div><div class="ttdeci">double interfacial</div><div class="ttdoc">(cubic + hexagonal) / N</div><div class="ttdef"><b>Definition</b> <a href="#l00059">interface_order.hpp:59</a></div></div>
+<div class="ttc" id="astructiface_1_1Profile_html_a202d42f287ecc5ad81f34b76eb713e6f"><div class="ttname"><a href="structiface_1_1Profile.html#a202d42f287ecc5ad81f34b76eb713e6f">iface::Profile::thickness</a></div><div class="ttdeci">double thickness</div><div class="ttdoc">crystal + interfacial, over N</div><div class="ttdef"><b>Definition</b> <a href="#l00061">interface_order.hpp:61</a></div></div>
+<div class="ttc" id="astructiface_1_1Profile_html_a2c127c519fb30527115826b951f8ea84"><div class="ttname"><a href="structiface_1_1Profile.html#a2c127c519fb30527115826b951f8ea84">iface::Profile::crystal</a></div><div class="ttdeci">double crystal</div><div class="ttdef"><b>Definition</b> <a href="#l00058">interface_order.hpp:58</a></div></div>
+<div class="ttc" id="astructiface_1_1Profile_html_a411c2fe4e684c2c3bf63f5b6955247d0"><div class="ttname"><a href="structiface_1_1Profile.html#a411c2fe4e684c2c3bf63f5b6955247d0">iface::Profile::solid</a></div><div class="ttdeci">double solid</div><div class="ttdoc">interfacial / N</div><div class="ttdef"><b>Definition</b> <a href="#l00060">interface_order.hpp:60</a></div></div>
+<div class="ttc" id="astructiface_1_1Profile_html_ab77ce65569d6ed1411a986f007b337a5"><div class="ttname"><a href="structiface_1_1Profile.html#ab77ce65569d6ed1411a986f007b337a5">iface::Profile::fronts</a></div><div class="ttdeci">std::vector&lt; Front &gt; fronts</div><div class="ttdoc">ice span between the two 0.5 crossings, or 2 R</div><div class="ttdef"><b>Definition</b> <a href="#l00062">interface_order.hpp:62</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html"><div class="ttname"><a href="structiface_1_1Study.html">iface::Study</a></div><div class="ttdef"><b>Definition</b> <a href="#l00076">interface_order.hpp:76</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a02f7cf4c604ee77f16fc31ff0011a539"><div class="ttname"><a href="structiface_1_1Study.html#a02f7cf4c604ee77f16fc31ff0011a539">iface::Study::cnaCrystal</a></div><div class="ttdeci">int cnaCrystal</div><div class="ttdef"><b>Definition</b> <a href="#l00096">interface_order.hpp:96</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a099c157e423b188add797c5909bf58a9"><div class="ttname"><a href="structiface_1_1Study.html#a099c157e423b188add797c5909bf58a9">iface::Study::causeCount</a></div><div class="ttdeci">int causeCount[5]</div><div class="ttdef"><b>Definition</b> <a href="#l00079">interface_order.hpp:79</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a13c931580fcd57994b8c01ac23ccbbba"><div class="ttname"><a href="structiface_1_1Study.html#a13c931580fcd57994b8c01ac23ccbbba">iface::Study::ringDisagree</a></div><div class="ttdeci">int ringDisagree[3]</div><div class="ttdef"><b>Definition</b> <a href="#l00085">interface_order.hpp:85</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a14898b7c04b362144ec8ae7d25319625"><div class="ttname"><a href="structiface_1_1Study.html#a14898b7c04b362144ec8ae7d25319625">iface::Study::nDisagree</a></div><div class="ttdeci">int nDisagree</div><div class="ttdef"><b>Definition</b> <a href="#l00078">interface_order.hpp:78</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a15b4a45ed794541f7f5655e34a9fb151"><div class="ttname"><a href="structiface_1_1Study.html#a15b4a45ed794541f7f5655e34a9fb151">iface::Study::depthDisagreeN</a></div><div class="ttdeci">int depthDisagreeN</div><div class="ttdef"><b>Definition</b> <a href="#l00103">interface_order.hpp:103</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a1ffe0f010f9cc15fa9b3136fd67523c8"><div class="ttname"><a href="structiface_1_1Study.html#a1ffe0f010f9cc15fa9b3136fd67523c8">iface::Study::transition</a></div><div class="ttdeci">int transition[9][9]</div><div class="ttdef"><b>Definition</b> <a href="#l00082">interface_order.hpp:82</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a2148a46548ca3b37650dcd525323168a"><div class="ttname"><a href="structiface_1_1Study.html#a2148a46548ca3b37650dcd525323168a">iface::Study::q6Agree</a></div><div class="ttdeci">double q6Agree</div><div class="ttdef"><b>Definition</b> <a href="#l00100">interface_order.hpp:100</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a35198c3867d2893e49121862d8c72809"><div class="ttname"><a href="structiface_1_1Study.html#a35198c3867d2893e49121862d8c72809">iface::Study::diamondHex</a></div><div class="ttdeci">int diamondHex</div><div class="ttdef"><b>Definition</b> <a href="#l00094">interface_order.hpp:94</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a360994b36b17763bb185bcd82a45a22d"><div class="ttname"><a href="structiface_1_1Study.html#a360994b36b17763bb185bcd82a45a22d">iface::Study::depthAgree</a></div><div class="ttdeci">double depthAgree</div><div class="ttdoc">mean distance to the nearest front</div><div class="ttdef"><b>Definition</b> <a href="#l00102">interface_order.hpp:102</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a374b1003a41309c4a86a9b0049425367"><div class="ttname"><a href="structiface_1_1Study.html#a374b1003a41309c4a86a9b0049425367">iface::Study::crystalOvi</a></div><div class="ttdeci">Profile crystalOvi</div><div class="ttdef"><b>Definition</b> <a href="#l00110">interface_order.hpp:110</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a4381152a880f99ae7329144b753e7cca"><div class="ttname"><a href="structiface_1_1Study.html#a4381152a880f99ae7329144b753e7cca">iface::Study::prismAtoms</a></div><div class="ttdeci">int prismAtoms</div><div class="ttdef"><b>Definition</b> <a href="#l00087">interface_order.hpp:87</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a48e96760472e8a1f45d6dcff189c9a69"><div class="ttname"><a href="structiface_1_1Study.html#a48e96760472e8a1f45d6dcff189c9a69">iface::Study::depthDisagree</a></div><div class="ttdeci">double depthDisagree</div><div class="ttdef"><b>Definition</b> <a href="#l00101">interface_order.hpp:101</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a4a5a8c3051bc35f9be5d457c08263b60"><div class="ttname"><a href="structiface_1_1Study.html#a4a5a8c3051bc35f9be5d457c08263b60">iface::Study::n</a></div><div class="ttdeci">int n</div><div class="ttdef"><b>Definition</b> <a href="#l00077">interface_order.hpp:77</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a4b928032f56ee6665b51c0553f6b4f2c"><div class="ttname"><a href="structiface_1_1Study.html#a4b928032f56ee6665b51c0553f6b4f2c">iface::Study::q6Disagree</a></div><div class="ttdeci">double q6Disagree</div><div class="ttdef"><b>Definition</b> <a href="#l00099">interface_order.hpp:99</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a4f29c357a4bb69f36bfd18e0dea38e2a"><div class="ttname"><a href="structiface_1_1Study.html#a4f29c357a4bb69f36bfd18e0dea38e2a">iface::Study::diamondCubic</a></div><div class="ttdeci">int diamondCubic</div><div class="ttdef"><b>Definition</b> <a href="#l00093">interface_order.hpp:93</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a5a7f2c730e012eaf0616bb68efbd4bd7"><div class="ttname"><a href="structiface_1_1Study.html#a5a7f2c730e012eaf0616bb68efbd4bd7">iface::Study::solidOvi</a></div><div class="ttdeci">Profile solidOvi</div><div class="ttdoc">cubic + hexagonal</div><div class="ttdef"><b>Definition</b> <a href="#l00109">interface_order.hpp:109</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a650724652de17ba7517a0512afc53245"><div class="ttname"><a href="structiface_1_1Study.html#a650724652de17ba7517a0512afc53245">iface::Study::depthAgreeN</a></div><div class="ttdeci">int depthAgreeN</div><div class="ttdef"><b>Definition</b> <a href="#l00104">interface_order.hpp:104</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a66130754bbdb2628aaf90627c58bdbb5"><div class="ttname"><a href="structiface_1_1Study.html#a66130754bbdb2628aaf90627c58bdbb5">iface::Study::countOvi</a></div><div class="ttdeci">int countOvi[9]</div><div class="ttdef"><b>Definition</b> <a href="#l00081">interface_order.hpp:81</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a68ff8d5293ad3ca88acec7f4a200c45e"><div class="ttname"><a href="structiface_1_1Study.html#a68ff8d5293ad3ca88acec7f4a200c45e">iface::Study::crystalPub</a></div><div class="ttdeci">Profile crystalPub</div><div class="ttdoc">cubic + hexagonal + interfacial</div><div class="ttdef"><b>Definition</b> <a href="#l00108">interface_order.hpp:108</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a6aa92c8b615e49f589c9fe0d6607c63d"><div class="ttname"><a href="structiface_1_1Study.html#a6aa92c8b615e49f589c9fe0d6607c63d">iface::Study::prismBlocks</a></div><div class="ttdeci">int prismBlocks</div><div class="ttdef"><b>Definition</b> <a href="#l00088">interface_order.hpp:88</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a6fac2d95f344ebcbe25700059572679f"><div class="ttname"><a href="structiface_1_1Study.html#a6fac2d95f344ebcbe25700059572679f">iface::Study::axis</a></div><div class="ttdeci">int axis</div><div class="ttdef"><b>Definition</b> <a href="#l00106">interface_order.hpp:106</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a79bf381313f1515fea338f3565200477"><div class="ttname"><a href="structiface_1_1Study.html#a79bf381313f1515fea338f3565200477">iface::Study::diamondOther</a></div><div class="ttdeci">int diamondOther</div><div class="ttdef"><b>Definition</b> <a href="#l00092">interface_order.hpp:92</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a86e1f3d52ae6304ba2cc34413001fc5d"><div class="ttname"><a href="structiface_1_1Study.html#a86e1f3d52ae6304ba2cc34413001fc5d">iface::Study::ptmPassDisagree</a></div><div class="ttdeci">int ptmPassDisagree</div><div class="ttdef"><b>Definition</b> <a href="#l00098">interface_order.hpp:98</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a98508f616b45d1279d3228974a4f4f65"><div class="ttname"><a href="structiface_1_1Study.html#a98508f616b45d1279d3228974a4f4f65">iface::Study::bilayerAtoms</a></div><div class="ttdeci">int bilayerAtoms</div><div class="ttdef"><b>Definition</b> <a href="#l00089">interface_order.hpp:89</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_a9c9bd20630f3111a3406b01fcb1cb324"><div class="ttname"><a href="structiface_1_1Study.html#a9c9bd20630f3111a3406b01fcb1cb324">iface::Study::kind</a></div><div class="ttdeci">Kind kind</div><div class="ttdef"><b>Definition</b> <a href="#l00105">interface_order.hpp:105</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_aa1e44a579e9232a2efd9fd1c35ba619f"><div class="ttname"><a href="structiface_1_1Study.html#aa1e44a579e9232a2efd9fd1c35ba619f">iface::Study::shellAgree</a></div><div class="ttdeci">int shellAgree[8]</div><div class="ttdoc">0..6 and 7 meaning 7 or more</div><div class="ttdef"><b>Definition</b> <a href="#l00084">interface_order.hpp:84</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_ab5b1acc67cba6d7bf4188801222cfd3a"><div class="ttname"><a href="structiface_1_1Study.html#ab5b1acc67cba6d7bf4188801222cfd3a">iface::Study::ptmPass</a></div><div class="ttdeci">int ptmPass</div><div class="ttdoc">FCC, HCP, icosahedral or BCC under adaptive CNA.</div><div class="ttdef"><b>Definition</b> <a href="#l00097">interface_order.hpp:97</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_ac92f03a72b3ceeea09a82315fefe5cbb"><div class="ttname"><a href="structiface_1_1Study.html#ac92f03a72b3ceeea09a82315fefe5cbb">iface::Study::solidPub</a></div><div class="ttdeci">Profile solidPub</div><div class="ttdef"><b>Definition</b> <a href="#l00107">interface_order.hpp:107</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_ad825a8163744dc6b84ba939a6aff243e"><div class="ttname"><a href="structiface_1_1Study.html#ad825a8163744dc6b84ba939a6aff243e">iface::Study::polygonAtoms</a></div><div class="ttdeci">int polygonAtoms</div><div class="ttdef"><b>Definition</b> <a href="#l00090">interface_order.hpp:90</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_ada37224d2abb541c5c124ae043b5bc4f"><div class="ttname"><a href="structiface_1_1Study.html#ada37224d2abb541c5c124ae043b5bc4f">iface::Study::bins</a></div><div class="ttdeci">std::vector&lt; Bin &gt; bins</div><div class="ttdef"><b>Definition</b> <a href="#l00111">interface_order.hpp:111</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_add6faf5db5ff24e27cefe1eb8f60e85e"><div class="ttname"><a href="structiface_1_1Study.html#add6faf5db5ff24e27cefe1eb8f60e85e">iface::Study::shellDisagree</a></div><div class="ttdeci">int shellDisagree[8]</div><div class="ttdef"><b>Definition</b> <a href="#l00083">interface_order.hpp:83</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_ae692ea13d88798005a2d32f883419908"><div class="ttname"><a href="structiface_1_1Study.html#ae692ea13d88798005a2d32f883419908">iface::Study::thinSheets</a></div><div class="ttdeci">int thinSheets</div><div class="ttdef"><b>Definition</b> <a href="#l00091">interface_order.hpp:91</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_af461f007cd947e708b0f3ab33f53272b"><div class="ttname"><a href="structiface_1_1Study.html#af461f007cd947e708b0f3ab33f53272b">iface::Study::countPub</a></div><div class="ttdeci">int countPub[9]</div><div class="ttdef"><b>Definition</b> <a href="#l00080">interface_order.hpp:80</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_af7dd4a39146a3ac06b77d419f04ec2a1"><div class="ttname"><a href="structiface_1_1Study.html#af7dd4a39146a3ac06b77d419f04ec2a1">iface::Study::cnaOther</a></div><div class="ttdeci">int cnaOther</div><div class="ttdef"><b>Definition</b> <a href="#l00095">interface_order.hpp:95</a></div></div>
+<div class="ttc" id="astructiface_1_1Study_html_af8d96e9fb849520d932c5917ff17f3db"><div class="ttname"><a href="structiface_1_1Study.html#af8d96e9fb849520d932c5917ff17f3db">iface::Study::ringAgree</a></div><div class="ttdeci">int ringAgree[3]</div><div class="ttdoc">atoms in at least one ring of size 4, 5, 6</div><div class="ttdef"><b>Definition</b> <a href="#l00086">interface_order.hpp:86</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html"><div class="ttname"><a href="structiface_1_1WillardChandler.html">iface::WillardChandler</a></div><div class="ttdef"><b>Definition</b> <a href="#l00187">interface_order.hpp:187</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html_a19b25781c0272c17f766504c193193b7"><div class="ttname"><a href="structiface_1_1WillardChandler.html#a19b25781c0272c17f766504c193193b7">iface::WillardChandler::defined</a></div><div class="ttdeci">bool defined</div><div class="ttdef"><b>Definition</b> <a href="#l00195">interface_order.hpp:195</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html_a2f58f5e82ecbc2fd0eb0a2a0343875a9"><div class="ttname"><a href="structiface_1_1WillardChandler.html#a2f58f5e82ecbc2fd0eb0a2a0343875a9">iface::WillardChandler::nRays</a></div><div class="ttdeci">int nRays</div><div class="ttdef"><b>Definition</b> <a href="#l00194">interface_order.hpp:194</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html_a40d9dc21c7e9b44f37dae6571ce1af7a"><div class="ttname"><a href="structiface_1_1WillardChandler.html#a40d9dc21c7e9b44f37dae6571ce1af7a">iface::WillardChandler::solidWidthOvi</a></div><div class="ttdeci">double solidWidthOvi</div><div class="ttdoc">10-90 of the 2015 solid fraction on the same coordinate</div><div class="ttdef"><b>Definition</b> <a href="#l00193">interface_order.hpp:193</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html_a43b066cc850d59fbb014c49d9b14e4d0"><div class="ttname"><a href="structiface_1_1WillardChandler.html#a43b066cc850d59fbb014c49d9b14e4d0">iface::WillardChandler::meanRadius</a></div><div class="ttdeci">double meanRadius</div><div class="ttdef"><b>Definition</b> <a href="#l00189">interface_order.hpp:189</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html_a6c0ae6c5564e0e887bc7eea3a5b2e1ff"><div class="ttname"><a href="structiface_1_1WillardChandler.html#a6c0ae6c5564e0e887bc7eea3a5b2e1ff">iface::WillardChandler::solidWidthPub</a></div><div class="ttdeci">double solidWidthPub</div><div class="ttdoc">10-90 of the coarse density normal to that surface</div><div class="ttdef"><b>Definition</b> <a href="#l00192">interface_order.hpp:192</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html_a8bbeefb1fdd49b031bd88770af4e131e"><div class="ttname"><a href="structiface_1_1WillardChandler.html#a8bbeefb1fdd49b031bd88770af4e131e">iface::WillardChandler::surfaceRms</a></div><div class="ttdeci">double surfaceRms</div><div class="ttdef"><b>Definition</b> <a href="#l00190">interface_order.hpp:190</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html_aa5291bdc63998373f8c85270d8ac87ee"><div class="ttname"><a href="structiface_1_1WillardChandler.html#aa5291bdc63998373f8c85270d8ac87ee">iface::WillardChandler::densityWidth</a></div><div class="ttdeci">double densityWidth</div><div class="ttdoc">rms of the instantaneous surface about its mean</div><div class="ttdef"><b>Definition</b> <a href="#l00191">interface_order.hpp:191</a></div></div>
+<div class="ttc" id="astructiface_1_1WillardChandler_html_aea0ff84abb2c360c282fb2b84bc81f8f"><div class="ttname"><a href="structiface_1_1WillardChandler.html#aea0ff84abb2c360c282fb2b84bc81f8f">iface::WillardChandler::xi</a></div><div class="ttdeci">double xi</div><div class="ttdef"><b>Definition</b> <a href="#l00188">interface_order.hpp:188</a></div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00152">mol_sys.hpp:152</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="interface__order_8hpp.html">interface_order.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

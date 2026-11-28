@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::PrismOptions
+.. _doxid-structseams_1_1_prism_options:
+
+struct seams::PrismOptions
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for prism stacks. :ref:`More...<details-structseams_1_1_prism_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct PrismOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_prism_options_1a33d127526dde69ab35a5cd6d6a45a3cd>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_prism_options_1a0b95df986a86f000b3c826a8d0669789>` = 0;
+	};
+.. _details-structseams_1_1_prism_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for prism stacks.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_prism_options_1a33d127526dde69ab35a5cd6d6a45a3cd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_prism_options_1a0b95df986a86f000b3c826a8d0669789:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+

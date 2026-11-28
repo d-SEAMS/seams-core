@@ -1,0 +1,24 @@
+.. index:: pair: group; Further analyses
+.. _doxid-group__capi__more:
+
+Further analyses
+================
+
+.. toctree::
+	:hidden:
+
+	struct_seams_directed_hbond.rst
+	struct_seams_hbond_edge.rst
+
+Aliases, k-nearest lists, RDF, hydrogen bonds, density, fingerprints, sites.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// structs
+
+	struct :ref:`seams_directed_hbond<doxid-structseams__directed__hbond>`;
+	struct :ref:`seams_hbond_edge<doxid-structseams__hbond__edge>`;
+

@@ -1,0 +1,90 @@
+.. index:: pair: namespace; seams::cfg
+.. _doxid-namespaceseams_1_1cfg:
+
+namespace seams::cfg
+====================
+
+.. toctree::
+	:hidden:
+
+	struct_seams_cfg_Runtime.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace cfg {
+
+	// structs
+
+	struct :ref:`Runtime<doxid-structseams_1_1cfg_1_1_runtime>`;
+
+	// global functions
+
+	std::string :ref:`pathFromArgv<doxid-namespaceseams_1_1cfg_1a3b2a50f145d13cd1992555c5c9c0bee0>`(int argc, char** argv);
+	void :ref:`applyFile<doxid-namespaceseams_1_1cfg_1a15a32127f8c951ab7ddc615b73dd2768>`(const std::string& path, bool required);
+	:ref:`Runtime<doxid-structseams_1_1cfg_1_1_runtime>` :ref:`load<doxid-namespaceseams_1_1cfg_1afc15aaadf171c66c374b2e93295c7649>`(std::string_view explicitFile = {});
+	void :ref:`exportEnviron<doxid-namespaceseams_1_1cfg_1aabf071e8f8e859b7daa9df9a9024377f>`(const :ref:`Runtime<doxid-structseams_1_1cfg_1_1_runtime>`& cfg);
+	void :target:`dump<doxid-namespaceseams_1_1cfg_1a713ce305c8665518546545ced0b638f5>`(const :ref:`Runtime<doxid-structseams_1_1cfg_1_1_runtime>`& cfg, std::ostream& os);
+
+	} // namespace cfg
+.. _details-namespaceseams_1_1cfg:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; pathFromArgv
+.. _doxid-namespaceseams_1_1cfg_1a3b2a50f145d13cd1992555c5c9c0bee0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string pathFromArgv(int argc, char** argv)
+
+Scan argv for config PATH / config=PATH.
+
+Empty if absent.
+
+.. index:: pair: function; applyFile
+.. _doxid-namespaceseams_1_1cfg_1a15a32127f8c951ab7ddc615b73dd2768:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void applyFile(const std::string& path, bool required)
+
+Apply a dotenv file: set KEY=VAL only when KEY is not already in the environment.
+
+Throws if required and the file is missing.
+
+.. index:: pair: function; load
+.. _doxid-namespaceseams_1_1cfg_1afc15aaadf171c66c374b2e93295c7649:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Runtime<doxid-structseams_1_1cfg_1_1_runtime>` load(std::string_view explicitFile = {})
+
+Load file (if any) then read the environment into a :ref:`Runtime <doxid-structseams_1_1cfg_1_1_runtime>`.
+
+.. index:: pair: function; exportEnviron
+.. _doxid-namespaceseams_1_1cfg_1aabf071e8f8e859b7daa9df9a9024377f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void exportEnviron(const :ref:`Runtime<doxid-structseams_1_1cfg_1_1_runtime>`& cfg)
+
+Write :ref:`Runtime <doxid-structseams_1_1cfg_1_1_runtime>` fields into the environment so libraries that only call getenv (linkcell, OpenMP offload) see the CLI result.
+

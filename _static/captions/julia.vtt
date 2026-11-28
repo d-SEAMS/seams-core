@@ -1,0 +1,28 @@
+WEBVTT
+
+NOTE
+Draft cues converted from captions.srt. Final wording and timing are recorded later.
+
+1
+00:00:00.300 --> 00:00:23.850 line:95% align:center size:80%
+I build this tree with the seams-core pixi environment. The two lines on screen are the install: meson setup build, then meson compile -C build. That produces the seams command and libseams, which is the library the Julia call sits on. I keep that build and use it for every count in this recording.
+
+2
+00:00:24.250 --> 00:00:39.470 line:95% align:center size:80%
+The input is input/traj/ice1h.lammpstrj. seams read prints nop 128 frame 1. Those are the 128 oxygens in one frame. This is the cell docs_engine_openmm scores, and it is the cell I hand to Julia.
+
+3
+00:00:40.020 --> 00:00:57.320 line:95% align:center size:80%
+Neighbours are a cutoff of 3.5 angstroms on type 1. seams cn prints nI 128, so every oxygen is in the list. Ice Ih keeps a four-neighbour shell inside that cutoff. The Julia neighbour call walks this same list.
+
+4
+00:00:57.670 --> 00:01:12.890 line:95% align:center size:80%
+Primitive rings use that list. The histogram is 6 256, and the summary is rings 256. Two six-rings for each of the 128 waters, and no other size. docs_engine_openmm names that count six-rings 256.
+
+5
+00:01:13.390 --> 00:01:29.020 line:95% align:center size:80%
+Local q6 on the same cutoff prints q6 0.625855. Published CHILL+ then prints hexagonal 128. Every water is hexagonal. I want the Julia result to show the same two figures before I trust the wrapper.
+
+6
+00:01:29.620 --> 00:01:44.000 line:95% align:center size:80%
+The Julia example is docs/examples/minimal_julia.jl with --project=bindings/julia/Dseams, on input/traj/genice_sI.lammpstrj. It prints julia example ok. The ice Ih numbers on the earlier lines stay nop 128, q6 0.625855, hexagonal 128, and rings 256.

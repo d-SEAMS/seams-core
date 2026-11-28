@@ -1,0 +1,146 @@
+.. index:: pair: namespace; topoparam
+.. _doxid-namespacetopoparam:
+
+namespace topoparam
+===================
+
+.. toctree::
+	:hidden:
+
+	enum_topoparam_TetrahedralNeighbours.rst
+	struct_topoparam_LayerStack.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace topoparam {
+
+	// enums
+
+	enum :ref:`TetrahedralNeighbours<doxid-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133>`;
+
+	// structs
+
+	struct :ref:`LayerStack<doxid-structtopoparam_1_1_layer_stack>`;
+
+	// global functions
+
+	std::vector<double> :ref:`tetrahedralOrder<doxid-namespacetopoparam_1ac48323590268a0d651161a5b3bd4486f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<int>& centres, const std::vector<int>& partners, :ref:`TetrahedralNeighbours<doxid-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133>` convention, double cutoff);
+	std::vector<double> :ref:`localStructureIndex<doxid-namespacetopoparam_1ad0f6df73b0e817fdcb7fefc3a8e9439f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<int>& centres, const std::vector<int>& partners, double cutoff);
+	double :ref:`normHeightPercent<doxid-namespacetopoparam_1a473e7ca29f517802126410c59756c974>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int nPrisms, double avgPrismHeight);
+	std::vector<double> :ref:`calcCoverageArea<doxid-namespacetopoparam_1a9c3eb2dbcb32ec7523ed28f8ad4d6b19>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, double sheetArea);
+	std::vector<double> :ref:`projAreaSingleRing<doxid-namespacetopoparam_1a2e190293e3c4603ddd1026e4c8f3896a>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& ring);
+	std::vector<double> :ref:`rodgerF4<doxid-namespacetopoparam_1ac9f9075f5de0b04fb6d0431ee15a29b9>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int oxygenType, int hydrogenType);
+	double :ref:`meanFinite<doxid-namespacetopoparam_1ab7cd3df2fabd16fcadfc571348e90cdf>`(const std::vector<double>& values);
+	double :ref:`jumpRotorTau90<doxid-namespacetopoparam_1aeb9f8c9987282f283cd961250d42408e>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame0, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame1, double dt, int oxygenType, int hydrogenType);
+	:ref:`LayerStack<doxid-structtopoparam_1_1_layer_stack>` :target:`layerCubicity<doxid-namespacetopoparam_1aa880bc72cf1a43526aa69ff58e016014>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int axis = 2, double layerWidth = 3.7);
+	:ref:`LayerStack<doxid-structtopoparam_1_1_layer_stack>` :ref:`tumLayerStack<doxid-namespacetopoparam_1a6fe65121ff4d4bad3f74f84037fe3e7c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<bool>& basal, const std::vector<bool>& equatorial, int axis = 2, double layerWidth = 3.7);
+
+	} // namespace topoparam
+.. _details-namespacetopoparam:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; tetrahedralOrder
+.. _doxid-namespacetopoparam_1ac48323590268a0d651161a5b3bd4486f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> tetrahedralOrder(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<int>& centres, const std::vector<int>& partners, :ref:`TetrahedralNeighbours<doxid-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133>` convention, double cutoff)
+
+Errington-Debenedetti tetrahedral order for selected centres against an independently selected partner set. Empty selections mean every atom. A centre is excluded from its own partner shell. Results follow centre order. A centre with fewer than four available neighbours is quiet NaN.
+
+.. index:: pair: function; localStructureIndex
+.. _doxid-namespacetopoparam_1ad0f6df73b0e817fdcb7fefc3a8e9439f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> localStructureIndex(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<int>& centres, const std::vector<int>& partners, double cutoff)
+
+Shiratani-Sasai Local Structure Index for selected centres and partners. With sorted distances r_1 < ... < r_N <= cutoff < r\_{N+1}, LSI is the population variance of the N gaps r\_{i+1} - r_i. No partner inside the cutoff, or none beyond it, is quiet NaN.
+
+.. index:: pair: function; normHeightPercent
+.. _doxid-namespacetopoparam_1a473e7ca29f517802126410c59756c974:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double normHeightPercent(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int nPrisms, double avgPrismHeight)
+
+Calculates the height%, an average measure of filled volume. The average height of a prism can be taken to be 2.75-2.85 Angstrom. (Koga et. al., 2001)
+
+.. index:: pair: function; calcCoverageArea
+.. _doxid-namespacetopoparam_1a9c3eb2dbcb32ec7523ed28f8ad4d6b19:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> calcCoverageArea(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, double sheetArea)
+
+Calculates the coverage area%, an area-based measure of relative proportion of monolayer ices.
+
+.. index:: pair: function; projAreaSingleRing
+.. _doxid-namespacetopoparam_1a2e190293e3c4603ddd1026e4c8f3896a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> projAreaSingleRing(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& ring)
+
+Calculates the projected area on the XY, YZ and XZ planes.
+
+.. index:: pair: function; rodgerF4
+.. _doxid-namespacetopoparam_1ac9f9075f5de0b04fb6d0431ee15a29b9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> rodgerF4(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int oxygenType, int hydrogenType)
+
+Per-atom Rodger F4 = mean of cos(3 phi) over H-O...O-H dihedrals of this oxygen with its oxygen neighbours. Hydrogens share molID with their oxygen. An oxygen with no hydrogens (mW) is quiet_NaN. nList is by atom ID with the leading self entry, as neighListO.
+
+.. index:: pair: function; meanFinite
+.. _doxid-namespacetopoparam_1ab7cd3df2fabd16fcadfc571348e90cdf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double meanFinite(const std::vector<double>& values)
+
+Mean of the finite per-atom F4 values; quiet_NaN when none are finite.
+
+.. index:: pair: function; jumpRotorTau90
+.. _doxid-namespacetopoparam_1aeb9f8c9987282f283cd961250d42408e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double jumpRotorTau90(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame0, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame1, double dt, int oxygenType, int hydrogenType)
+
+Jump-rotor tau_90 from two frames. Each water is the H-H vector of the two hydrogens that share the oxygen molID. Returns dt when any molecule rotates by at least 90 degrees, quiet_NaN otherwise.
+
+.. index:: pair: function; tumLayerStack
+.. _doxid-namespacetopoparam_1a6fe65121ff4d4bad3f74f84037fe3e7c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`LayerStack<doxid-structtopoparam_1_1_layer_stack>` tumLayerStack(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<bool>& basal, const std::vector<bool>& equatorial, int axis = 2, double layerWidth = 3.7)
+
+Literature I_sd reference: CHILL+ molecules binned by coordinate. TUM/rings stacking: only HC-basal and DDC-equatorial six-rings vote. Prismatic/peripheral rings and non-plane cages (clathrate 5^12) do not write a letter. Ions stay off the ring graph the caller passes. phiC is N_equatorial / (N_basal + N_equatorial) over plane rings.
+

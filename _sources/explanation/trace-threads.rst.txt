@@ -1,0 +1,174 @@
+================================
+Signature-search thread controls
+================================
+
+
+The signature search reads one OpenMP width, and the neighbour list may
+narrow it. The tables record that width on hydrate cells and on ice Ic.
+``threads`` is the width that was requested. On the signature and kernel
+tables, ``cores`` is the number of CPUs the process was allowed. ``n`` is
+the number of timed calls that were kept.
+
+How the rows were timed
+-----------------------
+
+The signature and kernel rows at width :math:`n` were run with this environment:
+
+.. table::
+
+    +------------------------------------------------------------------------+-----------+
+    | variable                                                               | value     |
+    +========================================================================+===========+
+    | ``OMP_NUM_THREADS``                                                    | :math:`n` |
+    +------------------------------------------------------------------------+-----------+
+    | ``OMP_DYNAMIC``                                                        | ``FALSE`` |
+    +------------------------------------------------------------------------+-----------+
+    | ``OMP_PROC_BIND``                                                      | ``close`` |
+    +------------------------------------------------------------------------+-----------+
+    | ``OMP_PLACES``                                                         | ``cores`` |
+    +------------------------------------------------------------------------+-----------+
+    | ``RAYON_NUM_THREADS``                                                  | :math:`n` |
+    +------------------------------------------------------------------------+-----------+
+    | ``OPENBLAS_NUM_THREADS``, ``MKL_NUM_THREADS``, ``NUMEXPR_NUM_THREADS`` | ``1``     |
+    +------------------------------------------------------------------------+-----------+
+
+The process was pinned to cpu 0 when :math:`n = 1`, and to cpus 0 through
+:math:`n - 1` otherwise. One warm-up was dropped. Eight timed calls remain.
+The median of an even count is the mean of the two central samples. The
+interquartile range is the type-7 upper quartile minus the lower one.
+
+The width the search reads
+--------------------------
+
+``seams_set_num_threads`` sets the OpenMP width later calls read, and the
+linkcell width with it. Zero restores the width saved at first use.
+``seams_get_num_threads`` reports the width the next call will request.
+
+``seams::teamFor`` returns that OpenMP width. The atom count is not read.
+``seams::TeamWidth`` applies the width for the rest of the call and
+restores the previous width afterwards. Bond order, published CHILL+,
+the k-nearest list, the shell label and local :math:`q_l` use ``TeamWidth``.
+Those calls do not start a Rayon pool.
+
+``seams::adoptThreads`` calls ``prepareCompute``, then ``lc_set_threads`` with
+the OpenMP width. ``prepareCompute`` calls ``omp_set_dynamic(0)`` and leaves
+``OMP_WAIT_POLICY`` as the process started it. The environment above does
+not set that variable. The linkcell workers sleep between searches.
+Forcing a passive OpenMP wait on top of that sleep made the next region
+late by tens of milliseconds, so the OpenMP team is left running.
+
+``lc_set_threads`` stores the width of later linkcell searches. A count
+below one is stored as one thread, and one thread is a serial walk. A
+width keeps its pool, and a later search at the same width reuses it.
+A different width uses its own pool.
+
+The C calls ``seams_signature_cages`` and ``seams_signature_cages_edge``
+enter through ``seams::FairWidth``. When ``SEAMS_FAIR_WIDTH`` is unset, two
+forks in a row that each take more than a millisecond halve the team,
+down to a quarter of the requested width. A narrowed team tries twice
+its width again at most once a second. ``SEAMS_FAIR_WIDTH=0`` keeps the
+requested width. ``seams_frame_signature`` and ``seams cages --signature``
+do not enter through ``FairWidth``.
+
+:doc:`/stable/c` documents ``seams_set_num_threads`` and ``seams_get_num_threads``.
+
+The neighbour list
+------------------
+
+The timed hydrate sample is one cutoff list from ``neighListLinkcell``,
+one depth-6 primitive-ring network, and one search of :math:`5^{12}`,
+:math:`5^{12}6^{2}` and :math:`5^{12}6^{4}` together. Below 4096 molecules that
+list caps the team at four and sets the OpenMP width to the cap. The
+cap is left in place, so the ring search that follows runs at four
+threads as well. A request for eight threads on sI :math:`2\times2\times2`
+(368 molecules), sI :math:`4\times4\times4` (2944) and sII :math:`2\times2\times2`
+(1088) therefore has the same width as the four-thread row, and the
+medians sit together. At 4096 molecules and above the requested width
+is kept.
+
+Several threads in that list build an orthorhombic or triclinic cutoff
+with the cell-list CSR. One thread uses linkcell's buffered walk. If the
+cell list cannot be built, the call uses that walk as well. Both builders
+write the same sorted cutoff set, so the ring search does not depend on
+which builder ran.
+
+``seams cages --signature`` on a cutoff graph calls ``neighListO``, which
+does not apply the 4096 cap. The C API builds an orthorhombic cutoff
+with the cell list when every atom has the requested type, and uses
+``neighListO`` for a triclinic frame or a frame that mixes types.
+
+``seams_frame_signature`` on a single census uses the largest face as the
+depth, so ``512`` alone is a depth-5 network. The timed sample above
+searches all three censuses on one depth-6 network.
+
+When the pairs come from a linkcell pair list, the rows stay on the
+calling thread until the frame has at least 4096 atoms and the pair
+list has at least :math:`2^{20}` pairs. Waking a team that slept through
+the search costs more than writing those rows on the caller until the
+list is that large. The several-thread cell-list path does not use
+that placement.
+
+.. include:: trace-threads-tables.rst
+
+The ring update
+---------------
+
+``sourceTeam`` sizes the enumeration of changed ring sources, and the
+carried update's full pass. The calling thread does the work until
+there are about 80 sources for every worker. ``teamFor`` is a different
+rule: it is the requested width at every frame size.
+
+On one thread the carried update copies the new rings and sorts them
+directly, then merges the rings that stay with a direct walk. Several
+threads sort indices, scan for rings that meet the changed set, and
+merge the rings that are kept, using ``teamFor``. Dropped ring buffers
+are kept and reused by the next frame.
+
+The cage index is merged from per-thread buckets in ring order.
+Membership is the sorted atom ids of each face. The census at every
+width is the one-thread census.
+
+Eight kernels
+-------------
+
+Eight kernels are timed on ideal ice Ic at 4096, 32768, 110592 and
+884736 molecules, each at 1, 2, 4 and 8 threads. They are primitive
+rings, local and cutoff :math:`q_4` and :math:`q_6`, CHILL+, the shell label,
+and one carried hop update. The neighbour graph is built before the
+timer starts. The rings kernel is ``primitive::ringNetwork`` on that
+graph. Local :math:`q_4` and :math:`q_6` read the same graph. Cutoff :math:`q_4`,
+cutoff :math:`q_6` and published CHILL+ build their own cutoff list inside
+the timed call. The hop kernel times the second update, after the first
+update has filled the carried state. A repeat whose fingerprint differs
+from the first call aborts the run. On 4096 molecules the kernels match
+the one-thread result.
+
+``seams_frame_rings`` builds the cutoff list and then searches, so its
+time is not this rings kernel.
+
+.. include:: thread-scaling-tables.rst
+
+The full cutoff ring call
+-------------------------
+
+The full call is the neighbour list, the index conversion and the
+depth-6 search, timed together on ice Ic at 884736 molecules.
+``cell-list`` is the orthorhombic list inside that call. ``linkcell`` is
+the buffered walk. ``link``, ``convert`` and ``search`` are the three parts.
+``total`` is the whole call. This is not the rings kernel above.
+
+Several threads take the half stencil one z layer at a time, in one
+team. A layer stores a pair only on its own atoms. The partner row is
+filled after the team has stopped, because a forward step in x reaches
+back one z layer. An interior cell has no periodic image. Its thirteen
+forward neighbours are plain index steps and the shift is zero, so
+that cell skips the periodic-shift arithmetic. A boundary cell still
+applies the shift. One thread uses the same half stencil without a
+team. Below 2048 atoms the orthorhombic list runs on one thread and
+then restores the caller's width. Published CHILL+ and cutoff :math:`q_6`
+read this list. The one-thread and several-thread pair lists match.
+
+The 4096-molecule cap and the :math:`2^{20}`-pair row placement belong to
+the signature search above. ``teamFor`` does not replace them.
+
+.. include:: cutoff-rings-tables.rst

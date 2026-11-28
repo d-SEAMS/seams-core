@@ -1,0 +1,130 @@
+.. index:: pair: namespace; rdf2
+.. _doxid-namespacerdf2:
+
+namespace rdf2
+==============
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Defines RDF-specific functions. :ref:`More...<details-namespacerdf2>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace rdf2 {
+
+	// global functions
+
+	int :ref:`rdf2Danalysis_AA<doxid-namespacerdf2_1aa861f048b84783c91eb1fb21f5c827cd>`(std::string path, std::vector<double>& rdfValues, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, double binwidth, int firstFrame, int finalFrame);
+	std::vector<int> :ref:`sampleRDF_AA<doxid-namespacerdf2_1ae37c30b0c6e6c8d63f2471450b9b26ef>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, double binwidth, int nbin);
+	int :ref:`normalizeRDF<doxid-namespacerdf2_1a7f3e0b969a3ad28ce57dc8e7e74b6b98>`(int nopA, std::vector<double>& rdfValues, std::vector<int> histogram, double binwidth, int nbin, std::vector<double> volumeLengths, int nIter);
+	std::vector<double> :ref:`getSystemLengths<doxid-namespacerdf2_1adeebcb414f512ab8d99db14addb4506c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	double :ref:`getPlaneArea<doxid-namespacerdf2_1a309f282dffeee8083437a95aab29f51b>`(std::vector<double> volumeLengths);
+
+	} // namespace rdf2
+.. _details-namespacerdf2:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Defines RDF-specific functions.
+
+The radial distribution function :math:`g(r)`, or pair distribution function. It can be used to illuminate features of short-range and long-range order. The RDF is the probability of finding a particle at a distance of :math:`r` from a tagged reference particle, relative to that of an ideal gas. For a system of :math:`N` particles, the pair correlation function for :math:`N(N-1)` pairs is:
+
+.. math::
+
+	 \rho_N^{(2)}(r,r') = ⟨\sum_{i=1}^{N} \sum_{j=1,j \neq i}^{N} \delta
+	(r-r_i) \delta (r'-r_j) \langle
+
+The code essentially bins distances between pairs of particles, and normalizes the resulting histogram is normalized with respect to an ideal gas. The algorithm for the calculation of :math:`g(r)` may be divided into the following steps:
+
+#. **Initialization:** The :math:`g(r)` array is initialized to zero.
+
+#. **Sampling:** The histogram is added to for a particular bin, if the distance of a pair of atoms falls within the :math:`r` associated with the bin.
+
+#. **Normalization:** Every bin of the :math:`g(r)` array is normalized by the product of the number of ideal gas particles in that bin, and the number of particles and number of frames.
+
+To account for the geometry of the slab-like quasi-two-dimensional system, the RDF must be additionally normalized by a form factor :math:`f` such that :math:`f = 1 - \frac{r}{2h}` for :math:`r \le h` and :math:`f = \frac{h}{2r}` for :math:`r > h`; where :math:`h` is the height of the quasi-two-dimensional system. That is what ``:ref:`rdf2::normalizeRDF <doxid-namespacerdf2_1a7f3e0b969a3ad28ce57dc8e7e74b6b98>``` implements.
+
+
+
+.. _doxid-namespacerdf2_1autotoc_md9_1s1:
+
+
+
+
+
+.. _doxid-namespacerdf2_1autotoc_md9_1s2:
+
+
+
+
+
+.. _doxid-namespacerdf2_1autotoc_md9:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Dec 10, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; rdf2Danalysis_AA
+.. _doxid-namespacerdf2_1aa861f048b84783c91eb1fb21f5c827cd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int rdf2Danalysis_AA(std::string path, std::vector<double>& rdfValues, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, double binwidth, int firstFrame, int finalFrame)
+
+Main function for calculating the RDF for the same type of particle: calls other functions for initializing, sampling and normalizing the RDF
+
+.. index:: pair: function; sampleRDF_AA
+.. _doxid-namespacerdf2_1ae37c30b0c6e6c8d63f2471450b9b26ef:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> sampleRDF_AA(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, double binwidth, int nbin)
+
+Samples the RDF histogram at every step.
+
+.. index:: pair: function; normalizeRDF
+.. _doxid-namespacerdf2_1a7f3e0b969a3ad28ce57dc8e7e74b6b98:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int normalizeRDF(int nopA, std::vector<double>& rdfValues, std::vector<int> histogram, double binwidth, int nbin, std::vector<double> volumeLengths, int nIter)
+
+Normalize the histogram.
+
+.. index:: pair: function; getSystemLengths
+.. _doxid-namespacerdf2_1adeebcb414f512ab8d99db14addb4506c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> getSystemLengths(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+
+Gets the lengths of the volume slice of the quasi-two-dimensional system. box.size()>=6 returns dump H {lx, ly, lz}; a length-3 box stays the particle AABB so slab tests keep the occupied extents.
+
+.. index:: pair: function; getPlaneArea
+.. _doxid-namespacerdf2_1a309f282dffeee8083437a95aab29f51b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double getPlaneArea(std::vector<double> volumeLengths)
+
+Gets the plane area from the volume lengths vector.
+

@@ -1,0 +1,109 @@
+.. index:: pair: namespace; rdf
+.. _doxid-namespacerdf:
+
+namespace rdf
+=============
+
+.. toctree::
+	:hidden:
+
+	struct_rdf_PartialRdf.rst
+
+Overview
+~~~~~~~~
+
+Three-dimensional partial RDF g_IJ(r). :ref:`More...<details-namespacerdf>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace rdf {
+
+	// structs
+
+	struct :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`;
+
+	// global functions
+
+	:ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>` :ref:`partialRdf<doxid-namespacerdf_1a517997ee57e5a92beb20610ac1537e64>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ, double rmax, int nbins);
+	std::vector<double> :ref:`runningCN<doxid-namespacerdf_1a2a54eea649f6c234be50494cec2cee82>`(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h);
+	std::vector<double> :ref:`runningCN<doxid-namespacerdf_1a86d11871fc6dcad3daa99cddf7fc11dc>`(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h, double rhoJ);
+	int :ref:`firstMinimumBin<doxid-namespacerdf_1a69992a657891f8f1142240d0522b3e47>`(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h);
+	double :ref:`coordinationNumber<doxid-namespacerdf_1a8e81848e99a437aeb449478d47d096e2>`(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h, double rMax);
+	double :ref:`coordinationNumber<doxid-namespacerdf_1a0bfe751aa5d47556f24bebefdfa4dcc8>`(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h, double rMax, double rhoJ);
+
+	} // namespace rdf
+.. _details-namespacerdf:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Three-dimensional partial RDF g_IJ(r).
+
+Pair distances use :ref:`gen::periodicDist <doxid-namespacegen_1a4038dadde6016e7a738c2cb015344ee3>`, so a sheared dump cell uses the same minimum image as the neighbour lists. The ideal-gas denominator uses the triclinic volume from :ref:`nneigh::dumpVolume <doxid-namespacenneigh_1ad17e972366865905372aa796e946a351>` (det H), not the product of bound spans.
+
+Global Functions
+----------------
+
+.. index:: pair: function; partialRdf
+.. _doxid-namespacerdf_1a517997ee57e5a92beb20610ac1537e64:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>` partialRdf(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ, double rmax, int nbins)
+
+Histogram I-J pair distances and normalize to the dump-cell ideal gas.
+
+.. index:: pair: function; runningCN
+.. _doxid-namespacerdf_1a2a54eea649f6c234be50494cec2cee82:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> runningCN(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h)
+
+Running CN: 4 pi rho_J int_0^r s^2 g_IJ(s) ds. rho_J = nJ / volume.
+
+.. index:: pair: function; runningCN
+.. _doxid-namespacerdf_1a86d11871fc6dcad3daa99cddf7fc11dc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> runningCN(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h, double rhoJ)
+
+Running site-site CN: 4 pi rho_J integral_0^{r} s^2 g_IJ(s) ds per bin.
+
+.. index:: pair: function; firstMinimumBin
+.. _doxid-namespacerdf_1a69992a657891f8f1142240d0522b3e47:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int firstMinimumBin(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h)
+
+First minimum of g after the first maximum. Returns the bin index, or -1.
+
+.. index:: pair: function; coordinationNumber
+.. _doxid-namespacerdf_1a8e81848e99a437aeb449478d47d096e2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double coordinationNumber(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h, double rMax)
+
+Site-site CN integrated to rMax. Same kernel as runningCN; no default rMax.
+
+.. index:: pair: function; coordinationNumber
+.. _doxid-namespacerdf_1a0bfe751aa5d47556f24bebefdfa4dcc8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double coordinationNumber(const :ref:`PartialRdf<doxid-structrdf_1_1_partial_rdf>`& h, double rMax, double rhoJ)
+
+Site-site CN integrated to rMax. rhoJ is the number density of type J.
+

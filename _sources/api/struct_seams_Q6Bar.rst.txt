@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::Q6Bar
+.. _doxid-structseams_1_1_q6_bar:
+
+struct seams::Q6Bar
+===================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Lechner-Dellago q6-bar and the ice count above a cut. :ref:`More...<details-structseams_1_1_q6_bar>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Q6Bar {
+		// fields
+	
+		std::vector<double> :ref:`values<doxid-structseams_1_1_q6_bar_1a3596512c21d81c79ac382ca152da3070>`;
+		double :ref:`mean<doxid-structseams_1_1_q6_bar_1a50e8f473e10b495b22f822b33eda89c4>` = 0;
+		double :ref:`median<doxid-structseams_1_1_q6_bar_1a9176de7ae0506e1526ae065ef026054b>` = 0;
+		int :ref:`n_ice<doxid-structseams_1_1_q6_bar_1aede804552e361ca61d8d4ee910d72a3d>` = 0;
+	};
+.. _details-structseams_1_1_q6_bar:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Lechner-Dellago q6-bar and the ice count above a cut.
+
+Fields
+------
+
+.. index:: pair: variable; values
+.. _doxid-structseams_1_1_q6_bar_1a3596512c21d81c79ac382ca152da3070:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> values
+
+One q6-bar per atom.
+
+.. index:: pair: variable; mean
+.. _doxid-structseams_1_1_q6_bar_1a50e8f473e10b495b22f822b33eda89c4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double mean = 0
+
+Mean of the finite values.
+
+.. index:: pair: variable; median
+.. _doxid-structseams_1_1_q6_bar_1a9176de7ae0506e1526ae065ef026054b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double median = 0
+
+Median of the finite values.
+
+.. index:: pair: variable; n_ice
+.. _doxid-structseams_1_1_q6_bar_1aede804552e361ca61d8d4ee910d72a3d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int n_ice = 0
+
+Count strictly above the cut.
+

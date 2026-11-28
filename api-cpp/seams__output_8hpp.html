@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/seams_output.hpp File Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/seams__output_8hpp.html">
+<meta property="og:title" content="seams-core: src/include/internal/seams_output.hpp File Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/seams__output_8hpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/seams_output.hpp File Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('seams__output_8hpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams_output.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><code>#include &lt;<a class="el" href="bond_8hpp_source.html">bond.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cage_8hpp_source.html">cage.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="generic_8hpp_source.html">generic.hpp</a>&gt;</code><br />
+<code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
+<code>#include &lt;filesystem&gt;</code><br />
+</div>
+<p><a href="seams__output_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:sout" id="r_sout"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html">sout</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a3985775f30d7920fbf13f12386abefc1" id="r_a3985775f30d7920fbf13f12386abefc1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a3985775f30d7920fbf13f12386abefc1">sout::makePath</a> (const std::string &amp;path)</td></tr>
+<tr class="memdesc:a3985775f30d7920fbf13f12386abefc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline function for creating the desired directory (and parents).  <br /></td></tr>
+<tr class="memitem:aa5a5fe7be0281da3e75c9c45c7bc005d" id="r_aa5a5fe7be0281da3e75c9c45c7bc005d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#aa5a5fe7be0281da3e75c9c45c7bc005d">sout::writeRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::string filename=&quot;rings.dat&quot;)</td></tr>
+<tr class="memdesc:aa5a5fe7be0281da3e75c9c45c7bc005d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for printing out ring info, when there is no volume slice.  <br /></td></tr>
+<tr class="memitem:a74916a9878dd9f8234f493d8d67e0588" id="r_a74916a9878dd9f8234f493d8d67e0588"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a74916a9878dd9f8234f493d8d67e0588">sout::writePrismNum</a> (std::string path, const std::vector&lt; int &gt; &amp;nPrisms, const std::vector&lt; int &gt; &amp;nDefPrisms, const std::vector&lt; double &gt; &amp;heightPercent, int maxDepth, int currentFrame, int firstFrame)</td></tr>
+<tr class="memitem:a565b4993e658b431acc2fb314dbde015" id="r_a565b4993e658b431acc2fb314dbde015"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a565b4993e658b431acc2fb314dbde015">sout::writeRingNum</a> (std::string path, int currentFrame, const std::vector&lt; int &gt; &amp;nRings, const std::vector&lt; double &gt; &amp;coverageAreaXY, const std::vector&lt; double &gt; &amp;coverageAreaXZ, const std::vector&lt; double &gt; &amp;coverageAreaYZ, int maxDepth, int firstFrame)</td></tr>
+<tr class="memitem:a971cb6b5c97b5b9ba3d552f0a6c47055" id="r_a971cb6b5c97b5b9ba3d552f0a6c47055"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a971cb6b5c97b5b9ba3d552f0a6c47055">sout::writeRingNumBulk</a> (std::string path, int currentFrame, const std::vector&lt; int &gt; &amp;nRings, int maxDepth, int firstFrame)</td></tr>
+<tr class="memitem:a77cc523102fc57d203495a657703dab5" id="r_a77cc523102fc57d203495a657703dab5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a77cc523102fc57d203495a657703dab5">sout::printRDF</a> (std::string fileName, std::vector&lt; double &gt; &amp;rdfValues, double binwidth, int nbin)</td></tr>
+<tr class="memdesc:a77cc523102fc57d203495a657703dab5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for printing out the RDF, given the filename.  <br /></td></tr>
+<tr class="memitem:a5ca5eeff9edc702cdcf1b26e8501dc0c" id="r_a5ca5eeff9edc702cdcf1b26e8501dc0c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a5ca5eeff9edc702cdcf1b26e8501dc0c">sout::writeTopoBulkData</a> (std::string path, int currentFrame, int numHC, int numDDC, int mixedRings, int basalRings, int prismaticRings, int firstFrame)</td></tr>
+<tr class="memitem:a5bf62f6266ab17b7e0aaab15dddb0267" id="r_a5bf62f6266ab17b7e0aaab15dddb0267"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a5bf62f6266ab17b7e0aaab15dddb0267">sout::writePrisms</a> (std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2, int prismNum, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memdesc:a5bf62f6266ab17b7e0aaab15dddb0267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for writing out each prism.  <br /></td></tr>
+<tr class="memitem:aee17b8438205b4b88aad8a481c533ba5" id="r_aee17b8438205b4b88aad8a481c533ba5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#aee17b8438205b4b88aad8a481c533ba5">sout::writeClusterStats</a> (std::string path, int currentFrame, int largestCluster, int numOfClusters, int smallestCluster, double avgClusterSize, int firstFrame)</td></tr>
+<tr class="memdesc:aee17b8438205b4b88aad8a481c533ba5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for writing out cluster statistics.  <br /></td></tr>
+<tr class="memitem:a5d8a2d2b1746ed2e1deba049593ded7b" id="r_a5d8a2d2b1746ed2e1deba049593ded7b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a5d8a2d2b1746ed2e1deba049593ded7b">sout::writeMoleculeIDsInSlice</a> (std::string path, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:af556b48a2b7f51da88108dfc7ecf9623" id="r_af556b48a2b7f51da88108dfc7ecf9623"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#af556b48a2b7f51da88108dfc7ecf9623">sout::writeMoleculeIDsExpressionSelectOVITO</a> (std::string path, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a5b26e7213f27b9506c4eea7e8998edc9" id="r_a5b26e7213f27b9506c4eea7e8998edc9"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a5b26e7213f27b9506c4eea7e8998edc9">sout::writeLAMMPSdata</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; std::vector&lt; int &gt; &gt; rings, std::vector&lt; std::vector&lt; int &gt; &gt; bonds, std::string filename=&quot;system-rings.data&quot;)</td></tr>
+<tr class="memdesc:a5b26e7213f27b9506c4eea7e8998edc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a data file for rings.  <br /></td></tr>
+<tr class="memitem:a3b1cccfe3d5fc641d200b9ef3c31f041" id="r_a3b1cccfe3d5fc641d200b9ef3c31f041"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a3b1cccfe3d5fc641d200b9ef3c31f041">sout::writeLAMMPSdumpINT</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; double &gt; &amp;rmsdPerAtom, const std::vector&lt; int &gt; &amp;atomTypes, int maxDepth, std::string path)</td></tr>
+<tr class="memdesc:a3b1cccfe3d5fc641d200b9ef3c31f041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out a LAMMPS dump file containing the RMSD per atom.  <br /></td></tr>
+<tr class="memitem:a46251e11ffd9fab32a85c6e80e98ca0c" id="r_a46251e11ffd9fab32a85c6e80e98ca0c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a46251e11ffd9fab32a85c6e80e98ca0c">sout::writeLAMMPSdumpSlice</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path)</td></tr>
+<tr class="memitem:a1f96c3a3ef2e7d902c4f183320bd6151" id="r_a1f96c3a3ef2e7d902c4f183320bd6151"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a1f96c3a3ef2e7d902c4f183320bd6151">sout::writeLAMMPSdumpCages</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; double &gt; &amp;rmsdPerAtom, const std::vector&lt; int &gt; &amp;atomTypes, std::string path, int firstFrame)</td></tr>
+<tr class="memdesc:a1f96c3a3ef2e7d902c4f183320bd6151"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out a LAMMPS dump file containing the RMSD per atom for bulk ice.  <br /></td></tr>
+<tr class="memitem:a4bc27d1a493f6ac1baea341587486142" id="r_a4bc27d1a493f6ac1baea341587486142"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a4bc27d1a493f6ac1baea341587486142">sout::writeLAMMPSdataAllPrisms</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;atomTypes, int maxDepth, std::string path, bool doShapeMatching=false)</td></tr>
+<tr class="memdesc:a4bc27d1a493f6ac1baea341587486142"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a data file for prisms of every type.  <br /></td></tr>
+<tr class="memitem:abddd6a343317271ce30245c88e4ed66c" id="r_abddd6a343317271ce30245c88e4ed66c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#abddd6a343317271ce30245c88e4ed66c">sout::writeLAMMPSdataAllRings</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;atomTypes, int maxDepth, std::string path, bool isMonolayer=true)</td></tr>
+<tr class="memdesc:abddd6a343317271ce30245c88e4ed66c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a data file for rings of every type for a monolayer.  <br /></td></tr>
+<tr class="memitem:a0955d323d41c351af8a878c29acb0248" id="r_a0955d323d41c351af8a878c29acb0248"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a0955d323d41c351af8a878c29acb0248">sout::writeLAMMPSdataTopoBulk</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; <a class="el" href="namespacecage.html#aaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;atomTypes, std::string path, bool bondsBetweenDummy=false)</td></tr>
+<tr class="memitem:af0da7bd8c480ab8e9fb74cd634fb8877" id="r_af0da7bd8c480ab8e9fb74cd634fb8877"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#af0da7bd8c480ab8e9fb74cd634fb8877">sout::writeLAMMPSdataPrisms</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, bool useBondFile, std::string bondFile, const std::vector&lt; int &gt; &amp;listPrism, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string filename=&quot;system-prisms.data&quot;)</td></tr>
+<tr class="memdesc:af0da7bd8c480ab8e9fb74cd634fb8877"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a data file for prisms of a single type.  <br /></td></tr>
+<tr class="memitem:afad3207fe70a1e45c079465f1ac44104" id="r_afad3207fe70a1e45c079465f1ac44104"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#afad3207fe70a1e45c079465f1ac44104">sout::writeLAMMPSdataCages</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, <a class="el" href="namespacecage.html#a5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, int numCages, std::string filename=&quot;system-cages.data&quot;)</td></tr>
+<tr class="memitem:aa6dec898d176414e84433fb08318db4f" id="r_aa6dec898d176414e84433fb08318db4f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#aa6dec898d176414e84433fb08318db4f">sout::writeAllCages</a> (std::string path, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int currentFrame)</td></tr>
+<tr class="memitem:aa4a162332246b965cde05f838e068f2c" id="r_aa4a162332246b965cde05f838e068f2c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#aa4a162332246b965cde05f838e068f2c">sout::writeEachCage</a> (const std::vector&lt; int &gt; &amp;currentCage, int cageNum, <a class="el" href="namespacecage.html#a5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memdesc:aa4a162332246b965cde05f838e068f2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out a particular cage to a file.  <br /></td></tr>
+<tr class="memitem:a37163ab84cced80535282af04a7b6238" id="r_a37163ab84cced80535282af04a7b6238"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a37163ab84cced80535282af04a7b6238">sout::writeBasalRingsHex</a> (const std::vector&lt; int &gt; &amp;currentCage, int cageNum, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings)</td></tr>
+<tr class="memdesc:a37163ab84cced80535282af04a7b6238"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out the basal rings of a particular Hexagonal cage.  <br /></td></tr>
+<tr class="memitem:aae3f9c739ed902feed13bf1572dbf619" id="r_aae3f9c739ed902feed13bf1572dbf619"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#aae3f9c739ed902feed13bf1572dbf619">sout::writeBasalRingsPrism</a> (std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2, int prismNum, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, bool isDeformed)</td></tr>
+<tr class="memdesc:aae3f9c739ed902feed13bf1572dbf619"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write out the basal rings for a particular prism.  <br /></td></tr>
+<tr class="memitem:a6cc62aedecc8a19b34725616fbb8bdab" id="r_a6cc62aedecc8a19b34725616fbb8bdab"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a6cc62aedecc8a19b34725616fbb8bdab">sout::writeDump</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path, std::string outFile)</td></tr>
+<tr class="memdesc:a6cc62aedecc8a19b34725616fbb8bdab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic function for writing out to a dump file.  <br /></td></tr>
+<tr class="memitem:a27fa17268ba7c153cb879ff53022eee7" id="r_a27fa17268ba7c153cb879ff53022eee7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a27fa17268ba7c153cb879ff53022eee7">sout::writeHisto</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; double &gt; &amp;avgQ6)</td></tr>
+<tr class="memitem:abf5ebc975df1bd370e73d7390cd30f68" id="r_abf5ebc975df1bd370e73d7390cd30f68"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#abf5ebc975df1bd370e73d7390cd30f68">sout::writeCluster</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string fileName=&quot;cluster.txt&quot;, bool isSlice=false, int largestIceCluster=0)</td></tr>
+<tr class="memdesc:abf5ebc975df1bd370e73d7390cd30f68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for printing the largest ice cluster.  <br /></td></tr>
+<tr class="memitem:a2b208dcfe7724d9af7b158dfd15c808d" id="r_a2b208dcfe7724d9af7b158dfd15c808d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesout.html#a2b208dcfe7724d9af7b158dfd15c808d">sout::writeXYZcluster</a> (std::string path, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;atoms, int clusterID, <a class="el" href="namespacecage.html#a5787314f51b5927c213db48b81c21d95">cage::cageType</a> type)</td></tr>
+<tr class="memdesc:a2b208dcfe7724d9af7b158dfd15c808d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for writing out the XYZ files for each cluster.  <br /></td></tr>
+</table>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="seams__output_8hpp.html">seams_output.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+.. index:: pair: struct; tum::SpecializedCaps
+.. _doxid-structtum_1_1_specialized_caps:
+
+struct tum::SpecializedCaps
+===========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Initial buffer sizes of the hop-bound path. :ref:`More...<details-structtum_1_1_specialized_caps>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/tum_offload.hpp>
+	
+	struct SpecializedCaps {
+		// fields
+	
+		int :target:`rowCap<doxid-structtum_1_1_specialized_caps_1ad8955b2eea49812c13dd01b5c29c93a1>` = 32;
+		int :target:`ringCap<doxid-structtum_1_1_specialized_caps_1a768c638cf855580623bed1de3ec23d8c>` = 0;
+		int :target:`pairCap<doxid-structtum_1_1_specialized_caps_1a33e178503b17ba55668ee7357497f6c0>` = 0;
+		bool :target:`forceTarget<doxid-structtum_1_1_specialized_caps_1a5e817f9b4151b0b3d73c0fb7a6b9ee53>` = false;
+	};
+.. _details-structtum_1_1_specialized_caps:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Initial buffer sizes of the hop-bound path.
+
+Each grows on overflow.
+

@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Changelog - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Head-to-head summary" href="../explanation/comparisons-summary-tables.html" /><link rel="prev" title="struct water::Selection" href="../api/struct_water_Selection.html" /><link rel="canonical" href="https://docs.dseams.info/development/changelog.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css?v=f040eaf7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-tokens.css?v=d0993c48" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-family.css?v=ab9c5117" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-shibuya.css?v=86c54dcb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-doxyrest.css?v=cb763bf8" />
+    
+    
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/development/changelog.html"/>
+  <meta property="og:title" content="Changelog"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="Release notes for the d-SEAMS engine. Part of the d-SEAMS manual."/>
+    <meta property="og:description" content="Release notes for the d-SEAMS engine. Part of the d-SEAMS manual."/><meta name="twitter:card" content="summary_large_image"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="robots" content="index, follow">
+<meta name="twitter:title" content="Changelog - d-SEAMS">
+<meta name="twitter:description" content="Release notes for the d-SEAMS engine. Part of the d-SEAMS manual.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/development/changelog.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"Changelog - d-SEAMS","description":"Release notes for the d-SEAMS engine. Part of the d-SEAMS manual.","url":"https://docs.dseams.info/development/changelog.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
+<body><nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
+            <span>Libraries</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://linkcell.dseams.info">
+                <span>linkcell</span>
+                <small>Periodic linked-cell neighbour lists</small>
+              </a></li></ul>
+      </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../user/index.html">User guide</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_SkinNeighborList.html">class nneigh::SkinNeighborList</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_primitive_RingUpdater.html">class primitive::RingUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_AffiliationUpdater.html">class ring::AffiliationUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_NeighBond.html">class ring::NeighBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Brine.html">class seams::Brine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Cages.html">class seams::Cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Error.html">class seams::Error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_FairWidth.html">class seams::FairWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Fingerprint.html">class seams::Fingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_HbondTcf.html">class seams::HbondTcf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Msd.html">class seams::Msd</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Neighbours.html">class seams::Neighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_PinSession.html">class seams::PinSession</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_RegionErrors.html">class seams::RegionErrors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Reorientation.html">class seams::Reorientation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings.html">class seams::Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings_iterator.html">class seams::Rings::iterator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_System.html">class seams::System</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_detail_Handle.html">template class seams::detail::Handle</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_HbondLifetimeAccumulator.html">class traj::HbondLifetimeAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_MsdAccumulator.html">class traj::MsdAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_ReorientationAccumulator.html">class traj::ReorientationAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_TrajectoryUnwrapper.html">class traj::TrajectoryUnwrapper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_Signature_Kind.html">enum cage::Signature::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_cageType.html">enum cage::cageType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_iceType.html">enum cage::iceType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_ChillPlusRule.html">enum chill::ChillPlusRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_CrystalKind.html">enum chill::CrystalKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Cause.html">enum iface::Cause</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Kind.html">enum iface::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_atom_state_type.html">enum molSys::atom_state_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_bond_type.html">enum molSys::bond_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nneigh_BondGraph.html">enum nneigh::BondGraph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nucleation_CommittorFate.html">enum nucleation::CommittorFate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_phase_GlassKind.html">enum phase::GlassKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_primitive_RingRows.html">enum primitive::RingRows</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_ring_strucType.html">enum ring::strucType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Int8Backend.html">enum seams::product::Int8Backend</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Mode.html">enum seams::product::Mode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Reduction.html">enum seams::product::Reduction</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Family.html">enum site::Family</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_IonState.html">enum site::IonState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Kind.html">enum site::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Crystal.html">enum symm::Crystal</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Kind.html">enum symm::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_topoparam_TetrahedralNeighbours.html">enum topoparam::TetrahedralNeighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_water_MolMode.html">enum water::MolMode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-atoms">seams_system_set_atoms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-positions">seams_system_set_positions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-handle-error">seams_handle_error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-status">seams_status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system">seams_system</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-cagelabel">seams::CageLabel</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#doxid-group-seams-cpp-1ga66e498496a8ac061410534a9f0171779">seams::Status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-chillrule">seams::ChillRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-domainsubset">seams::DomainSubset</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-graph">seams::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-axis">seams::Axis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-set-num-threads">seams::set_num_threads</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5">group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d">group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/global.html">Global Namespace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_bond.html">Bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_cage.html">Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_brine.html">Ice/brine fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_cage.html">Cages and ice shells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame.html">Frames</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame_io.html">Frame reload and read-back</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_meta.html">Library metadata and errors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_more.html">Further analyses</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_neigh.html">Neighbour lists</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_order.html">Order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_pore.html">Pore geometry</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_ring.html">Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_sized.html">Status-returning and length-checked entry points</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_traj.html">Trajectories and dynamics</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_types.html">Types</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_chill.html">Chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_clump.html">Clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_gen.html">Gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_molSys.html">MolSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_primitive.html">Primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_prism3.html">Bulk prisms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf.html">Rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_ring.html">Ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_seams_cpp.html">C++ API</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_sinp.html">Sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_absor.html">namespace absor</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_bond.html">namespace bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_cage.html">namespace cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chill.html">namespace chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chordless.html">namespace chordless</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_clump.html">namespace clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen.html">namespace gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen_mic.html">namespace gen::mic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gpu.html">namespace gpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_iface.html">namespace iface</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ira.html">namespace ira</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_match.html">namespace match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_molSys.html">namespace molSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nneigh.html">namespace nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nucleation.html">namespace nucleation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_phase.html">namespace phase</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pntToPnt.html">namespace pntToPnt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pore.html">namespace pore</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_primitive.html">namespace primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_prism3.html">namespace prism3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf.html">namespace rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf2.html">namespace rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ring.html">namespace ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_science.html">namespace science</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams.html">namespace seams</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cfg.html">namespace seams::cfg</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cpu.html">namespace seams::cpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_detail.html">namespace seams::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_domain.html">namespace seams::domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_minimax.html">namespace seams::minimax</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_product.html">namespace seams::product</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_solid.html">namespace seams::solid</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_sphericart_ylm.html">namespace seams::sphericart_ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_steinhardt.html">namespace seams::steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_team.html">namespace seams::team</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_team_detail.html">namespace seams::team::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_tsan.html">namespace seams::tsan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_wigner.html">namespace seams::wigner</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_ylm.html">namespace seams::ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sinp.html">namespace sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_site.html">namespace site</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sout.html">namespace sout</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sph.html">namespace sph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_std.html">namespace std</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm.html">namespace symm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_avx2.html">namespace symm::avx2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_generic.html">namespace symm::generic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topo.html">namespace topo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topoparam.html">namespace topoparam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_traj.html">namespace traj</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum.html">namespace tum</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum3.html">namespace tum3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum_device.html">namespace tum::device</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_water.html">namespace water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_bond_DirectedHydrogenBond.html">struct bond::DirectedHydrogenBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Cage.html">struct cage::Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_CageShape.html">struct cage::CageShape</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_EdgeWindow.html">struct cage::EdgeWindow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FormerRow.html">struct cage::FormerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FoundCage.html">struct cage::FoundCage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Signature.html">struct cage::Signature</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_AnalysisPhases.html">struct chill::AnalysisPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondClassifier.html">struct chill::BondClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondOrder.html">struct chill::BondOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_ChillPlusResult.html">struct chill::ChillPlusResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_LinearClassifier.html">struct chill::LinearClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlCutoffStages.html">struct chill::QlCutoffStages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlmAtom.html">struct chill::QlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_SteinhardtQl.html">struct chill::SteinhardtQl</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_TemplateHit.html">struct chill::TemplateHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_VoronoiWeights.html">struct chill::VoronoiWeights</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_YlmAtom.html">struct chill::YlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_clump_Domain.html">struct clump::Domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_FracBox.html">struct gen::FracBox</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_mic_RangeError.html">struct gen::mic::RangeError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_BatchResult.html">struct gpu::BatchResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_DeviceInfo.html">struct gpu::DeviceInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Footprint.html">struct gpu::Footprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Plan.html">struct gpu::Plan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Bin.html">struct iface::Bin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_BootstrapInterval.html">struct iface::BootstrapInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Front.html">struct iface::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Growth.html">struct iface::Growth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_GrowthFrame.html">struct iface::GrowthFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Profile.html">struct iface::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Study.html">struct iface::Study</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_WillardChandler.html">struct iface::WillardChandler</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_Match.html">struct ira::Match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_PointGroup.html">struct ira::PointGroup</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Point.html">template struct molSys::Point</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_PointCloud.html">template struct molSys::PointCloud</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Result.html">struct molSys::Result</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Ascent.html">struct nucleation::Ascent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_CommittorCall.html">struct nucleation::CommittorCall</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_FrameRecord.html">struct nucleation::FrameRecord</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_GrowBasin.html">struct nucleation::GrowBasin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_HalfRise.html">struct nucleation::HalfRise</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Lead.html">struct nucleation::Lead</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Shift.html">struct nucleation::Shift</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_phase_IceXXIHit.html">struct phase::IceXXIHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_BoxError.html">struct pore::BoxError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Frame.html">struct pore::Frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_HostGuest.html">struct pore::HostGuest</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Profile.html">struct pore::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Profiles.html">struct pore::Profiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Graph.html">struct primitive::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_RingSearchSplit.html">struct primitive::RingSearchSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Vertex.html">struct primitive::Vertex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_rdf_PartialRdf.html">struct rdf::PartialRdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CageAffiliation.html">struct ring::CageAffiliation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CagePlanes.html">struct ring::CagePlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_DdcSplit.html">struct ring::DdcSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_EquatorChoice.html">struct ring::EquatorChoice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackParts.html">struct ring::PackParts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackingCertificate.html">struct ring::PackingCertificate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_RingSearchIndex.html">struct ring::RingSearchIndex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_SeededAtomLabels.html">struct ring::SeededAtomLabels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_StackingPlanes.html">struct ring::StackingPlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_AtomRow.html">struct science::AtomRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_ClusterPart.html">struct science::ClusterPart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_CriticalSize.html">struct science::CriticalSize</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Front.html">struct science::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_LayerRow.html">struct science::LayerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Layers.html">struct science::Layers</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_NucleusFrame.html">struct science::NucleusFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_SlopeInterval.html">struct science::SlopeInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BondOptions.html">struct seams::BondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineFronts.html">struct seams::BrineFronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineOptions.html">struct seams::BrineOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineProfile.html">struct seams::BrineProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageCounts.html">struct seams::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageOptions.html">struct seams::CageOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChillOptions.html">struct seams::ChillOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChordlessCycles.html">struct seams::ChordlessCycles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Classification.html">struct seams::Classification</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Contacts.html">struct seams::Contacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityOptions.html">struct seams::DensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityProfile.html">struct seams::DensityProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DiffusionFit.html">struct seams::DiffusionFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DirectedBond.html">struct seams::DirectedBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DirectedBondOptions.html">struct seams::DirectedBondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Distribution.html">struct seams::Distribution</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DistributionOptions.html">struct seams::DistributionOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainOptions.html">struct seams::DomainOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainReport.html">struct seams::DomainReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_EdgeSet.html">struct seams::EdgeSet</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FairState.html">struct seams::FairState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FilledByTeam.html">template struct seams::FilledByTeam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FilledByTeam_rebind.html">template struct seams::FilledByTeam::rebind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FingerprintOptions.html">struct seams::FingerprintOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FractionalDensityOptions.html">struct seams::FractionalDensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FractionalProfile.html">struct seams::FractionalProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HbondLifetimeCurve.html">struct seams::HbondLifetimeCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HbondLifetimeFit.html">struct seams::HbondLifetimeFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HostGuestContacts.html">struct seams::HostGuestContacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HostGuestOptions.html">struct seams::HostGuestOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_KnnOptions.html">struct seams::KnnOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MoleculeCentres.html">struct seams::MoleculeCentres</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MoleculeDipoles.html">struct seams::MoleculeDipoles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MsdCurve.html">struct seams::MsdCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_NeighbourOptions.html">struct seams::NeighbourOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrderOptions.html">struct seams::OrderOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrientationOrder.html">struct seams::OrientationOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Pockets.html">struct seams::Pockets</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreFrame.html">struct seams::PoreFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreFrameOptions.html">struct seams::PoreFrameOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreProfileOptions.html">struct seams::PoreProfileOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreProfiles.html">struct seams::PoreProfiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismCensus.html">struct seams::PrismCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismOptions.html">struct seams::PrismOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q4Q6.html">struct seams::Q4Q6</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6Bar.html">struct seams::Q6Bar</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6BarOptions.html">struct seams::Q6BarOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Rejection.html">struct seams::Rejection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ReorientationCurve.html">struct seams::ReorientationCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ReorientationFit.html">struct seams::ReorientationFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RingOptions.html">struct seams::RingOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RunningCoordination.html">struct seams::RunningCoordination</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SheetOptions.html">struct seams::SheetOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureMatch.html">struct seams::SignatureMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureOptions.html">struct seams::SignatureOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Steinhardt.html">struct seams::Steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SteinhardtOptions.html">struct seams::SteinhardtOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_TeamWidth.html">struct seams::TeamWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_WaterVectors.html">struct seams::WaterVectors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cfg_Runtime.html">struct seams::cfg::Runtime</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cpu_Features.html">struct seams::cpu::Features</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_directed_hbond.html">struct seams_directed_hbond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingPhases.html">struct seams::domain::RingPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingSummary.html">struct seams::domain::RingSummary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_Share.html">struct seams::domain::Share</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_hbond_edge.html">struct seams_hbond_edge</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_Cij.html">struct seams::product::Cij</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_ComplexDot.html">struct seams::product::ComplexDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_GemmInfo.html">struct seams::product::GemmInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_RealDot.html">struct seams::product::RealDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_team_detail_Call.html">template struct seams::team::detail::Call</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_tsan_Slot.html">struct seams::tsan::Slot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_sinp_ChemfilesLoadOptions.html">struct sinp::ChemfilesLoadOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_BrinePocket.html">struct site::BrinePocket</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationBin.html">struct site::ConcentrationBin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationProfile.html">struct site::ConcentrationProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_DensityZ.html">struct site::DensityZ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontLayerReport.html">struct site::FrontLayerReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontOptions.html">struct site::FrontOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontPair.html">struct site::FrontPair</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontSnapshot.html">struct site::FrontSnapshot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_GuestOccupancy.html">struct site::GuestOccupancy</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IceClusterIons.html">struct site::IceClusterIons</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_InsideTrace.html">struct site::InsideTrace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IonEnvironment.html">struct site::IonEnvironment</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_LinearFit.html">struct site::LinearFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_PocketCensus.html">struct site::PocketCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_RejectionCoefficient.html">struct site::RejectionCoefficient</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_Table.html">struct site::Table</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_TrapEvent.html">struct site::TrapEvent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_CanonShell.html">struct symm::CanonShell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Group.html">struct symm::Group</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Lattice.html">struct symm::Lattice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Overlay.html">struct symm::Overlay</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Shell17.html">struct symm::Shell17</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Space.html">struct symm::Space</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_FrameFingerprint.html">struct topo::FrameFingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_KeyLibrary.html">struct topo::KeyLibrary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LibraryMatch.html">struct topo::LibraryMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LocalKey.html">struct topo::LocalKey</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topoparam_LayerStack.html">struct topoparam::LayerStack</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_BoxCell.html">struct traj::BoxCell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DecayFitResult.html">struct traj::DecayFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DiffusionFitResult.html">struct traj::DiffusionFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DipoleVectorsResult.html">struct traj::DipoleVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_HbondLifetimeAccumulator_OriginSlot.html">struct traj::HbondLifetimeAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_MsdAccumulator_OriginSlot.html">struct traj::MsdAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_OrientationOrderResult.html">struct traj::OrientationOrderResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_ReorientationAccumulator_OriginSlot.html">struct traj::ReorientationAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_WaterVectorsResult.html">struct traj::WaterVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_CageCounts.html">struct tum::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_SpecializedCaps.html">struct tum::SpecializedCaps</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonReport.html">struct water::IonReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/comparisons-summary-tables.html">Head-to-head summary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sqq-tables.html">SQQ</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#id1">2.14.0</a><ul>
+<li><a class="reference internal" href="#highlights">Highlights</a></li>
+<li><a class="reference internal" href="#c-api">C API</a></li>
+<li><a class="reference internal" href="#packages">Packages</a></li>
+<li><a class="reference internal" href="#engines">Engines</a></li>
+<li><a class="reference internal" href="#neighbour-lists-and-chill">Neighbour lists and CHILL+</a></li>
+<li><a class="reference internal" href="#cages-and-symmetry">Cages and symmetry</a></li>
+<li><a class="reference internal" href="#performance">Performance</a></li>
+<li><a class="reference internal" href="#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id2">2.13.0</a></li>
+<li><a class="reference internal" href="#id3">2.12.0</a></li>
+<li><a class="reference internal" href="#id4">2.11.0</a></li>
+<li><a class="reference internal" href="#id5">2.10.0</a></li>
+<li><a class="reference internal" href="#id6">2.9.2</a></li>
+<li><a class="reference internal" href="#id7">2.9.1</a></li>
+<li><a class="reference internal" href="#id8">2.9.0</a></li>
+<li><a class="reference internal" href="#id9">2.8.0</a></li>
+<li><a class="reference internal" href="#id10">2.7.0</a></li>
+<li><a class="reference internal" href="#id11">2.6.0</a></li>
+<li><a class="reference internal" href="#id12">2.5.0</a></li>
+<li><a class="reference internal" href="#id13">2.4.0</a></li>
+<li><a class="reference internal" href="#id14">2.3.4</a></li>
+<li><a class="reference internal" href="#id15">2.3.3</a></li>
+<li><a class="reference internal" href="#id16">2.3.2</a></li>
+<li><a class="reference internal" href="#id17">2.3.1</a></li>
+<li><a class="reference internal" href="#id18">2.3.0</a></li>
+<li><a class="reference internal" href="#id19">2.2.5</a></li>
+<li><a class="reference internal" href="#id20">2.2.4</a></li>
+<li><a class="reference internal" href="#id21">2.2.3</a></li>
+<li><a class="reference internal" href="#id22">2.2.2</a></li>
+<li><a class="reference internal" href="#id23">2.2.1</a></li>
+<li><a class="reference internal" href="#id24">2.2.0</a></li>
+<li><a class="reference internal" href="#id25">2.1.2</a></li>
+<li><a class="reference internal" href="#id26">2.1.1</a></li>
+<li><a class="reference internal" href="#id27">2.1.0</a></li>
+<li><a class="reference internal" href="#id28">2.0.1</a></li>
+<li><a class="reference internal" href="#id30">2.0.0</a></li>
+<li><a class="reference internal" href="#id31">1.0.0</a></li>
+</ul>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Changelog</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">#</a></h1>
+<p>Release notes for the d-SEAMS engine. This repository builds
+<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>, the C library <code class="docutils literal notranslate"><span class="pre">libseams</span></code> (<code class="docutils literal notranslate"><span class="pre">include/seams.h</span></code>), the
+language ABI <code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code>, and the <code class="docutils literal notranslate"><span class="pre">seams</span></code> command. Each language
+binding is its own package. See the
+<a class="reference external" href="../reference/release-2.14.html">2.14 release notes</a> for changes in
+all 2.14 releases. The overview below covers the 2.14.0 ABI and package split.</p>
+<section id="id1">
+<h2>2.14.0<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">seams.h</span></code> is ABI 1. Callers moving from
+2.13 follow the <a class="reference external" href="../user/howto/upgrade-2.14.html">upgrade guide</a>.</p>
+<section id="highlights">
+<h3>Highlights<a class="headerlink" href="#highlights" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>A frame carries an orthorhombic or triclinic cell. The C API returns
+neighbours, the published CHILL+ rule and the OVITO rule, q4 and q6,
+primitive rings, and ring symmetry labels.</p></li>
+<li><p>CHILL+ defaults to the cutoff neighbour list. <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">mutual</span></code> is the
+mutual four-nearest list.</p></li>
+<li><p>LAMMPS, GROMACS, and OpenMM call the library on the frames a running
+calculation chooses. The report is the primitive ring census, the
+published CHILL labels, and the hexagonal and double-diamond cage
+flags.</p></li>
+<li><p>The ice label is the scale-free residual of the seventeen-atom shell
+after the optimal rotation and scale. The shell is the central atom,
+its four bonded neighbours, and the atoms bonded to those four.</p></li>
+<li><p>IRA, SOFI, and spglib reports for ice shells, hydrate cages, and
+rings are optional. The build links them when <code class="docutils literal notranslate"><span class="pre">-Dwith_ira</span></code> and
+<code class="docutils literal notranslate"><span class="pre">-Dwith_spglib</span></code> find the libraries.</p></li>
+</ul>
+</section>
+<section id="c-api">
+<h3>C API<a class="headerlink" href="#c-api" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">seams_set_num_threads(0)</span></code> restores the OpenMP width captured at first
+use. That width is <code class="docutils literal notranslate"><span class="pre">omp_get_max_threads()</span></code> when OpenMP is linked, and 1
+otherwise. A negative width returns <code class="docutils literal notranslate"><span class="pre">SEAMS_ERR_RANGE</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams_system_set_positions</span></code> overwrites the coordinates, and optionally
+the cell, of a stored frame. <code class="docutils literal notranslate"><span class="pre">seams_system_box</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seams_system_positions</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_types</span></code>, and <code class="docutils literal notranslate"><span class="pre">seams_system_ids</span></code>
+copy the stored frame out through a const handle.</p>
+<p>Length-checked calls are <code class="docutils literal notranslate"><span class="pre">seams_chill_plus_n</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_q4q6_n</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seams_rings_labels_n</span></code>, and <code class="docutils literal notranslate"><span class="pre">seams_rings_histogram_n</span></code>. The counts are
+<code class="docutils literal notranslate"><span class="pre">seams_system_natoms</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_neighbours_nrows</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">seams_rings_nrings</span></code>. <code class="docutils literal notranslate"><span class="pre">seams_last_error_message</span></code> names the last
+failure. <code class="docutils literal notranslate"><span class="pre">seams_rings_chordless</span></code> lists every chordless cycle of one
+size from 3 to 12, as sorted canonical rows. On 4096 mW molecules, one
+thread, the six-ring census that calls it takes 3.1 ms. The census it
+replaces took 20.6 ms.</p>
+<p>Every public call returns a <code class="docutils literal notranslate"><span class="pre">seams_status</span></code>. The library does not call
+<code class="docutils literal notranslate"><span class="pre">exit</span></code>.</p>
+</section>
+<section id="packages">
+<h3>Packages<a class="headerlink" href="#packages" title="Link to this heading">#</a></h3>
+<p>Each binding is version 2.14.0.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Language</p></th>
+<th class="head"><p>Package</p></th>
+<th class="head"><p>Repository</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Python</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pydseamslib</span></code> (<code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">dseams</span></code> and <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pydseams</span></code>)</p></td>
+<td><p><a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Rust</p></td>
+<td><p>crates <code class="docutils literal notranslate"><span class="pre">dseams-sys</span></code> and <code class="docutils literal notranslate"><span class="pre">dseams</span></code></p></td>
+<td><p><a class="reference external" href="https://github.com/d-SEAMS/dseams-rs">dseams-rs</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Fortran</p></td>
+<td><p>fpm Git dependency <code class="docutils literal notranslate"><span class="pre">dseams</span></code></p></td>
+<td><p><a class="reference external" href="https://github.com/d-SEAMS/dseams-fortran">dseams-fortran</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Lua, Fennel</p></td>
+<td><p>Git source, <code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code></p></td>
+<td><p><a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a></p></td>
+</tr>
+<tr class="row-even"><td><p>R</p></td>
+<td><p>package <code class="docutils literal notranslate"><span class="pre">dseams</span></code></p></td>
+<td><p><a class="reference external" href="https://github.com/d-SEAMS/dseams-r">dseams-r</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Julia</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Dseams</span></code> (over <code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code>) and <code class="docutils literal notranslate"><span class="pre">Seams</span></code> (over <code class="docutils literal notranslate"><span class="pre">libseams</span></code>)</p></td>
+<td><p><a class="reference external" href="https://github.com/d-SEAMS/Dseams.jl">Dseams.jl</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The Meson options that built the
+bindings in-tree are removed: <code class="docutils literal notranslate"><span class="pre">with_python</span></code>, <code class="docutils literal notranslate"><span class="pre">with_lua</span></code>, <code class="docutils literal notranslate"><span class="pre">fennel_lua</span></code>,
+<code class="docutils literal notranslate"><span class="pre">with_fortran</span></code>, <code class="docutils literal notranslate"><span class="pre">julia_wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">r_libs_user</span></code>, and <code class="docutils literal notranslate"><span class="pre">system_libseams</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pydseams</span></code> 2.14.0 has a Frame handle. <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">from_ase</span></code>, <code class="docutils literal notranslate"><span class="pre">to_ase</span></code>,
+<code class="docutils literal notranslate"><span class="pre">to_solvis</span></code>, <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code>, <code class="docutils literal notranslate"><span class="pre">cages</span></code>, <code class="docutils literal notranslate"><span class="pre">cages_by_signature</span></code>, <code class="docutils literal notranslate"><span class="pre">steinhardt</span></code>,
+<code class="docutils literal notranslate"><span class="pre">rdf_2d</span></code>, <code class="docutils literal notranslate"><span class="pre">monolayer_rings</span></code>, <code class="docutils literal notranslate"><span class="pre">find_prisms</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">pydseams.band.ring_census</span></code> call <code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code>. Saved trajectories
+other than CON are read with chemfiles when that library is linked.
+The formats include xyz, a LAMMPS dump, gro, pdb, dcd, xtc, and Amber
+NetCDF.</p>
+</section>
+<section id="engines">
+<h3>Engines<a class="headerlink" href="#engines" title="Link to this heading">#</a></h3>
+<p>LAMMPS loads <code class="docutils literal notranslate"><span class="pre">compute</span> <span class="pre">dseams</span></code> as <code class="docutils literal notranslate"><span class="pre">dseamsplugin.so</span></code> (<code class="docutils literal notranslate"><span class="pre">plugin</span> <span class="pre">load</span></code>), or
+from the copy-in sources in <code class="docutils literal notranslate"><span class="pre">extras/lammps</span></code>. The plugin accepts
+<code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, <code class="docutils literal notranslate"><span class="pre">graph</span> <span class="pre">cutoff</span></code> or <code class="docutils literal notranslate"><span class="pre">graph</span> <span class="pre">mutual</span></code>, <code class="docutils literal notranslate"><span class="pre">rule</span> <span class="pre">published</span></code> or
+<code class="docutils literal notranslate"><span class="pre">rule</span> <span class="pre">ovito</span></code>, <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">I</span></code>, and <code class="docutils literal notranslate"><span class="pre">mol</span> <span class="pre">water</span></code>. The copy-in sources accept
+<code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, <code class="docutils literal notranslate"><span class="pre">graph</span></code>, <code class="docutils literal notranslate"><span class="pre">type</span></code>, and <code class="docutils literal notranslate"><span class="pre">mol</span></code>. <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">mol</span> <span class="pre">water</span></code> score
+only the named oxygens. GROMACS uses a module inside <code class="docutils literal notranslate"><span class="pre">mdrun</span></code>. OpenMM
+uses a reporter.</p>
+<p>The PLUMED <code class="docutils literal notranslate"><span class="pre">SEAMS</span></code> collective variable is a separate plugin. The
+standalone PLUMED action (<code class="docutils literal notranslate"><span class="pre">dseams-plumed</span></code> v0.4.1) is indexed in
+<a class="reference external" href="https://www.plumed-nest.org/eggs/26/018/">PLUMED-NEST egg 26.018</a>. Meson
+builds it when <code class="docutils literal notranslate"><span class="pre">-Dwith_plumed</span></code> finds PLUMED. The option defaults to
+<code class="docutils literal notranslate"><span class="pre">auto</span></code>. <code class="docutils literal notranslate"><span class="pre">seams.q6</span></code> is the mean local q6, <code class="docutils literal notranslate"><span class="pre">seams.ice</span></code> is the CHILL+
+cubic fraction, and <code class="docutils literal notranslate"><span class="pre">seams.ring</span></code> is the fraction of atoms on a
+primitive six-ring. <code class="docutils literal notranslate"><span class="pre">MODE=all</span></code>, the default, also reports the
+hexagonal count and the six-ring count. <code class="docutils literal notranslate"><span class="pre">MODE=q6</span></code> and <code class="docutils literal notranslate"><span class="pre">MODE=q6bar</span></code>
+compute only the mean local q6 or the mean Lechner-Dellago q6-bar.
+<code class="docutils literal notranslate"><span class="pre">DUMP=file</span></code> appends a LAMMPS dump of the coordinates handed to d-SEAMS
+and the per-atom value. A restraint can bias q6. Positions are read in
+PLUMED’s length unit and converted to angstroms.</p>
+</section>
+<section id="neighbour-lists-and-chill">
+<h3>Neighbour lists and CHILL+<a class="headerlink" href="#neighbour-lists-and-chill" title="Link to this heading">#</a></h3>
+<p>The cutoff list covers restricted triclinic boxes. The orthorhombic
+list is a parallel cell sort. Each thread counts its atoms, a prefix
+sum places them, and the pairs are written into one CSR. The pair set
+does not depend on the thread count. Each OpenMP thread also owns a
+block of the linkcell weighted cell cut.</p>
+<p>On <code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code>, 250 TIP4P oxygens of LAMMPS type
+2:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/exampleTraj.lammpstrj<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span>
+</span><span data-line="2">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/exampleTraj.lammpstrj<span class="w"> </span>--cutoff<span class="w"> </span><span class="m">3</span>.5<span class="w"> </span>--type<span class="w"> </span><span class="m">2</span><span class="w"> </span>--graph<span class="w"> </span>mutual
+</span></pre></div>
+</div>
+<p>The cutoff command prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">250</span> <span class="pre">interClathrate</span> <span class="pre">9</span> <span class="pre">water</span> <span class="pre">241</span></code>. The
+mutual command prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">250</span> <span class="pre">clathrate</span> <span class="pre">1</span> <span class="pre">interClathrate</span> <span class="pre">7</span> <span class="pre">water</span> <span class="pre">242</span></code>.</p>
+<p>Those cutoff counts are a shell-count fix on this frame. The previous
+cutoff classification reported 12 interClathrate and 238 water, because
+bonds were counted after the list had been cut to four. A crystal row
+needs four neighbours inside the cutoff. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">ovito-chill+</span></code> averages
+q3 on the full shell and skips that neighbour test. Plain CHILL keeps
+the four closest neighbours and Moore’s test. A failure to read the
+input returns exit status 2.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--pair-types</span> <span class="pre">I,J</span></code> names the site-site pair for <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span></code> and
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cn</span></code>. Neighbour, CHILL, CHILL+, ring, and cage calls keep water
+oxygens with <code class="docutils literal notranslate"><span class="pre">--water-types</span></code> or <code class="docutils literal notranslate"><span class="pre">--mol</span></code> (<code class="docutils literal notranslate"><span class="pre">water</span></code>, or a molecule-id
+list such as <code class="docutils literal notranslate"><span class="pre">1,5-12</span></code>) and leave ions out of that graph. A type or
+molecule id that is absent from the frame is an error.</p>
+</section>
+<section id="cages-and-symmetry">
+<h3>Cages and symmetry<a class="headerlink" href="#cages-and-symmetry" title="Link to this heading">#</a></h3>
+<p>A signature cage is kept when its faces tile a sphere: every vertex
+lies on at least three faces that close around it, and <span class="math notranslate nohighlight">\(V - E + F = 2\)</span>.
+<code class="docutils literal notranslate"><span class="pre">--cage-edge</span></code> and <code class="docutils literal notranslate"><span class="pre">SEAMS_CAGE_EDGE</span></code> set the face-edge window, in the
+coordinate units of the file. The default is <code class="docutils literal notranslate"><span class="pre">2.65,3.15</span></code>. <code class="docutils literal notranslate"><span class="pre">none</span></code> leaves
+the cage bound to the face census. <code class="docutils literal notranslate"><span class="pre">Frame.cages_by_signature</span></code> and the
+Lua <code class="docutils literal notranslate"><span class="pre">edge</span></code> option take the same window.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rings</span></code> prints the primitive-ring census by size. Primitive rings
+are the Franzblau shortest-path census. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">prisms</span></code> counts perfect
+and imperfect prisms of sizes 3 to 6.</p>
+</section>
+<section id="performance">
+<h3>Performance<a class="headerlink" href="#performance" title="Link to this heading">#</a></h3>
+<p>On 110592-molecule ice Ic, 8 OpenMP threads run the cutoff list 4.8
+times, q4 5.8 times, q6 5.9 times, and the primitive-ring census 6.1
+times faster than 1 thread. The CSR, the <span class="math notranslate nohighlight">\(q_l\)</span> values, and the ring
+counts match at 1, 2, 4, and 8 threads.</p>
+<p>When an idle 8-thread OpenMP team is already resident, 8-thread CHILL+
+on that ice Ic frame takes 7 ms and the shell match takes 9 ms. The
+same calls took 74 ms and 76 ms before the library narrowed its team
+to the free cores. <code class="docutils literal notranslate"><span class="pre">SEAMS_FAIR_WIDTH=0</span></code> keeps the requested width.
+Times on an idle machine are unchanged.</p>
+</section>
+<section id="deprecations">
+<h3>Deprecations<a class="headerlink" href="#deprecations" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--types</span></code> is a deprecated alias of <code class="docutils literal notranslate"><span class="pre">--pair-types</span></code>. Both names bind.
+Using <code class="docutils literal notranslate"><span class="pre">--types</span></code> prints a one-line warning on stderr.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span> <span class="pre">--color-types</span></code> is the spelling <code class="docutils literal notranslate"><span class="pre">--help</span></code> shows.
+<code class="docutils literal notranslate"><span class="pre">--colour-types</span></code> remains a hidden alias of that option. A key library
+writes <code class="docutils literal notranslate"><span class="pre">colors</span></code> in its header and still reads a 2.13 file that says
+<code class="docutils literal notranslate"><span class="pre">colours</span></code>.</p>
+</section>
+</section>
+<section id="id2">
+<h2>2.13.0<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Each bond row is the sorted neighbour ids.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code> reuses a search only when the undirected edge sets
+match. Differing lists are searched on their own.</p></li>
+<li><p>Cage-edge windows and other decimal options parse in the C locale, so
+the same decimal text is accepted on every supported toolchain,
+including a libc++ with no floating <code class="docutils literal notranslate"><span class="pre">std::from_chars</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pydseamslib</span></code> <code class="docutils literal notranslate"><span class="pre">chill_plus</span></code> takes no graph argument. The call labels
+the cutoff neighbour list.</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>2.12.0<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<p>Double-diamond cages are a maximum non-conflicting set.
+<code class="docutils literal notranslate"><span class="pre">findDDC</span></code> builds the mutual-conflict graph once. A one-cage component
+is kept. A component whose neighbourhoods are the two cliques of a
+bipartite line graph is a maximum matching, certified by a König
+cover. Any other component is a branch-and-bound maximum independent
+set, certified by a clique partition. A degree-one candidate is kept,
+and only that one conflict is dropped.</p>
+<p>A peripheral set is kept when the seven rings span 14 molecules and
+each peripheral shares exactly three atoms with the equator. When the
+product of rings through the even or odd triplets exceeds 256, the
+chains are built from edges that share at least three atoms, and the
+lexicographically least assignment that meets the same test is kept.</p>
+<p>On cubic mW, 4096 molecules, the certified double-diamond count is
+2048, one cage for every two molecules. The search before this
+certificate reported 2040. On nucleation frame 148 the double-diamond
+count is 121 and the hexagonal count is 102. The search before the
+certificate reported 122 double-diamond cages.</p>
+<p>On the all-site niu2f1 frame, one thread spends 176.4 s in one run of
+<code class="docutils literal notranslate"><span class="pre">findHC</span></code>, <code class="docutils literal notranslate"><span class="pre">findDDC</span></code>, and <code class="docutils literal notranslate"><span class="pre">findBySignatures</span></code> together. TRACE on that
+frame spends 1762.064 s. On the mixed-site frame <code class="docutils literal notranslate"><span class="pre">findDDC</span></code> returns 0.
+The search before the 14-molecule rule returned 605243 cages there,
+and every hexagon of that frame fails the rule.</p>
+<p>The clathrate face-edge window is <code class="docutils literal notranslate"><span class="pre">--cage-edge</span></code> and <code class="docutils literal notranslate"><span class="pre">SEAMS_CAGE_EDGE</span></code>,
+default <code class="docutils literal notranslate"><span class="pre">2.65,3.15</span></code> in the coordinate units of the file. <code class="docutils literal notranslate"><span class="pre">none</span></code> turns
+the window off.</p>
+<p><code class="docutils literal notranslate"><span class="pre">cages</span> <span class="pre">--signature</span></code> counts a face set as a cage when its faces tile a
+sphere: every vertex lies on at least three faces that close around
+it, and <span class="math notranslate nohighlight">\(V - E + F = 2\)</span>. Rings whose minimum-image bonds add up to a
+lattice vector wind through the periodic cell and are dropped first.
+On the GenIce structure I unit cell the search reports 2 <span class="math notranslate nohighlight">\(5^{12}\)</span>
+cages and 6 <span class="math notranslate nohighlight">\(5^{12}6^{2}\)</span> cages. The search before that test reported
+90 <span class="math notranslate nohighlight">\(5^{12}6^{2}\)</span>, 4248 <span class="math notranslate nohighlight">\(5^{12}6^{4}\)</span>, and 218305 <span class="math notranslate nohighlight">\(5^{12}6^{8}\)</span>.</p>
+<p>The orthorhombic cutoff list folds coordinates into the cell, bins
+them one cutoff wide, and shares the 27-cell stencil across the atoms
+in a cell. Interior cells skip the periodic wrap. CHILL and CHILL+ on
+the default left-to-right fp64 path evaluate the <span class="math notranslate nohighlight">\(l = 3\)</span> harmonics
+as real and imaginary parts.</p>
+<p>CHILL and CHILL+ default to the cutoff list on the command line, in
+the C API, in R, in Julia, and in <code class="docutils literal notranslate"><span class="pre">compute</span> <span class="pre">dseams</span></code>. The mutual
+four-nearest list is <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">mutual</span></code> under that name on each of those
+fronts. Those fronts used the mutual list by default before this
+release.</p>
+<p>This release adds the R package and the Julia package. Both call
+<code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code>.</p>
+</section>
+<section id="id4">
+<h2>2.11.0<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Cutoff neighbour rows and hexagonal and double-diamond cage
+affiliation run across host threads.</p></li>
+<li><p>Under <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code>, an MPI build shares the <code class="docutils literal notranslate"><span class="pre">--frame</span></code> / <code class="docutils literal notranslate"><span class="pre">--last</span></code> range
+of a LAMMPS dump across ranks. Rank 0 prints every frame in order.
+A run without a launcher, or with <code class="docutils literal notranslate"><span class="pre">SEAMS_MPI=0</span></code>, stays on one
+process.</p></li>
+<li><p>Periodic distances use minimage 0.1.4. The linked-cell neighbour
+search uses linkcell 0.3.10.</p></li>
+<li><p>The ice XXI library matches the Lee et al. 2026 I-42d oxygen cell
+(space group <span class="math notranslate nohighlight">\(I\bar{4}2d\)</span>, Z = 152, a = b = 20.197 Å, c = 7.891 Å).
+A hit also requires a tetrahedral four-nearest graph, mean
+coordination in [3.5, 4.5], and a six-ring census near 112.</p></li>
+</ul>
+</section>
+<section id="id5">
+<h2>2.10.0<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Rodger F4 and host <span class="math notranslate nohighlight">\(q_{12}\)</span> are per-atom fields, so the Zeron
+q3/q12 hydrate pair can be read from the command line.</p></li>
+<li><p>CHILL and CHILL+ default to the mutual four-nearest graph.
+<code class="docutils literal notranslate"><span class="pre">--water-types</span></code> keeps the four-neighbour list on the named water
+types, so substrate and ions stay out of it.</p></li>
+<li><p>Cups and incomplete cages are enumerated on the ring graph. Closed
+signature counts stay on the closed path. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--signature</span> <span class="pre">--incomplete</span></code> reports the open cages.</p></li>
+<li><p>Stacking planes of the topological unit matching (HC-basal and
+DDC-equatorial) are reported beside the CHILL+ <span class="math notranslate nohighlight">\(I_{sd}\)</span> bins.
+<code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD=1</span></code> runs those hop-bound cages on a device when one is
+present, and on the host when none is. <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD=0</span></code> stays on
+the host. CHILL+ itself stays on the host.</p></li>
+<li><p>Hexagonal channels are stacked six-ring prisms. Ice XXI (Lee et al.,
+Nat. Mater. 25, 302, 2026) also requires a tetrahedral 3.5 Å graph
+and a primitive six-ring on the Z = 152 cell.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compute</span> <span class="pre">dseams</span></code> writes per-atom CHILL+ from the C API. The example
+deck <code class="docutils literal notranslate"><span class="pre">extras/lammps/in.dseams</span></code> reads <code class="docutils literal notranslate"><span class="pre">extras/lammps/water.data</span></code> with
+<code class="docutils literal notranslate"><span class="pre">pair_style</span> <span class="pre">zero</span></code>.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2>2.9.2<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<p>Every host stage of the ring pipeline runs under OpenMP. From 2048
+atoms, when OpenMP is compiled in, the cutoff neighbour list and the
+index-ordered list come from <code class="docutils literal notranslate"><span class="pre">nneigh::cellListRowsThreaded</span></code>. Atoms are
+binned in fractional coordinates of the recovered triclinic cell, every
+axis needs three cells of perpendicular width one cutoff, and each row
+is one thread’s task. The rows equal the minimum-image reference.
+<code class="docutils literal notranslate"><span class="pre">neighbourListByIndex</span></code> runs one row per thread. <code class="docutils literal notranslate"><span class="pre">bench_strong</span></code> times
+every host stage and their sum and keeps the best of five runs.</p>
+</section>
+<section id="id7">
+<h2>2.9.1<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<p>The OpenMP target offload of the Steinhardt kernel compiles with nvc++
+23.7 (<code class="docutils literal notranslate"><span class="pre">-mp=gpu</span></code>) against CUDA 12.2 on an NVIDIA A100. The device path
+matches the serial and threaded host paths bit for bit on the FCC
+lattice and on <code class="docutils literal notranslate"><span class="pre">input/traj/mW_cubic.lammpstrj</span></code>. <code class="docutils literal notranslate"><span class="pre">SEAMS_OFFLOAD=0</span></code>
+forces the host path.</p>
+</section>
+<section id="id8">
+<h2>2.9.0<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">cage::findBySignature</span></code> enumerates closed polyhedra from a ring-size
+census. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--signature</span></code> takes a census such as <code class="docutils literal notranslate"><span class="pre">4:6,6:8</span></code> or
+a name (<code class="docutils literal notranslate"><span class="pre">sodalite</span></code>, <code class="docutils literal notranslate"><span class="pre">alpha</span></code>, <code class="docutils literal notranslate"><span class="pre">512</span></code>, <code class="docutils literal notranslate"><span class="pre">51262</span></code>, <code class="docutils literal notranslate"><span class="pre">hc</span></code>, <code class="docutils literal notranslate"><span class="pre">ddc</span></code>). Named <code class="docutils literal notranslate"><span class="pre">hc</span></code>
+and <code class="docutils literal notranslate"><span class="pre">ddc</span></code> call <code class="docutils literal notranslate"><span class="pre">findHC</span></code> and <code class="docutils literal notranslate"><span class="pre">findDDC</span></code>, so the vertex sets match those
+finders.</p>
+<p><code class="docutils literal notranslate"><span class="pre">topo::matchLibraries</span></code> names atoms against key libraries at several hop
+counts. The deepest library that holds an atom’s key wins, and the
+report includes the depth that named the atom. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span> <span class="pre">--library</span></code> accepts a comma-separated list.</p>
+<p><code class="docutils literal notranslate"><span class="pre">site::guestOccupancy</span></code> places guests in enumerated cages by the
+periodic centroid of the cage vertices and counts occupied, multiply
+occupied, and free cages. <code class="docutils literal notranslate"><span class="pre">--guest-types</span></code> names the guest LAMMPS types.
+<code class="docutils literal notranslate"><span class="pre">site::shellRingCensus</span></code> counts, by size, the water-network rings that
+pass through an ion’s shell. <code class="docutils literal notranslate"><span class="pre">--per-atom</span> <span class="pre">FILE</span></code> on <code class="docutils literal notranslate"><span class="pre">cages</span></code>,
+<code class="docutils literal notranslate"><span class="pre">fingerprint</span></code>, and <code class="docutils literal notranslate"><span class="pre">ions</span></code> appends a LAMMPS dump frame with the engine’s
+per-atom decision, for OVITO or VMD.</p>
+</section>
+<section id="id9">
+<h2>2.8.0<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">topo::localKey</span></code> names the isomorphism class of an atom’s rooted
+bonded neighbourhood. With nauty linked, the key is the nauty
+certificate. Otherwise it is a Weisfeiler-Leman hash.
+<code class="docutils literal notranslate"><span class="pre">topo::fingerprint</span></code> keys a frame by the sorted hashes and the primitive
+ring census, so a relabelled configuration shares the key.
+<code class="docutils literal notranslate"><span class="pre">--color-types</span></code> partitions keys by LAMMPS type.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span> <span class="pre">--emit-library</span></code> writes a frame’s keys as library
+lines. <code class="docutils literal notranslate"><span class="pre">--library</span></code> names the atoms of a later frame from that file.
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">ions</span></code> classes ions by their first water shell against the cage
+assignment. <code class="docutils literal notranslate"><span class="pre">--hops</span></code>, <code class="docutils literal notranslate"><span class="pre">--ion-types</span></code>, and <code class="docutils literal notranslate"><span class="pre">--ion-cutoff</span></code> are the new
+options.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--graph</span> <span class="pre">seeded</span> <span class="pre">--complete</span></code> turns on ring-adjacent
+completion. The CLI keeps frame order for a parallel LAMMPS range,
+dispatches ranges for XYZ, chemfiles, and readcon input, and writes
+versioned JSONL with <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">json</span></code>. <code class="docutils literal notranslate"><span class="pre">--strict-input</span></code> makes an empty
+frame an error. XYZ input accepts coordinate-only rows and records
+that frame as frame 1.</p>
+<p>CON input uses the embedded readcon reader when the engine is built
+with it. CON or chemfiles input with the reader absent is refused, and
+the call does not return an empty frame in its place.</p>
+</section>
+<section id="id10">
+<h2>2.7.0<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code> takes an optional completion flag.
+<code class="docutils literal notranslate"><span class="pre">ring::ringAdjacentCompletion</span></code> fills the last vertex of any six-ring
+whose other vertices carry a cage label, and repeats to a fixed point.
+Hexagonal-cage labels and double-diamond-cage labels are two separate
+walks. The rule is stated and proved in <code class="docutils literal notranslate"><span class="pre">lean/</span></code> with Mathlib: the
+completion is the least fixed point above the seed, it is empty on an
+empty seed, and it does not depend on the visiting order.</p>
+</section>
+<section id="id11">
+<h2>2.6.0<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<p>Meson links FlexiBLAS when pkg-config or <code class="docutils literal notranslate"><span class="pre">libflexiblas</span></code> is present, and
+otherwise the conda-forge <code class="docutils literal notranslate"><span class="pre">libblas</span></code> and <code class="docutils literal notranslate"><span class="pre">liblapack</span></code> packages. Python
+callers use <code class="docutils literal notranslate"><span class="pre">pydseamslib</span></code> from PyPI. The nucleation notebook reads
+<code class="docutils literal notranslate"><span class="pre">CageScore</span></code> fields. The Figshare Lua demos load <code class="docutils literal notranslate"><span class="pre">example_lua</span></code> from
+yodaStruct.</p>
+</section>
+<section id="id12">
+<h2>2.5.0<a class="headerlink" href="#id12" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">--family</span></code> selects the chemistry. The default is <code class="docutils literal notranslate"><span class="pre">waterIce</span></code>. <code class="docutils literal notranslate"><span class="pre">chill</span></code>,
+<code class="docutils literal notranslate"><span class="pre">chill-plus</span></code>, <code class="docutils literal notranslate"><span class="pre">cages</span></code>, and <code class="docutils literal notranslate"><span class="pre">ions</span></code> on any other family print the family
+name and return exit status 2. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cn</span> <span class="pre">--ions</span></code> is the cage degree on <code class="docutils literal notranslate"><span class="pre">site::ionCloud</span></code>. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">pairs</span></code> counts
+mutual-nearest contact pairs. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">domains</span></code> is the largest polar or
+apolar Stoddard component. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">density-z</span></code> is the type-resolved
+<span class="math notranslate nohighlight">\(\rho(z)\)</span>, with the slab volume taken from the dump cell matrix.
+Running coordination numbers and the first minimum of <span class="math notranslate nohighlight">\(g_{IJ}\)</span> come
+from <code class="docutils literal notranslate"><span class="pre">rdf::runningCN</span></code> and <code class="docutils literal notranslate"><span class="pre">rdf::firstMinimumBin</span></code>. Dump writers emit
+<code class="docutils literal notranslate"><span class="pre">xy</span></code>, <code class="docutils literal notranslate"><span class="pre">xz</span></code>, and <code class="docutils literal notranslate"><span class="pre">yz</span></code> when the cloud carries tilt.</p>
+</section>
+<section id="id13">
+<h2>2.4.0<a class="headerlink" href="#id13" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span></code> and <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cn</span></code> compute partial three-dimensional site-site
+<span class="math notranslate nohighlight">\(g_{IJ}(r)\)</span> and coordination numbers under the dump minimum image.
+Site chemistry is a <code class="docutils literal notranslate"><span class="pre">site::Table</span></code> of LAMMPS types, with optional
+atom-id overrides. <code class="docutils literal notranslate"><span class="pre">site::ionCloud</span></code> collapses each ion molecule id to
+one unwrapped center-of-mass vertex. Hydrogen bonds accept an explicit
+donor-hydrogen index set through <code class="docutils literal notranslate"><span class="pre">populateHbondsFromDonors</span></code>. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">hbonds</span> <span class="pre">--donors</span></code> treats every hydrogen as a donor candidate. The water
+cutoffs on that command are the water criterion.</p>
+<p>In-plane RDF normalization uses the dump-cell volume <span class="math notranslate nohighlight">\(|\det H|\)</span> and
+the restricted-triclinic in-plane area <span class="math notranslate nohighlight">\(l_x \times l_y\)</span>.</p>
+</section>
+<section id="id14">
+<h2>2.3.4<a class="headerlink" href="#id14" title="Link to this heading">#</a></h2>
+<p>Steinhardt parameters, hydrogen bonds, and cluster wraps use the dump
+minimum image.</p>
+</section>
+<section id="id15">
+<h2>2.3.3<a class="headerlink" href="#id15" title="Link to this heading">#</a></h2>
+<p>Cutoff fallbacks and the skin Verlet refresh use the dump 3 by 3
+minimum image.</p>
+</section>
+<section id="id16">
+<h2>2.3.2<a class="headerlink" href="#id16" title="Link to this heading">#</a></h2>
+<p>Cutoff lists take the LAMMPS dump 3 by 3 cell. Device ice-score batches
+pass <code class="docutils literal notranslate"><span class="pre">lammpsBoxToLinkcell</span></code> when the dump carries tilt. This release
+uses linkcell v0.3.1.</p>
+</section>
+<section id="id17">
+<h2>2.3.1<a class="headerlink" href="#id17" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">neighList</span></code>, <code class="docutils literal notranslate"><span class="pre">halfNeighList</span></code>, and the in-plane RDF sampler use the
+vesin cell list, the same helper as <code class="docutils literal notranslate"><span class="pre">neighListO</span></code>. Brute force remains
+the fallback. The GPU ice-score workspace is unchanged.</p>
+</section>
+<section id="id18">
+<h2>2.3.0<a class="headerlink" href="#id18" title="Link to this heading">#</a></h2>
+<p>The topological unit-matching ice score (mutual four-nearest graph,
+primitive hexagons, hexagonal and double-diamond cages) runs as a
+device-resident batch of frames when gpulite and linkcell 0.3.0 are
+present. CHILL and <span class="math notranslate nohighlight">\(q_{lm}\)</span> stay on the host.</p>
+<p>Runtime settings are read from <code class="docutils literal notranslate"><span class="pre">SEAMS_CONFIG</span></code> or from <code class="docutils literal notranslate"><span class="pre">./seams.env</span></code> in
+the working directory, then from the environment, then from
+command-line flags. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--print-config</span></code> prints the resolved table.
+Examples call <code class="docutils literal notranslate"><span class="pre">seams</span></code>, <code class="docutils literal notranslate"><span class="pre">pydseams</span></code>, and <code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code>. The 2020
+<code class="docutils literal notranslate"><span class="pre">yodaStruct</span> <span class="pre">-c</span></code> and <code class="docutils literal notranslate"><span class="pre">conf.yaml</span></code> surface is removed in this release.</p>
+</section>
+<section id="id19">
+<h2>2.2.5<a class="headerlink" href="#id19" title="Link to this heading">#</a></h2>
+<p>This release uses linkcell v0.2.4. A static <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> links the static
+linkcell archive, so a consumer of that archive does not need
+<code class="docutils literal notranslate"><span class="pre">liblinkcell.so</span></code> at link time. Dump floating-point fields parse with
+<code class="docutils literal notranslate"><span class="pre">strtod</span></code>, including on Apple libc++.</p>
+</section>
+<section id="id20">
+<h2>2.2.4<a class="headerlink" href="#id20" title="Link to this heading">#</a></h2>
+<p>Periodic <em>k</em>-nearest graphs come from
+<a class="reference external" href="https://github.com/d-SEAMS/linkcell">linkcell</a> v0.2.2.
+<code class="docutils literal notranslate"><span class="pre">kNearestNeighbourList</span></code> and <code class="docutils literal notranslate"><span class="pre">kNearestNeighbourPair</span></code> write packed
+<span class="math notranslate nohighlight">\(n \times k\)</span> nominations. The mutual graph and the union graph come
+from one walk. The LAMMPS dump box is the bound spans plus <code class="docutils literal notranslate"><span class="pre">xy</span></code>, <code class="docutils literal notranslate"><span class="pre">xz</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">yz</span></code>. <code class="docutils literal notranslate"><span class="pre">periodicDistSq</span></code> recovers the cell matrix from that box. An
+empty frame no longer stops the walker.</p>
+</section>
+<section id="id21">
+<h2>2.2.3<a class="headerlink" href="#id21" title="Link to this heading">#</a></h2>
+<p>Help, errors, ice-type counts, and <code class="docutils literal notranslate"><span class="pre">--features</span></code> are colorized.
+<code class="docutils literal notranslate"><span class="pre">NO_COLOR</span></code> turns the color off.</p>
+</section>
+<section id="id22">
+<h2>2.2.2<a class="headerlink" href="#id22" title="Link to this heading">#</a></h2>
+<p>The compiled Python module in this release is <code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code>.
+<code class="docutils literal notranslate"><span class="pre">pydseams._core</span></code> remains an alias.</p>
+</section>
+<section id="id23">
+<h2>2.2.1<a class="headerlink" href="#id23" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The Nix flake packages <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> and <code class="docutils literal notranslate"><span class="pre">seams</span></code>. The package is the
+Meson build.</p></li>
+<li><p>A live LAMMPS dump session, <code class="docutils literal notranslate"><span class="pre">nLammpsFrames</span></code> and
+<code class="docutils literal notranslate"><span class="pre">forEachLammpsFrame</span></code>, supports <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--frame</span> <span class="pre">N</span> <span class="pre">--last</span> <span class="pre">M</span> <span class="pre">--jobs</span> <span class="pre">J</span></code>.
+Each worker opens its own handle.</p></li>
+<li><p>The bond graph is chosen at runtime: <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>, <code class="docutils literal notranslate"><span class="pre">knn</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">knn-union</span></code>. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--graph</span></code> adds <code class="docutils literal notranslate"><span class="pre">seeded</span></code>.</p></li>
+<li><p>LAMMPS readers bind <code class="docutils literal notranslate"><span class="pre">xu</span></code>, <code class="docutils literal notranslate"><span class="pre">yu</span></code>, <code class="docutils literal notranslate"><span class="pre">zu</span></code> and <code class="docutils literal notranslate"><span class="pre">xs</span></code>, <code class="docutils literal notranslate"><span class="pre">ys</span></code>, <code class="docutils literal notranslate"><span class="pre">zs</span></code> when <code class="docutils literal notranslate"><span class="pre">x</span></code>,
+<code class="docutils literal notranslate"><span class="pre">y</span></code>, and <code class="docutils literal notranslate"><span class="pre">z</span></code> are absent.</p></li>
+</ul>
+</section>
+<section id="id24">
+<h2>2.2.0<a class="headerlink" href="#id24" title="Link to this heading">#</a></h2>
+<p>The engine command line is <code class="docutils literal notranslate"><span class="pre">seams</span></code>, with <code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">chill</span></code>,
+<code class="docutils literal notranslate"><span class="pre">chill-plus</span></code>, and <code class="docutils literal notranslate"><span class="pre">cages</span></code>. Lua callers use the <code class="docutils literal notranslate"><span class="pre">dseams</span></code> library from
+yodaStruct. Python callers use <code class="docutils literal notranslate"><span class="pre">pydseams</span></code>.</p>
+</section>
+<section id="id25">
+<h2>2.1.2<a class="headerlink" href="#id25" title="Link to this heading">#</a></h2>
+<p>The CMake-era Nix entry points (<code class="docutils literal notranslate"><span class="pre">default.nix</span></code>, <code class="docutils literal notranslate"><span class="pre">shell.nix</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">nix/yodaStruct.nix</span></code>) are removed. They still named the product
+<code class="docutils literal notranslate"><span class="pre">yodaStruct</span></code>. This release builds with pixi.</p>
+</section>
+<section id="id26">
+<h2>2.1.1<a class="headerlink" href="#id26" title="Link to this heading">#</a></h2>
+<p>The CHILL interfacial walk uses the same four-neighbour star as
+<code class="docutils literal notranslate"><span class="pre">c_ij</span></code>. Atoms without four recorded bonds are labelled water, matching
+CHILL+. Seeded affiliation floods the hexagonal cage and the
+double-diamond cage as separate components, so a hexagonal seed does
+not keep a double-diamond-only atom.</p>
+</section>
+<section id="id27">
+<h2>2.1.0<a class="headerlink" href="#id27" title="Link to this heading">#</a></h2>
+<p>This repository is the C++ engine.</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">yodaStruct</span></code> Lua and Fennel command line moves to
+<a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">https://github.com/d-SEAMS/yodaStruct</a> . This release rejects
+<code class="docutils literal notranslate"><span class="pre">-Dwith_lua=enabled</span></code> and names that repository. The option itself is
+removed in 2.14.0.</p></li>
+<li><p>Python bindings stay in
+<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">https://github.com/d-SEAMS/PydSEAMSlib</a> , where they moved in 2.0.1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">getCorrel</span></code>, <code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code>, <code class="docutils literal notranslate"><span class="pre">getIceType</span></code>, <code class="docutils literal notranslate"><span class="pre">getIceTypeNoPrint</span></code>,
+<code class="docutils literal notranslate"><span class="pre">getIceTypePlus</span></code>, <code class="docutils literal notranslate"><span class="pre">getIceTypePlusNoPrint</span></code>, and <code class="docutils literal notranslate"><span class="pre">reclassifyWater</span></code>
+return <code class="docutils literal notranslate"><span class="pre">void</span></code>.</p></li>
+</ul>
+</section>
+<section id="id28">
+<h2>2.0.1<a class="headerlink" href="#id28" title="Link to this heading">#</a></h2>
+<p>The Python bindings move to
+<a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">https://github.com/d-SEAMS/PydSEAMSlib</a> . This repository is the C++
+engine. macOS wheels in this release target deployment 14, and macOS
+x86_64 wheels are no longer built.</p>
+</section>
+<section id="id30">
+<h2>2.0.0<a class="headerlink" href="#id30" title="Link to this heading">#</a></h2>
+<p>Meson replaces CMake. The license changes from GPL to MIT. Optional
+dependencies are vesin neighbour lists, Highway SIMD, chemfiles, and
+readcon-core. The engine tests are a Catch2 suite.</p>
+</section>
+<section id="id31">
+<h2>1.0.0<a class="headerlink" href="#id31" title="Link to this heading">#</a></h2>
+<p>Initial release. Goswami, Goswami, and Singh, J. Chem. Inf. Model., 60, 2169-2177,
+<a class="reference external" href="https://doi.org/10.1021/acs.jcim.0c00031">10.1021/acs.jcim.0c00031</a>.</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../api/struct_water_Selection.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">struct water::Selection</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../explanation/comparisons-summary-tables.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Head-to-head summary</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=4c4eaf79"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script>
+      <script async="async" src="../_static/dseams/mathjax/tex-chtml.js?v=20daa33d"></script></body>
+</html>

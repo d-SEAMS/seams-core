@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::OrientationOrder
+.. _doxid-structseams_1_1_orientation_order:
+
+struct seams::OrientationOrder
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Axis-projected orientational order parameters P1 and P2. :ref:`More...<details-structseams_1_1_orientation_order>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct OrientationOrder {
+		// fields
+	
+		std::vector<double> :ref:`cos_theta<doxid-structseams_1_1_orientation_order_1a516b4012171e820ceef9dbf873cbfe24>`;
+		std::vector<double> :ref:`p2<doxid-structseams_1_1_orientation_order_1a136017d0d222e30ab7c8af7a2c907d6f>`;
+		double :ref:`mean_p1<doxid-structseams_1_1_orientation_order_1a15a29f394ed0dc2dba8d6acb83681381>` = 0;
+		double :ref:`mean_p2<doxid-structseams_1_1_orientation_order_1a0ef3f211e56f8c97d94b6e242c201188>` = 0;
+	};
+.. _details-structseams_1_1_orientation_order:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Axis-projected orientational order parameters P1 and P2.
+
+Fields
+------
+
+.. index:: pair: variable; cos_theta
+.. _doxid-structseams_1_1_orientation_order_1a516b4012171e820ceef9dbf873cbfe24:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> cos_theta
+
+Per-vector cos(theta).
+
+.. index:: pair: variable; p2
+.. _doxid-structseams_1_1_orientation_order_1a136017d0d222e30ab7c8af7a2c907d6f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> p2
+
+Per-vector P2(cos(theta)).
+
+.. index:: pair: variable; mean_p1
+.. _doxid-structseams_1_1_orientation_order_1a15a29f394ed0dc2dba8d6acb83681381:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double mean_p1 = 0
+
+Ensemble mean of cos(theta).
+
+.. index:: pair: variable; mean_p2
+.. _doxid-structseams_1_1_orientation_order_1a0ef3f211e56f8c97d94b6e242c201188:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double mean_p2 = 0
+
+Ensemble mean of P2(cos(theta)).
+

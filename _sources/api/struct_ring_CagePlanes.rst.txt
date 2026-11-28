@@ -1,0 +1,23 @@
+.. index:: pair: struct; ring::CagePlanes
+.. _doxid-structring_1_1_cage_planes:
+
+struct ring::CagePlanes
+=======================
+
+.. toctree::
+	:hidden:
+
+Affiliation and stacking planes from one basal sweep. The planes are the basal rings of the passing pairs and the rings passing the equatorial test, so both answers read the same pairs.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/cage_affiliation.hpp>
+	
+	struct CagePlanes {
+		// fields
+	
+		:ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>` :target:`affiliation<doxid-structring_1_1_cage_planes_1a24b5438167fec04d4acbc78c14c94be9>`;
+		:ref:`StackingPlanes<doxid-structring_1_1_stacking_planes>` :target:`planes<doxid-structring_1_1_cage_planes_1a27c7cc5c748d18c8ca5b215569919361>`;
+	};

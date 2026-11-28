@@ -1,0 +1,25 @@
+.. index:: pair: struct; traj::DipoleVectorsResult
+.. _doxid-structtraj_1_1_dipole_vectors_result:
+
+struct traj::DipoleVectorsResult
+================================
+
+.. toctree::
+	:hidden:
+
+Generic per-molecule dipole / orientation vectors.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	struct DipoleVectorsResult {
+		// fields
+	
+		std::vector<int> :target:`molIds<doxid-structtraj_1_1_dipole_vectors_result_1a0a551f5d67c88e9cecde6947b43e6d4e>`;
+		std::vector<double> :target:`dipoles<doxid-structtraj_1_1_dipole_vectors_result_1a456f34e63399261e2ff20c66974f8849>`;
+		std::vector<double> :target:`unitVectors<doxid-structtraj_1_1_dipole_vectors_result_1af283a4c54a778cd8a171c54189029d82>`;
+		std::vector<double> :target:`magnitudes<doxid-structtraj_1_1_dipole_vectors_result_1a26f875de0fb892181a31c750a0b66fef>`;
+	};

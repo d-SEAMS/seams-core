@@ -1,0 +1,89 @@
+.. index:: pair: struct; seams::WaterVectors
+.. _doxid-structseams_1_1_water_vectors:
+
+struct seams::WaterVectors
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Per-water orientation vectors under minimum image. :ref:`More...<details-structseams_1_1_water_vectors>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct WaterVectors {
+		// fields
+	
+		std::vector<int> :ref:`mol_ids<doxid-structseams_1_1_water_vectors_1a1ee2e3b83a793aa78d826864cc60bb23>`;
+		std::vector<double> :ref:`oh_mid<doxid-structseams_1_1_water_vectors_1af16b437d9a229d7c91daaed415dc971d>`;
+		std::vector<double> :ref:`bisector<doxid-structseams_1_1_water_vectors_1a54a77b82730692db3c409f5f06065033>`;
+		std::vector<double> :ref:`hh<doxid-structseams_1_1_water_vectors_1ac6062e282de8bf890570eeed9173dda1>`;
+		std::vector<double> :ref:`hh_unit<doxid-structseams_1_1_water_vectors_1ac918584a37117f75a7c764bf194afb38>`;
+	};
+.. _details-structseams_1_1_water_vectors:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Per-water orientation vectors under minimum image.
+
+Fields
+------
+
+.. index:: pair: variable; mol_ids
+.. _doxid-structseams_1_1_water_vectors_1a1ee2e3b83a793aa78d826864cc60bb23:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> mol_ids
+
+Water molecule ids.
+
+.. index:: pair: variable; oh_mid
+.. _doxid-structseams_1_1_water_vectors_1af16b437d9a229d7c91daaed415dc971d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> oh_mid
+
+Raw O-to-H-midpoint vectors, Angstrom.
+
+.. index:: pair: variable; bisector
+.. _doxid-structseams_1_1_water_vectors_1a54a77b82730692db3c409f5f06065033:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> bisector
+
+Unit bisector vectors.
+
+.. index:: pair: variable; hh
+.. _doxid-structseams_1_1_water_vectors_1ac6062e282de8bf890570eeed9173dda1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> hh
+
+Raw H1-to-H2 vectors, Angstrom.
+
+.. index:: pair: variable; hh_unit
+.. _doxid-structseams_1_1_water_vectors_1ac918584a37117f75a7c764bf194afb38:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> hh_unit
+
+Unit H1-to-H2 vectors.
+

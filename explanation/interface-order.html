@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Interface and confined ice - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Linkcell strong scaling" href="linkcell-scaling.html" /><link rel="prev" title="Directed hydrogen bonds" href="hydrogen-bonds.html" /><link rel="canonical" href="https://docs.dseams.info/explanation/interface-order.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css?v=f040eaf7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-tokens.css?v=d0993c48" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-family.css?v=ab9c5117" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-shibuya.css?v=86c54dcb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-doxyrest.css?v=cb763bf8" />
+    
+    
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/explanation/interface-order.html"/>
+  <meta property="og:title" content="Interface and confined ice"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="Two published CHILL+ rules, on the same coordinates, with the thresholds left alone."/>
+    <meta property="og:description" content="Two published CHILL+ rules, on the same coordinates, with the thresholds left alone."/><meta name="twitter:card" content="summary_large_image"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="robots" content="index, follow">
+<meta name="twitter:title" content="Interface and confined ice - d-SEAMS">
+<meta name="twitter:description" content="Two published CHILL+ rules, on the same coordinates, with the thresholds left alone.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/explanation/interface-order.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"Interface and confined ice - d-SEAMS","description":"Two published CHILL+ rules, on the same coordinates, with the thresholds left alone.","url":"https://docs.dseams.info/explanation/interface-order.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
+<body><nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
+            <span>Libraries</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://linkcell.dseams.info">
+                <span>linkcell</span>
+                <small>Periodic linked-cell neighbour lists</small>
+              </a></li></ul>
+      </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../user/index.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../user/classify.html">Classify ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/order.html">Rings, cages, and order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/interfaces.html">Interfaces, nucleation, and brine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/confined.html">Confined ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/engines.html">Engines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/languages.html">Language walkthroughs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/versions.html">Versions and bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/paper.html">Paper figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/performance.html">Performance and comparisons</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Concepts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="binding-overhead.html">Binding overhead</a></li>
+<li class="toctree-l3"><a class="reference internal" href="c-api.html">The C API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="citation.html">Citation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clavis-trace.html">ClavisCage TRACE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hop-ball.html">Carried rings and the hop ball</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrogen-bonds.html">Directed hydrogen bonds</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Interface and confined ice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linkcell-scaling.html">Linkcell strong scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ovito-findrings.html">Primitive rings and OVITO FindRings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance.html">Release-candidate sitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-h2h.html">Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-overview.html">Performance overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-range.html">Performance, 4096 to 110592</a></li>
+<li class="toctree-l3"><a class="reference internal" href="primitive-rings.html">Primitive rings and the full graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rings-one-thread.html">Rings on one thread</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sqq.html">SQQ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stacking-disorder.html">Stacking disorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="symmetry.html">Local symmetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="topological-network.html">Topological network criteria</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace-assembly.html">TRACE and signature cages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace-threads.html">Signature-search thread controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_SkinNeighborList.html">class nneigh::SkinNeighborList</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_primitive_RingUpdater.html">class primitive::RingUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_AffiliationUpdater.html">class ring::AffiliationUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_NeighBond.html">class ring::NeighBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Brine.html">class seams::Brine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Cages.html">class seams::Cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Error.html">class seams::Error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_FairWidth.html">class seams::FairWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Fingerprint.html">class seams::Fingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_HbondTcf.html">class seams::HbondTcf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Msd.html">class seams::Msd</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Neighbours.html">class seams::Neighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_PinSession.html">class seams::PinSession</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_RegionErrors.html">class seams::RegionErrors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Reorientation.html">class seams::Reorientation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings.html">class seams::Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings_iterator.html">class seams::Rings::iterator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_System.html">class seams::System</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_detail_Handle.html">template class seams::detail::Handle</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_HbondLifetimeAccumulator.html">class traj::HbondLifetimeAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_MsdAccumulator.html">class traj::MsdAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_ReorientationAccumulator.html">class traj::ReorientationAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_TrajectoryUnwrapper.html">class traj::TrajectoryUnwrapper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_Signature_Kind.html">enum cage::Signature::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_cageType.html">enum cage::cageType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_iceType.html">enum cage::iceType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_ChillPlusRule.html">enum chill::ChillPlusRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_CrystalKind.html">enum chill::CrystalKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Cause.html">enum iface::Cause</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Kind.html">enum iface::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_atom_state_type.html">enum molSys::atom_state_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_bond_type.html">enum molSys::bond_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nneigh_BondGraph.html">enum nneigh::BondGraph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nucleation_CommittorFate.html">enum nucleation::CommittorFate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_phase_GlassKind.html">enum phase::GlassKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_primitive_RingRows.html">enum primitive::RingRows</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_ring_strucType.html">enum ring::strucType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Int8Backend.html">enum seams::product::Int8Backend</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Mode.html">enum seams::product::Mode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Reduction.html">enum seams::product::Reduction</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Family.html">enum site::Family</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_IonState.html">enum site::IonState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Kind.html">enum site::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Crystal.html">enum symm::Crystal</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Kind.html">enum symm::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_topoparam_TetrahedralNeighbours.html">enum topoparam::TetrahedralNeighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_water_MolMode.html">enum water::MolMode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-atoms">seams_system_set_atoms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-positions">seams_system_set_positions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-handle-error">seams_handle_error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-status">seams_status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system">seams_system</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-cagelabel">seams::CageLabel</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#doxid-group-seams-cpp-1ga66e498496a8ac061410534a9f0171779">seams::Status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-chillrule">seams::ChillRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-domainsubset">seams::DomainSubset</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-graph">seams::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-axis">seams::Axis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-set-num-threads">seams::set_num_threads</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5">group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d">group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/global.html">Global Namespace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_bond.html">Bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_cage.html">Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_brine.html">Ice/brine fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_cage.html">Cages and ice shells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame.html">Frames</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame_io.html">Frame reload and read-back</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_meta.html">Library metadata and errors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_more.html">Further analyses</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_neigh.html">Neighbour lists</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_order.html">Order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_pore.html">Pore geometry</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_ring.html">Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_sized.html">Status-returning and length-checked entry points</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_traj.html">Trajectories and dynamics</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_types.html">Types</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_chill.html">Chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_clump.html">Clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_gen.html">Gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_molSys.html">MolSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_primitive.html">Primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_prism3.html">Bulk prisms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf.html">Rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_ring.html">Ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_seams_cpp.html">C++ API</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_sinp.html">Sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_absor.html">namespace absor</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_bond.html">namespace bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_cage.html">namespace cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chill.html">namespace chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chordless.html">namespace chordless</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_clump.html">namespace clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen.html">namespace gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen_mic.html">namespace gen::mic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gpu.html">namespace gpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_iface.html">namespace iface</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ira.html">namespace ira</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_match.html">namespace match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_molSys.html">namespace molSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nneigh.html">namespace nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nucleation.html">namespace nucleation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_phase.html">namespace phase</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pntToPnt.html">namespace pntToPnt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pore.html">namespace pore</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_primitive.html">namespace primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_prism3.html">namespace prism3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf.html">namespace rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf2.html">namespace rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ring.html">namespace ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_science.html">namespace science</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams.html">namespace seams</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cfg.html">namespace seams::cfg</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cpu.html">namespace seams::cpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_detail.html">namespace seams::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_domain.html">namespace seams::domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_minimax.html">namespace seams::minimax</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_product.html">namespace seams::product</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_solid.html">namespace seams::solid</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_sphericart_ylm.html">namespace seams::sphericart_ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_steinhardt.html">namespace seams::steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_team.html">namespace seams::team</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_team_detail.html">namespace seams::team::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_tsan.html">namespace seams::tsan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_wigner.html">namespace seams::wigner</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_ylm.html">namespace seams::ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sinp.html">namespace sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_site.html">namespace site</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sout.html">namespace sout</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sph.html">namespace sph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_std.html">namespace std</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm.html">namespace symm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_avx2.html">namespace symm::avx2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_generic.html">namespace symm::generic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topo.html">namespace topo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topoparam.html">namespace topoparam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_traj.html">namespace traj</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum.html">namespace tum</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum3.html">namespace tum3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum_device.html">namespace tum::device</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_water.html">namespace water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_bond_DirectedHydrogenBond.html">struct bond::DirectedHydrogenBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Cage.html">struct cage::Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_CageShape.html">struct cage::CageShape</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_EdgeWindow.html">struct cage::EdgeWindow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FormerRow.html">struct cage::FormerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FoundCage.html">struct cage::FoundCage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Signature.html">struct cage::Signature</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_AnalysisPhases.html">struct chill::AnalysisPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondClassifier.html">struct chill::BondClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondOrder.html">struct chill::BondOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_ChillPlusResult.html">struct chill::ChillPlusResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_LinearClassifier.html">struct chill::LinearClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlCutoffStages.html">struct chill::QlCutoffStages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlmAtom.html">struct chill::QlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_SteinhardtQl.html">struct chill::SteinhardtQl</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_TemplateHit.html">struct chill::TemplateHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_VoronoiWeights.html">struct chill::VoronoiWeights</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_YlmAtom.html">struct chill::YlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_clump_Domain.html">struct clump::Domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_FracBox.html">struct gen::FracBox</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_mic_RangeError.html">struct gen::mic::RangeError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_BatchResult.html">struct gpu::BatchResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_DeviceInfo.html">struct gpu::DeviceInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Footprint.html">struct gpu::Footprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Plan.html">struct gpu::Plan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Bin.html">struct iface::Bin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_BootstrapInterval.html">struct iface::BootstrapInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Front.html">struct iface::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Growth.html">struct iface::Growth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_GrowthFrame.html">struct iface::GrowthFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Profile.html">struct iface::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Study.html">struct iface::Study</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_WillardChandler.html">struct iface::WillardChandler</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_Match.html">struct ira::Match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_PointGroup.html">struct ira::PointGroup</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Point.html">template struct molSys::Point</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_PointCloud.html">template struct molSys::PointCloud</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Result.html">struct molSys::Result</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Ascent.html">struct nucleation::Ascent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_CommittorCall.html">struct nucleation::CommittorCall</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_FrameRecord.html">struct nucleation::FrameRecord</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_GrowBasin.html">struct nucleation::GrowBasin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_HalfRise.html">struct nucleation::HalfRise</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Lead.html">struct nucleation::Lead</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Shift.html">struct nucleation::Shift</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_phase_IceXXIHit.html">struct phase::IceXXIHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_BoxError.html">struct pore::BoxError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Frame.html">struct pore::Frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_HostGuest.html">struct pore::HostGuest</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Profile.html">struct pore::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Profiles.html">struct pore::Profiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Graph.html">struct primitive::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_RingSearchSplit.html">struct primitive::RingSearchSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Vertex.html">struct primitive::Vertex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_rdf_PartialRdf.html">struct rdf::PartialRdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CageAffiliation.html">struct ring::CageAffiliation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CagePlanes.html">struct ring::CagePlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_DdcSplit.html">struct ring::DdcSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_EquatorChoice.html">struct ring::EquatorChoice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackParts.html">struct ring::PackParts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackingCertificate.html">struct ring::PackingCertificate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_RingSearchIndex.html">struct ring::RingSearchIndex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_SeededAtomLabels.html">struct ring::SeededAtomLabels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_StackingPlanes.html">struct ring::StackingPlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_AtomRow.html">struct science::AtomRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_ClusterPart.html">struct science::ClusterPart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_CriticalSize.html">struct science::CriticalSize</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Front.html">struct science::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_LayerRow.html">struct science::LayerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Layers.html">struct science::Layers</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_NucleusFrame.html">struct science::NucleusFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_SlopeInterval.html">struct science::SlopeInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BondOptions.html">struct seams::BondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineFronts.html">struct seams::BrineFronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineOptions.html">struct seams::BrineOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineProfile.html">struct seams::BrineProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageCounts.html">struct seams::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageOptions.html">struct seams::CageOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChillOptions.html">struct seams::ChillOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChordlessCycles.html">struct seams::ChordlessCycles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Classification.html">struct seams::Classification</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Contacts.html">struct seams::Contacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityOptions.html">struct seams::DensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityProfile.html">struct seams::DensityProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DiffusionFit.html">struct seams::DiffusionFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DirectedBond.html">struct seams::DirectedBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DirectedBondOptions.html">struct seams::DirectedBondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Distribution.html">struct seams::Distribution</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DistributionOptions.html">struct seams::DistributionOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainOptions.html">struct seams::DomainOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainReport.html">struct seams::DomainReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_EdgeSet.html">struct seams::EdgeSet</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FairState.html">struct seams::FairState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FilledByTeam.html">template struct seams::FilledByTeam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FilledByTeam_rebind.html">template struct seams::FilledByTeam::rebind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FingerprintOptions.html">struct seams::FingerprintOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FractionalDensityOptions.html">struct seams::FractionalDensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FractionalProfile.html">struct seams::FractionalProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HbondLifetimeCurve.html">struct seams::HbondLifetimeCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HbondLifetimeFit.html">struct seams::HbondLifetimeFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HostGuestContacts.html">struct seams::HostGuestContacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HostGuestOptions.html">struct seams::HostGuestOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_KnnOptions.html">struct seams::KnnOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MoleculeCentres.html">struct seams::MoleculeCentres</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MoleculeDipoles.html">struct seams::MoleculeDipoles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MsdCurve.html">struct seams::MsdCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_NeighbourOptions.html">struct seams::NeighbourOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrderOptions.html">struct seams::OrderOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrientationOrder.html">struct seams::OrientationOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Pockets.html">struct seams::Pockets</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreFrame.html">struct seams::PoreFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreFrameOptions.html">struct seams::PoreFrameOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreProfileOptions.html">struct seams::PoreProfileOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreProfiles.html">struct seams::PoreProfiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismCensus.html">struct seams::PrismCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismOptions.html">struct seams::PrismOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q4Q6.html">struct seams::Q4Q6</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6Bar.html">struct seams::Q6Bar</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6BarOptions.html">struct seams::Q6BarOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Rejection.html">struct seams::Rejection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ReorientationCurve.html">struct seams::ReorientationCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ReorientationFit.html">struct seams::ReorientationFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RingOptions.html">struct seams::RingOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RunningCoordination.html">struct seams::RunningCoordination</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SheetOptions.html">struct seams::SheetOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureMatch.html">struct seams::SignatureMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureOptions.html">struct seams::SignatureOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Steinhardt.html">struct seams::Steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SteinhardtOptions.html">struct seams::SteinhardtOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_TeamWidth.html">struct seams::TeamWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_WaterVectors.html">struct seams::WaterVectors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cfg_Runtime.html">struct seams::cfg::Runtime</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cpu_Features.html">struct seams::cpu::Features</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_directed_hbond.html">struct seams_directed_hbond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingPhases.html">struct seams::domain::RingPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingSummary.html">struct seams::domain::RingSummary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_Share.html">struct seams::domain::Share</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_hbond_edge.html">struct seams_hbond_edge</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_Cij.html">struct seams::product::Cij</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_ComplexDot.html">struct seams::product::ComplexDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_GemmInfo.html">struct seams::product::GemmInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_RealDot.html">struct seams::product::RealDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_team_detail_Call.html">template struct seams::team::detail::Call</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_tsan_Slot.html">struct seams::tsan::Slot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_sinp_ChemfilesLoadOptions.html">struct sinp::ChemfilesLoadOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_BrinePocket.html">struct site::BrinePocket</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationBin.html">struct site::ConcentrationBin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationProfile.html">struct site::ConcentrationProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_DensityZ.html">struct site::DensityZ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontLayerReport.html">struct site::FrontLayerReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontOptions.html">struct site::FrontOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontPair.html">struct site::FrontPair</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontSnapshot.html">struct site::FrontSnapshot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_GuestOccupancy.html">struct site::GuestOccupancy</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IceClusterIons.html">struct site::IceClusterIons</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_InsideTrace.html">struct site::InsideTrace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IonEnvironment.html">struct site::IonEnvironment</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_LinearFit.html">struct site::LinearFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_PocketCensus.html">struct site::PocketCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_RejectionCoefficient.html">struct site::RejectionCoefficient</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_Table.html">struct site::Table</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_TrapEvent.html">struct site::TrapEvent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_CanonShell.html">struct symm::CanonShell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Group.html">struct symm::Group</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Lattice.html">struct symm::Lattice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Overlay.html">struct symm::Overlay</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Shell17.html">struct symm::Shell17</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Space.html">struct symm::Space</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_FrameFingerprint.html">struct topo::FrameFingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_KeyLibrary.html">struct topo::KeyLibrary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LibraryMatch.html">struct topo::LibraryMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LocalKey.html">struct topo::LocalKey</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topoparam_LayerStack.html">struct topoparam::LayerStack</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_BoxCell.html">struct traj::BoxCell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DecayFitResult.html">struct traj::DecayFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DiffusionFitResult.html">struct traj::DiffusionFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DipoleVectorsResult.html">struct traj::DipoleVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_HbondLifetimeAccumulator_OriginSlot.html">struct traj::HbondLifetimeAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_MsdAccumulator_OriginSlot.html">struct traj::MsdAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_OrientationOrderResult.html">struct traj::OrientationOrderResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_ReorientationAccumulator_OriginSlot.html">struct traj::ReorientationAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_WaterVectorsResult.html">struct traj::WaterVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_CageCounts.html">struct tum::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_SpecializedCaps.html">struct tum::SpecializedCaps</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonReport.html">struct water::IonReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="comparisons-summary-tables.html">Head-to-head summary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="sqq-tables.html">SQQ</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#the-two-rules">The two rules</a></li>
+<li><a class="reference internal" href="#nucleus">Nucleus</a></li>
+<li><a class="reference internal" href="#slab">Slab</a></li>
+<li><a class="reference internal" href="#confined-ice">Confined ice</a></li>
+<li><a class="reference internal" href="#growth">Growth</a></li>
+<li><a class="reference internal" href="#rule-sensitivity-bound">Rule-sensitivity bound</a></li>
+<li><a class="reference internal" href="#direct-coexistence">Direct coexistence</a></li>
+<li><a class="reference internal" href="#which-definition-meets-table-i">Which definition meets Table I</a></li>
+<li><a class="reference internal" href="#where-the-factor-of-four-sits">Where the factor of four sits</a></li>
+<li><a class="reference internal" href="#growth-speed-curve">Growth-speed curve</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#on-the-shipped-frames">On the shipped frames</a></li>
+</ul>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../user/index.html"><span itemprop="name">User guide</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Concepts</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Interface and confined ice</strong>
+        <meta itemprop="position" content="4" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="interface-and-confined-ice">
+<h1>Interface and confined ice<a class="headerlink" href="#interface-and-confined-ice" title="Link to this heading">#</a></h1>
+<p>Two published CHILL+ rules, on the same coordinates, with the
+thresholds left alone.
+The neighbour test and the <span class="math notranslate nohighlight">\(q_3\)</span> shell are what move the labels.
+The open edges do not, on these frames.
+Prism blocks and sheet rings name confined ice that CHILL+, the
+diamond test, adaptive common-neighbour analysis and a tetrahedron
+template do not.
+The rule itself is
+<a class="reference external" href="chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a>.
+The counts below are <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code> on the shipped frames.</p>
+<p>Ideal ice Ih (<code class="docutils literal notranslate"><span class="pre">input/traj/ice1h.lammpstrj</span></code>, 128 molecules) is
+hexagonal under both rules, with no disagreements.</p>
+<section id="the-two-rules">
+<h2>The two rules<a class="headerlink" href="#the-two-rules" title="Link to this heading">#</a></h2>
+<p>Nguyen and Molinero, J. Phys. Chem. B 119 (2015) 9369, equation 1
+averages <span class="math notranslate nohighlight">\(q_3\)</span> over the four nearest neighbours.
+A staggered bond is <code class="docutils literal notranslate"><span class="pre">c(i,j)</span> <span class="pre">&lt;=</span> <span class="pre">-0.8</span></code>.
+An eclipsed bond is <code class="docutils literal notranslate"><span class="pre">-0.35</span> <span class="pre">&lt;=</span> <span class="pre">c(i,j)</span> <span class="pre">&lt;=</span> <span class="pre">0.25</span></code>.
+Table 1 gives a crystal or clathrate label only when four neighbours
+lie inside the cutoff.
+Footnote a of that table keeps the interfacial neighbour test.
+Two staggered bonds need a neighbour with more than two staggered
+bonds.
+Three staggered bonds and no eclipsed bond need a neighbour with
+more than one staggered bond.</p>
+<p>The OVITO 3.17.2 manual
+(<a class="reference external" href="https://docs.ovito.org/reference/pipelines/modifiers/chill_plus.html">Chill+</a>)
+states the same cutoff and the same four-bond rows, and then differs
+in three places.
+A staggered bond is a correlation less than <code class="docutils literal notranslate"><span class="pre">-0.8</span></code>.
+An eclipsed bond lies between <code class="docutils literal notranslate"><span class="pre">-0.35</span></code> and <code class="docutils literal notranslate"><span class="pre">0.25</span></code>.
+Interfacial ice is “4 bonds of which 2 or 3 staggered”, with
+hexagonal ice preferred when the fourth bond is eclipsed.
+The neighbour test is not stated.</p>
+<p>mdapy’s Chill+ kernel (cross-checked there against OVITO’s
+<code class="docutils literal notranslate"><span class="pre">ChillPlusModifier</span></code>) is the same statement in code.
+<span class="math notranslate nohighlight">\(q_3\)</span> is summed over every neighbour inside the cutoff, not over the
+four nearest.
+The inequalities are strict.
+A row is classified only when the coordination is 4.
+Two staggered bonds, or three staggered and no eclipsed bond, are
+interfacial, with no look at the neighbour.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chill+</span></code> in the supplied examples is the 2015 rule.
+<code class="docutils literal notranslate"><span class="pre">ovito-chill+</span></code> is the OVITO/mdapy rule.
+Neither threshold is changed.
+The comparison turns one lever at a time: the neighbour test, then
+the <span class="math notranslate nohighlight">\(q_3\)</span> shell, then the open edges.
+An atom is counted under the lever that first produces the OVITO
+label.
+If more than one lever moves the label, the atom is mixed.</p>
+<p>On both frames below, every atom that changes label has exactly four
+neighbours inside 3.5 Å.
+The shell condition in Table 1 is not the split.
+Widening <span class="math notranslate nohighlight">\(q_3\)</span> changes the label of a four-coordinated molecule when
+one of its neighbours has a further neighbour inside the cutoff.
+The open edges move no atom on either frame.
+No correlation in these two frames sits on <code class="docutils literal notranslate"><span class="pre">-0.8</span></code>, <code class="docutils literal notranslate"><span class="pre">-0.35</span></code> or <code class="docutils literal notranslate"><span class="pre">0.25</span></code>.</p>
+</section>
+<section id="nucleus">
+<h2>Nucleus<a class="headerlink" href="#nucleus" title="Link to this heading">#</a></h2>
+<p>Frame 1 of <code class="docutils literal notranslate"><span class="pre">input/traj/nucleation_f1.lammpstrj</span></code> (timestep 15677000,
+4096 mW molecules).
+The two rules disagree on 397 molecules.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>label</p></th>
+<th class="head"><p>2015</p></th>
+<th class="head"><p>OVITO</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cubic</p></td>
+<td><p>47</p></td>
+<td><p>48</p></td>
+</tr>
+<tr class="row-odd"><td><p>hexagonal</p></td>
+<td><p>62</p></td>
+<td><p>54</p></td>
+</tr>
+<tr class="row-even"><td><p>water</p></td>
+<td><p>3589</p></td>
+<td><p>3360</p></td>
+</tr>
+<tr class="row-odd"><td><p>interfacial</p></td>
+<td><p>240</p></td>
+<td><p>478</p></td>
+</tr>
+<tr class="row-even"><td><p>clathrate</p></td>
+<td><p>20</p></td>
+<td><p>21</p></td>
+</tr>
+<tr class="row-odd"><td><p>interfacial clathrate</p></td>
+<td><p>138</p></td>
+<td><p>135</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>All 397 molecules are in the four-neighbour shell.
+Of the molecules that do not change label, 1927 also have four
+neighbours, 1428 have five, 289 have six and 38 have seven or more.
+17 have three.
+The extra neighbours sit on the agreeing population.
+They change a neighbour’s <span class="math notranslate nohighlight">\(q_3\)</span>, and that is the shell lever.</p>
+<p>Ring membership does not separate the 397.
+395 of them lie on a primitive 6-ring, 381 on a 5-ring and 111 on a
+4-ring, on the 3.5 Å graph.
+The agreeing population is 3656, 3583 and 1957 on those same rings.
+The primitive-ring search finds 40 prismatic faces.</p>
+<p>The crystal radius, read outward from the shell of highest crystal
+fraction to the 0.5 crossing, is 4.75 Å.
+The 10-90 width of that crystal front is 7.69 Å.
+The solid radius is 2.25 Å (2015) and 2.25 Å (OVITO).
+The 10-90 width of the solid front, measured from the center of mass,
+is 10.26 Å under the 2015 rule and 14.56 Å under OVITO.</p>
+<p>The same frame has an instantaneous surface in the sense of Willard
+and Chandler, J. Phys. Chem. B 114, 1954 (2010).
+The coarse-graining Gaussian has their width, ξ = 2.40 Å.
+Rays leave the center of mass of the 2015 crystal.
+The surface on a ray is where the coarse density crosses the midpoint
+of the core and the outer liquid.
+288 of 288 rays cross.
+The mean radius is 9.19 Å and the root-mean-square deviation of the
+surface about that mean is 7.59 Å.
+The 10-90 width of the coarse density, measured along the local
+normal of that surface, is 1.34 Å.
+On the same coordinate the 2015 solid fraction has a 10-90 width of
+1.75 Å and the OVITO solid fraction has 1.79 Å.
+The 10.26 Å and 14.56 Å widths are the center-of-mass profiles.
+Adaptive common-neighbour analysis calls 4096 of 4096 molecules other.
+The diamond test calls 13 cubic and 14 hexagonal.
+A tetrahedron template with RMSD below 0.1, the OVITO polyhedral
+template matching cutoff, passes 12 molecules, of which 1 is in
+the disagreeing set.
+Mean <code class="docutils literal notranslate"><span class="pre">q6</span></code> is 0.540 on the disagreeing set and 0.489 on the rest.
+Bulk ice Ih in the test set has mean <code class="docutils literal notranslate"><span class="pre">q6</span></code> 0.626.</p>
+</section>
+<section id="slab">
+<h2>Slab<a class="headerlink" href="#slab" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">input/traj/interface_f0.lammpstrj</span></code> is 864 mW molecules in a box of
+22.99 × 21.61 × 52.51 Å.
+The long axis is the surface normal.
+The two rules disagree on 46 molecules.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>lever</p></th>
+<th class="head"><p>molecules</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>neighbour test</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(q_3\)</span> shell</p></td>
+<td><p>41</p></td>
+</tr>
+<tr class="row-even"><td><p>open edge</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>both levers</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>label</p></th>
+<th class="head"><p>2015</p></th>
+<th class="head"><p>OVITO</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cubic</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>hexagonal</p></td>
+<td><p>352</p></td>
+<td><p>346</p></td>
+</tr>
+<tr class="row-even"><td><p>interfacial</p></td>
+<td><p>49</p></td>
+<td><p>57</p></td>
+</tr>
+<tr class="row-odd"><td><p>clathrate</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>interfacial clathrate</p></td>
+<td><p>25</p></td>
+<td><p>20</p></td>
+</tr>
+<tr class="row-odd"><td><p>water</p></td>
+<td><p>434</p></td>
+<td><p>437</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The net interfacial count rises by 8, from 5.67% to 6.60%.
+Forty-six labels move, in both directions.
+Hexagonal to interfacial is 10.
+Interfacial to water is 5 and interfacial to hexagonal is 4.
+Interfacial clathrate to water is 10.
+The solid fraction is 0.465 and 0.468.
+The crystal fraction is 0.409 and 0.402.</p>
+<p>The 2015 solid slab is 24.82 Å thick, between Gibbs surfaces at
+0.30 Å and 25.11 Å.
+The 10-90 widths are 3.04 Å and 5.29 Å.
+The OVITO solid slab is 22.98 Å thick, between 2.05 Å and 25.04 Å.
+The widths are 1.10 Å and 5.29 Å.
+One surface stays put.
+The other moves by 1.76 Å, and that is the whole of the thickness
+change.
+The crystal slab, cubic plus hexagonal only, is 21.61 Å (2015) and
+21.23 Å (OVITO).</p>
+<p>The 46 molecules sit on average 5.33 Å from the nearest 2015 solid
+surface.
+The other 818 sit 6.67 Å away.
+The shift is real and small.
+Bins on the two surfaces hold part of the 46, and the rest are
+scattered through the liquid, one or two molecules in a 1 Å bin.
+All 46 have four neighbours inside 3.5 Å.
+Forty-five lie on a 6-ring.
+There is no prism and no bilayer.</p>
+<p>Adaptive common-neighbour analysis calls every molecule other.
+The diamond test calls 143 hexagonal and none cubic.
+The tetrahedron template passes 346 molecules, 8 of them in the
+disagreeing set.
+Mean <code class="docutils literal notranslate"><span class="pre">q6</span></code> is 0.527 and 0.511.</p>
+</section>
+<section id="confined-ice">
+<h2>Confined ice<a class="headerlink" href="#confined-ice" title="Link to this heading">#</a></h2>
+<p>The frameworks are ideal oxygen sites at a nearest-neighbour
+distance of 2.75 Å.
+A nanotube is a stack of 8 rings in a box whose long axis is the
+tube.
+A sheet is a rectangular honeycomb, one layer or two.
+The second layer is shifted by one bond in the plane, which is the
+graphite AB stacking, and separated by 2.75 Å.
+Half the bilayer molecules then have three neighbours and half have
+four.
+The library builds the oxygen sites. No trajectory is stored.
+The <code class="docutils literal notranslate"><span class="pre">seams</span></code> command does not print the prism or sheet census.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>framework</p></th>
+<th class="head"><p>N</p></th>
+<th class="head"><p>2015</p></th>
+<th class="head"><p>OVITO</p></th>
+<th class="head"><p>rings</p></th>
+<th class="head"><p>diamond</p></th>
+<th class="head"><p>CNA</p></th>
+<th class="head"><p>PTM</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">q6</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>square tube</p></td>
+<td><p>32</p></td>
+<td><p>water 32</p></td>
+<td><p>water 32</p></td>
+<td><p>prism 32, 8 blocks</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0.424</p></td>
+</tr>
+<tr class="row-odd"><td><p>pentagon tube</p></td>
+<td><p>40</p></td>
+<td><p>water 40</p></td>
+<td><p>water 40</p></td>
+<td><p>prism 40, 8 blocks</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0.487</p></td>
+</tr>
+<tr class="row-even"><td><p>hexagon tube</p></td>
+<td><p>48</p></td>
+<td><p>water 48</p></td>
+<td><p>interfacial 48</p></td>
+<td><p>prism 48, 8 blocks</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0.509</p></td>
+</tr>
+<tr class="row-odd"><td><p>monolayer</p></td>
+<td><p>48</p></td>
+<td><p>water 48</p></td>
+<td><p>water 48</p></td>
+<td><p>polygon 48</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0.741</p></td>
+</tr>
+<tr class="row-even"><td><p>AB bilayer</p></td>
+<td><p>96</p></td>
+<td><p>cubic 48, water 48</p></td>
+<td><p>cubic 48, water 48</p></td>
+<td><p>bilayer 96</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0.622</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The hexagon tube is the neighbour test on its own.
+Every molecule has four neighbours and an interfacial bond count.
+Footnote a fails for all 48, so the 2015 rule leaves them as water.
+OVITO labels all 48 interfacial.
+The prism blocks are the same eight basal pairs either way.
+Square and pentagon tubes are water under both rules.
+Their bond angles are not the staggered ice pattern.
+The prism blocks still name the tube.
+The monolayer has three neighbours, so both CHILL+ rules say water
+before any bond test.
+Every molecule is on a planar 6-ring.
+Its mean <code class="docutils literal notranslate"><span class="pre">q6</span></code> is 0.741, above the 0.626 of bulk ice Ih, so a <code class="docutils literal notranslate"><span class="pre">q6</span></code>
+threshold taken from bulk ice does not reject the sheet.
+The AB bilayer is split by coordination.
+The four-coordinated sublattice is cubic under both CHILL+ rules.
+The diamond test, adaptive common-neighbour analysis and the
+tetrahedron template call none of the 96 a crystal.
+The bilayer rings cover all 96, and there is no prism.</p>
+<p>Adaptive common-neighbour analysis is the Stukowski test: 12
+neighbours for FCC, HCP and icosahedral, 14 for BCC, with the
+adaptive cutoff <code class="docutils literal notranslate"><span class="pre">(1+sqrt(2))/2</span></code> times the mean neighbour distance.
+The diamond test is the second-shell common-neighbour test used for
+cubic and hexagonal diamond.
+The template is the four unit vectors of a tetrahedron, accepted
+when the best rigid match has RMSD below 0.1.
+<code class="docutils literal notranslate"><span class="pre">q6</span></code> is the Steinhardt invariant on the 3.5 Å shell, the quantity
+<code class="docutils literal notranslate"><span class="pre">freud.order.Steinhardt(l=6)</span></code> returns for that neighbour list.</p>
+</section>
+<section id="growth">
+<h2>Growth<a class="headerlink" href="#growth" title="Link to this heading">#</a></h2>
+<p>The campaign is <code class="docutils literal notranslate"><span class="pre">input/interface/campaign.py</span></code>.
+It starts from <code class="docutils literal notranslate"><span class="pre">interface_f0.lammpstrj</span></code>, the mW Stillinger-Weber
+potential, a 10 fs step, and NVT at the volume of that frame.
+Four velocity seeds, numbered 1 to 4, run at 240, 250, 260 and 270 K.
+The velocity seed is ten times the temperature plus the replica, so
+the sixteen streams differ.
+Frames are kept every 10 ps for 800 ps.
+The slope on a seed is ordinary least squares of the solid thickness
+while the 2015 solid fraction lies between 0.15 and 0.90 and both
+thicknesses are still defined.
+The mean of the four seeds is a percentile bootstrap, 10000 draws,
+Hyndman-Fan type 7, generator seed 270.
+The interval is the 2.5 and 97.5 percentiles.
+The difference is the 2015 rate minus the OVITO rate on the same
+seed, resampled by the shared seed index.
+It excludes zero when those two percentiles lie on the same side of
+zero.</p>
+<p>The thickness below is the ice slab on that fixed-volume cell.
+It is the sum of the two fronts.
+It is not a speed that can be set beside a direct-coexistence table.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>T (K)</p></th>
+<th class="head"><p>2015 slab (Å/ps)</p></th>
+<th class="head"><p>OVITO slab (Å/ps)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>240</p></td>
+<td><p>0.269 [0.224, 0.312]</p></td>
+<td><p>0.287 [0.237, 0.334]</p></td>
+</tr>
+<tr class="row-odd"><td><p>250</p></td>
+<td><p>0.174 [0.148, 0.200]</p></td>
+<td><p>0.183 [0.151, 0.213]</p></td>
+</tr>
+<tr class="row-even"><td><p>260</p></td>
+<td><p>0.143 [0.128, 0.159]</p></td>
+<td><p>0.148 [0.132, 0.164]</p></td>
+</tr>
+<tr class="row-odd"><td><p>270</p></td>
+<td><p>0.0292 [0.0137, 0.0569]</p></td>
+<td><p>0.0299 [0.0139, 0.0584]</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="rule-sensitivity-bound">
+<h2>Rule-sensitivity bound<a class="headerlink" href="#rule-sensitivity-bound" title="Link to this heading">#</a></h2>
+<p>The paired difference on that slab, 2015 minus OVITO, excludes zero
+at 240, 250, 260 and 270 K.
+Four further seeds at 272 K and at 273 K put the interval across zero.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>T (K)</p></th>
+<th class="head"><p>difference (Å/ps)</p></th>
+<th class="head"><p>excludes zero</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>240</p></td>
+<td><p>−0.0179 [−0.0217, −0.0140]</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>250</p></td>
+<td><p>−0.00854 [−0.0130, −0.00395]</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p>260</p></td>
+<td><p>−0.00466 [−0.00733, −0.00245]</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p>270</p></td>
+<td><p>−0.00067 [−0.00154, −0.00015]</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p>272</p></td>
+<td><p>−0.00015 [−0.00058, 0.00032]</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p>273</p></td>
+<td><p>−0.00028 [−0.00054, 0.00001]</p></td>
+<td><p>no</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>272 K is the rule-sensitivity bound for this thickness.
+Below it the two published CHILL+ rules are distinguishable as
+growth rates.
+At 272 K they are not.
+The crystal thickness, cubic plus hexagonal and not the interfacial
+label, already includes zero at 240, 260 and 270 K, so the bound is
+carried by the interfacial label.
+The 2015 thresholds are unchanged.</p>
+</section>
+<section id="direct-coexistence">
+<h2>Direct coexistence<a class="headerlink" href="#direct-coexistence" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">input/interface/npt_growth.py</span></code> builds the comparison cell.
+The oxygen sites are the GenIce ice Ih cell.
+Its basal normal is y, where the planes come in pairs 0.92 Å apart
+separated by 2.76 Å.
+Its secondary-prism normal is z, where the planes are 2.25 Å apart.
+Each face is 8064 molecules, ice in the middle half and liquid in
+the two caps, so the periodic cell has two interfaces.
+The ensemble is anisotropic NpT at 1 bar (0.986923 atm in the real-unit
+pressure of LAMMPS).
+Four velocity seeds run at 240, 250, 260 and 270 K.
+The speed of one front is L / (2 τ), the definition in equation 2 of
+Espinosa, Navarro, Sanz, Valeriani and Vega, J. Chem. Phys. 145,
+211922 (2016), page 211922-4.
+L is the liquid length in the first production frame.
+τ is the first frame whose solid fraction is at least 0.95.
+The mean of the seeds that freeze is the same percentile bootstrap.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>face</p></th>
+<th class="head"><p>T (K)</p></th>
+<th class="head"><p>2015 (Å/ns)</p></th>
+<th class="head"><p>OVITO (Å/ns)</p></th>
+<th class="head"><p>seeds</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>secondary prism</p></td>
+<td><p>240</p></td>
+<td><p>139.5 [133.0, 145.9]</p></td>
+<td><p>139.5 [133.0, 145.9]</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>secondary prism</p></td>
+<td><p>250</p></td>
+<td><p>108.3 [100.0, 115.5]</p></td>
+<td><p>108.3 [100.0, 115.5]</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p>secondary prism</p></td>
+<td><p>260</p></td>
+<td><p>74.2 [72.6, 77.1]</p></td>
+<td><p>74.2 [72.6, 77.1]</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>secondary prism</p></td>
+<td><p>270</p></td>
+<td><p>18.8 [15.5, 20.4]</p></td>
+<td><p>18.8 [15.5, 20.4]</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>basal</p></td>
+<td><p>240</p></td>
+<td><p>62.5 [60.7, 64.0]</p></td>
+<td><p>62.9 [61.1, 64.4]</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>basal</p></td>
+<td><p>250</p></td>
+<td><p>53.7 [45.2, 62.1]</p></td>
+<td><p>53.7 [45.2, 62.1]</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p>basal</p></td>
+<td><p>260</p></td>
+<td><p>37.7 [34.0, 40.6]</p></td>
+<td><p>37.8 [34.3, 40.6]</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>basal</p></td>
+<td><p>270</p></td>
+<td><p>not frozen in 2 ns</p></td>
+<td><p>not frozen in 2 ns</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The paired difference includes zero on every row that freezes.
+On this cell the front speed is not sensitive to the choice of rule.
+The 272 K bound belongs to the fixed-volume thickness, not to this speed.</p>
+<p>Table I on page 211922-4 lists the mW secondary-prism rate, and no
+basal rate.
+The printed values are 490 Å/ns at 240 K, 375 Å/ns at 250 K and
+266 Å/ns at 260 K.
+The table has no 270 K row.
+Table II on the same page gives the mW melting point as 274.6 K.
+The secondary-prism speeds here are 0.28 times those printed numbers.
+Montero de Hijes, Romano, Gorfer and Dellago, J. Chem. Phys. 158,
+204706 (2023), say in the caption of their Figure 4 that the mW
+points taken from that table were divided by ten, because the authors
+of the 2016 paper acknowledged a units erratum.
+Dividing the printed table by ten gives 49, 37.5 and 26.6 Å/ns.
+The speeds here are 2.8 times those corrected values.
+The basal face is slower than the secondary prism at each temperature,
+which is the direction Espinosa, Navarro, Sanz, Valeriani and Vega
+report for TIP4P/ICE on the same page: the basal rate is within five
+per cent of 0.6 times the secondary prism at 245, 255 and 260 K.
+They do not print an mW basal number.</p>
+</section>
+<section id="which-definition-meets-table-i">
+<h2>Which definition meets Table I<a class="headerlink" href="#which-definition-meets-table-i" title="Link to this heading">#</a></h2>
+<p>The gap is not the 0.95 cutoff, the box length, the barostat period,
+or the number of molecules.</p>
+<p>Equation 2 is u = L / (2 τ), with L the liquid length and the 2
+standing for two interfaces. On a linear freeze that is the same
+number as the slope of the solid count,</p>
+<p>u = (dN/dt) Lz / (2 N),</p>
+<p>and the same number as half the slope of the solid thickness.
+Lengths here are angstroms and times are picoseconds, so the speed
+in Å/ns is 1000 times the speed in Å/ps. 490 Å/ns is 49 m/s.</p>
+<p><code class="docutils literal notranslate"><span class="pre">input/interface/espinosa_protocol.py</span></code> repeats the secondary prism
+at the size on page 211922-2: 4000 molecules, ice in the middle
+half, box 39.11 × 36.77 × 90.37 Å. The barostat is anisotropic
+Nose-Hoover at 1 bar, with the 2 ps period stated for their
+thermostat and barostat. LAMMPS has no velocity-rescaling fix of
+the Gromacs kind; Nose-Hoover is the NpT fix. The mW parameters are
+the Molinero and Moore set: ε = 6.189 kcal/mol, σ = 2.3925 Å,
+a = 1.80, λ = 23.15, γ = 1.20, cos θ0 = −1/3. The temperature is
+the Kelvin target of that fix. A 20 ps melt at 400 K with a 2 ps
+period left the liquid on the crystal sites, mean move 0.3 Å, so
+the liquid was melted for 100 ps at 500 K before the growth run.
+Four seeds at 240 K and four at 260 K.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>definition</p></th>
+<th class="head"><p>240 K (Å/ns)</p></th>
+<th class="head"><p>260 K (Å/ns)</p></th>
+<th class="head"><p>over printed</p></th>
+<th class="head"><p>over printed/10</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>L/(2τ) at 0.95</p></td>
+<td><p>151.6 [143.6, 160.8]</p></td>
+<td><p>82.8 [80.5, 85.6]</p></td>
+<td><p>0.31</p></td>
+<td><p>3.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>solid-count slope</p></td>
+<td><p>116.2 [112.3, 122.0]</p></td>
+<td><p>64.1 [61.0, 67.5]</p></td>
+<td><p>0.24</p></td>
+<td><p>2.4</p></td>
+</tr>
+<tr class="row-even"><td><p>thickness slope / 2</p></td>
+<td><p>116.5 [109.9, 123.2]</p></td>
+<td><p>58.5 [53.2, 61.7]</p></td>
+<td><p>0.23</p></td>
+<td><p>2.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table I as printed</p></td>
+<td><p>490</p></td>
+<td><p>266</p></td>
+<td><p>1</p></td>
+<td><p>10</p></td>
+</tr>
+<tr class="row-even"><td><p>Table I divided by 10</p></td>
+<td><p>49</p></td>
+<td><p>26.6</p></td>
+<td><p>0.1</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The same three definitions on the earlier 8064-molecule runs, with
+a 0.2 ps Nose-Hoover period, give a count slope of 115.3 at 240 K
+and 57.1 at 260 K. Changing the molecule count and the barostat
+period does not move the speed onto either published column.
+Using the whole box instead of the liquid length, and dropping the
+factor of two, gives about 600 Å/ns at 240 K and about 325 Å/ns at
+260 K. That is the nearest misreading of equation 2, and it still
+sits about 20% above the printed table.</p>
+<p>The factor of ten in Montero de Hijes, Romano, Gorfer and Dellago,
+Figure 4, is what they were told to apply to the 2016 points. It
+does not turn Table I into this front displacement. The contour of
+the solid fraction moves about 34 Å in 145 ps on the 4000-molecule
+cell at 240 K, which is a one-front speed near 120 Å/ns whether or
+not the count of solid molecules is used. That is the speed this
+model produces with equation 2. It is 0.24 times the printed table
+and 2.4 times the table divided by ten, at both 240 K and 260 K.</p>
+</section>
+<section id="where-the-factor-of-four-sits">
+<h2>Where the factor of four sits<a class="headerlink" href="#where-the-factor-of-four-sits" title="Link to this heading">#</a></h2>
+<p>The protocol keeps equation 2. A second campaign,
+<code class="docutils literal notranslate"><span class="pre">input/interface/espinosa_faces.py</span></code>, repeats the 4000-molecule
+secondary prism and adds the basal face, the primary prism, and one
+secondary-prism seed at a 5 fs step. The melt, the 2 ps Nose-Hoover
+periods, and the 10 fs step are the ones above. Production is 600 ps
+at 240 K and 1000 ps at 260 K, with frames every 5 ps.</p>
+<p>The one-front speed is the slope of the solid count,
+u = (dN/dt) L / (2 N), on solid fraction 0.55 to 0.90.
+On the secondary prism that slope is
+116.9 [107.9, 125.9] Å/ns at 240 K and
+64.1 [62.0, 67.4] Å/ns at 260 K.
+Four times those intervals is [432, 504] and [248, 270].
+Table I, 490 and 266, lies inside both.
+The ratio of the slope to the printed table is 0.239 at 240 K and
+0.241 at 260 K.
+The ratio to the table divided by ten is 2.39 and 2.41.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>reading, secondary prism</p></th>
+<th class="head"><p>240 K (Å/ns)</p></th>
+<th class="head"><p>260 K (Å/ns)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>L_liquid/(2τ) at 0.95</p></td>
+<td><p>142.6 [133.5, 151.6]</p></td>
+<td><p>84.8 [77.9, 93.9]</p></td>
+</tr>
+<tr class="row-odd"><td><p>L_liquid/(2τ) at 0.99</p></td>
+<td><p>131.4</p></td>
+<td><p>72.9</p></td>
+</tr>
+<tr class="row-even"><td><p>L_liquid/(2τ) at 0.70</p></td>
+<td><p>277.0</p></td>
+<td><p>167.4</p></td>
+</tr>
+<tr class="row-odd"><td><p>solid-count slope</p></td>
+<td><p>116.9 [107.9, 125.9]</p></td>
+<td><p>64.1 [62.0, 67.4]</p></td>
+</tr>
+<tr class="row-even"><td><p>thickness slope / 2</p></td>
+<td><p>117.7 [100.0, 147.4]</p></td>
+<td><p>56.1 [36.9, 71.0]</p></td>
+</tr>
+<tr class="row-odd"><td><p>Lechner-Dellago q6bar slope</p></td>
+<td><p>118.3 [107.3, 129.4]</p></td>
+<td><p>64.8 [62.2, 67.4]</p></td>
+</tr>
+<tr class="row-even"><td><p>q6bar slope at 0.358</p></td>
+<td><p>117.5 [108.1, 126.8]</p></td>
+<td><p>64.1 [61.9, 67.2]</p></td>
+</tr>
+<tr class="row-odd"><td><p>potential-energy clock</p></td>
+<td><p>135.4 [127.3, 143.5]</p></td>
+<td><p>80.6 [74.5, 88.6]</p></td>
+</tr>
+<tr class="row-even"><td><p>L_box/(2τ) at 0.95</p></td>
+<td><p>283.1</p></td>
+<td><p>165.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>L_box/τ at 0.95</p></td>
+<td><p>566 [540, 593]</p></td>
+<td><p>332 [304, 368]</p></td>
+</tr>
+<tr class="row-even"><td><p>initial slab length / (2τ)</p></td>
+<td><p>140.5</p></td>
+<td><p>81.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>one interface’s travel, divided by 2 again</p></td>
+<td><p>71.3</p></td>
+<td><p>42.4</p></td>
+</tr>
+<tr class="row-even"><td><p>Table I</p></td>
+<td><p>490</p></td>
+<td><p>266</p></td>
+</tr>
+<tr class="row-odd"><td><p>Table I / 4</p></td>
+<td><p>122.5</p></td>
+<td><p>66.5</p></td>
+</tr>
+<tr class="row-even"><td><p>Table I / 10</p></td>
+<td><p>49</p></td>
+<td><p>26.6</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>L_liquid is the liquid length in the first production frame, about
+half the long edge.
+The 0.70 clock uses that whole liquid length for a shorter time, so
+the speed rises to 277 Å/ns at 240 K and 167 Å/ns at 260 K, about
+half the printed table.
+The time at which the solid fraction first reaches 0.995 is noisier,
+105.6 [71.8, 128.0] at 240 K and 58.8 [44.5, 71.5] at 260 K,
+because the last percent flickers.
+The potential energy falls by about 2100 kcal on the 4000-molecule
+cell, about 1.05 kcal/mol for the 2000 molecules that freeze.
+The energy clock uses that drop in place of an order parameter and
+lands on the same side of both published columns.</p>
+<p>Page 211922-3 identifies solid molecules with the Lechner-Dellago
+q6 on a 3.5 Å shell. The threshold is the point where the fraction
+of bulk ice labeled liquid equals the fraction of bulk liquid
+labeled ice, about half a percent.
+On these trajectories that cut is 0.38 to 0.40.
+The slope of that count is the CHILL+ count slope.
+The constant 0.358 quoted for the earlier seeding work gives the
+same slope.
+The local, unaveraged q6 at 0.5 is lower, 76.5 Å/ns at 240 K and
+43.6 Å/ns at 260 K on the secondary prism, and it is still a quarter
+of the printed table or less.
+The 2015 CHILL+ thresholds are unchanged.</p>
+<p>The primary prism, two seeds, has a count slope of
+101.3 [87.5, 115.0] at 240 K and 51.3 [49.4, 53.2] at 260 K.
+The basal face has 61.1 [60.0, 62.3] and 36.4 [34.1, 38.8].
+Basal over secondary prism is 0.52 at 240 K and 0.57 at 260 K.
+Page 211922-4 says the basal rate of TIP4P/ICE is within five
+percent of 0.6 times the secondary prism, and that the two prismatic
+planes are similar.
+The mW cell here has that same ordering.
+A wrong face does not supply the missing factor of four.</p>
+<p>One secondary-prism seed at 240 K with a 5 fs step, frames still
+5 ps apart, has a count slope of 96.0 Å/ns and an equation-2 speed
+of 132.6 Å/ns.
+The four 10 fs seeds at that temperature span 106 to 127 Å/ns on
+the count slope and 131 to 154 Å/ns on equation 2.
+The shorter step does not move the speed by a factor of four.</p>
+<p>116.9 Å/ns is 11.7 m/s and 1169 cm/s.
+Dividing by σ = 2.3925 Å gives 48.9 σ/ns at 240 K and 26.8 σ/ns at
+260 K, which is the table divided by ten (49 and 26.6).
+The long edge of the cell is 90.37 Å.
+Page 211922-2 describes that cell as about 9 nm, so the length used
+here is already in angstroms.
+Table II fits ln(u/(Å/ns)) for mW with C1 = 4.1711, C2 = 0.096266 K^−1
+and C3 = −0.001148 K^−2.
+At 240 K, ΔT = 34.6 K, the fit returns 458 Å/ns, next to the printed</p>
+<ol class="arabic simple">
+<li></li>
+</ol>
+<p>The fit is the printed column, in the unit the table names.</p>
+<p>Shi, Fulford, Salvalaglio and Molteni, J. Chem. Phys. 162, 054714
+(2025), Figure 3, plots mW growth on the primary prism and the basal
+face.
+The markers, read from the figure coordinates, are
+98.3 Å/ns at 240 K and 62.1 Å/ns at 260 K on the primary prism,
+with the error bars running 85.2 to 111.4 and 51.6 to 72.7.
+The basal markers are 88.1 and 39.5.
+The primary-prism equation-2 speeds here are 115.2 at 240 K and
+63.2 at 260 K, and the energy clocks are 108.7 and 62.1.
+The basal equation-2 speeds are 84.0 and 44.1.
+Those sit with Figure 3.
+Rozmanov and Kusalik, Phys. Chem. Chem. Phys. 13, 15501 (2011),
+report basal speeds of 0.7, 0.9 and 1.1 Å/ns at 10 K of supercooling
+for their large, medium and small cells, as quoted by Shi et al.
+Table I for TIP4P/ICE at 260 K is 0.933 Å/ns, on that atomistic scale.
+Moore and Molinero’s minimum crystallization time is about ten
+nanoseconds, as cited on page 211922-7.
+Avrami time scales as u to the power −3/4, so a factor of four in u
+moves that time by 4^0.75 = 2.8, inside the order of magnitude the
+2016 paper claims for the comparison.
+The ten-nanosecond minimum does not separate Table I from a quarter
+of Table I.</p>
+<p>The steady one-front speed, times four, is the printed mW column.
+That factor is what you get by taking L as the whole box and dropping
+the two in equation 2, since the liquid is half the box:
+L_box / τ = 4 L_liquid / (2 τ).
+On the 0.95 clock this reading is 566 and 332 Å/ns, above the table.
+On the count slope it is 468 and 256 Å/ns, and the printed 490 and
+266 fall inside the seed intervals.
+The private correction of ten, applied to a column that already
+carries this factor of four, leaves a residual 10/4 = 2.5, which is
+the stable 2.4 measured here.
+Equation 2 is the speed the trajectories produce, and it is the
+speed in Figure 3 of Shi et al.</p>
+</section>
+<section id="growth-speed-curve">
+<h2>Growth-speed curve<a class="headerlink" href="#growth-speed-curve" title="Link to this heading">#</a></h2>
+<p>The curve uses the same 4000-molecule deck as
+<code class="docutils literal notranslate"><span class="pre">input/interface/espinosa_faces.py</span></code>.
+The melt, the 2 ps Nose-Hoover periods and the 10 fs step are
+unchanged.
+240 K keeps the 600 ps production of that file and 260 K keeps the
+1000 ps production.
+220 K and 230 K run for 800 ps, 250 K for 1200 ps and 265 K for
+2000 ps, so the basal face still crosses the fitting window.
+Basal, primary prism and secondary prism, four velocity seeds each,
+six temperatures, seventy-two trajectories.
+Every seed reached a solid fraction of at least 0.90.</p>
+<p>The speed is the count slope already used for the factor of four,</p>
+<p>u = (dN/dt) Lz / (2 N),</p>
+<p>on the 2015 CHILL+ solid fraction between 0.55 and 0.90.
+The thresholds are not changed.
+The same window is scored with Lechner-Dellago q6bar on the 3.5 Å
+shell, once at the mislabel cut and once at the constant 0.358.
+Neither cut is fitted to these rates.
+The mean of the four seeds is a percentile bootstrap, 10000 draws,
+Hyndman-Fan type 7, generator seed 270.
+The interval is the 2.5 and 97.5 percentiles.
+Speeds are angstroms per nanosecond.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>face</p></th>
+<th class="head"><p>T (K)</p></th>
+<th class="head"><p>CHILL+ count (Å/ns)</p></th>
+<th class="head"><p>q6bar (Å/ns)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>basal</p></td>
+<td><p>220</p></td>
+<td><p>57.7 [46.9, 67.6]</p></td>
+<td><p>63.1 [51.8, 74.4]</p></td>
+</tr>
+<tr class="row-odd"><td><p>basal</p></td>
+<td><p>230</p></td>
+<td><p>71.1 [61.3, 80.9]</p></td>
+<td><p>80.6 [65.8, 89.1]</p></td>
+</tr>
+<tr class="row-even"><td><p>basal</p></td>
+<td><p>240</p></td>
+<td><p>65.8 [57.6, 73.2]</p></td>
+<td><p>68.5 [59.1, 76.3]</p></td>
+</tr>
+<tr class="row-odd"><td><p>basal</p></td>
+<td><p>250</p></td>
+<td><p>47.9 [41.7, 54.1]</p></td>
+<td><p>49.6 [42.4, 56.8]</p></td>
+</tr>
+<tr class="row-even"><td><p>basal</p></td>
+<td><p>260</p></td>
+<td><p>41.9 [35.4, 46.8]</p></td>
+<td><p>42.8 [36.6, 47.1]</p></td>
+</tr>
+<tr class="row-odd"><td><p>basal</p></td>
+<td><p>265</p></td>
+<td><p>19.5 [14.4, 24.6]</p></td>
+<td><p>20.4 [14.8, 25.9]</p></td>
+</tr>
+<tr class="row-even"><td><p>primary prism</p></td>
+<td><p>220</p></td>
+<td><p>101.2 [88.9, 112.8]</p></td>
+<td><p>107.3 [92.2, 120.2]</p></td>
+</tr>
+<tr class="row-odd"><td><p>primary prism</p></td>
+<td><p>230</p></td>
+<td><p>112.4 [89.8, 140.1]</p></td>
+<td><p>114.9 [89.3, 143.7]</p></td>
+</tr>
+<tr class="row-even"><td><p>primary prism</p></td>
+<td><p>240</p></td>
+<td><p>104.7 [93.3, 120.0]</p></td>
+<td><p>108.0 [95.1, 123.4]</p></td>
+</tr>
+<tr class="row-odd"><td><p>primary prism</p></td>
+<td><p>250</p></td>
+<td><p>87.5 [77.5, 97.8]</p></td>
+<td><p>89.8 [78.2, 102.5]</p></td>
+</tr>
+<tr class="row-even"><td><p>primary prism</p></td>
+<td><p>260</p></td>
+<td><p>57.7 [52.3, 61.6]</p></td>
+<td><p>60.1 [55.7, 64.0]</p></td>
+</tr>
+<tr class="row-odd"><td><p>primary prism</p></td>
+<td><p>265</p></td>
+<td><p>30.0 [23.4, 34.8]</p></td>
+<td><p>31.0 [24.3, 36.1]</p></td>
+</tr>
+<tr class="row-even"><td><p>secondary prism</p></td>
+<td><p>220</p></td>
+<td><p>119.2 [115.6, 125.1]</p></td>
+<td><p>120.9 [115.7, 128.9]</p></td>
+</tr>
+<tr class="row-odd"><td><p>secondary prism</p></td>
+<td><p>230</p></td>
+<td><p>117.1 [103.7, 133.2]</p></td>
+<td><p>117.8 [105.4, 133.7]</p></td>
+</tr>
+<tr class="row-even"><td><p>secondary prism</p></td>
+<td><p>240</p></td>
+<td><p>111.7 [105.7, 120.2]</p></td>
+<td><p>112.6 [106.9, 120.9]</p></td>
+</tr>
+<tr class="row-odd"><td><p>secondary prism</p></td>
+<td><p>250</p></td>
+<td><p>87.0 [78.5, 96.2]</p></td>
+<td><p>88.1 [78.9, 97.3]</p></td>
+</tr>
+<tr class="row-even"><td><p>secondary prism</p></td>
+<td><p>260</p></td>
+<td><p>63.2 [58.1, 69.5]</p></td>
+<td><p>66.0 [58.2, 73.9]</p></td>
+</tr>
+<tr class="row-odd"><td><p>secondary prism</p></td>
+<td><p>265</p></td>
+<td><p>50.4 [41.2, 57.0]</p></td>
+<td><p>51.7 [43.6, 58.6]</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The constant 0.358 gives the CHILL+ count slope again.
+On the secondary prism it is 120.2, 118.0, 111.9, 88.2, 64.1 and
+52.0 Å/ns from 220 K to 265 K.
+The mislabel q6bar sits a few angstroms per nanosecond above the
+CHILL+ slope and does not move the ordering.
+The basal face is the slowest at each temperature.
+From 220 K to 260 K it is 0.48 to 0.66 of the secondary prism, around
+the 0.6 ratio Espinosa, Navarro, Sanz, Valeriani and Vega report for
+TIP4P/ICE.
+At 265 K the ratio is 0.39.
+The two prisms agree from 230 K to 260 K.
+At 220 K the secondary prism is faster than the primary, 119.2
+against 101.2, and the intervals do not overlap.
+At 265 K they do not overlap either, 50.4 against 30.0.
+One primary-prism seed at 230 K is 151 Å/ns.
+The other three are 84, 107 and 108, which is why that interval is
+the wide one.</p>
+<p>The curve on each face is a Wilson-Frenkel form with the melting
+point fixed at the Table II value, 274.6 K,</p>
+<p>u(T) = A exp(−B/T) [1 − exp(−C (Tm − T)/T)].</p>
+<p>A, B and C are the least-squares values on the six CHILL+ means.
+A large A with a small C can describe the same six means, so the
+separate parameters are not a measured activation energy.
+The maximum is read from the curve on a 0.05 K grid.
+The interval resamples the seeds inside each temperature, refits,
+and takes the 2.5 and 97.5 percentiles of 1000 maxima.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>face</p></th>
+<th class="head"><p>T of maximum (K)</p></th>
+<th class="head"><p>maximum (Å/ns)</p></th>
+<th class="head"><p>highest measured mean</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>basal</p></td>
+<td><p>228.7 [219.2, 234.9]</p></td>
+<td><p>64.9 [59.7, 71.6]</p></td>
+<td><p>71.1 at 230 K</p></td>
+</tr>
+<tr class="row-odd"><td><p>primary prism</p></td>
+<td><p>225.3 [217.4, 231.5]</p></td>
+<td><p>108.4 [98.3, 120.8]</p></td>
+<td><p>112.4 at 230 K</p></td>
+</tr>
+<tr class="row-even"><td><p>secondary prism</p></td>
+<td><p>218.1 [200.0, 226.7]</p></td>
+<td><p>120.0 [115.4, 128.3]</p></td>
+<td><p>119.2 at 220 K</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The basal and primary-prism maxima sit between the 220 K and 240 K
+measurements.
+The secondary-prism means at 220 K and 230 K agree, and the fitted
+maximum is at 218 K.
+The lower end of that interval is 200 K, the edge of the grid on
+which the maximum is sought, so the turnover has not been resolved
+below the coldest point that was run.
+By 240 K the secondary prism has already fallen, and it keeps
+falling through 265 K.</p>
+<p>Four times the secondary-prism count slope is the factor-of-four
+reading of Table I.
+At 240 K that is 447 [423, 481], and the printed 490 lies above
+the interval.
+At 250 K it is 348 [314, 385], and the printed 375 lies inside.
+At 260 K it is 253 [232, 278], and the printed 266 lies inside.
+The ratios of the count slope to the printed column are 0.23, 0.23
+and 0.24.
+The ratios to the column divided by four are 0.91, 0.93 and 0.95.
+Table II, ln(u/(Å/ns)) = 4.1711 + 0.096266 ΔT − 0.001148 (ΔT)^2,
+peaks at 232.7 K.
+The printed peak is 487 Å/ns and the factor-of-four reading is
+121.9 Å/ns, next to the 120 Å/ns secondary-prism maximum here, at a
+warmer temperature.
+Dividing the Table II curve by four gives 101, 121, 115, 86, 52 and
+37 Å/ns at 220, 230, 240, 250, 260 and 265 K.
+The measured secondary prism sits on that curve at 230, 240 and
+250 K.
+It is faster at 220 K (119 against 101), at 260 K (63 against 52)
+and at 265 K (50 against 37).
+The quadratic has already turned down by 220 K and it falls faster
+than these seeds on the warm side.
+The text of the 2016 paper places the mW maximum around 40 K below
+274.6 K, which is 235 K.
+Shi, Fulford, Salvalaglio and Molteni describe that Espinosa
+secondary-prism maximum as about 234.6 K.</p>
+<p>Shi et al., Figure 3, is the basal face and the primary prism from
+200 K to 270 K, ten replicas, with the maximum at 240 K on both
+faces.
+The markers read from that figure are unchanged: primary prism 98.3
+[85.2, 111.4] at 240 K and 62.1 [51.6, 72.7] at 260 K, basal 88.1
+[76.4, 99.7] and 39.5 [27.2, 51.9].
+The primary-prism count slopes here, 104.7 [93.3, 120.0] and 57.7
+[52.3, 61.6], overlap those bars.
+The basal count slope at 260 K, 41.9 [35.4, 46.8], lies inside the
+basal bar.
+The basal count slope at 240 K, 65.8 [57.6, 73.2], lies below the
+basal bar.
+Their order parameter is the lq3 liquid count on a slab with a
+quasi-liquid layer, and the earlier equation-2 speeds on this deck
+were the ones that sat with the 240 K basal marker.
+The maxima of the curves fit here are 229 K on the basal face and
+225 K on the primary prism.
+Neither interval reaches their stated 240 K maximum.
+The count slopes at 240 K are still within a few angstroms per
+nanosecond of the 230 K means on both faces.</p>
+<p>Moore and Molinero, Nature 479, 506 (2011), do not tabulate a face
+growth speed in Å/ns.
+Espinosa et al. compare their brute-force crystallization times, for
+about 4000 molecules and a frozen fraction 0.7, with the Avrami
+estimate.
+The minimum of those brute-force times is about ten nanoseconds.
+The abstract places the mW minimum about 85 K below the melting
+point, near 190 K, colder than every temperature run here.
+At 220 K the one-front speeds are still at the top of the measured
+curve, 119 Å/ns on the secondary prism, 101 on the primary prism and
+58 on the basal face.
+That is the growth factor inside the crystallization time, not the
+crystallization time.</p>
+<p>On one frame from the 240 K secondary prism, during the growth, the
+pure-Python q6bar and the d-SEAMS q6bar counted the same molecules
+above 0.30, 0.36, 0.40, 0.50 and 0.56.
+The timing used eight frames from that secondary-prism trajectory,
+spread through the run, repeated eight times.
+The median and the interquartile range are over the eight repeats.
+The per-frame time divides each repeat by eight.
+At eight cores the Python baseline runs one process per frame.
+d-SEAMS uses OpenMP with that many threads.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>tool</p></th>
+<th class="head"><p>cores</p></th>
+<th class="head"><p>per frame (ms)</p></th>
+<th class="head"><p>IQR (ms)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS CHILL+</p></td>
+<td><p>1</p></td>
+<td><p>7.92</p></td>
+<td><p>0.12</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS q6bar</p></td>
+<td><p>1</p></td>
+<td><p>4.99</p></td>
+<td><p>0.08</p></td>
+</tr>
+<tr class="row-even"><td><p>Python q6bar</p></td>
+<td><p>1</p></td>
+<td><p>134.9</p></td>
+<td><p>1.41</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS CHILL+</p></td>
+<td><p>8</p></td>
+<td><p>5.40</p></td>
+<td><p>0.11</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS q6bar</p></td>
+<td><p>8</p></td>
+<td><p>3.69</p></td>
+<td><p>0.22</p></td>
+</tr>
+<tr class="row-odd"><td><p>Python q6bar</p></td>
+<td><p>8</p></td>
+<td><p>32.9</p></td>
+<td><p>2.57</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>On one core the Python q6bar takes 17 times the CHILL+ frame and 27
+times the d-SEAMS q6bar frame.
+Eight cores shorten the CHILL+ frame by a factor of 1.5 and the
+d-SEAMS q6bar frame by a factor of 1.4.
+The Python frame shortens by a factor of 4.1.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<p>Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369–9376,
+<a class="reference external" href="https://doi.org/10.1021/jp510289t">10.1021/jp510289t</a>.
+Willard and Chandler, J. Phys. Chem. B 2010, 114, 1954–1958.
+Their coarse-graining width is ξ = 2.4 Å.
+Espinosa, Navarro, Sanz, Valeriani and Vega, J. Chem. Phys. 145,
+211922 (2016), <a class="reference external" href="https://doi.org/10.1063/1.4965427">10.1063/1.4965427</a>.
+Table I and Table II are on page 211922-4.
+The 4000-molecule cell, about 3 × 3 × 9 nm with an ice slice of
+about 4.5 nm, and the anisotropic barostat, are on page 211922-2.
+Equation 2, <span class="math notranslate nohighlight">\(u = L / (2 \tau)\)</span>, is on page 211922-4.
+Shi, Fulford, Salvalaglio and Molteni, J. Chem. Phys. 162, 054714
+(2025), arXiv:2410.07050.
+The text gives TIP4P/Ice maxima of 0.621 ± 0.104 Å/ns on the basal
+face and 0.840 ± 0.033 Å/ns on prism1 at 260 K.
+Figure 3 plots the mW basal and primary-prism rates.
+The markers read from that figure are 98.3 and 62.1 Å/ns on the
+primary prism at 240 and 260 K, and 88.1 and 39.5 Å/ns on the basal
+face.
+Rozmanov and Kusalik, Phys. Chem. Chem. Phys. 13, 15501 (2011).
+Shi et al. quote their TIP4P/2005 basal speeds as 0.7 to 1.1 Å/ns
+at 10 K of supercooling.
+Moore and Molinero, Nature 479, 506 (2011).
+Page 211922-7 of Espinosa et al. quotes their minimum crystallization
+time as about ten nanoseconds.
+Montero de Hijes, Romano, Gorfer and Dellago, J. Chem. Phys. 158,
+204706 (2023).
+The caption of their Figure 4 records the factor-of-ten correction
+applied to the 2016 mW points.</p>
+</section>
+<section id="on-the-shipped-frames">
+<h2>On the shipped frames<a class="headerlink" href="#on-the-shipped-frames" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/ice1h.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--rule<span class="w"> </span>chill+
+</span><span data-line="2">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/ice1h.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--rule<span class="w"> </span>ovito-chill+
+</span><span data-line="3">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/nucleation_f1.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--rule<span class="w"> </span>chill+
+</span><span data-line="4">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/nucleation_f1.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--rule<span class="w"> </span>ovito-chill+
+</span><span data-line="5">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/interface_f0.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--layers<span class="w"> </span>--axis<span class="w"> </span><span class="m">2</span>
+</span><span data-line="6">seams<span class="w"> </span>chill-plus<span class="w"> </span>input/traj/interface_f0.lammpstrj<span class="w"> </span>--type<span class="w"> </span><span class="m">1</span><span class="w"> </span>--rule<span class="w"> </span>ovito-chill+
+</span></pre></div>
+</div>
+<p>Ice Ih is hexagonal 128 under both rules.
+The nucleation frame is the table in the nucleus section.
+The interface slab is hexagonal 352, cubic 1, interfacial 49,
+clathrate 3, interfacial clathrate 25, water 434 and stack
+<code class="docutils literal notranslate"><span class="pre">HHHHHHHH....C.</span></code> under the published rule, and hexagonal 346, cubic 1,
+interfacial 57, clathrate 3, interfacial clathrate 20 and water 437
+under the OVITO rule.</p>
+<figure class="align-default" id="id2">
+<img alt="Crystal and solid fraction against radius for the mW nucleus." src="../_images/nucleus-profile.svg" />
+<figcaption>
+<p><span class="caption-text">Crystal and solid fraction on the nucleation frame. Solid includes the interfacial label. Crystal is cubic and hexagonal only.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id3">
+<img alt="Ice fraction along the surface normal of the mW slab." src="../_images/interface-profile.svg" />
+<figcaption>
+<p><span class="caption-text">Ice fraction along the long edge of the interface slab.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id4">
+<img alt="Label fractions for the nanotube and sheet frameworks." src="../_images/confined-labels.svg" />
+<figcaption>
+<p><span class="caption-text">Fraction of molecules carrying each label on the confined frameworks.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id5">
+<img alt="Ice thickness against time for one fixed-volume slab." src="../_images/growth-thickness.svg" />
+<figcaption>
+<p><span class="caption-text">Ice thickness of one fixed-volume slab. Solid includes the interfacial label.</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="hydrogen-bonds.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Directed hydrogen bonds</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="linkcell-scaling.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Linkcell strong scaling</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=4c4eaf79"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script>
+      <script async="async" src="../_static/dseams/mathjax/tex-chtml.js?v=20daa33d"></script></body>
+</html>

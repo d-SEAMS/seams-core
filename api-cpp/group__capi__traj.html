@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: Trajectories and dynamics</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/group__capi__traj.html">
+<meta property="og:title" content="seams-core: Trajectories and dynamics">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/group__capi__traj.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: Trajectories and dynamics">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__capi__traj.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Trajectories and dynamics </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Periodic unwrapping, molecular dipoles, and streaming time correlations.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga5e1d54e7d0723366dbad199abc80b5a4" id="r_ga5e1d54e7d0723366dbad199abc80b5a4"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga5e1d54e7d0723366dbad199abc80b5a4">seams_mols</a> (const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int *mols, size_t len)</td></tr>
+<tr class="memdesc:ga5e1d54e7d0723366dbad199abc80b5a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the stored molecule ids out.  <br /></td></tr>
+<tr class="memitem:ga66225929fd455eeaa8966a3fd665957f" id="r_ga66225929fd455eeaa8966a3fd665957f"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga66225929fd455eeaa8966a3fd665957f">seams_set_mols</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, const int *mols, size_t len)</td></tr>
+<tr class="memdesc:ga66225929fd455eeaa8966a3fd665957f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace the stored molecule ids on a loaded frame.  <br /></td></tr>
+<tr class="memitem:ga49779975dc3d1bbd2629a5cc303cf372" id="r_ga49779975dc3d1bbd2629a5cc303cf372"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga49779975dc3d1bbd2629a5cc303cf372">seams_molecule_centres</a> (const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, const int *mols, size_t mols_len, const double *masses, size_t masses_len, int *mol_ids_out, double *centres_out, size_t cap, size_t *n_mols)</td></tr>
+<tr class="memdesc:ga49779975dc3d1bbd2629a5cc303cf372"><td class="mdescLeft">&#160;</td><td class="mdescRight">Intact periodic centres of mass or geometry for molecules in a frame.  <br /></td></tr>
+<tr class="memitem:gaec29816a91313bf4d062f44851de985f" id="r_gaec29816a91313bf4d062f44851de985f"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaec29816a91313bf4d062f44851de985f">seams_traj_unwrap_positions</a> (const double *xyz, size_t nframes, size_t natoms, const double *boxes, size_t nboxes, double *unwrapped, size_t unwrapped_len)</td></tr>
+<tr class="memdesc:gaec29816a91313bf4d062f44851de985f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unwrap periodic coordinates across consecutive frames.  <br /></td></tr>
+<tr class="memitem:gaae87d8838530ea8f468766a6a84d3544" id="r_gaae87d8838530ea8f468766a6a84d3544"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaae87d8838530ea8f468766a6a84d3544">seams_traj_unwrap_centres</a> (const double *xyz, size_t nframes, size_t natoms, const double *boxes, size_t nboxes, const int *mols, size_t mols_len, const double *masses, size_t masses_len, int *mol_ids_out, size_t mol_ids_cap, double *centres_out, size_t centres_len, size_t *n_mols)</td></tr>
+<tr class="memdesc:gaae87d8838530ea8f468766a6a84d3544"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assemble per-molecule centres and unwrap them across frames.  <br /></td></tr>
+<tr class="memitem:ga43b73c9466e811317f6dce78837cd550" id="r_ga43b73c9466e811317f6dce78837cd550"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga43b73c9466e811317f6dce78837cd550">seams_water_vectors</a> (const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int oxygen_type, int hydrogen_type, int *mol_ids, double *oh_mid, double *bisector, double *hh, double *hh_unit, size_t cap, size_t *n_waters)</td></tr>
+<tr class="memdesc:ga43b73c9466e811317f6dce78837cd550"><td class="mdescLeft">&#160;</td><td class="mdescRight">Water orientation vectors: O to H-midpoint and H-to-H under PBC.  <br /></td></tr>
+<tr class="memitem:ga5601e0fac275f7bc709b052dc24ff3df" id="r_ga5601e0fac275f7bc709b052dc24ff3df"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga5601e0fac275f7bc709b052dc24ff3df">seams_molecule_dipoles</a> (const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, const int *mols, size_t mols_len, const double *charges, size_t charges_len, int *mol_ids_out, double *dipoles, double *unit_vectors, size_t cap, size_t *n_mols)</td></tr>
+<tr class="memdesc:ga5601e0fac275f7bc709b052dc24ff3df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic per-molecule dipole or geometric orientation vectors.  <br /></td></tr>
+<tr class="memitem:ga630179c79fb72a8b4b76dfe4acf1d078" id="r_ga630179c79fb72a8b4b76dfe4acf1d078"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga630179c79fb72a8b4b76dfe4acf1d078">seams_orientation_order</a> (const double *vectors, size_t n_vectors, const double axis[3], double *cos_theta, double *p2, size_t cap, double *mean_p1, double *mean_p2)</td></tr>
+<tr class="memdesc:ga630179c79fb72a8b4b76dfe4acf1d078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Project molecular vectors onto an axis for P1 and P2 order parameters.  <br /></td></tr>
+<tr class="memitem:ga3dab150c4c96b85975df84e1707cc74d" id="r_ga3dab150c4c96b85975df84e1707cc74d"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga3dab150c4c96b85975df84e1707cc74d">seams_msd_create</a> (size_t natoms, size_t max_lag, size_t origin_stride, double dt, const double axis[3], <a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> **out)</td></tr>
+<tr class="memdesc:ga3dab150c4c96b85975df84e1707cc74d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a streaming multi-origin MSD accumulator with axial/lateral split.  <br /></td></tr>
+<tr class="memitem:ga06f1a57764f5ac14c663e095ce1ce3be" id="r_ga06f1a57764f5ac14c663e095ce1ce3be"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void&#160;</td><td class="memItemRight"><a class="el" href="#ga06f1a57764f5ac14c663e095ce1ce3be">seams_msd_destroy</a> (<a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *msd)</td></tr>
+<tr class="memdesc:ga06f1a57764f5ac14c663e095ce1ce3be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free an MSD accumulator.  <br /></td></tr>
+<tr class="memitem:ga5a3748c88317d4c73186ca455de5e867" id="r_ga5a3748c88317d4c73186ca455de5e867"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga5a3748c88317d4c73186ca455de5e867">seams_msd_push</a> (<a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *msd, const double *xyz, size_t natoms, const double *box9, size_t box_len)</td></tr>
+<tr class="memdesc:ga5a3748c88317d4c73186ca455de5e867"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push one frame into a streaming MSD accumulator.  <br /></td></tr>
+<tr class="memitem:gac24a302f5d80b545b230ce700830a70d" id="r_gac24a302f5d80b545b230ce700830a70d"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gac24a302f5d80b545b230ce700830a70d">seams_msd_curve</a> (const <a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *msd, double *lag_time, double *total, double *axial, double *lateral, size_t *n_origins, size_t cap, size_t *n_lags)</td></tr>
+<tr class="memdesc:gac24a302f5d80b545b230ce700830a70d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read accumulated lag times and total, axial, and lateral MSD curves.  <br /></td></tr>
+<tr class="memitem:ga151419523df9bcb0051ab38f4a92054d" id="r_ga151419523df9bcb0051ab38f4a92054d"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga151419523df9bcb0051ab38f4a92054d">seams_msd_fit</a> (const <a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *msd, double t_start, double t_end, double *d_total, double *d_axial, double *d_lateral, double *alpha)</td></tr>
+<tr class="memdesc:ga151419523df9bcb0051ab38f4a92054d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linear Einstein diffusion fit on an MSD accumulator.  <br /></td></tr>
+<tr class="memitem:ga89f9d9a503808ac10065d6988f45c3fc" id="r_ga89f9d9a503808ac10065d6988f45c3fc"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga89f9d9a503808ac10065d6988f45c3fc">seams_hbond_tcf_create</a> (size_t max_lag, size_t origin_stride, double dt, int directed, <a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> **out)</td></tr>
+<tr class="memdesc:ga89f9d9a503808ac10065d6988f45c3fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a streaming H-bond lifetime accumulator from per-frame edges.  <br /></td></tr>
+<tr class="memitem:ga1b8678fd50bdc1d4ff6ced6bd8caf6de" id="r_ga1b8678fd50bdc1d4ff6ced6bd8caf6de"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void&#160;</td><td class="memItemRight"><a class="el" href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">seams_hbond_tcf_destroy</a> (<a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *tcf)</td></tr>
+<tr class="memdesc:ga1b8678fd50bdc1d4ff6ced6bd8caf6de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free an H-bond lifetime accumulator.  <br /></td></tr>
+<tr class="memitem:gac2923387350d1bb0ccdb2316728183af" id="r_gac2923387350d1bb0ccdb2316728183af"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gac2923387350d1bb0ccdb2316728183af">seams_hbond_tcf_push</a> (<a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *tcf, const int *donors, const int *acceptors, size_t n_edges)</td></tr>
+<tr class="memdesc:gac2923387350d1bb0ccdb2316728183af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push one frame's hydrogen-bond edge set into the lifetime accumulator.  <br /></td></tr>
+<tr class="memitem:ga74f029e450e2e8df0fd20c333842a25b" id="r_ga74f029e450e2e8df0fd20c333842a25b"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga74f029e450e2e8df0fd20c333842a25b">seams_hbond_tcf_curve</a> (const <a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *tcf, double *lag_time, double *c_intermittent, double *s_continuous, size_t *n_origins, size_t cap, size_t *n_lags)</td></tr>
+<tr class="memdesc:ga74f029e450e2e8df0fd20c333842a25b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read intermittent C_HB(t) and continuous S_HB(t) lifetime curves.  <br /></td></tr>
+<tr class="memitem:ga9f7d03054da7f56f35465aa88901e050" id="r_ga9f7d03054da7f56f35465aa88901e050"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga9f7d03054da7f56f35465aa88901e050">seams_hbond_tcf_fit</a> (const <a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *tcf, double t_start, double t_end, double *tau_c_int, double *tau_c_exp, double *tau_s_int, double *tau_s_exp)</td></tr>
+<tr class="memdesc:ga9f7d03054da7f56f35465aa88901e050"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integrated and single-exponential lifetimes for C_HB and S_HB.  <br /></td></tr>
+<tr class="memitem:gaa886ba06b8e811d05d8e63804298578b" id="r_gaa886ba06b8e811d05d8e63804298578b"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaa886ba06b8e811d05d8e63804298578b">seams_reorient_create</a> (size_t n_vectors, size_t max_lag, size_t origin_stride, double dt, <a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> **out)</td></tr>
+<tr class="memdesc:gaa886ba06b8e811d05d8e63804298578b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a streaming orientational correlation accumulator for C1 and C2.  <br /></td></tr>
+<tr class="memitem:ga1aa8b2169eae4e9b76f367c90be4c88e" id="r_ga1aa8b2169eae4e9b76f367c90be4c88e"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void&#160;</td><td class="memItemRight"><a class="el" href="#ga1aa8b2169eae4e9b76f367c90be4c88e">seams_reorient_destroy</a> (<a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *reorient)</td></tr>
+<tr class="memdesc:ga1aa8b2169eae4e9b76f367c90be4c88e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a reorientation accumulator.  <br /></td></tr>
+<tr class="memitem:ga3aa930465b7964cc847d252027624d9f" id="r_ga3aa930465b7964cc847d252027624d9f"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a> (<a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *reorient, const double *vectors, size_t n_vectors)</td></tr>
+<tr class="memdesc:ga3aa930465b7964cc847d252027624d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push one frame of molecular 3-vectors into a reorientation accumulator.  <br /></td></tr>
+<tr class="memitem:ga031fc0986ed8eb8cc3ba7788d5636aad" id="r_ga031fc0986ed8eb8cc3ba7788d5636aad"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga031fc0986ed8eb8cc3ba7788d5636aad">seams_reorient_curve</a> (const <a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *reorient, double *lag_time, double *c1, double *c2, size_t *n_origins, size_t cap, size_t *n_lags)</td></tr>
+<tr class="memdesc:ga031fc0986ed8eb8cc3ba7788d5636aad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read accumulated C1(t) = &lt;P1(u(0).u(t))&gt; and C2(t) = &lt;P2(u(0).u(t))&gt;.  <br /></td></tr>
+<tr class="memitem:gab2c93609986098b1df15ebeab4efa973" id="r_gab2c93609986098b1df15ebeab4efa973"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gab2c93609986098b1df15ebeab4efa973">seams_reorient_fit</a> (const <a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *reorient, double t_start, double t_end, double *tau1_int, double *tau1_exp, double *tau2_int, double *tau2_exp)</td></tr>
+<tr class="memdesc:gab2c93609986098b1df15ebeab4efa973"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integrated and single-exponential reorientation times tau_1 and tau_2.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Periodic unwrapping, molecular dipoles, and streaming time correlations. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ga89f9d9a503808ac10065d6988f45c3fc" name="ga89f9d9a503808ac10065d6988f45c3fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga89f9d9a503808ac10065d6988f45c3fc">&#9670;&#160;</a></span>seams_hbond_tcf_create()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_hbond_tcf_create </td>
+          <td>(</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>max_lag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>origin_stride</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>directed</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> **</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a streaming H-bond lifetime accumulator from per-frame edges. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">max_lag</td><td>Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>. </td></tr>
+    <tr><td class="paramname">origin_stride</td><td>Frame stride between time origins, at least 1. </td></tr>
+    <tr><td class="paramname">dt</td><td>Positive finite frame spacing. </td></tr>
+    <tr><td class="paramname">directed</td><td>Non-zero treats (donor, acceptor) as directed; zero canonicalizes pairs. </td></tr>
+    <tr><td class="paramname">out</td><td>Receives the new handle; set to NULL on failure. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller frees *out with <a class="el" href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de" title="Free an H-bond lifetime accumulator.">seams_hbond_tcf_destroy()</a>. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Pure aside from handle registration and the thread-local error string. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *tcf = NULL;</div>
+<div class="line"><a class="code hl_function" href="#ga89f9d9a503808ac10065d6988f45c3fc">seams_hbond_tcf_create</a>(16, 1, 0.1, 1, &amp;tcf);</div>
+<div class="line"><a class="code hl_function" href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">seams_hbond_tcf_destroy</a>(tcf);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga1b8678fd50bdc1d4ff6ced6bd8caf6de"><div class="ttname"><a href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">seams_hbond_tcf_destroy</a></div><div class="ttdeci">SEAMS_API void seams_hbond_tcf_destroy(seams_hbond_tcf *tcf)</div><div class="ttdoc">Free an H-bond lifetime accumulator.</div></div>
+<div class="ttc" id="agroup__capi__traj_html_ga89f9d9a503808ac10065d6988f45c3fc"><div class="ttname"><a href="#ga89f9d9a503808ac10065d6988f45c3fc">seams_hbond_tcf_create</a></div><div class="ttdeci">SEAMS_API seams_status seams_hbond_tcf_create(size_t max_lag, size_t origin_stride, double dt, int directed, seams_hbond_tcf **out)</div><div class="ttdoc">Create a streaming H-bond lifetime accumulator from per-frame edges.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ga31249294b7b20c8ec6d477cdf82338fa"><div class="ttname"><a href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a></div><div class="ttdeci">struct seams_hbond_tcf seams_hbond_tcf</div><div class="ttdoc">Streaming hydrogen-bond lifetime accumulator.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00262">seams.h:262</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga74f029e450e2e8df0fd20c333842a25b" name="ga74f029e450e2e8df0fd20c333842a25b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga74f029e450e2e8df0fd20c333842a25b">&#9670;&#160;</a></span>seams_hbond_tcf_curve()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_hbond_tcf_curve </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *</td>          <td class="paramname"><span class="paramname"><em>tcf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>lag_time</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>c_intermittent</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>s_continuous</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_origins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_lags</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Read intermittent C_HB(t) and continuous S_HB(t) lifetime curves. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tcf</td><td>H-bond TCF handle. </td></tr>
+    <tr><td class="paramname">lag_time</td><td>Receives lag times k * dt, or NULL. </td></tr>
+    <tr><td class="paramname">c_intermittent</td><td>Receives intermittent autocorrelation C_HB, or NULL. </td></tr>
+    <tr><td class="paramname">s_continuous</td><td>Receives unbroken survival probability S_HB, or NULL. </td></tr>
+    <tr><td class="paramname">n_origins</td><td>Receives origin counts per lag, or NULL. </td></tr>
+    <tr><td class="paramname">cap</td><td>Capacity of non-NULL output arrays. </td></tr>
+    <tr><td class="paramname">n_lags</td><td>Receives the available lag count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all output buffers. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on tcf. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> don[1] = {1}, acc[1] = {2};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *tcf = NULL;</div>
+<div class="line"><span class="keywordtype">size_t</span> nlags = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga89f9d9a503808ac10065d6988f45c3fc">seams_hbond_tcf_create</a>(4, 1, 1.0, 1, &amp;tcf);</div>
+<div class="line"><a class="code hl_function" href="#gac2923387350d1bb0ccdb2316728183af">seams_hbond_tcf_push</a>(tcf, don, acc, 1);</div>
+<div class="line"><a class="code hl_function" href="#gac2923387350d1bb0ccdb2316728183af">seams_hbond_tcf_push</a>(tcf, don, acc, 1);</div>
+<div class="line"><a class="code hl_function" href="#ga74f029e450e2e8df0fd20c333842a25b">seams_hbond_tcf_curve</a>(tcf, NULL, NULL, NULL, NULL, 0, &amp;nlags);</div>
+<div class="line"><a class="code hl_function" href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">seams_hbond_tcf_destroy</a>(tcf);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga74f029e450e2e8df0fd20c333842a25b"><div class="ttname"><a href="#ga74f029e450e2e8df0fd20c333842a25b">seams_hbond_tcf_curve</a></div><div class="ttdeci">SEAMS_API seams_status seams_hbond_tcf_curve(const seams_hbond_tcf *tcf, double *lag_time, double *c_intermittent, double *s_continuous, size_t *n_origins, size_t cap, size_t *n_lags)</div><div class="ttdoc">Read intermittent C_HB(t) and continuous S_HB(t) lifetime curves.</div></div>
+<div class="ttc" id="agroup__capi__traj_html_gac2923387350d1bb0ccdb2316728183af"><div class="ttname"><a href="#gac2923387350d1bb0ccdb2316728183af">seams_hbond_tcf_push</a></div><div class="ttdeci">SEAMS_API seams_status seams_hbond_tcf_push(seams_hbond_tcf *tcf, const int *donors, const int *acceptors, size_t n_edges)</div><div class="ttdoc">Push one frame&#39;s hydrogen-bond edge set into the lifetime accumulator.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga1b8678fd50bdc1d4ff6ced6bd8caf6de" name="ga1b8678fd50bdc1d4ff6ced6bd8caf6de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">&#9670;&#160;</a></span>seams_hbond_tcf_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void seams_hbond_tcf_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *</td>          <td class="paramname"><span class="paramname"><em>tcf</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free an H-bond lifetime accumulator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tcf</td><td>Handle from <a class="el" href="#ga89f9d9a503808ac10065d6988f45c3fc" title="Create a streaming H-bond lifetime accumulator from per-frame edges.">seams_hbond_tcf_create()</a>, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Ownership</dt><dd>Releases the handle and its active origin sets. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of tcf. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">seams_hbond_tcf_destroy</a>(NULL);</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga9f7d03054da7f56f35465aa88901e050" name="ga9f7d03054da7f56f35465aa88901e050"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9f7d03054da7f56f35465aa88901e050">&#9670;&#160;</a></span>seams_hbond_tcf_fit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_hbond_tcf_fit </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *</td>          <td class="paramname"><span class="paramname"><em>tcf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>t_start</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>t_end</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>tau_c_int</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>tau_c_exp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>tau_s_int</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>tau_s_exp</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Integrated and single-exponential lifetimes for C_HB and S_HB. </p>
+<p>Pass t_start = 0 and t_end = 0 to fit across the full positive decay range.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tcf</td><td>H-bond TCF handle with at least 2 lag points. </td></tr>
+    <tr><td class="paramname">t_start</td><td>Fit window start time, &gt;= 0. </td></tr>
+    <tr><td class="paramname">t_end</td><td>Fit window end time, &gt; t_start (or both 0 for full range). </td></tr>
+    <tr><td class="paramname">tau_c_int</td><td>Receives trapezoidal integral of C_HB, or NULL. </td></tr>
+    <tr><td class="paramname">tau_c_exp</td><td>Receives exponential decay time of C_HB, or NULL. </td></tr>
+    <tr><td class="paramname">tau_s_int</td><td>Receives trapezoidal integral of S_HB, or NULL. </td></tr>
+    <tr><td class="paramname">tau_s_exp</td><td>Receives exponential decay time of S_HB, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>Writes scalar outputs owned by the caller. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on tcf. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> don[2] = {1, 2}, acc[2] = {3, 4};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *tcf = NULL;</div>
+<div class="line"><span class="keywordtype">double</span> tc = 0, ts = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga89f9d9a503808ac10065d6988f45c3fc">seams_hbond_tcf_create</a>(4, 1, 1.0, 1, &amp;tcf);</div>
+<div class="line"><a class="code hl_function" href="#gac2923387350d1bb0ccdb2316728183af">seams_hbond_tcf_push</a>(tcf, don, acc, 2);</div>
+<div class="line"><a class="code hl_function" href="#gac2923387350d1bb0ccdb2316728183af">seams_hbond_tcf_push</a>(tcf, don, acc, 1);</div>
+<div class="line"><a class="code hl_function" href="#ga9f7d03054da7f56f35465aa88901e050">seams_hbond_tcf_fit</a>(tcf, 0.0, 0.0, &amp;tc, NULL, &amp;ts, NULL);</div>
+<div class="line"><a class="code hl_function" href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">seams_hbond_tcf_destroy</a>(tcf);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga9f7d03054da7f56f35465aa88901e050"><div class="ttname"><a href="#ga9f7d03054da7f56f35465aa88901e050">seams_hbond_tcf_fit</a></div><div class="ttdeci">SEAMS_API seams_status seams_hbond_tcf_fit(const seams_hbond_tcf *tcf, double t_start, double t_end, double *tau_c_int, double *tau_c_exp, double *tau_s_int, double *tau_s_exp)</div><div class="ttdoc">Integrated and single-exponential lifetimes for C_HB and S_HB.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gac2923387350d1bb0ccdb2316728183af" name="gac2923387350d1bb0ccdb2316728183af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac2923387350d1bb0ccdb2316728183af">&#9670;&#160;</a></span>seams_hbond_tcf_push()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_hbond_tcf_push </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *</td>          <td class="paramname"><span class="paramname"><em>tcf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>donors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>acceptors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_edges</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Push one frame's hydrogen-bond edge set into the lifetime accumulator. </p>
+<p>Duplicate edges within the same frame are deduplicated before updating intermittent C_HB(t) and continuous survival S_HB(t).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tcf</td><td>H-bond TCF handle. </td></tr>
+    <tr><td class="paramname">donors</td><td>Donor ids of length n_edges (may be NULL when n_edges is 0). </td></tr>
+    <tr><td class="paramname">acceptors</td><td>Acceptor ids of length n_edges (may be NULL when n_edges is 0). </td></tr>
+    <tr><td class="paramname">n_edges</td><td>Number of edges in this frame. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The library copies edge ids and keeps no caller pointer. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of tcf. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> don[1] = {1}, acc[1] = {2};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga31249294b7b20c8ec6d477cdf82338fa">seams_hbond_tcf</a> *tcf = NULL;</div>
+<div class="line"><a class="code hl_function" href="#ga89f9d9a503808ac10065d6988f45c3fc">seams_hbond_tcf_create</a>(8, 1, 1.0, 1, &amp;tcf);</div>
+<div class="line"><a class="code hl_function" href="#gac2923387350d1bb0ccdb2316728183af">seams_hbond_tcf_push</a>(tcf, don, acc, 1);</div>
+<div class="line"><a class="code hl_function" href="#ga1b8678fd50bdc1d4ff6ced6bd8caf6de">seams_hbond_tcf_destroy</a>(tcf);</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga49779975dc3d1bbd2629a5cc303cf372" name="ga49779975dc3d1bbd2629a5cc303cf372"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga49779975dc3d1bbd2629a5cc303cf372">&#9670;&#160;</a></span>seams_molecule_centres()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_molecule_centres </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>mols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>mols_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>masses</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>masses_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>mol_ids_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>centres_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_mols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Intact periodic centres of mass or geometry for molecules in a frame. </p>
+<p>Atoms sharing a molecule id are assembled onto the first atom of that molecule through the minimum image of the stored orthorhombic or triclinic cell before averaging. Pass NULL for both mol_ids_out and centres_out to query the molecule count in n_mols.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">mols</td><td>Optional molecule id per atom, or NULL to use stored molecule ids. </td></tr>
+    <tr><td class="paramname">mols_len</td><td>Length of mols when mols is non-NULL; must equal n, or 0 when NULL. </td></tr>
+    <tr><td class="paramname">masses</td><td>Optional positive weight per atom, or NULL for equal weights. </td></tr>
+    <tr><td class="paramname">masses_len</td><td>Length of masses when masses is non-NULL; must equal n, or 0 when NULL. </td></tr>
+    <tr><td class="paramname">mol_ids_out</td><td>Receives one molecule id per molecule, or NULL. </td></tr>
+    <tr><td class="paramname">centres_out</td><td>Receives 3 * n_mols coordinates in Angstrom, or NULL. </td></tr>
+    <tr><td class="paramname">cap</td><td>Molecule capacity of non-NULL output buffers. </td></tr>
+    <tr><td class="paramname">n_mols</td><td>Receives the molecule count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all buffers. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> nm = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga49779975dc3d1bbd2629a5cc303cf372">seams_molecule_centres</a>(sys, NULL, 0, NULL, 0, NULL, NULL, 0, &amp;nm);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga49779975dc3d1bbd2629a5cc303cf372"><div class="ttname"><a href="#ga49779975dc3d1bbd2629a5cc303cf372">seams_molecule_centres</a></div><div class="ttdeci">SEAMS_API seams_status seams_molecule_centres(const seams_system *sys, const int *mols, size_t mols_len, const double *masses, size_t masses_len, int *mol_ids_out, double *centres_out, size_t cap, size_t *n_mols)</div><div class="ttdoc">Intact periodic centres of mass or geometry for molecules in a frame.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga5601e0fac275f7bc709b052dc24ff3df" name="ga5601e0fac275f7bc709b052dc24ff3df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5601e0fac275f7bc709b052dc24ff3df">&#9670;&#160;</a></span>seams_molecule_dipoles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_molecule_dipoles </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>mols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>mols_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>charges</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>charges_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>mol_ids_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>dipoles</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>unit_vectors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_mols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Generic per-molecule dipole or geometric orientation vectors. </p>
+<p>With charges, computes sum_a q_a (r_a - r_centre) in elementary-charge Angstrom on each PBC-assembled molecule. Without charges, computes the mean minimum-image vector from each molecule's first atom to its remaining atoms.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">mols</td><td>Optional molecule id per atom, or NULL to use stored molecule ids. </td></tr>
+    <tr><td class="paramname">mols_len</td><td>Length of mols when non-NULL, or 0 when NULL. </td></tr>
+    <tr><td class="paramname">charges</td><td>Optional partial charge per atom, or NULL for geometric mode. </td></tr>
+    <tr><td class="paramname">charges_len</td><td>Length of charges when non-NULL, or 0 when NULL. </td></tr>
+    <tr><td class="paramname">mol_ids_out</td><td>Receives molecule ids, length cap, or NULL. </td></tr>
+    <tr><td class="paramname">dipoles</td><td>Receives 3 * cap raw dipole vectors, or NULL. </td></tr>
+    <tr><td class="paramname">unit_vectors</td><td>Receives 3 * cap normalized orientation vectors, or NULL. </td></tr>
+    <tr><td class="paramname">cap</td><td>Molecule capacity of non-NULL output arrays. </td></tr>
+    <tr><td class="paramname">n_mols</td><td>Receives the molecule count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all buffers. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> nm = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga5601e0fac275f7bc709b052dc24ff3df">seams_molecule_dipoles</a>(sys, NULL, 0, NULL, 0, NULL, NULL, NULL, 0, &amp;nm);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga5601e0fac275f7bc709b052dc24ff3df"><div class="ttname"><a href="#ga5601e0fac275f7bc709b052dc24ff3df">seams_molecule_dipoles</a></div><div class="ttdeci">SEAMS_API seams_status seams_molecule_dipoles(const seams_system *sys, const int *mols, size_t mols_len, const double *charges, size_t charges_len, int *mol_ids_out, double *dipoles, double *unit_vectors, size_t cap, size_t *n_mols)</div><div class="ttdoc">Generic per-molecule dipole or geometric orientation vectors.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga5e1d54e7d0723366dbad199abc80b5a4" name="ga5e1d54e7d0723366dbad199abc80b5a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5e1d54e7d0723366dbad199abc80b5a4">&#9670;&#160;</a></span>seams_mols()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_mols </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>mols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy the stored molecule ids out. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">mols</td><td>Caller buffer for n ints, in stored order. </td></tr>
+    <tr><td class="paramname">len</td><td>Length of mols. Must be at least n. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a> when no frame is stored; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a> for a short buffer. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns mols. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">int</span> mols[8] = {0};</div>
+<div class="line"><a class="code hl_function" href="#ga5e1d54e7d0723366dbad199abc80b5a4">seams_mols</a>(sys, mols, 8);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga5e1d54e7d0723366dbad199abc80b5a4"><div class="ttname"><a href="#ga5e1d54e7d0723366dbad199abc80b5a4">seams_mols</a></div><div class="ttdeci">SEAMS_API seams_status seams_mols(const seams_system *sys, int *mols, size_t len)</div><div class="ttdoc">Copy the stored molecule ids out.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga3dab150c4c96b85975df84e1707cc74d" name="ga3dab150c4c96b85975df84e1707cc74d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3dab150c4c96b85975df84e1707cc74d">&#9670;&#160;</a></span>seams_msd_create()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_msd_create </td>
+          <td>(</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>natoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>max_lag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>origin_stride</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> **</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a streaming multi-origin MSD accumulator with axial/lateral split. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">natoms</td><td>Particle or molecule count per frame, at least 1. Above PTRDIFF_MAX / (3 * sizeof(double)) the coordinates cannot be allocated, which is <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>. </td></tr>
+    <tr><td class="paramname">max_lag</td><td>Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>. </td></tr>
+    <tr><td class="paramname">origin_stride</td><td>Frame stride between time origins, at least 1. </td></tr>
+    <tr><td class="paramname">dt</td><td>Positive finite frame spacing in physical time units. </td></tr>
+    <tr><td class="paramname">axis</td><td>Non-zero 3-vector defining the axial direction. </td></tr>
+    <tr><td class="paramname">out</td><td>Receives the new handle; set to NULL on failure. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller frees *out with <a class="el" href="#ga06f1a57764f5ac14c663e095ce1ce3be" title="Free an MSD accumulator.">seams_msd_destroy()</a>. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Pure aside from handle registration and the thread-local error string. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> axis[3] = {0, 0, 1};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *msd = NULL;</div>
+<div class="line"><a class="code hl_function" href="#ga3dab150c4c96b85975df84e1707cc74d">seams_msd_create</a>(4, 16, 1, 0.1, axis, &amp;msd);</div>
+<div class="line"><a class="code hl_function" href="#ga06f1a57764f5ac14c663e095ce1ce3be">seams_msd_destroy</a>(msd);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga06f1a57764f5ac14c663e095ce1ce3be"><div class="ttname"><a href="#ga06f1a57764f5ac14c663e095ce1ce3be">seams_msd_destroy</a></div><div class="ttdeci">SEAMS_API void seams_msd_destroy(seams_msd *msd)</div><div class="ttdoc">Free an MSD accumulator.</div></div>
+<div class="ttc" id="agroup__capi__traj_html_ga3dab150c4c96b85975df84e1707cc74d"><div class="ttname"><a href="#ga3dab150c4c96b85975df84e1707cc74d">seams_msd_create</a></div><div class="ttdeci">SEAMS_API seams_status seams_msd_create(size_t natoms, size_t max_lag, size_t origin_stride, double dt, const double axis[3], seams_msd **out)</div><div class="ttdoc">Create a streaming multi-origin MSD accumulator with axial/lateral split.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ga2e469103dbde4499ca6e150be315e945"><div class="ttname"><a href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a></div><div class="ttdeci">struct seams_msd seams_msd</div><div class="ttdoc">Streaming mean-squared displacement accumulator.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00260">seams.h:260</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gac24a302f5d80b545b230ce700830a70d" name="gac24a302f5d80b545b230ce700830a70d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac24a302f5d80b545b230ce700830a70d">&#9670;&#160;</a></span>seams_msd_curve()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_msd_curve </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *</td>          <td class="paramname"><span class="paramname"><em>msd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>lag_time</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>total</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>axial</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>lateral</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_origins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_lags</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Read accumulated lag times and total, axial, and lateral MSD curves. </p>
+<p>Any of lag_time, total, axial, lateral, and n_origins may be NULL to skip that column; pass all five as NULL to query n_lags.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">msd</td><td>MSD handle. </td></tr>
+    <tr><td class="paramname">lag_time</td><td>Receives lag times k * dt, or NULL. </td></tr>
+    <tr><td class="paramname">total</td><td>Receives 3D total MSD, or NULL. </td></tr>
+    <tr><td class="paramname">axial</td><td>Receives 1D axial MSD along axis, or NULL. </td></tr>
+    <tr><td class="paramname">lateral</td><td>Receives 2D lateral MSD perpendicular to axis, or NULL. </td></tr>
+    <tr><td class="paramname">n_origins</td><td>Receives time-origin counts per lag, or NULL. </td></tr>
+    <tr><td class="paramname">cap</td><td>Capacity of non-NULL output arrays. </td></tr>
+    <tr><td class="paramname">n_lags</td><td>Receives the available lag count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all output buffers. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on msd. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> axis[3] = {0, 0, 1};</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> f0[3] = {0, 0, 0}, f1[3] = {0, 0, 1};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *msd = NULL;</div>
+<div class="line"><span class="keywordtype">size_t</span> nlags = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga3dab150c4c96b85975df84e1707cc74d">seams_msd_create</a>(1, 4, 1, 1.0, axis, &amp;msd);</div>
+<div class="line"><a class="code hl_function" href="#ga5a3748c88317d4c73186ca455de5e867">seams_msd_push</a>(msd, f0, 1, NULL, 0);</div>
+<div class="line"><a class="code hl_function" href="#ga5a3748c88317d4c73186ca455de5e867">seams_msd_push</a>(msd, f1, 1, NULL, 0);</div>
+<div class="line"><a class="code hl_function" href="#gac24a302f5d80b545b230ce700830a70d">seams_msd_curve</a>(msd, NULL, NULL, NULL, NULL, NULL, 0, &amp;nlags);</div>
+<div class="line"><a class="code hl_function" href="#ga06f1a57764f5ac14c663e095ce1ce3be">seams_msd_destroy</a>(msd);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga5a3748c88317d4c73186ca455de5e867"><div class="ttname"><a href="#ga5a3748c88317d4c73186ca455de5e867">seams_msd_push</a></div><div class="ttdeci">SEAMS_API seams_status seams_msd_push(seams_msd *msd, const double *xyz, size_t natoms, const double *box9, size_t box_len)</div><div class="ttdoc">Push one frame into a streaming MSD accumulator.</div></div>
+<div class="ttc" id="agroup__capi__traj_html_gac24a302f5d80b545b230ce700830a70d"><div class="ttname"><a href="#gac24a302f5d80b545b230ce700830a70d">seams_msd_curve</a></div><div class="ttdeci">SEAMS_API seams_status seams_msd_curve(const seams_msd *msd, double *lag_time, double *total, double *axial, double *lateral, size_t *n_origins, size_t cap, size_t *n_lags)</div><div class="ttdoc">Read accumulated lag times and total, axial, and lateral MSD curves.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga06f1a57764f5ac14c663e095ce1ce3be" name="ga06f1a57764f5ac14c663e095ce1ce3be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga06f1a57764f5ac14c663e095ce1ce3be">&#9670;&#160;</a></span>seams_msd_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void seams_msd_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *</td>          <td class="paramname"><span class="paramname"><em>msd</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free an MSD accumulator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">msd</td><td>Handle from <a class="el" href="#ga3dab150c4c96b85975df84e1707cc74d" title="Create a streaming multi-origin MSD accumulator with axial/lateral split.">seams_msd_create()</a>, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Ownership</dt><dd>Releases the handle and its ring buffer. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of msd. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#ga06f1a57764f5ac14c663e095ce1ce3be">seams_msd_destroy</a>(NULL);</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga151419523df9bcb0051ab38f4a92054d" name="ga151419523df9bcb0051ab38f4a92054d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga151419523df9bcb0051ab38f4a92054d">&#9670;&#160;</a></span>seams_msd_fit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_msd_fit </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *</td>          <td class="paramname"><span class="paramname"><em>msd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>t_start</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>t_end</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>d_total</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>d_axial</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>d_lateral</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>alpha</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Linear Einstein diffusion fit on an MSD accumulator. </p>
+<p>Fits MSD_total = 6 D_total t + c, MSD_axial = 2 D_axial t + c, and MSD_lateral = 4 D_lateral t + c over [t_start, t_end]. Pass t_start = 0 and t_end = 0 for the default [0.1 t_max, 0.5 t_max] window.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">msd</td><td>MSD handle with at least 2 lag points. </td></tr>
+    <tr><td class="paramname">t_start</td><td>Window start time, &gt;= 0. </td></tr>
+    <tr><td class="paramname">t_end</td><td>Window end time, &gt; t_start (or both 0 for default window). </td></tr>
+    <tr><td class="paramname">d_total</td><td>Receives 3D diffusion coefficient, or NULL. </td></tr>
+    <tr><td class="paramname">d_axial</td><td>Receives 1D axial diffusion coefficient, or NULL. </td></tr>
+    <tr><td class="paramname">d_lateral</td><td>Receives 2D lateral diffusion coefficient, or NULL. </td></tr>
+    <tr><td class="paramname">alpha</td><td>Receives the log-log anomalous exponent, or NULL. Receives NaN when the window holds fewer than two lags with t &gt; 0 and MSD_total &gt; 1e-20, so the log-log fit was skipped; test it with isnan(). The diffusion coefficients are still the linear fit. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a> when the linear fit succeeded, including a skipped log-log fit (alpha NaN); <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>Writes scalar outputs owned by the caller. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on msd. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> axis[3] = {0, 0, 1};</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> f0[3] = {0, 0, 0}, f1[3] = {0, 0, 1}, f2[3] = {0, 0, 2};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *msd = NULL;</div>
+<div class="line"><span class="keywordtype">double</span> dtot = 0, dax = 0, dlat = 0, alpha = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga3dab150c4c96b85975df84e1707cc74d">seams_msd_create</a>(1, 4, 1, 1.0, axis, &amp;msd);</div>
+<div class="line"><a class="code hl_function" href="#ga5a3748c88317d4c73186ca455de5e867">seams_msd_push</a>(msd, f0, 1, NULL, 0);</div>
+<div class="line"><a class="code hl_function" href="#ga5a3748c88317d4c73186ca455de5e867">seams_msd_push</a>(msd, f1, 1, NULL, 0);</div>
+<div class="line"><a class="code hl_function" href="#ga5a3748c88317d4c73186ca455de5e867">seams_msd_push</a>(msd, f2, 1, NULL, 0);</div>
+<div class="line"><a class="code hl_function" href="#ga151419523df9bcb0051ab38f4a92054d">seams_msd_fit</a>(msd, 0.0, 0.0, &amp;dtot, &amp;dax, &amp;dlat, &amp;alpha);</div>
+<div class="line"><a class="code hl_function" href="#ga06f1a57764f5ac14c663e095ce1ce3be">seams_msd_destroy</a>(msd);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga151419523df9bcb0051ab38f4a92054d"><div class="ttname"><a href="#ga151419523df9bcb0051ab38f4a92054d">seams_msd_fit</a></div><div class="ttdeci">SEAMS_API seams_status seams_msd_fit(const seams_msd *msd, double t_start, double t_end, double *d_total, double *d_axial, double *d_lateral, double *alpha)</div><div class="ttdoc">Linear Einstein diffusion fit on an MSD accumulator.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga5a3748c88317d4c73186ca455de5e867" name="ga5a3748c88317d4c73186ca455de5e867"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5a3748c88317d4c73186ca455de5e867">&#9670;&#160;</a></span>seams_msd_push()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_msd_push </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *</td>          <td class="paramname"><span class="paramname"><em>msd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>natoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>box_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Push one frame into a streaming MSD accumulator. </p>
+<p>Pass box9 as NULL (with box_len 0) when xyz is already unwrapped, or pass a nine-number cell (with box_len 9) to unwrap incrementally across frames.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">msd</td><td>MSD handle. </td></tr>
+    <tr><td class="paramname">xyz</td><td>Coordinates of 3 * natoms doubles in Angstrom. </td></tr>
+    <tr><td class="paramname">natoms</td><td>Particle count; must match the count passed to <a class="el" href="#ga3dab150c4c96b85975df84e1707cc74d" title="Create a streaming multi-origin MSD accumulator with axial/lateral split.">seams_msd_create()</a>. </td></tr>
+    <tr><td class="paramname">box9</td><td>Optional 9-number periodic cell, or NULL for unwrapped input. </td></tr>
+    <tr><td class="paramname">box_len</td><td>Must be 9 when box9 is non-NULL, or 0 when box9 is NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The library copies coordinates into active origin slots as needed. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of msd. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> axis[3] = {0, 0, 1};</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> f0[3] = {0, 0, 0};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga2e469103dbde4499ca6e150be315e945">seams_msd</a> *msd = NULL;</div>
+<div class="line"><a class="code hl_function" href="#ga3dab150c4c96b85975df84e1707cc74d">seams_msd_create</a>(1, 8, 1, 1.0, axis, &amp;msd);</div>
+<div class="line"><a class="code hl_function" href="#ga5a3748c88317d4c73186ca455de5e867">seams_msd_push</a>(msd, f0, 1, NULL, 0);</div>
+<div class="line"><a class="code hl_function" href="#ga06f1a57764f5ac14c663e095ce1ce3be">seams_msd_destroy</a>(msd);</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga630179c79fb72a8b4b76dfe4acf1d078" name="ga630179c79fb72a8b4b76dfe4acf1d078"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga630179c79fb72a8b4b76dfe4acf1d078">&#9670;&#160;</a></span>seams_orientation_order()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_orientation_order </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>vectors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_vectors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>cos_theta</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>p2</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>mean_p1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>mean_p2</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Project molecular vectors onto an axis for P1 and P2 order parameters. </p>
+<p>Computes cos_theta = u . e and P2 = 0.5 * (3 cos_theta^2 - 1) for each non-zero vector, where e is the normalized axis. Zero-length vectors receive NaN in per-molecule outputs and are omitted from mean_p1 and mean_p2.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vectors</td><td>Input 3-vectors, 3 * n_vectors doubles (or NULL when n_vectors is 0). </td></tr>
+    <tr><td class="paramname">n_vectors</td><td>Number of 3-vectors. </td></tr>
+    <tr><td class="paramname">axis</td><td>Non-zero reference axis of 3 finite doubles. </td></tr>
+    <tr><td class="paramname">cos_theta</td><td>Optional output buffer of cap doubles for cos(theta), or NULL. </td></tr>
+    <tr><td class="paramname">p2</td><td>Optional output buffer of cap doubles for P2(cos(theta)), or NULL. </td></tr>
+    <tr><td class="paramname">cap</td><td>Capacity of non-NULL per-vector buffers; must be at least n_vectors. </td></tr>
+    <tr><td class="paramname">mean_p1</td><td>Receives ensemble mean of cos(theta), or NULL. </td></tr>
+    <tr><td class="paramname">mean_p2</td><td>Receives ensemble mean of P2(cos(theta)), or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all arrays. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Pure aside from the thread-local error string. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> vecs[6] = {0, 0, 1, 0, 0, 2};</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> axis[3] = {0, 0, 1};</div>
+<div class="line"><span class="keywordtype">double</span> p1 = 0, p2 = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga630179c79fb72a8b4b76dfe4acf1d078">seams_orientation_order</a>(vecs, 2, axis, NULL, NULL, 0, &amp;p1, &amp;p2);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga630179c79fb72a8b4b76dfe4acf1d078"><div class="ttname"><a href="#ga630179c79fb72a8b4b76dfe4acf1d078">seams_orientation_order</a></div><div class="ttdeci">SEAMS_API seams_status seams_orientation_order(const double *vectors, size_t n_vectors, const double axis[3], double *cos_theta, double *p2, size_t cap, double *mean_p1, double *mean_p2)</div><div class="ttdoc">Project molecular vectors onto an axis for P1 and P2 order parameters.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaa886ba06b8e811d05d8e63804298578b" name="gaa886ba06b8e811d05d8e63804298578b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa886ba06b8e811d05d8e63804298578b">&#9670;&#160;</a></span>seams_reorient_create()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_reorient_create </td>
+          <td>(</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_vectors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>max_lag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>origin_stride</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> **</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a streaming orientational correlation accumulator for C1 and C2. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n_vectors</td><td>Number of molecular vectors per frame, at least 1. Above PTRDIFF_MAX / (3 * sizeof(double)) the vectors cannot be allocated, which is <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>. </td></tr>
+    <tr><td class="paramname">max_lag</td><td>Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>. </td></tr>
+    <tr><td class="paramname">origin_stride</td><td>Frame stride between time origins, at least 1. </td></tr>
+    <tr><td class="paramname">dt</td><td>Positive finite frame spacing. </td></tr>
+    <tr><td class="paramname">out</td><td>Receives the new handle; set to NULL on failure. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller frees *out with <a class="el" href="#ga1aa8b2169eae4e9b76f367c90be4c88e" title="Free a reorientation accumulator.">seams_reorient_destroy()</a>. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Pure aside from handle registration and the thread-local error string. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *rot = NULL;</div>
+<div class="line"><a class="code hl_function" href="#gaa886ba06b8e811d05d8e63804298578b">seams_reorient_create</a>(4, 16, 1, 0.1, &amp;rot);</div>
+<div class="line"><a class="code hl_function" href="#ga1aa8b2169eae4e9b76f367c90be4c88e">seams_reorient_destroy</a>(rot);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga1aa8b2169eae4e9b76f367c90be4c88e"><div class="ttname"><a href="#ga1aa8b2169eae4e9b76f367c90be4c88e">seams_reorient_destroy</a></div><div class="ttdeci">SEAMS_API void seams_reorient_destroy(seams_reorient *reorient)</div><div class="ttdoc">Free a reorientation accumulator.</div></div>
+<div class="ttc" id="agroup__capi__traj_html_gaa886ba06b8e811d05d8e63804298578b"><div class="ttname"><a href="#gaa886ba06b8e811d05d8e63804298578b">seams_reorient_create</a></div><div class="ttdeci">SEAMS_API seams_status seams_reorient_create(size_t n_vectors, size_t max_lag, size_t origin_stride, double dt, seams_reorient **out)</div><div class="ttdoc">Create a streaming orientational correlation accumulator for C1 and C2.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ga7fbd2129f52180f3b1c206e2e1686e20"><div class="ttname"><a href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a></div><div class="ttdeci">struct seams_reorient seams_reorient</div><div class="ttdoc">Streaming orientational time-correlation accumulator.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00264">seams.h:264</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga031fc0986ed8eb8cc3ba7788d5636aad" name="ga031fc0986ed8eb8cc3ba7788d5636aad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga031fc0986ed8eb8cc3ba7788d5636aad">&#9670;&#160;</a></span>seams_reorient_curve()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_reorient_curve </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *</td>          <td class="paramname"><span class="paramname"><em>reorient</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>lag_time</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>c1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>c2</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_origins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_lags</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Read accumulated C1(t) = &lt;P1(u(0).u(t))&gt; and C2(t) = &lt;P2(u(0).u(t))&gt;. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reorient</td><td>Reorientation handle. </td></tr>
+    <tr><td class="paramname">lag_time</td><td>Receives lag times k * dt, or NULL. </td></tr>
+    <tr><td class="paramname">c1</td><td>Receives first Legendre correlation C1, or NULL. </td></tr>
+    <tr><td class="paramname">c2</td><td>Receives second Legendre correlation C2, or NULL. </td></tr>
+    <tr><td class="paramname">n_origins</td><td>Receives origin counts per lag, or NULL. </td></tr>
+    <tr><td class="paramname">cap</td><td>Capacity of non-NULL output arrays. </td></tr>
+    <tr><td class="paramname">n_lags</td><td>Receives the available lag count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all output buffers. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on reorient. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> v0[3] = {0, 0, 1}, v1[3] = {0, 1, 0};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *rot = NULL;</div>
+<div class="line"><span class="keywordtype">size_t</span> nlags = 0;</div>
+<div class="line"><a class="code hl_function" href="#gaa886ba06b8e811d05d8e63804298578b">seams_reorient_create</a>(1, 4, 1, 1.0, &amp;rot);</div>
+<div class="line"><a class="code hl_function" href="#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a>(rot, v0, 1);</div>
+<div class="line"><a class="code hl_function" href="#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a>(rot, v1, 1);</div>
+<div class="line"><a class="code hl_function" href="#ga031fc0986ed8eb8cc3ba7788d5636aad">seams_reorient_curve</a>(rot, NULL, NULL, NULL, NULL, 0, &amp;nlags);</div>
+<div class="line"><a class="code hl_function" href="#ga1aa8b2169eae4e9b76f367c90be4c88e">seams_reorient_destroy</a>(rot);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga031fc0986ed8eb8cc3ba7788d5636aad"><div class="ttname"><a href="#ga031fc0986ed8eb8cc3ba7788d5636aad">seams_reorient_curve</a></div><div class="ttdeci">SEAMS_API seams_status seams_reorient_curve(const seams_reorient *reorient, double *lag_time, double *c1, double *c2, size_t *n_origins, size_t cap, size_t *n_lags)</div><div class="ttdoc">Read accumulated C1(t) = &lt;P1(u(0).u(t))&gt; and C2(t) = &lt;P2(u(0).u(t))&gt;.</div></div>
+<div class="ttc" id="agroup__capi__traj_html_ga3aa930465b7964cc847d252027624d9f"><div class="ttname"><a href="#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a></div><div class="ttdeci">SEAMS_API seams_status seams_reorient_push(seams_reorient *reorient, const double *vectors, size_t n_vectors)</div><div class="ttdoc">Push one frame of molecular 3-vectors into a reorientation accumulator.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga1aa8b2169eae4e9b76f367c90be4c88e" name="ga1aa8b2169eae4e9b76f367c90be4c88e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1aa8b2169eae4e9b76f367c90be4c88e">&#9670;&#160;</a></span>seams_reorient_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void seams_reorient_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *</td>          <td class="paramname"><span class="paramname"><em>reorient</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free a reorientation accumulator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reorient</td><td>Handle from <a class="el" href="#gaa886ba06b8e811d05d8e63804298578b" title="Create a streaming orientational correlation accumulator for C1 and C2.">seams_reorient_create()</a>, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Ownership</dt><dd>Releases the handle and its ring buffer. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of reorient. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#ga1aa8b2169eae4e9b76f367c90be4c88e">seams_reorient_destroy</a>(NULL);</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gab2c93609986098b1df15ebeab4efa973" name="gab2c93609986098b1df15ebeab4efa973"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab2c93609986098b1df15ebeab4efa973">&#9670;&#160;</a></span>seams_reorient_fit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_reorient_fit </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *</td>          <td class="paramname"><span class="paramname"><em>reorient</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>t_start</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>t_end</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>tau1_int</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>tau1_exp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>tau2_int</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>tau2_exp</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Integrated and single-exponential reorientation times tau_1 and tau_2. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reorient</td><td>Reorientation handle with at least 2 lag points. </td></tr>
+    <tr><td class="paramname">t_start</td><td>Fit window start time, &gt;= 0. </td></tr>
+    <tr><td class="paramname">t_end</td><td>Fit window end time, &gt; t_start (or both 0 for full range). </td></tr>
+    <tr><td class="paramname">tau1_int</td><td>Receives trapezoidal integral of C1, or NULL. </td></tr>
+    <tr><td class="paramname">tau1_exp</td><td>Receives exponential decay time of C1, or NULL. </td></tr>
+    <tr><td class="paramname">tau2_int</td><td>Receives trapezoidal integral of C2, or NULL. </td></tr>
+    <tr><td class="paramname">tau2_exp</td><td>Receives exponential decay time of C2, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>Writes scalar outputs owned by the caller. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on reorient. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> v0[3] = {0, 0, 1}, v1[3] = {0.6, 0, 0.8};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *rot = NULL;</div>
+<div class="line"><span class="keywordtype">double</span> t1 = 0, t2 = 0;</div>
+<div class="line"><a class="code hl_function" href="#gaa886ba06b8e811d05d8e63804298578b">seams_reorient_create</a>(1, 4, 1, 1.0, &amp;rot);</div>
+<div class="line"><a class="code hl_function" href="#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a>(rot, v0, 1);</div>
+<div class="line"><a class="code hl_function" href="#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a>(rot, v1, 1);</div>
+<div class="line"><a class="code hl_function" href="#gab2c93609986098b1df15ebeab4efa973">seams_reorient_fit</a>(rot, 0.0, 0.0, &amp;t1, NULL, &amp;t2, NULL);</div>
+<div class="line"><a class="code hl_function" href="#ga1aa8b2169eae4e9b76f367c90be4c88e">seams_reorient_destroy</a>(rot);</div>
+<div class="ttc" id="agroup__capi__traj_html_gab2c93609986098b1df15ebeab4efa973"><div class="ttname"><a href="#gab2c93609986098b1df15ebeab4efa973">seams_reorient_fit</a></div><div class="ttdeci">SEAMS_API seams_status seams_reorient_fit(const seams_reorient *reorient, double t_start, double t_end, double *tau1_int, double *tau1_exp, double *tau2_int, double *tau2_exp)</div><div class="ttdoc">Integrated and single-exponential reorientation times tau_1 and tau_2.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga3aa930465b7964cc847d252027624d9f" name="ga3aa930465b7964cc847d252027624d9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3aa930465b7964cc847d252027624d9f">&#9670;&#160;</a></span>seams_reorient_push()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_reorient_push </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *</td>          <td class="paramname"><span class="paramname"><em>reorient</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>vectors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_vectors</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Push one frame of molecular 3-vectors into a reorientation accumulator. </p>
+<p>Non-zero vectors are normalized per molecule; zero-norm vectors are skipped in correlation pairs.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reorient</td><td>Reorientation handle. </td></tr>
+    <tr><td class="paramname">vectors</td><td>Array of 3 * n_vectors finite doubles. </td></tr>
+    <tr><td class="paramname">n_vectors</td><td>Vector count; must match <a class="el" href="#gaa886ba06b8e811d05d8e63804298578b" title="Create a streaming orientational correlation accumulator for C1 and C2.">seams_reorient_create()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The library copies normalized vectors into active origin slots. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of reorient. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> v0[3] = {0, 0, 1};</div>
+<div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *rot = NULL;</div>
+<div class="line"><a class="code hl_function" href="#gaa886ba06b8e811d05d8e63804298578b">seams_reorient_create</a>(1, 4, 1, 1.0, &amp;rot);</div>
+<div class="line"><a class="code hl_function" href="#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a>(rot, v0, 1);</div>
+<div class="line"><a class="code hl_function" href="#ga1aa8b2169eae4e9b76f367c90be4c88e">seams_reorient_destroy</a>(rot);</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga66225929fd455eeaa8966a3fd665957f" name="ga66225929fd455eeaa8966a3fd665957f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga66225929fd455eeaa8966a3fd665957f">&#9670;&#160;</a></span>seams_set_mols()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_set_mols </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>mols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Replace the stored molecule ids on a loaded frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">mols</td><td>Caller buffer of n molecule ids. </td></tr>
+    <tr><td class="paramname">len</td><td>Length of mols. Must equal the stored atom count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a> when no frame is stored; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a> when len differs from the atom count. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const: updates stored molecule ids and clears the handle error slot. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The library copies mols and keeps no pointer to caller memory. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> mols[8] = {1, 1, 2, 2, 3, 3, 4, 4};</div>
+<div class="line"><a class="code hl_function" href="#ga66225929fd455eeaa8966a3fd665957f">seams_set_mols</a>(sys, mols, 8);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga66225929fd455eeaa8966a3fd665957f"><div class="ttname"><a href="#ga66225929fd455eeaa8966a3fd665957f">seams_set_mols</a></div><div class="ttdeci">SEAMS_API seams_status seams_set_mols(seams_system *sys, const int *mols, size_t len)</div><div class="ttdoc">Replace the stored molecule ids on a loaded frame.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaae87d8838530ea8f468766a6a84d3544" name="gaae87d8838530ea8f468766a6a84d3544"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaae87d8838530ea8f468766a6a84d3544">&#9670;&#160;</a></span>seams_traj_unwrap_centres()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_traj_unwrap_centres </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>nframes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>natoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>boxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>nboxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>mols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>mols_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>masses</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>masses_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>mol_ids_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>mol_ids_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>centres_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>centres_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_mols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Assemble per-molecule centres and unwrap them across frames. </p>
+<p>Pass NULL for both mol_ids_out and centres_out to query n_mols first.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xyz</td><td>Wrapped atom coordinates, nframes * 3 * natoms doubles. </td></tr>
+    <tr><td class="paramname">nframes</td><td>Number of frames, at least 1. </td></tr>
+    <tr><td class="paramname">natoms</td><td>Number of atoms per frame, at least 1. </td></tr>
+    <tr><td class="paramname">boxes</td><td>Cell array of 9 * nboxes doubles. </td></tr>
+    <tr><td class="paramname">nboxes</td><td>Cell count, either 1 or nframes. </td></tr>
+    <tr><td class="paramname">mols</td><td>Molecule id per atom, length mols_len. </td></tr>
+    <tr><td class="paramname">mols_len</td><td>Must equal natoms. </td></tr>
+    <tr><td class="paramname">masses</td><td>Optional positive mass per atom, or NULL for equal weights. </td></tr>
+    <tr><td class="paramname">masses_len</td><td>Must equal natoms when masses is non-NULL, or 0 when NULL. </td></tr>
+    <tr><td class="paramname">mol_ids_out</td><td>Receives unique molecule ids, or NULL. </td></tr>
+    <tr><td class="paramname">mol_ids_cap</td><td>Capacity of mol_ids_out in ints when non-NULL. </td></tr>
+    <tr><td class="paramname">centres_out</td><td>Receives nframes * 3 * n_mols unwrapped coordinates, or NULL. </td></tr>
+    <tr><td class="paramname">centres_len</td><td>Capacity of centres_out in doubles when non-NULL. </td></tr>
+    <tr><td class="paramname">n_mols</td><td>Receives the molecule count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all buffers. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Pure aside from the thread-local error string. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> box[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> xyz[12] = {9.8, 0, 0, 0.2, 0, 0, 0.4, 0, 0, 0.8, 0, 0};</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">int</span> mols[2] = {1, 1};</div>
+<div class="line"><span class="keywordtype">size_t</span> nm = 0;</div>
+<div class="line"><span class="keywordtype">double</span> out[6] = {0};</div>
+<div class="line"><a class="code hl_function" href="#gaae87d8838530ea8f468766a6a84d3544">seams_traj_unwrap_centres</a>(xyz, 2, 2, box, 1, mols, 2, NULL, 0, NULL, 0, out, 6, &amp;nm);</div>
+<div class="ttc" id="agroup__capi__traj_html_gaae87d8838530ea8f468766a6a84d3544"><div class="ttname"><a href="#gaae87d8838530ea8f468766a6a84d3544">seams_traj_unwrap_centres</a></div><div class="ttdeci">SEAMS_API seams_status seams_traj_unwrap_centres(const double *xyz, size_t nframes, size_t natoms, const double *boxes, size_t nboxes, const int *mols, size_t mols_len, const double *masses, size_t masses_len, int *mol_ids_out, size_t mol_ids_cap, double *centres_out, size_t centres_len, size_t *n_mols)</div><div class="ttdoc">Assemble per-molecule centres and unwrap them across frames.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaec29816a91313bf4d062f44851de985f" name="gaec29816a91313bf4d062f44851de985f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaec29816a91313bf4d062f44851de985f">&#9670;&#160;</a></span>seams_traj_unwrap_positions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_traj_unwrap_positions </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>nframes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>natoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>boxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>nboxes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>unwrapped</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>unwrapped_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Unwrap periodic coordinates across consecutive frames. </p>
+<p>Each step adds the minimum-image displacement under an orthorhombic or triclinic nine-number cell (ox, oy, oz, lx, ly, lz, xy, xz, yz). Pass nboxes equal to 1 for a constant cell or nframes for a deforming cell.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xyz</td><td>Wrapped coordinates, nframes * 3 * natoms doubles in Angstrom. </td></tr>
+    <tr><td class="paramname">nframes</td><td>Number of frames, at least 1. </td></tr>
+    <tr><td class="paramname">natoms</td><td>Number of atoms per frame, at least 1. </td></tr>
+    <tr><td class="paramname">boxes</td><td>Cell array of 9 * nboxes doubles. </td></tr>
+    <tr><td class="paramname">nboxes</td><td>Cell count, either 1 or nframes. </td></tr>
+    <tr><td class="paramname">unwrapped</td><td>Output buffer of unwrapped_len doubles. </td></tr>
+    <tr><td class="paramname">unwrapped_len</td><td>Capacity in doubles, at least nframes * 3 * natoms. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns xyz, boxes, and unwrapped. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Pure aside from the thread-local error string. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> box[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};</div>
+<div class="line"><span class="keyword">const</span> <span class="keywordtype">double</span> wrapped[6] = {9.5, 1.0, 1.0, 0.5, 1.0, 1.0};</div>
+<div class="line"><span class="keywordtype">double</span> unwrapped[6] = {0};</div>
+<div class="line"><a class="code hl_function" href="#gaec29816a91313bf4d062f44851de985f">seams_traj_unwrap_positions</a>(wrapped, 2, 1, box, 1, unwrapped, 6);</div>
+<div class="ttc" id="agroup__capi__traj_html_gaec29816a91313bf4d062f44851de985f"><div class="ttname"><a href="#gaec29816a91313bf4d062f44851de985f">seams_traj_unwrap_positions</a></div><div class="ttdeci">SEAMS_API seams_status seams_traj_unwrap_positions(const double *xyz, size_t nframes, size_t natoms, const double *boxes, size_t nboxes, double *unwrapped, size_t unwrapped_len)</div><div class="ttdoc">Unwrap periodic coordinates across consecutive frames.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga43b73c9466e811317f6dce78837cd550" name="ga43b73c9466e811317f6dce78837cd550"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga43b73c9466e811317f6dce78837cd550">&#9670;&#160;</a></span>seams_water_vectors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_water_vectors </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>oxygen_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hydrogen_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>mol_ids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>oh_mid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>bisector</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>hh</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>hh_unit</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_waters</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Water orientation vectors: O to H-midpoint and H-to-H under PBC. </p>
+<p>Each water pairs one oxygen_type atom with two hydrogen_type atoms via shared molecule ids when available, or via minimum-image covalent distance otherwise. Pass NULL for all five output arrays to query n_waters.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">oxygen_type</td><td>Species integer of water oxygen. </td></tr>
+    <tr><td class="paramname">hydrogen_type</td><td>Species integer of water hydrogen, distinct from oxygen_type. </td></tr>
+    <tr><td class="paramname">mol_ids</td><td>Receives molecule ids, length cap, or NULL. </td></tr>
+    <tr><td class="paramname">oh_mid</td><td>Receives O-to-H-midpoint vectors in Angstrom, 3 * cap doubles, or NULL. </td></tr>
+    <tr><td class="paramname">bisector</td><td>Receives unit bisector vectors, 3 * cap doubles, or NULL. </td></tr>
+    <tr><td class="paramname">hh</td><td>Receives H1-to-H2 vectors in Angstrom, 3 * cap doubles, or NULL. </td></tr>
+    <tr><td class="paramname">hh_unit</td><td>Receives unit H1-to-H2 vectors, 3 * cap doubles, or NULL. </td></tr>
+    <tr><td class="paramname">cap</td><td>Molecule capacity of every non-NULL output array. </td></tr>
+    <tr><td class="paramname">n_waters</td><td>Receives the water count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns all output arrays. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only on sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> nw = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga43b73c9466e811317f6dce78837cd550">seams_water_vectors</a>(sys, 1, 2, NULL, NULL, NULL, NULL, NULL, 0, &amp;nw);</div>
+<div class="ttc" id="agroup__capi__traj_html_ga43b73c9466e811317f6dce78837cd550"><div class="ttname"><a href="#ga43b73c9466e811317f6dce78837cd550">seams_water_vectors</a></div><div class="ttdeci">SEAMS_API seams_status seams_water_vectors(const seams_system *sys, int oxygen_type, int hydrogen_type, int *mol_ids, double *oh_mid, double *bisector, double *hh, double *hh_unit, size_t cap, size_t *n_waters)</div><div class="ttdoc">Water orientation vectors: O to H-midpoint and H-to-H under PBC.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

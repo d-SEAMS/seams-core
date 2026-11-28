@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: Pore geometry</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/group__capi__pore.html">
+<meta property="og:title" content="seams-core: Pore geometry">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/group__capi__pore.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: Pore geometry">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__capi__pore.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Pore geometry </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Fractional density, cylindrical pore profiles, and host-guest contacts.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga70f8dac2996c29a249e02a512aace3e0" id="r_ga70f8dac2996c29a249e02a512aace3e0"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga70f8dac2996c29a249e02a512aace3e0">seams_density_fractional</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int type, int bins, int axis, const double *direction, size_t direction_len, double origin, const double *masses, size_t masses_len, double *coordinate, double *number_density, double *mass_density, double *bin_volume, size_t cap, size_t *n_out)</td></tr>
+<tr class="memdesc:ga70f8dac2996c29a249e02a512aace3e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number and mass density along a cell axis or a Cartesian direction.  <br /></td></tr>
+<tr class="memitem:ga7515c28e202e7515e641f42a0bce45bd" id="r_ga7515c28e202e7515e641f42a0bce45bd"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga7515c28e202e7515e641f42a0bce45bd">seams_pore_frame</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int framework_type, int axis, const double *direction, size_t direction_len, const double *centre_frac, size_t centre_len, double *axis_out, double *centre_out, double *centre_frac_out, int *axis_index)</td></tr>
+<tr class="memdesc:ga7515c28e202e7515e641f42a0bce45bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pore axis and centre, supplied or taken from the framework.  <br /></td></tr>
+<tr class="memitem:ga7908edc02bfd212ee6fd6c7c4246f12b" id="r_ga7908edc02bfd212ee6fd6c7c4246f12b"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga7908edc02bfd212ee6fd6c7c4246f12b">seams_pore_profiles</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int type, int radial_bins, int azimuthal_bins, int axial_bins, double r_max, int axis, const double *direction, size_t direction_len, const double *centre_frac, size_t centre_len, int framework_type, double origin, const double *masses, size_t masses_len, double *radius, double *radial_number, double *radial_mass, double *radial_volume, size_t radial_cap, size_t *n_radial, double *theta, double *azimuthal_number, double *azimuthal_mass, double *azimuthal_volume, size_t azimuthal_cap, size_t *n_azimuthal, double *axial, double *axial_number, double *axial_mass, double *axial_volume, size_t axial_cap, size_t *n_axial)</td></tr>
+<tr class="memdesc:ga7908edc02bfd212ee6fd6c7c4246f12b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Radial, azimuthal, and axial densities about a pore axis.  <br /></td></tr>
+<tr class="memitem:ga54c0bd43c37cea4f9b27ee60af41e02f" id="r_ga54c0bd43c37cea4f9b27ee60af41e02f"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga54c0bd43c37cea4f9b27ee60af41e02f">seams_host_guest</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int guest_type, int framework_type, double cutoff, int *guest_index, int *nearest_index, int *nearest_type, double *nearest_distance, size_t guest_cap, size_t *n_guest, int *framework_types, size_t type_cap, size_t *n_types, int *contact_counts, size_t contact_cap)</td></tr>
+<tr class="memdesc:ga54c0bd43c37cea4f9b27ee60af41e02f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nearest framework site and contact counts for each guest.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Fractional density, cylindrical pore profiles, and host-guest contacts. </p>
+<p>Slab and shell volumes use the triclinic cell, det(H). A fractional bin along a cell edge has volume V/n. An arbitrary direction bins the projection of the reduced cell, and each bin volume is the measure of that slice. Number density is atoms per cubic Angstrom. Mass density is the caller's mass unit per cubic Angstrom, or mass 1 when masses is NULL. A mass given in amu is therefore amu per cubic Angstrom, and multiplying by 1.66054 converts that density to grams per cubic centimetre. The library does not apply the factor. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ga70f8dac2996c29a249e02a512aace3e0" name="ga70f8dac2996c29a249e02a512aace3e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga70f8dac2996c29a249e02a512aace3e0">&#9670;&#160;</a></span>seams_density_fractional()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_density_fractional </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>direction</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>direction_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>origin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>masses</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>masses_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>coordinate</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>number_density</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>mass_density</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>bin_volume</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Number and mass density along a cell axis or a Cartesian direction. </p>
+<p>coordinate is the bin centre in the shifted fractional coordinate, on [0, 1). Bin 0 starts at origin. origin is wrapped into [0, 1). A non-NULL direction is three Cartesian components and replaces axis. Pass NULL output columns to query the bin count.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. Zero keeps every atom. </td></tr>
+    <tr><td class="paramname">bins</td><td>Positive bin count. </td></tr>
+    <tr><td class="paramname">axis</td><td>0, 1, or 2. Ignored when direction is not NULL. </td></tr>
+    <tr><td class="paramname">direction</td><td>Three Cartesian components, or NULL for a cell axis. </td></tr>
+    <tr><td class="paramname">direction_len</td><td>3 when direction is not NULL. Ignored otherwise. </td></tr>
+    <tr><td class="paramname">origin</td><td>Fractional origin. Any finite value is wrapped into [0, 1). </td></tr>
+    <tr><td class="paramname">masses</td><td>One mass per stored atom, or NULL for mass 1. </td></tr>
+    <tr><td class="paramname">masses_len</td><td>Length of masses. Must equal the atom count when masses is not NULL. </td></tr>
+    <tr><td class="paramname">coordinate</td><td>Bin centres, or NULL to skip. </td></tr>
+    <tr><td class="paramname">number_density</td><td>Number density, or NULL to skip. </td></tr>
+    <tr><td class="paramname">mass_density</td><td>Mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre. </td></tr>
+    <tr><td class="paramname">bin_volume</td><td>Bin volume in cubic Angstrom, or NULL to skip. </td></tr>
+    <tr><td class="paramname">cap</td><td>Capacity of each non-NULL column. </td></tr>
+    <tr><td class="paramname">n_out</td><td>Receives the bin count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns every buffer. The library copies nothing and keeps no pointer after the call returns. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> n = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga70f8dac2996c29a249e02a512aace3e0">seams_density_fractional</a>(sys, 0, 4, 2, NULL, 0, 0.0, NULL, 0,</div>
+<div class="line">                         NULL, NULL, NULL, NULL, 0, &amp;n);</div>
+<div class="ttc" id="agroup__capi__pore_html_ga70f8dac2996c29a249e02a512aace3e0"><div class="ttname"><a href="#ga70f8dac2996c29a249e02a512aace3e0">seams_density_fractional</a></div><div class="ttdeci">SEAMS_API seams_status seams_density_fractional(seams_system *sys, int type, int bins, int axis, const double *direction, size_t direction_len, double origin, const double *masses, size_t masses_len, double *coordinate, double *number_density, double *mass_density, double *bin_volume, size_t cap, size_t *n_out)</div><div class="ttdoc">Number and mass density along a cell axis or a Cartesian direction.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga54c0bd43c37cea4f9b27ee60af41e02f" name="ga54c0bd43c37cea4f9b27ee60af41e02f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga54c0bd43c37cea4f9b27ee60af41e02f">&#9670;&#160;</a></span>seams_host_guest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_host_guest </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>guest_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>framework_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>guest_index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>nearest_index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>nearest_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>nearest_distance</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>guest_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_guest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>framework_types</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>type_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_types</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>contact_counts</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>contact_cap</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Nearest framework site and contact counts for each guest. </p>
+<p>A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted.</p>
+<p>guest_type must be positive. framework_type 0 keeps every atom of another type. framework_type equal to guest_type is an error. nearest_distance is negative when a guest has no framework atom. A contact is a framework atom at or inside cutoff under the triclinic minimum image. contact_counts is row-major, one row per guest and one column per framework type, types sorted. Pass NULL columns to query the guest and type counts.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">guest_type</td><td>Positive guest species. </td></tr>
+    <tr><td class="paramname">framework_type</td><td>Framework species. Zero keeps every other type. A value equal to guest_type is rejected. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Contact distance in Angstrom. Zero counts only a site at the same point. Negative is rejected. </td></tr>
+    <tr><td class="paramname">guest_index</td><td>Guest indices, or NULL to skip. </td></tr>
+    <tr><td class="paramname">nearest_index</td><td>Nearest framework index, or -1. NULL skips the column. </td></tr>
+    <tr><td class="paramname">nearest_type</td><td>Type of that site, or NULL to skip. </td></tr>
+    <tr><td class="paramname">nearest_distance</td><td>Distance in Angstrom, or NULL to skip. </td></tr>
+    <tr><td class="paramname">guest_cap</td><td>Capacity of each non-NULL guest column. </td></tr>
+    <tr><td class="paramname">n_guest</td><td>Receives the guest count. </td></tr>
+    <tr><td class="paramname">framework_types</td><td>Sorted framework types, or NULL to skip. </td></tr>
+    <tr><td class="paramname">type_cap</td><td>Capacity of framework_types when that pointer is not NULL. </td></tr>
+    <tr><td class="paramname">n_types</td><td>Receives the framework type count. </td></tr>
+    <tr><td class="paramname">contact_counts</td><td>Row-major counts, or NULL to skip. </td></tr>
+    <tr><td class="paramname">contact_cap</td><td>Capacity of contact_counts. Must hold n_guest * n_types when contact_counts is not NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns every column. The library keeps no pointer. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> ng = 0, nt = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga54c0bd43c37cea4f9b27ee60af41e02f">seams_host_guest</a>(sys, 1, 0, 3.5, NULL, NULL, NULL, NULL, 0, &amp;ng,</div>
+<div class="line">                 NULL, 0, &amp;nt, NULL, 0);</div>
+<div class="ttc" id="agroup__capi__pore_html_ga54c0bd43c37cea4f9b27ee60af41e02f"><div class="ttname"><a href="#ga54c0bd43c37cea4f9b27ee60af41e02f">seams_host_guest</a></div><div class="ttdeci">SEAMS_API seams_status seams_host_guest(seams_system *sys, int guest_type, int framework_type, double cutoff, int *guest_index, int *nearest_index, int *nearest_type, double *nearest_distance, size_t guest_cap, size_t *n_guest, int *framework_types, size_t type_cap, size_t *n_types, int *contact_counts, size_t contact_cap)</div><div class="ttdoc">Nearest framework site and contact counts for each guest.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga7515c28e202e7515e641f42a0bce45bd" name="ga7515c28e202e7515e641f42a0bce45bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7515c28e202e7515e641f42a0bce45bd">&#9670;&#160;</a></span>seams_pore_frame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_pore_frame </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>framework_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>direction</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>direction_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>centre_frac</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>centre_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>axis_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>centre_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>centre_frac_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>axis_index</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Pore axis and centre, supplied or taken from the framework. </p>
+<p>axis 0, 1, or 2 selects that cell edge. axis -1 with direction NULL selects the longest cell edge. Any other negative axis is rejected. A non-NULL direction must be parallel to a cell edge. centre_frac NULL places the centre at the periodic centroid of the framework atoms in the perpendicular plane. framework_type 0 uses every atom for that centroid.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">framework_type</td><td>Species used to place an automatic centre. Zero keeps every atom. </td></tr>
+    <tr><td class="paramname">axis</td><td>0, 1, 2, or -1 for the longest edge when direction is NULL. Any other negative value is rejected. </td></tr>
+    <tr><td class="paramname">direction</td><td>Three Cartesian components parallel to a cell edge, or NULL. </td></tr>
+    <tr><td class="paramname">direction_len</td><td>3 when direction is not NULL. Ignored otherwise. </td></tr>
+    <tr><td class="paramname">centre_frac</td><td>Three fractional coordinates, or NULL to detect the centre. </td></tr>
+    <tr><td class="paramname">centre_len</td><td>3 when centre_frac is not NULL. Ignored otherwise. </td></tr>
+    <tr><td class="paramname">axis_out</td><td>Receives the unit Cartesian axis. Three doubles. </td></tr>
+    <tr><td class="paramname">centre_out</td><td>Receives the Cartesian centre. Three doubles. </td></tr>
+    <tr><td class="paramname">centre_frac_out</td><td>Receives the fractional centre. Three doubles. </td></tr>
+    <tr><td class="paramname">axis_index</td><td>Receives 0, 1, or 2. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns the three output arrays. Each holds three doubles. The library keeps no pointer. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">double</span> axis[3], centre[3], frac[3];</div>
+<div class="line"><span class="keywordtype">int</span> index = -1;</div>
+<div class="line"><a class="code hl_function" href="#ga7515c28e202e7515e641f42a0bce45bd">seams_pore_frame</a>(sys, 0, -1, NULL, 0, NULL, 0, axis, centre, frac, &amp;index);</div>
+<div class="ttc" id="agroup__capi__pore_html_ga7515c28e202e7515e641f42a0bce45bd"><div class="ttname"><a href="#ga7515c28e202e7515e641f42a0bce45bd">seams_pore_frame</a></div><div class="ttdeci">SEAMS_API seams_status seams_pore_frame(seams_system *sys, int framework_type, int axis, const double *direction, size_t direction_len, const double *centre_frac, size_t centre_len, double *axis_out, double *centre_out, double *centre_frac_out, int *axis_index)</div><div class="ttdoc">Pore axis and centre, supplied or taken from the framework.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga7908edc02bfd212ee6fd6c7c4246f12b" name="ga7908edc02bfd212ee6fd6c7c4246f12b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7908edc02bfd212ee6fd6c7c4246f12b">&#9670;&#160;</a></span>seams_pore_profiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_pore_profiles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>radial_bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>azimuthal_bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axial_bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>r_max</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>direction</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>direction_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>centre_frac</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>centre_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>framework_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>origin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>masses</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>masses_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>radial_number</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>radial_mass</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>radial_volume</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>radial_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_radial</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>theta</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>azimuthal_number</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>azimuthal_mass</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>azimuthal_volume</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>azimuthal_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_azimuthal</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>axial</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>axial_number</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>axial_mass</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>axial_volume</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>axial_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_axial</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Radial, azimuthal, and axial densities about a pore axis. </p>
+<p>The axis is a cell edge, as in <a class="el" href="#ga7515c28e202e7515e641f42a0bce45bd" title="Pore axis and centre, supplied or taken from the framework.">seams_pore_frame()</a>. r_max 0 covers the perpendicular face. Radial bins run from 0 to r_max. The radial coordinate is the distance to the nearest periodic image of the pore axis. Within the inscribed radius of the centred face that image is the face origin. Beyond the inscribed radius a corner point can be closer to a neighbouring image, and the coordinate follows that image. The radial shell is the annulus inside the Voronoi cell of the perpendicular lattice. A circle-edge crossing that lands on a vertex stays on that edge. Azimuthal bins cover [-pi, pi) in the centred face, and each sector is clipped to that face. Azimuth zero points along the perpendicular projection of cell edge (axis + 1) mod 3, with the component parallel to the pore axis removed. The angle increases towards the pore axis crossed with that direction. The axial coordinate is the fractional cell coordinate, shifted by origin. A shell volume is that area times the edge length. Mass density is the caller's mass unit per cubic Angstrom. An amu mass gives amu per cubic Angstrom, and times 1.66054 that is grams per cubic centimetre. Pass NULL columns to query the three bin counts.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. Zero keeps every atom. </td></tr>
+    <tr><td class="paramname">radial_bins</td><td>Positive radial bin count. </td></tr>
+    <tr><td class="paramname">azimuthal_bins</td><td>Positive azimuthal bin count. </td></tr>
+    <tr><td class="paramname">axial_bins</td><td>Positive axial bin count. </td></tr>
+    <tr><td class="paramname">r_max</td><td>Outer radius in Angstrom. Zero covers the face. </td></tr>
+    <tr><td class="paramname">axis</td><td>0, 1, 2, or -1 when direction is NULL. Any other negative value is rejected. </td></tr>
+    <tr><td class="paramname">direction</td><td>Three Cartesian components parallel to a cell edge, or NULL. </td></tr>
+    <tr><td class="paramname">direction_len</td><td>3 when direction is not NULL. Ignored otherwise. </td></tr>
+    <tr><td class="paramname">centre_frac</td><td>Three fractional coordinates, or NULL to detect the centre. </td></tr>
+    <tr><td class="paramname">centre_len</td><td>3 when centre_frac is not NULL. Ignored otherwise. </td></tr>
+    <tr><td class="paramname">framework_type</td><td>Species for an automatic centre. Zero keeps every atom. </td></tr>
+    <tr><td class="paramname">origin</td><td>Fractional axial origin, wrapped into [0, 1). </td></tr>
+    <tr><td class="paramname">masses</td><td>One mass per stored atom, or NULL for mass 1. </td></tr>
+    <tr><td class="paramname">masses_len</td><td>Length of masses. Must equal the atom count when masses is not NULL. </td></tr>
+    <tr><td class="paramname">radius</td><td>Radial bin centres, or NULL to skip. </td></tr>
+    <tr><td class="paramname">radial_number</td><td>Radial number density, or NULL to skip. </td></tr>
+    <tr><td class="paramname">radial_mass</td><td>Radial mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre. </td></tr>
+    <tr><td class="paramname">radial_volume</td><td>Radial shell volume, or NULL to skip. </td></tr>
+    <tr><td class="paramname">radial_cap</td><td>Capacity of each non-NULL radial column. </td></tr>
+    <tr><td class="paramname">n_radial</td><td>Receives the radial bin count. </td></tr>
+    <tr><td class="paramname">theta</td><td>Azimuthal bin centres in radians, or NULL to skip. </td></tr>
+    <tr><td class="paramname">azimuthal_number</td><td>Azimuthal number density, or NULL to skip. </td></tr>
+    <tr><td class="paramname">azimuthal_mass</td><td>Azimuthal mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre. </td></tr>
+    <tr><td class="paramname">azimuthal_volume</td><td>Azimuthal sector volume, or NULL to skip. </td></tr>
+    <tr><td class="paramname">azimuthal_cap</td><td>Capacity of each non-NULL azimuthal column. </td></tr>
+    <tr><td class="paramname">n_azimuthal</td><td>Receives the azimuthal bin count. </td></tr>
+    <tr><td class="paramname">axial</td><td>Axial bin centres, or NULL to skip. </td></tr>
+    <tr><td class="paramname">axial_number</td><td>Axial number density, or NULL to skip. </td></tr>
+    <tr><td class="paramname">axial_mass</td><td>Axial mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre. </td></tr>
+    <tr><td class="paramname">axial_volume</td><td>Axial slab volume, or NULL to skip. </td></tr>
+    <tr><td class="paramname">axial_cap</td><td>Capacity of each non-NULL axial column. </td></tr>
+    <tr><td class="paramname">n_axial</td><td>Receives the axial bin count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient ...">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns every column. The library keeps no pointer. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> nr = 0, nt = 0, ns = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga7908edc02bfd212ee6fd6c7c4246f12b">seams_pore_profiles</a>(sys, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0,</div>
+<div class="line">                    NULL, NULL, NULL, NULL, 0, &amp;nr,</div>
+<div class="line">                    NULL, NULL, NULL, NULL, 0, &amp;nt,</div>
+<div class="line">                    NULL, NULL, NULL, NULL, 0, &amp;ns);</div>
+<div class="ttc" id="agroup__capi__pore_html_ga7908edc02bfd212ee6fd6c7c4246f12b"><div class="ttname"><a href="#ga7908edc02bfd212ee6fd6c7c4246f12b">seams_pore_profiles</a></div><div class="ttdeci">SEAMS_API seams_status seams_pore_profiles(seams_system *sys, int type, int radial_bins, int azimuthal_bins, int axial_bins, double r_max, int axis, const double *direction, size_t direction_len, const double *centre_frac, size_t centre_len, int framework_type, double origin, const double *masses, size_t masses_len, double *radius, double *radial_number, double *radial_mass, double *radial_volume, size_t radial_cap, size_t *n_radial, double *theta, double *azimuthal_number, double *azimuthal_mass, double *azimuthal_volume, size_t azimuthal_cap, size_t *n_azimuthal, double *axial, double *axial_number, double *axial_mass, double *axial_volume, size_t axial_cap, size_t *n_axial)</div><div class="ttdoc">Radial, azimuthal, and axial densities about a pore axis.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: seams::team Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespaceseams_1_1team.html">
+<meta property="og:title" content="seams-core: seams::team Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespaceseams_1_1team.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: seams::team Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespaceseams_1_1team.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams::team Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:detail" id="r_detail"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1team_1_1detail.html">detail</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a30b4e7f5882d5faa3bdc6623070ca480" id="r_a30b4e7f5882d5faa3bdc6623070ca480"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a30b4e7f5882d5faa3bdc6623070ca480">width</a> ()</td></tr>
+<tr class="memitem:a39454148a5aa51f7cda1dc6f2f3c4d87" id="r_a39454148a5aa51f7cda1dc6f2f3c4d87"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a39454148a5aa51f7cda1dc6f2f3c4d87">parts</a> (int width)</td></tr>
+<tr class="memitem:a00df93c8190c21e025222c1498889fdc" id="r_a00df93c8190c21e025222c1498889fdc"><td class="memTemplParams" colspan="2">template&lt;class F&gt; </td></tr>
+<tr class="memitem:a00df93c8190c21e025222c1498889fdc template"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a00df93c8190c21e025222c1498889fdc">run</a> (const std::vector&lt; std::size_t &gt; &amp;sizes, F &amp;&amp;fn)</td></tr>
+<tr class="memitem:afda59cde937ae2bcd7a0722b5046fa10" id="r_afda59cde937ae2bcd7a0722b5046fa10"><td class="memTemplParams" colspan="2">template&lt;class F&gt; </td></tr>
+<tr class="memitem:afda59cde937ae2bcd7a0722b5046fa10 template"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#afda59cde937ae2bcd7a0722b5046fa10">run</a> (std::initializer_list&lt; std::size_t &gt; chunks, F &amp;&amp;fn)</td></tr>
+<tr class="memitem:a6ee1589b5f9b7ebc678f2281684d7c33" id="r_a6ee1589b5f9b7ebc678f2281684d7c33"><td class="memItemLeft">std::size_t&#160;</td><td class="memItemRight"><a class="el" href="#a6ee1589b5f9b7ebc678f2281684d7c33">chunksOf</a> (std::size_t n, std::size_t grain)</td></tr>
+<tr class="memitem:a5b030019303b197563201d6628c4a8ab" id="r_a5b030019303b197563201d6628c4a8ab"><td class="memTemplParams" colspan="2">template&lt;class F&gt; </td></tr>
+<tr class="memitem:a5b030019303b197563201d6628c4a8ab template"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a5b030019303b197563201d6628c4a8ab">forRange</a> (std::size_t n, std::size_t grain, F &amp;&amp;fn)</td></tr>
+</table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a6ee1589b5f9b7ebc678f2281684d7c33" name="a6ee1589b5f9b7ebc678f2281684d7c33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ee1589b5f9b7ebc678f2281684d7c33">&#9670;&#160;</a></span>chunksOf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t seams::team::chunksOf </td>
+          <td>(</td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>grain</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="team__run_8hpp_source.html#l00159">159</a> of file <a class="el" href="team__run_8hpp_source.html">team_run.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  159</span>                                                        {</div>
+<div class="line"><span class="lineno">  160</span>  <span class="keywordflow">return</span> grain == 0 ? 0 : (n + grain - 1) / grain;</div>
+<div class="line"><span class="lineno">  161</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a5b030019303b197563201d6628c4a8ab" name="a5b030019303b197563201d6628c4a8ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b030019303b197563201d6628c4a8ab">&#9670;&#160;</a></span>forRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class F&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::team::forRange </td>
+          <td>(</td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>grain</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">F &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>fn</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="team__run_8hpp_source.html#l00166">166</a> of file <a class="el" href="team__run_8hpp_source.html">team_run.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  166</span>                                                                       {</div>
+<div class="line"><span class="lineno">  167</span>  <span class="keywordflow">if</span> (n == 0) {</div>
+<div class="line"><span class="lineno">  168</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  169</span>  }</div>
+<div class="line"><span class="lineno">  170</span>  std::size_t count = <a class="code hl_function" href="#a6ee1589b5f9b7ebc678f2281684d7c33">chunksOf</a>(n, std::max&lt;std::size_t&gt;(1, grain));</div>
+<div class="line"><span class="lineno">  171</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> most = <a class="code hl_function" href="#a30b4e7f5882d5faa3bdc6623070ca480">width</a>();</div>
+<div class="line"><span class="lineno">  172</span>  <span class="keyword">const</span> <span class="keyword">auto</span> workers = <span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno">  173</span>      <a class="code hl_function" href="namespaceseams.html#a289b38633efc51b3e8c2304583b96676">othersHoldHalf</a>() ? most : std::max(1, std::min(most, <a class="code hl_function" href="namespaceseams.html#a002966520b0a58eaf667caa881bd7e55">teamWidth</a>())));</div>
+<div class="line"><span class="lineno">  174</span>  <span class="keywordflow">if</span> (count &gt; 1 &amp;&amp; workers &gt; 1) {</div>
+<div class="line"><span class="lineno">  175</span>    count = std::min(n, (count + workers - 1) / workers * workers);</div>
+<div class="line"><span class="lineno">  176</span>  }</div>
+<div class="line"><span class="lineno">  177</span>  <span class="keyword">const</span> std::size_t step = <a class="code hl_function" href="#a6ee1589b5f9b7ebc678f2281684d7c33">chunksOf</a>(n, count);</div>
+<div class="line"><span class="lineno">  178</span>  <a class="code hl_function" href="#a00df93c8190c21e025222c1498889fdc">run</a>({<a class="code hl_function" href="#a6ee1589b5f9b7ebc678f2281684d7c33">chunksOf</a>(n, step)}, [&amp;](std::size_t, std::size_t chunk, <span class="keywordtype">int</span> worker) {</div>
+<div class="line"><span class="lineno">  179</span>    <span class="keyword">const</span> std::size_t begin = chunk * step;</div>
+<div class="line"><span class="lineno">  180</span>    fn(begin, std::min(n, begin + step), worker);</div>
+<div class="line"><span class="lineno">  181</span>  });</div>
+<div class="line"><span class="lineno">  182</span>}</div>
+<div class="ttc" id="anamespaceseams_1_1team_html_a00df93c8190c21e025222c1498889fdc"><div class="ttname"><a href="#a00df93c8190c21e025222c1498889fdc">seams::team::run</a></div><div class="ttdeci">void run(const std::vector&lt; std::size_t &gt; &amp;sizes, F &amp;&amp;fn)</div><div class="ttdef"><b>Definition</b> <a href="team__run_8hpp_source.html#l00131">team_run.hpp:131</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1team_html_a30b4e7f5882d5faa3bdc6623070ca480"><div class="ttname"><a href="#a30b4e7f5882d5faa3bdc6623070ca480">seams::team::width</a></div><div class="ttdeci">int width()</div><div class="ttdef"><b>Definition</b> <a href="team__run_8hpp_source.html#l00041">team_run.hpp:41</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1team_html_a6ee1589b5f9b7ebc678f2281684d7c33"><div class="ttname"><a href="#a6ee1589b5f9b7ebc678f2281684d7c33">seams::team::chunksOf</a></div><div class="ttdeci">std::size_t chunksOf(std::size_t n, std::size_t grain)</div><div class="ttdef"><b>Definition</b> <a href="team__run_8hpp_source.html#l00159">team_run.hpp:159</a></div></div>
+<div class="ttc" id="anamespaceseams_html_a002966520b0a58eaf667caa881bd7e55"><div class="ttname"><a href="namespaceseams.html#a002966520b0a58eaf667caa881bd7e55">seams::teamWidth</a></div><div class="ttdeci">int teamWidth()</div><div class="ttdef"><b>Definition</b> <a href="thread__team_8hpp_source.html#l00118">thread_team.hpp:118</a></div></div>
+<div class="ttc" id="anamespaceseams_html_a289b38633efc51b3e8c2304583b96676"><div class="ttname"><a href="namespaceseams.html#a289b38633efc51b3e8c2304583b96676">seams::othersHoldHalf</a></div><div class="ttdeci">bool othersHoldHalf()</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a39454148a5aa51f7cda1dc6f2f3c4d87" name="a39454148a5aa51f7cda1dc6f2f3c4d87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39454148a5aa51f7cda1dc6f2f3c4d87">&#9670;&#160;</a></span>parts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::team::parts </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>width</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="team__run_8hpp_source.html#l00057">57</a> of file <a class="el" href="team__run_8hpp_source.html">team_run.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   57</span>                            {</div>
+<div class="line"><span class="lineno">   58</span>  <span class="keywordflow">if</span> (<a class="code hl_function" href="#a30b4e7f5882d5faa3bdc6623070ca480">width</a> &lt;= 1) {</div>
+<div class="line"><span class="lineno">   59</span>    <span class="keywordflow">return</span> 1;</div>
+<div class="line"><span class="lineno">   60</span>  }</div>
+<div class="line"><span class="lineno">   61</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespaceseams.html#a289b38633efc51b3e8c2304583b96676">othersHoldHalf</a>() ? 2 * <a class="code hl_function" href="#a30b4e7f5882d5faa3bdc6623070ca480">width</a> : std::max(1, std::min(<a class="code hl_function" href="#a30b4e7f5882d5faa3bdc6623070ca480">width</a>, <a class="code hl_function" href="namespaceseams.html#a002966520b0a58eaf667caa881bd7e55">teamWidth</a>()));</div>
+<div class="line"><span class="lineno">   62</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a00df93c8190c21e025222c1498889fdc" name="a00df93c8190c21e025222c1498889fdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00df93c8190c21e025222c1498889fdc">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class F&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::team::run </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::size_t &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>sizes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">F &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>fn</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="team__run_8hpp_source.html#l00131">131</a> of file <a class="el" href="team__run_8hpp_source.html">team_run.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  131</span>                                                                       {</div>
+<div class="line"><span class="lineno">  132</span>  <span class="keywordflow">if</span> (sizes.empty()) {</div>
+<div class="line"><span class="lineno">  133</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  134</span>  }</div>
+<div class="line"><span class="lineno">  135</span>  detail::Call&lt;std::remove_reference_t&lt;F&gt;&gt; call;</div>
+<div class="line"><span class="lineno">  136</span>  call.fn = &amp;fn;</div>
+<div class="line"><span class="lineno">  137</span>  <span class="keywordtype">bool</span> nested = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  138</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">  139</span>  nested = omp_in_parallel() != 0;</div>
+<div class="line"><span class="lineno">  140</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  141</span>  <span class="keywordflow">if</span> (!nested &amp;&amp; <a class="code hl_function" href="namespaceseams.html#a289b38633efc51b3e8c2304583b96676">othersHoldHalf</a>()) {</div>
+<div class="line"><span class="lineno">  142</span>    <a class="code hl_function" href="thread__team_8hpp.html#a06195ae10c6517c497c4d0b11d8722b1">lc_set_threads</a>(<a class="code hl_function" href="namespaceseams.html#a11e5439574d89b21e21c449ae1697cc8">poolFor</a>(0));</div>
+<div class="line"><span class="lineno">  143</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="team__run_8hpp.html#ab970b747c4141c129fddac78412f0ff4">lc_team_run</a>(sizes.size(), sizes.data(), &amp;<span class="keyword">decltype</span>(call)::trampoline, &amp;call) != 0) {</div>
+<div class="line"><span class="lineno">  144</span>      <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;linkcell team run failed&quot;</span>);</div>
+<div class="line"><span class="lineno">  145</span>    }</div>
+<div class="line"><span class="lineno">  146</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  147</span>    <a class="code hl_function" href="namespaceseams_1_1team_1_1detail.html#a9dd401c9b26db6f9e17726d615d64c78">detail::ompRun</a>(sizes, call);</div>
+<div class="line"><span class="lineno">  148</span>  }</div>
+<div class="line"><span class="lineno">  149</span>  <span class="keywordflow">if</span> (call.failure) {</div>
+<div class="line"><span class="lineno">  150</span>    std::rethrow_exception(call.failure);</div>
+<div class="line"><span class="lineno">  151</span>  }</div>
+<div class="line"><span class="lineno">  152</span>}</div>
+<div class="ttc" id="anamespaceseams_1_1team_1_1detail_html_a9dd401c9b26db6f9e17726d615d64c78"><div class="ttname"><a href="namespaceseams_1_1team_1_1detail.html#a9dd401c9b26db6f9e17726d615d64c78">seams::team::detail::ompRun</a></div><div class="ttdeci">void ompRun(const std::vector&lt; std::size_t &gt; &amp;sizes, C &amp;call)</div><div class="ttdef"><b>Definition</b> <a href="team__run_8hpp_source.html#l00092">team_run.hpp:92</a></div></div>
+<div class="ttc" id="anamespaceseams_html_a11e5439574d89b21e21c449ae1697cc8"><div class="ttname"><a href="namespaceseams.html#a11e5439574d89b21e21c449ae1697cc8">seams::poolFor</a></div><div class="ttdeci">int poolFor(int n)</div><div class="ttdef"><b>Definition</b> <a href="thread__team_8hpp_source.html#l00293">thread_team.hpp:293</a></div></div>
+<div class="ttc" id="ateam__run_8hpp_html_ab970b747c4141c129fddac78412f0ff4"><div class="ttname"><a href="team__run_8hpp.html#ab970b747c4141c129fddac78412f0ff4">lc_team_run</a></div><div class="ttdeci">int lc_team_run(std::size_t nstages, const std::size_t *chunks, void(*fn)(void *, std::size_t, std::size_t, std::size_t), void *ctx)</div></div>
+<div class="ttc" id="athread__team_8hpp_html_a06195ae10c6517c497c4d0b11d8722b1"><div class="ttname"><a href="thread__team_8hpp.html#a06195ae10c6517c497c4d0b11d8722b1">lc_set_threads</a></div><div class="ttdeci">void lc_set_threads(int n)</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="afda59cde937ae2bcd7a0722b5046fa10" name="afda59cde937ae2bcd7a0722b5046fa10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afda59cde937ae2bcd7a0722b5046fa10">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class F&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::team::run </td>
+          <td>(</td>
+          <td class="paramtype">std::initializer_list&lt; std::size_t &gt;</td>          <td class="paramname"><span class="paramname"><em>chunks</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">F &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>fn</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="team__run_8hpp_source.html#l00154">154</a> of file <a class="el" href="team__run_8hpp_source.html">team_run.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  154</span>                                                                           {</div>
+<div class="line"><span class="lineno">  155</span>  <a class="code hl_function" href="#a00df93c8190c21e025222c1498889fdc">run</a>(std::vector&lt;std::size_t&gt;(chunks), std::forward&lt;F&gt;(fn));</div>
+<div class="line"><span class="lineno">  156</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a30b4e7f5882d5faa3bdc6623070ca480" name="a30b4e7f5882d5faa3bdc6623070ca480"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30b4e7f5882d5faa3bdc6623070ca480">&#9670;&#160;</a></span>width()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::team::width </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="team__run_8hpp_source.html#l00041">41</a> of file <a class="el" href="team__run_8hpp_source.html">team_run.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   41</span>                   {</div>
+<div class="line"><span class="lineno">   42</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">   43</span>  <span class="keywordflow">if</span> (omp_in_parallel()) {</div>
+<div class="line"><span class="lineno">   44</span>    <span class="keywordflow">return</span> 1;</div>
+<div class="line"><span class="lineno">   45</span>  }</div>
+<div class="line"><span class="lineno">   46</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   47</span>  <span class="keywordflow">return</span> std::max(<a class="code hl_function" href="namespaceseams.html#a002966520b0a58eaf667caa881bd7e55">teamWidth</a>(), <a class="code hl_function" href="namespaceseams.html#a11e5439574d89b21e21c449ae1697cc8">poolFor</a>(0));</div>
+<div class="line"><span class="lineno">   48</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceseams.html">seams</a></li><li class="navelem"><a href="namespaceseams_1_1team.html">team</a></li>
+  </ul>
+</div>
+</body>
+</html>

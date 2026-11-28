@@ -1,0 +1,32 @@
+.. index:: pair: namespace; gen::mic
+.. _doxid-namespacegen_1_1mic:
+
+namespace gen::mic
+==================
+
+.. toctree::
+	:hidden:
+
+	struct_gen_mic_RangeError.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace mic {
+
+	// structs
+
+	struct :ref:`RangeError<doxid-structgen_1_1mic_1_1_range_error>`;
+
+	// global functions
+
+	bool :target:`latticeCoefficients<doxid-namespacegen_1_1mic_1a33b2f2e36b868dc17c20f82bb7d6779d>`(double lx, double ly, double lz, double xy, double xz, double yz, const std::array<double, 3>& raw, const std::array<double, 3>& candidate, double(&) n[3]);
+	bool :target:`latticeImage<doxid-namespacegen_1_1mic_1a360b14340880d8c74e1f0634c624089b>`(double lx, double ly, double lz, double xy, double xz, double yz, const std::array<double, 3>& raw, const std::array<double, 3>& candidate);
+	std::array<double, 3> :target:`euclideanIfShorter<doxid-namespacegen_1_1mic_1a1a29504e3d6fb23c397d8523474955ce>`(double lx, double ly, double lz, double xy, double xz, double yz, const std::array<double, 3>& raw, const std::array<double, 3>& wrapped);
+	std::array<double, 3> :target:`euclideanFromImage<doxid-namespacegen_1_1mic_1aaf3cb4cba94f028d7b4288205810ae40>`(double lx, double ly, double lz, double xy, double xz, double yz, const std::array<double, 3>& raw, const std::array<double, 3>& image);
+
+	} // namespace mic

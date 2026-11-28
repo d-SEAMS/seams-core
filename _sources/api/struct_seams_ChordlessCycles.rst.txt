@@ -1,0 +1,97 @@
+.. index:: pair: struct; seams::ChordlessCycles
+.. _doxid-structseams_1_1_chordless_cycles:
+
+struct seams::ChordlessCycles
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Chordless cycles of one length. :ref:`More...<details-structseams_1_1_chordless_cycles>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct ChordlessCycles {
+		// fields
+	
+		int :ref:`size<doxid-structseams_1_1_chordless_cycles_1a5f95f7eec618c43954613bbe0a384efb>` = 0;
+		std::vector<int> :ref:`atoms<doxid-structseams_1_1_chordless_cycles_1ad77d911d26cc14072ee815b90a87bfbd>`;
+		std::vector<int> :ref:`per_atom<doxid-structseams_1_1_chordless_cycles_1a3e3866f354fc62751edb2b80574823b7>`;
+
+		// methods
+	
+		std::size_t :ref:`count<doxid-structseams_1_1_chordless_cycles_1a03ffa11ffd11a5a39645c7627541b9de>`() const;
+		std::vector<int> :ref:`cycle<doxid-structseams_1_1_chordless_cycles_1a474a2d811805dd08d756b290b21f84b3>`(std::size_t index) const;
+	};
+.. _details-structseams_1_1_chordless_cycles:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Chordless cycles of one length.
+
+``:ref:`atoms <doxid-structseams_1_1_chordless_cycles_1ad77d911d26cc14072ee815b90a87bfbd>``` holds :ref:`count() <doxid-structseams_1_1_chordless_cycles_1a03ffa11ffd11a5a39645c7627541b9de>` rows of ``:ref:`size <doxid-structseams_1_1_chordless_cycles_1a5f95f7eec618c43954613bbe0a384efb>``` atom indices, in the order seams_rings_chordless writes them. ``:ref:`per_atom <doxid-structseams_1_1_chordless_cycles_1a3e3866f354fc62751edb2b80574823b7>``` is the number of cycles through each atom.
+
+Fields
+------
+
+.. index:: pair: variable; size
+.. _doxid-structseams_1_1_chordless_cycles_1a5f95f7eec618c43954613bbe0a384efb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int size = 0
+
+Cycle length.
+
+.. index:: pair: variable; atoms
+.. _doxid-structseams_1_1_chordless_cycles_1ad77d911d26cc14072ee815b90a87bfbd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> atoms
+
+:ref:`count() <doxid-structseams_1_1_chordless_cycles_1a03ffa11ffd11a5a39645c7627541b9de>` rows of ``:ref:`size <doxid-structseams_1_1_chordless_cycles_1a5f95f7eec618c43954613bbe0a384efb>``` indices.
+
+.. index:: pair: variable; per_atom
+.. _doxid-structseams_1_1_chordless_cycles_1a3e3866f354fc62751edb2b80574823b7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> per_atom
+
+Cycles through each atom.
+
+Methods
+-------
+
+.. index:: pair: function; count
+.. _doxid-structseams_1_1_chordless_cycles_1a03ffa11ffd11a5a39645c7627541b9de:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t count() const
+
+Number of cycles.
+
+.. index:: pair: function; cycle
+.. _doxid-structseams_1_1_chordless_cycles_1a474a2d811805dd08d756b290b21f84b3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> cycle(std::size_t index) const
+
+Atom indices of one cycle.
+

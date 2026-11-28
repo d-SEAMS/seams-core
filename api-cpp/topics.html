@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: Topics</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/topics.html">
+<meta property="og:title" content="seams-core: Topics">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/topics.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: Topics">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('topics.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Topics</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock">Here is a list of all topics with brief descriptions:</div><div class="directory">
+<table class="directory">
+<tr id="row_0_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__prism3.html" target="_self">Bulk prisms</a></td><td class="desc">Candidate basal rings and prism blocks in bulk ice </td></tr>
+<tr id="row_1_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__types.html" target="_self">Types</a></td><td class="desc">Status codes, label codes, and opaque handles </td></tr>
+<tr id="row_2_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__meta.html" target="_self">Library metadata and errors</a></td><td class="desc">Version, names, error strings, and the thread team </td></tr>
+<tr id="row_3_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__frame.html" target="_self">Frames</a></td><td class="desc">Create, fill, read, and free a <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831" title="One frame.">seams_system</a> </td></tr>
+<tr id="row_4_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__neigh.html" target="_self">Neighbour lists</a></td><td class="desc">Cutoff, mutual, and k-nearest graphs as CSR </td></tr>
+<tr id="row_5_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__order.html" target="_self">Order parameters</a></td><td class="desc">CHILL, CHILL+, Steinhardt q_l, and the ice shell label </td></tr>
+<tr id="row_6_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__ring.html" target="_self">Rings</a></td><td class="desc">Primitive rings (Franzblau) and their labels </td></tr>
+<tr id="row_7_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__cage.html" target="_self">Cages and ice shells</a></td><td class="desc">Hexagonal and double-diamond cages, signatures, and shell labels </td></tr>
+<tr id="row_8_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__brine.html" target="_self">Ice/brine fronts</a></td><td class="desc">Planar front, rejection coefficient, profile, and pockets </td></tr>
+<tr id="row_9_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__more.html" target="_self">Further analyses</a></td><td class="desc">Aliases, k-nearest lists, RDF, hydrogen bonds, density, fingerprints, sites </td></tr>
+<tr id="row_10_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__sized.html" target="_self">Status-returning and length-checked entry points</a></td><td class="desc">Preferred spellings for new callers </td></tr>
+<tr id="row_11_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__frame__io.html" target="_self">Frame reload and read-back</a></td><td class="desc">Overwrite coordinates in place and copy the stored frame out </td></tr>
+<tr id="row_12_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__traj.html" target="_self">Trajectories and dynamics</a></td><td class="desc">Periodic unwrapping, molecular dipoles, and streaming time correlations </td></tr>
+<tr id="row_13_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__capi__pore.html" target="_self">Pore geometry</a></td><td class="desc">Fractional density, cylindrical pore profiles, and host-guest contacts </td></tr>
+<tr id="row_14_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__seams__cpp.html" target="_self">C++ API</a></td><td class="desc">Move-only handles and value results over <span class="tt"><a class="el" href="seams_8h.html" title="d-SEAMS stable C API, ABI 1.">seams.h</a></span> </td></tr>
+<tr id="row_15_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__bond.html" target="_self">Bond</a></td><td class="desc"></td></tr>
+<tr id="row_16_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__chill.html" target="_self">Chill</a></td><td class="desc"></td></tr>
+<tr id="row_17_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__ring.html" target="_self">Ring</a></td><td class="desc"></td></tr>
+<tr id="row_18_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__cage.html" target="_self">Cage</a></td><td class="desc"></td></tr>
+<tr id="row_19_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__clump.html" target="_self">Clump</a></td><td class="desc"></td></tr>
+<tr id="row_20_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__primitive.html" target="_self">Primitive</a></td><td class="desc"></td></tr>
+<tr id="row_21_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__gen.html" target="_self">Gen</a></td><td class="desc"></td></tr>
+<tr id="row_22_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__molSys.html" target="_self">MolSys</a></td><td class="desc"></td></tr>
+<tr id="row_23_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__nneigh.html" target="_self">Nneigh</a></td><td class="desc"></td></tr>
+<tr id="row_24_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__rdf.html" target="_self">Rdf</a></td><td class="desc"></td></tr>
+<tr id="row_25_" class="odd"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__rdf2.html" target="_self">Rdf2</a></td><td class="desc"></td></tr>
+<tr id="row_26_" class="even"><td class="entry"><span class="spacer">&#160;</span><a class="el" href="group__sinp.html" target="_self">Sinp</a></td><td class="desc"></td></tr>
+</table>
+</div><!-- directory -->
+</div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+.. index:: pair: group; Sinp
+.. _doxid-group__sinp:
+
+Sinp
+====
+
+.. toctree::
+	:hidden:
+
+	namespace_sinp.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`sinp<doxid-namespacesinp>`;
+

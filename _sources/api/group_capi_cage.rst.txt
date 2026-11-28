@@ -1,0 +1,11 @@
+.. index:: pair: group; Cages and ice shells
+.. _doxid-group__capi__cage:
+
+Cages and ice shells
+====================
+
+.. toctree::
+	:hidden:
+
+Hexagonal and double-diamond cages, signatures, and shell labels.
+

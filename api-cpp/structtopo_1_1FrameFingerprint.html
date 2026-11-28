@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: topo::FrameFingerprint Struct Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/structtopo_1_1FrameFingerprint.html">
+<meta property="og:title" content="seams-core: topo::FrameFingerprint Struct Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/structtopo_1_1FrameFingerprint.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: topo::FrameFingerprint Struct Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('structtopo_1_1FrameFingerprint.html','','structtopo_1_1FrameFingerprint-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">topo::FrameFingerprint Struct Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="topo__fingerprint_8hpp_source.html">src/include/internal/topo_fingerprint.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:ae73caf3f7d168ea457feb9b8fdb9c9fe" id="r_ae73caf3f7d168ea457feb9b8fdb9c9fe"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ae73caf3f7d168ea457feb9b8fdb9c9fe">key</a></td></tr>
+<tr class="memdesc:ae73caf3f7d168ea457feb9b8fdb9c9fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">hash of the sorted local keys and the ring census  <br /></td></tr>
+<tr class="memitem:a4d7179bcacbf440ed2a9bd1a8aefb260" id="r_a4d7179bcacbf440ed2a9bd1a8aefb260"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a4d7179bcacbf440ed2a9bd1a8aefb260">method</a></td></tr>
+<tr class="memdesc:a4d7179bcacbf440ed2a9bd1a8aefb260"><td class="mdescLeft">&#160;</td><td class="mdescRight">method of the local keys  <br /></td></tr>
+<tr class="memitem:a7552450f798d8591d7580e8d9422bcb6" id="r_a7552450f798d8591d7580e8d9422bcb6"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a7552450f798d8591d7580e8d9422bcb6">atomKeys</a></td></tr>
+<tr class="memdesc:a7552450f798d8591d7580e8d9422bcb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">one local key per atom  <br /></td></tr>
+<tr class="memitem:a7b460d00fe40ddad15c680fec009eecf" id="r_a7b460d00fe40ddad15c680fec009eecf"><td class="memItemLeft">std::map&lt; std::string, int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a7b460d00fe40ddad15c680fec009eecf">classes</a></td></tr>
+<tr class="memdesc:a7b460d00fe40ddad15c680fec009eecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">local key -&gt; number of atoms carrying it  <br /></td></tr>
+<tr class="memitem:af25731956ad220bebec8965a6e8432bc" id="r_af25731956ad220bebec8965a6e8432bc"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af25731956ad220bebec8965a6e8432bc">ringCensus</a></td></tr>
+<tr class="memdesc:af25731956ad220bebec8965a6e8432bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">ringCensus[s] = primitive rings of size s  <br /></td></tr>
+<tr class="memitem:a410ffeaef275b28480cdfca323f48985" id="r_a410ffeaef275b28480cdfca323f48985"><td class="memItemLeft">std::vector&lt; std::uint64_t &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a410ffeaef275b28480cdfca323f48985">wlAtom</a></td></tr>
+<tr class="memdesc:a410ffeaef275b28480cdfca323f48985"><td class="mdescLeft">&#160;</td><td class="mdescRight">per-atom WL hash used in the frame key  <br /></td></tr>
+<tr class="memitem:a436b359c7a9bb9b2c849d0e37d13962d" id="r_a436b359c7a9bb9b2c849d0e37d13962d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a436b359c7a9bb9b2c849d0e37d13962d">hops</a> = 0</td></tr>
+<tr class="memitem:a4bbbbc41fb33d1a11d8afe568969e383" id="r_a4bbbbc41fb33d1a11d8afe568969e383"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a4bbbbc41fb33d1a11d8afe568969e383">colored</a> = false</td></tr>
+<tr class="memdesc:a4bbbbc41fb33d1a11d8afe568969e383"><td class="mdescLeft">&#160;</td><td class="mdescRight">keys carry vertex colors  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00047">47</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a7552450f798d8591d7580e8d9422bcb6" name="a7552450f798d8591d7580e8d9422bcb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7552450f798d8591d7580e8d9422bcb6">&#9670;&#160;</a></span>atomKeys</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::string&gt; topo::FrameFingerprint::atomKeys</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>one local key per atom </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00050">50</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7b460d00fe40ddad15c680fec009eecf" name="a7b460d00fe40ddad15c680fec009eecf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b460d00fe40ddad15c680fec009eecf">&#9670;&#160;</a></span>classes</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::string, int&gt; topo::FrameFingerprint::classes</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>local key -&gt; number of atoms carrying it </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00051">51</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a4bbbbc41fb33d1a11d8afe568969e383" name="a4bbbbc41fb33d1a11d8afe568969e383"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bbbbc41fb33d1a11d8afe568969e383">&#9670;&#160;</a></span>colored</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool topo::FrameFingerprint::colored = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>keys carry vertex colors </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00055">55</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a436b359c7a9bb9b2c849d0e37d13962d" name="a436b359c7a9bb9b2c849d0e37d13962d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a436b359c7a9bb9b2c849d0e37d13962d">&#9670;&#160;</a></span>hops</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int topo::FrameFingerprint::hops = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00054">54</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae73caf3f7d168ea457feb9b8fdb9c9fe" name="ae73caf3f7d168ea457feb9b8fdb9c9fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae73caf3f7d168ea457feb9b8fdb9c9fe">&#9670;&#160;</a></span>key</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string topo::FrameFingerprint::key</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>hash of the sorted local keys and the ring census </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00048">48</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a4d7179bcacbf440ed2a9bd1a8aefb260" name="a4d7179bcacbf440ed2a9bd1a8aefb260"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d7179bcacbf440ed2a9bd1a8aefb260">&#9670;&#160;</a></span>method</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string topo::FrameFingerprint::method</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>method of the local keys </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00049">49</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af25731956ad220bebec8965a6e8432bc" name="af25731956ad220bebec8965a6e8432bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af25731956ad220bebec8965a6e8432bc">&#9670;&#160;</a></span>ringCensus</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;int&gt; topo::FrameFingerprint::ringCensus</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>ringCensus[s] = primitive rings of size s </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00052">52</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a410ffeaef275b28480cdfca323f48985" name="a410ffeaef275b28480cdfca323f48985"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a410ffeaef275b28480cdfca323f48985">&#9670;&#160;</a></span>wlAtom</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::uint64_t&gt; topo::FrameFingerprint::wlAtom</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>per-atom WL hash used in the frame key </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00053">53</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>src/include/internal/<a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacetopo.html">topo</a></li><li class="navelem"><a href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a></li>
+  </ul>
+</div>
+</body>
+</html>

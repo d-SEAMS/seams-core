@@ -1,0 +1,214 @@
+.. _global:
+.. index:: pair: namespace; global
+
+Global Namespace
+================
+
+.. toctree::
+	:hidden:
+
+	namespace_absor.rst
+	namespace_chordless.rst
+	namespace_gpu.rst
+	namespace_iface.rst
+	namespace_ira.rst
+	namespace_match.rst
+	namespace_nucleation.rst
+	namespace_phase.rst
+	namespace_pntToPnt.rst
+	namespace_pore.rst
+	namespace_science.rst
+	namespace_seams.rst
+	namespace_site.rst
+	namespace_sout.rst
+	namespace_std.rst
+	namespace_symm.rst
+	namespace_topo.rst
+	namespace_topoparam.rst
+	namespace_traj.rst
+	namespace_tum.rst
+	namespace_water.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`absor<doxid-namespaceabsor>`;
+	namespace :ref:`bond<doxid-namespacebond>`;
+	namespace :ref:`cage<doxid-namespacecage>`;
+	namespace :ref:`chill<doxid-namespacechill>`;
+	namespace :ref:`chordless<doxid-namespacechordless>`;
+	namespace :ref:`clump<doxid-namespaceclump>`;
+	namespace :ref:`gen<doxid-namespacegen>`;
+		namespace :ref:`gen::mic<doxid-namespacegen_1_1mic>`;
+	namespace :ref:`gpu<doxid-namespacegpu>`;
+	namespace :ref:`iface<doxid-namespaceiface>`;
+	namespace :ref:`ira<doxid-namespaceira>`;
+	namespace :ref:`match<doxid-namespacematch>`;
+	namespace :ref:`molSys<doxid-namespacemol_sys>`;
+	namespace :ref:`nneigh<doxid-namespacenneigh>`;
+	namespace :ref:`nucleation<doxid-namespacenucleation>`;
+	namespace :ref:`phase<doxid-namespacephase>`;
+	namespace :ref:`pntToPnt<doxid-namespacepnt_to_pnt>`;
+	namespace :ref:`pore<doxid-namespacepore>`;
+	namespace :ref:`primitive<doxid-namespaceprimitive>`;
+	namespace :ref:`prism3<doxid-namespaceprism3>`;
+	namespace :ref:`rdf<doxid-namespacerdf>`;
+	namespace :ref:`rdf2<doxid-namespacerdf2>`;
+	namespace :ref:`ring<doxid-namespacering>`;
+	namespace :ref:`science<doxid-namespacescience>`;
+	namespace :ref:`seams<doxid-namespaceseams>`;
+		namespace :ref:`seams::cfg<doxid-namespaceseams_1_1cfg>`;
+		namespace :ref:`seams::cpu<doxid-namespaceseams_1_1cpu>`;
+		namespace :ref:`seams::detail<doxid-namespaceseams_1_1detail>`;
+		namespace :ref:`seams::domain<doxid-namespaceseams_1_1domain>`;
+		namespace :ref:`seams::minimax<doxid-namespaceseams_1_1minimax>`;
+		namespace :ref:`seams::product<doxid-namespaceseams_1_1product>`;
+		namespace :ref:`seams::solid<doxid-namespaceseams_1_1solid>`;
+		namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
+		namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
+		namespace :ref:`seams::team<doxid-namespaceseams_1_1team>`;
+			namespace :ref:`seams::team::detail<doxid-namespaceseams_1_1team_1_1detail>`;
+		namespace :ref:`seams::tsan<doxid-namespaceseams_1_1tsan>`;
+		namespace :ref:`seams::wigner<doxid-namespaceseams_1_1wigner>`;
+		namespace :ref:`seams::ylm<doxid-namespaceseams_1_1ylm>`;
+	namespace :ref:`sinp<doxid-namespacesinp>`;
+	namespace :ref:`site<doxid-namespacesite>`;
+	namespace :ref:`sout<doxid-namespacesout>`;
+	namespace :ref:`sph<doxid-namespacesph>`;
+	namespace :ref:`std<doxid-namespacestd>`;
+	namespace :ref:`symm<doxid-namespacesymm>`;
+		namespace :ref:`symm::avx2<doxid-namespacesymm_1_1avx2>`;
+		namespace :ref:`symm::generic<doxid-namespacesymm_1_1generic>`;
+	namespace :ref:`topo<doxid-namespacetopo>`;
+	namespace :ref:`topoparam<doxid-namespacetopoparam>`;
+	namespace :ref:`traj<doxid-namespacetraj>`;
+	namespace :ref:`tum<doxid-namespacetum>`;
+		namespace :ref:`tum::device<doxid-namespacetum_1_1device>`;
+	namespace :ref:`tum3<doxid-namespacetum3>`;
+	namespace :ref:`water<doxid-namespacewater>`;
+
+	// structs
+
+	struct :ref:`seams_directed_hbond<doxid-structseams__directed__hbond>`;
+	struct :ref:`seams_hbond_edge<doxid-structseams__hbond__edge>`;
+
+	// global functions
+
+	void :target:`libira_cshda<doxid-iralib__interf_8h_1aa8a7fbd33077ea2bb23a69a87ec25ab2>`(int nat1, int* typ1, double* coords1, int nat2, int* typ2, double* coords2, double thr, int** found, double** dists);
+	void :target:`libira_cshda_from_cost<doxid-iralib__interf_8h_1af1f7561da936881e86c1470e65b1e920>`(int n1, int n2, double* cost, int** found, double** dists);
+	void :target:`libira_cshda_pbc<doxid-iralib__interf_8h_1a43b4ccf513280a85d6954bf58bc8bd8c>`(int nat1, int* typ1, double* coords1, int nat2, int* typ2, double* coords2, double* lat2, double thr, int** found, double** dists);
+	void :target:`libira_match<doxid-iralib__interf_8h_1a8773d7c8c8c2aa1fdda7a571b18cad8a>`(int nat1, int* typ1, double* coords1, int* cand1, int nat2, int* typ2, double* coords2, int* cand2, double km_factor, double** rmat, double** tr, int** perm, double* hd, int* cerr);
+	void :target:`libira_svdrot<doxid-iralib__interf_8h_1aa4bdea026816fa57b4fbd9a26184065b>`(int nat1, int* typ1, double* coords1, int nat2, int* typ2, double* coords2, double** rotation, double** translation, int* ierr);
+	void :target:`libira_cshda_svd<doxid-iralib__interf_8h_1afbd705cc56c08cae0d6c24a149c37a4b>`(int nat1, int* typ1, double* coords1, int nat2, int* typ2, double* coords2, double dthr, int recenter, int** perm, double** dists, double** rmat, double** tr, int* ierr);
+	void :target:`libira_get_version<doxid-iralib__interf_8h_1a8bb56c34d1da7e9a97fda278da84246c>`(char* string, long* date);
+	void :target:`libira_compute_all<doxid-iralib__interf_8h_1a5606132a5ff41191976528b882874232>`(int nat, int* typ, double* coords, double sym_thr, int prescreen_ih, int* n_mat, double** mat_data, int** perm_data, char** op_data, int** n_data, int** p_data, double** ax_data, double** angle_data, double** dHausdorff_data, char** pg, int* n_prin_ax, double** prin_ax, int* cerr);
+	void :target:`libira_get_symm_ops<doxid-iralib__interf_8h_1a62d22ffeec7542f49671abaa48efa8ff>`(int nat, int* typ, double* coords, double sym_thr, int prescreen_ih, int* nmat, double** mat_data, int* cerr);
+	void :target:`libira_get_pg<doxid-iralib__interf_8h_1ae8c594ce9aefc456b529fe357fd04a75>`(int n_mat, double* mat_data, char** pg, int* n_prin_ax, double** prin_ax, int verb, int* cerr);
+	void :target:`libira_unique_ax_angle<doxid-iralib__interf_8h_1a5eaede0f0aa62f2d04da940d97031e6e>`(int nmat, double* mat_data, char** op_data, double** ax_data, double** angle_data, int* cerr);
+	void :target:`libira_analmat<doxid-iralib__interf_8h_1a7673650bc73c2edb2ea09b7b1c78e06b>`(double* mat, char** op, int* n, int* p, double** ax, double* angle, int* cerr);
+	void :target:`libira_get_perm<doxid-iralib__interf_8h_1a92bf190b59b87796a4e15907c7f0f450>`(int nat, int* typ, double* coords, int nmat, double* mat_data, int** perm_data, double** dHausdorff_data);
+	void :target:`libira_get_combos<doxid-iralib__interf_8h_1a5268a50f9e0be0b3904bcbfe6285cf0c>`(int nat, int* typ, double* coords, int nmat, double* mat_data, int* nmat_out, double** mat_out, int* cerr);
+	void :target:`libira_try_mat<doxid-iralib__interf_8h_1a2ff0087569e7e744bd0105b29a036ed8>`(int nat, int* typ, double* coords, double* rmat, double* dh, int** perm);
+	void :target:`libira_construct_operation<doxid-iralib__interf_8h_1ac14e07c91cb4dad5efae1163c1821ccd>`(char* op, double* axis, double angle, double** rmat, int* cerr);
+	void :target:`libira_mat_combos<doxid-iralib__interf_8h_1afcc0b2ddfaeeda67182e8f52046316af>`(int nmat, double* mat_data, int* nmat_out, double** mat_out);
+	void :target:`libira_ext_bfield<doxid-iralib__interf_8h_1af6cda864e3b093fd509a7bb1277dd02e>`(int nmat, double* mat_data, double* b_vec, int* nmat_out, double** mat_out);
+	void :target:`libira_get_err_msg<doxid-iralib__interf_8h_1a975f49132bdbf1e2bb44929d8454cfde>`(int ierr, char** msg);
+	void :target:`libira_matrix_distance<doxid-iralib__interf_8h_1a22f0c3a4170961639bf5d124f003a1fc>`(const double* mat1, const double* mat2, double* dist);
+	void :target:`libira_check_collinear<doxid-iralib__interf_8h_1a58d36f3eac3b7eec698378079aa0263a>`(int nat, double* coords, int* collinear, double** ax);
+	int :target:`seams_chill_plus_flat<doxid-seams__c__api_8h_1a4779c3619c307b0e9f4aa8b82f01e73d>`(const double* xyz, int n, const double* box, int* labels);
+	int :target:`seams_chill_plus_graph<doxid-seams__c__api_8h_1a3cdbb04d3443c73b4f3067360bea8bf7>`(const double* xyz, int n, const double* box, double cutoff, const char* graph, int* labels);
+	int :target:`seams_chill_plus_rule<doxid-seams__c__api_8h_1a15b8a71d8194a40d3a495a6d6103dd7b>`(const double* xyz, int n, const double* box, double cutoff, const char* graph, const char* rule, int* labels);
+	int :target:`seams_chill_plus_graph_lammps<doxid-seams__c__api_8h_1a905d0436a8fd534e4177ff7627143e04>`(const double* xyz, int n, const double* box9, double cutoff, const char* graph, int* labels);
+	int :target:`seams_symmetry_match<doxid-seams__c__api_8h_1a7b2a4f4bf57d15eb7feb3f526b2bc998>`(const double* points, int n, int* template_id, double* rmsd, double* hausdorff, double* rotation9, double* translation3, int* permutation);
+	int :target:`seams_symmetry_point_group<doxid-seams__c__api_8h_1ad577898ecee04de6a1a7963f5605a52d>`(const double* points, int n, double sym_thr, char* symbol, int symbol_len, int* n_operations);
+	int :target:`seams_symmetry_space_group<doxid-seams__c__api_8h_1a2c3719eca0b342deb63fdaad3a4c9287>`(const double* lattice9, const double* cartesian, int n, double symprec, int* number, char* symbol, int symbol_len);
+	int :target:`seams_symmetry_template<doxid-seams__c__api_8h_1afd32896dc0affc747fc4135223d5b681>`(int id, double* points, int cap, int* n_out);
+	int :target:`seams_symmetry_crystal<doxid-seams__c__api_8h_1af3d4dc8bf1573a9e50de07be31190cc1>`(int which, double* lattice9, double* xyz, int cap, int* n_out);
+	int :target:`seams_symmetry_backend<doxid-seams__c__api_8h_1a286fe6a9075c6439ef46ed62e24e3418>`(char* name, int name_len);
+	int :target:`seams_symmetry_classify<doxid-seams__c__api_8h_1af1a71a01de96262b637c4f96281db221>`(const double* xyz, int n, const double* lattice9, int* labels);
+	int :target:`seams_symmetry_classify_tol<doxid-seams__c__api_8h_1a2a8ad5ce8d5997725826f2b0d81d000f>`(const double* xyz, int n, const double* lattice9, double shell_rmsd, int* labels);
+	int :target:`seams_symmetry_classify_gates<doxid-seams__c__api_8h_1aed9cb6f8a05fb3491f6fab4f5794724f>`(const double* xyz, int n, const double* lattice9, double shell_rmsd, double thermal_q, double bond_ratio, int* labels);
+	int :target:`seams_chill_plus_species<doxid-seams__c__api_8h_1a2b8636a1c0255423098b356dfbaa2b50>`(const double* xyz, int n, const double* box9, const int* types, const int* mols, int oxygen_type, int mol_mode, const int* mol_ids, int n_mol_ids, double cutoff, const char* graph, int* labels, int* ion_ice, int* ion_liquid, double* ion_front);
+	int :target:`seams_oxygen_cutoff_degree<doxid-seams__c__api_8h_1a945ab239fc029a7acbe76f72121ec83e>`(const double* xyz, int n, const double* box9, const int* types, const int* mols, int oxygen_type, int mol_mode, const int* mol_ids, int n_mol_ids, double cutoff, int* degree);
+	const char* :target:`seams_c_error<doxid-seams__c__api_8h_1ae2efe84c8d250d2fce58fb7da028484d>`(void);
+	int :target:`seams_q4_q6<doxid-seams__c__api_8h_1a0c793871e8522bd91c910effc9decde7>`(const double* xyz, int n, const double* box, double cutoff, double* q4, double* q6, double* q4bar, double* q6bar);
+	int :target:`seams_q4_q6_lammps<doxid-seams__c__api_8h_1aaf35eae4a6cfbc834ef146ed56555b45>`(const double* xyz, int n, const double* box9, double cutoff, double* q4, double* q6, double* q4bar, double* q6bar);
+	int :target:`seams_cutoff_csr<doxid-seams__c__api_8h_1a050628a119d97a5fd5070aef345853ee>`(const double* xyz, int n, const double* box9, double cutoff, int* offsets, int* cols, int cols_cap, int* n_cols);
+	int :target:`seams_ql_cutoff<doxid-seams__c__api_8h_1a61177c6e29fbc9f4431662d7b77f6b3b>`(const double* xyz, int n, const double* box9, double cutoff, int order_l, double* ql);
+	void :target:`seams_c_last_stages<doxid-seams__c__api_8h_1adfe45483219fd9882d34d16c74fbca43>`(double seconds[4]);
+	int :target:`seams_diamond_cna<doxid-seams__c__api_8h_1af044fde824bc475804a89763c9a74120>`(const double* xyz, int n, const double* box9, double cutoff, int* labels);
+	int :target:`seams_primitive_rings<doxid-seams__c__api_8h_1a84bdcf96e064a16b174b7a8a8392b49b>`(const double* xyz, int n, const double* box9, double cutoff, int max_depth, int* counts, int counts_len);
+	int :target:`lc_team_run<doxid-team__run_8hpp_1ab970b747c4141c129fddac78412f0ff4>`(std::size_t nstages, const std::size_t* chunks, void(*)(void*, std::size_t, std::size_t, std::size_t) fn, void* ctx);
+	void :target:`lc_set_threads<doxid-thread__team_8hpp_1a06195ae10c6517c497c4d0b11d8722b1>`(int n);
+	int :target:`lc_num_threads<doxid-thread__team_8hpp_1af5582f67f5a0e934909242cf69906676>`(void);
+	void :target:`lc_set_places<doxid-thread__team_8hpp_1aa29d52d05c8537df577170e3d01c5401>`(const int* cpus, int n);
+
+	// macros
+
+	#define :ref:`SEAMS_ABI<doxid-seams_8h_1a02e818d684aff98999fadd984533e454>`
+	#define :target:`SEAMS_ALWAYS_INLINE<doxid-compiler__compat_8hpp_1a63c1f08ae33fe2fb32efd437f3f021b8>`
+	#define :ref:`SEAMS_API<doxid-seams_8h_1a7b6e907d1aec143f224d85fdbdf57605>`
+	#define :target:`SEAMS_COLD<doxid-compiler__compat_8hpp_1a97f6a4fac4c640c65372654751a38e0a>`
+	#define :ref:`SEAMS_DEPRECATED<doxid-seams_8h_1ab04e0dc6747fd02f91c81bcf05d42efe>`(msg)
+	#define :target:`SEAMS_EH_API<doxid-compiler__compat_8hpp_1a15f882ad989e3ec281793a243cacd8f8>`
+	#define :target:`SEAMS_EXPORT_USED<doxid-compiler__compat_8hpp_1a7a4f0e8484eb2ffb4016a7a4953a3832>`
+	#define :target:`SEAMS_NOINLINE<doxid-compiler__compat_8hpp_1ae5d0f11cf93a39eee040de2265b3c427>`
+	#define :target:`SEAMS_OPTIMIZE<doxid-compiler__compat_8hpp_1a7378d18b56ec306e83f3b5981c43524f>`(spec)
+	#define :target:`SEAMS_TARGET<doxid-compiler__compat_8hpp_1a3018f39bb1ef16586159a38c9cbd0c14>`(spec)
+	#define :target:`SEAMS_WEAK<doxid-compiler__compat_8hpp_1a0ffee6e879b76c3103f4b01fc93de9f8>`
+
+.. _details-global:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Macros
+------
+
+.. index:: pair: define; SEAMS_ABI
+.. _doxid-seams_8h_1a02e818d684aff98999fadd984533e454:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	#define SEAMS_ABI
+
+ABI generation of this header.
+
+Bumped only on a breaking change.
+
+.. index:: pair: define; SEAMS_API
+.. _doxid-seams_8h_1a7b6e907d1aec143f224d85fdbdf57605:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	#define SEAMS_API
+
+Marks a symbol exported by libseams.
+
+The library is compiled with hidden visibility and SEAMS_BUILDING defined, so only declarations carrying this macro are exported. Windows consumers get dllimport. Define SEAMS_STATIC when linking a static archive.
+
+.. index:: pair: define; SEAMS_DEPRECATED
+.. _doxid-seams_8h_1ab04e0dc6747fd02f91c81bcf05d42efe:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	#define SEAMS_DEPRECATED(msg)
+
+Marks an entry point kept for ABI 1 callers.
+
+``msg`` names the replacement.
+

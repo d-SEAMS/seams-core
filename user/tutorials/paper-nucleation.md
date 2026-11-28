@@ -1,0 +1,43 @@
+<!-- https://docs.dseams.info/user/tutorials/paper-nucleation.md -->
+
+# Ice-likeness along a short nucleation run {#ice-likeness-along-a-short-nucleation-run}
+
+Ice-likeness here is the mean Lechner-Dellago $\bar q_6$. A liquid
+sits near 0.2. A crystal sits near 0.5. A nucleus in a liquid pulls
+the mean up as it grows, which is why the score is the whole-frame
+average and not a single molecule.
+
+The example trajectory has three frames. GenIce ice
+Ih is shaken into a liquid. The basal half of the original lattice is
+the nucleus. Frame 0 is the shaken liquid. Frame 1 puts half of that
+nucleus back on its lattice sites. Frame 2 puts the rest back. OpenMM
+relaxes each frame for two steps with those sites restrained, so the
+liquid can move and the nucleus cannot dissolve before you measure it.
+
+The three frames give
+
+```text
+nucleation frame 0 q6bar 0.276023
+nucleation frame 1 q6bar 0.320504
+nucleation frame 2 q6bar 0.334254
+```
+
+The mean rises at each stage.
+
+## Full run {#full-run}
+
+The paper trajectory is figshare
+[10.6084/m9.figshare.11448702.v1](https://doi.org/10.6084/m9.figshare.11448702.v1):
+148 frames of 4096 molecules, md5 `c28fc209a2854d2ba49e8f9b55accbe8`.
+Run `seams steinhardt` on every frame.
+
+```text
+nucleation full paper molecules 4096 frames 148
+nucleation full frame 1 q6bar 0.26063
+nucleation full frame 148 q6bar 0.287256
+nucleation full lines 148
+```
+
+Frame 1 of that file is the shipped
+`input/traj/nucleation_f1.lammpstrj`. The mean $\bar q_6$ on frame
+1 is 0.26063. Frame 148 is 0.287256.

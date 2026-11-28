@@ -1,0 +1,68 @@
+.. index:: pair: struct; site::InsideTrace
+.. _doxid-structsite_1_1_inside_trace:
+
+struct site::InsideTrace
+========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/site.hpp>
+	
+	struct InsideTrace {
+		// fields
+	
+		bool :target:`inside<doxid-structsite_1_1_inside_trace_1a17a084da96d1f72f73c60ef608839b26>` = false;
+		bool :ref:`onFace<doxid-structsite_1_1_inside_trace_1a30bedfd7fd5bb7610e2db4f0dada7935>` = false;
+		int :ref:`rays<doxid-structsite_1_1_inside_trace_1a381a39eb4dcfc1af4599763542930b59>` = 0;
+		int :ref:`crossings<doxid-structsite_1_1_inside_trace_1adb9ae5efad17e991e47010b3b44b4599>` = 0;
+	};
+.. _details-structsite_1_1_inside_trace:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; onFace
+.. _doxid-structsite_1_1_inside_trace_1a30bedfd7fd5bb7610e2db4f0dada7935:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool onFace = false
+
+the guest lies on a triangle within tolerance
+
+.. index:: pair: variable; rays
+.. _doxid-structsite_1_1_inside_trace_1a381a39eb4dcfc1af4599763542930b59:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int rays = 0
+
+directions tried, grazing ones included
+
+.. index:: pair: variable; crossings
+.. _doxid-structsite_1_1_inside_trace_1adb9ae5efad17e991e47010b3b44b4599:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int crossings = 0
+
+triangles met by the ray that decided
+

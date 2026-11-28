@@ -1,0 +1,51 @@
+.. index:: pair: struct; cage::Signature
+.. _doxid-structcage_1_1_signature:
+
+struct cage::Signature
+======================
+
+.. toctree::
+	:hidden:
+
+	enum_cage_Signature_Kind.rst
+
+Overview
+~~~~~~~~
+
+Ring-size census of a polyhedral cage: size -> number of faces. :ref:`More...<details-structcage_1_1_signature>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/cage.hpp>
+	
+	struct Signature {
+		// enums
+	
+		enum :ref:`Kind<doxid-structcage_1_1_signature_1aeaa9e4802e930824b43c274cec2486c5>`;
+
+		// fields
+	
+		std::map<int, int> :target:`counts<doxid-structcage_1_1_signature_1ad47448e66b48e0598596796daa7b9ec4>`;
+		:ref:`Kind<doxid-structcage_1_1_signature_1aeaa9e4802e930824b43c274cec2486c5>` :target:`kind<doxid-structcage_1_1_signature_1ae19997b93f028ab056b7d5fe5bc18fd3>` = :ref:`Kind::Census<doxid-structcage_1_1_signature_1aeaa9e4802e930824b43c274cec2486c5a9e150a2b8f77e55bbb1c616c3edc8a64>`;
+
+		// methods
+	
+		static Signature :target:`parse<doxid-structcage_1_1_signature_1a6eaee7d8d7515dec228c388a305606ec>`(std::string_view spec);
+		std::string :target:`str<doxid-structcage_1_1_signature_1ac8c529682fe69784b3a0df99c096ecc2>`() const;
+		int :target:`faceCount<doxid-structcage_1_1_signature_1a8911367fdf2b7710ed9c4c2a4da32782>`() const;
+		int :target:`maxRingSize<doxid-structcage_1_1_signature_1ad5104ccecc1bdc8180c016d00d8f4f55>`() const;
+		bool :target:`containsSize<doxid-structcage_1_1_signature_1a3f99012c3d6e4ea8d40ff669340a8ed8>`(int size) const;
+		bool :target:`operator==<doxid-structcage_1_1_signature_1acbde2dfeea35b12d34fb44ef3406c232>`(const Signature& other) const;
+		bool :target:`operator!=<doxid-structcage_1_1_signature_1a3241909e4cd663a30a2ff53329f54199>`(const Signature& other) const;
+	};
+.. _details-structcage_1_1_signature:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Ring-size census of a polyhedral cage: size -> number of faces.
+
+Parse a comma list (``4:6,6:8``) or a named table entry (``sodalite``, ``alpha``, ``512``, ``51262``, ``51264``, ``51268``, ``sh``, ``sH``, ``hc``, ``ddc``). Counts of a repeated size add. Every size and count must be positive. The names ``hc`` and ``ddc`` keep the TUM ice finders (five hexagons and seven hexagons); a raw list ``4:6,6:2`` is the hexagonal prism.
+

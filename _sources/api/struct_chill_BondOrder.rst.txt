@@ -1,0 +1,70 @@
+.. index:: pair: struct; chill::BondOrder
+.. _doxid-structchill_1_1_bond_order:
+
+struct chill::BondOrder
+=======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Unnormalised real l = 3 bond-order vector of the atoms *which* selects. :ref:`More...<details-structchill_1_1_bond_order>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/bop.hpp>
+	
+	struct BondOrder {
+		// fields
+	
+		int :target:`keepMax<doxid-structchill_1_1_bond_order_1a7032ff3175566b4ebf84f3b5b01c8b8a>` = 0;
+		std::vector<double> :target:`q<doxid-structchill_1_1_bond_order_1a31d7293e8922c8b5c3f8634c6df6c604>`;
+		std::vector<double> :ref:`norm<doxid-structchill_1_1_bond_order_1aeb7479599dc6202e7c2b225e28118608>`;
+		std::vector<int> :ref:`nkeep<doxid-structchill_1_1_bond_order_1a70c3e983b66911480b33c5aa1d606ca9>`;
+		std::vector<int> :target:`chosen<doxid-structchill_1_1_bond_order_1a2199c596d5eb93f14961a070d07a6fe4>`;
+		std::vector<std::vector<int>> :ref:`rows<doxid-structchill_1_1_bond_order_1aaeaace17f46d341e1f09eac06dc64faf>`;
+	};
+.. _details-structchill_1_1_bond_order:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Unnormalised real l = 3 bond-order vector of the atoms *which* selects. *which* null computes every atom. Ghost slots stay zero so a neighbour rank can write the vector it computed for that atom.
+
+Fields
+------
+
+.. index:: pair: variable; norm
+.. _doxid-structchill_1_1_bond_order_1aeb7479599dc6202e7c2b225e28118608:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> norm
+
+atom-major, 7 channels
+
+.. index:: pair: variable; nkeep
+.. _doxid-structchill_1_1_bond_order_1a70c3e983b66911480b33c5aa1d606ca9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> nkeep
+
+squared norm of q, with the m != 0 factor
+
+.. index:: pair: variable; rows
+.. _doxid-structchill_1_1_bond_order_1aaeaace17f46d341e1f09eac06dc64faf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> rows
+
+keepMax > 0, local indices, -1 empty
+

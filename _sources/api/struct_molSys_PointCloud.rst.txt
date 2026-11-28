@@ -1,0 +1,103 @@
+.. index:: pair: struct; molSys::PointCloud
+.. _doxid-structmol_sys_1_1_point_cloud:
+
+template struct molSys::PointCloud
+==================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This contains a collection of points; contains information for a particular frame. :ref:`More...<details-structmol_sys_1_1_point_cloud>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/mol_sys.hpp>
+	
+	template <typename S, CoordinateScalar T>
+	struct PointCloud {
+		// fields
+	
+		std::vector<S> :target:`pts<doxid-structmol_sys_1_1_point_cloud_1a67ab89369cd26572878a91afd521ef81>`;
+		int :ref:`currentFrame<doxid-structmol_sys_1_1_point_cloud_1afccb5a0daab40c3ccc83e4494f4176d7>` = 0;
+		int :ref:`nop<doxid-structmol_sys_1_1_point_cloud_1a2bdcb9260bd83f313a2d27fcc6437ef1>` = 0;
+		std::vector<T> :ref:`box<doxid-structmol_sys_1_1_point_cloud_1aa7d9b8543780baf4a495c7acdb1f87d8>`;
+		std::vector<T> :ref:`boxLow<doxid-structmol_sys_1_1_point_cloud_1ac861daaeb2b1e75a6ac9eb3390bc6105>`;
+		std::unordered_map<int, int> :ref:`idIndexMap<doxid-structmol_sys_1_1_point_cloud_1a8e48a0ae066c2585e7320cdaa0cbc8db>`;
+	};
+.. _details-structmol_sys_1_1_point_cloud:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This contains a collection of points; contains information for a particular frame.
+
+Specifically
+
+* A vector of :ref:`Point <doxid-structmol_sys_1_1_point>` structs
+
+* The current frame number
+
+* The number of particles in the current frame
+
+* A vector for the simulation box lengths in each dimension
+
+* A vector containing the absolute lower box coordinates
+
+Fields
+------
+
+.. index:: pair: variable; currentFrame
+.. _doxid-structmol_sys_1_1_point_cloud_1afccb5a0daab40c3ccc83e4494f4176d7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int currentFrame = 0
+
+Collection of points.
+
+.. index:: pair: variable; nop
+.. _doxid-structmol_sys_1_1_point_cloud_1a2bdcb9260bd83f313a2d27fcc6437ef1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int nop = 0
+
+Current frame number.
+
+.. index:: pair: variable; box
+.. _doxid-structmol_sys_1_1_point_cloud_1aa7d9b8543780baf4a495c7acdb1f87d8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<T> box
+
+Number of atoms.
+
+.. index:: pair: variable; boxLow
+.. _doxid-structmol_sys_1_1_point_cloud_1ac861daaeb2b1e75a6ac9eb3390bc6105:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<T> boxLow
+
+Periodic box lengths.
+
+.. index:: pair: variable; idIndexMap
+.. _doxid-structmol_sys_1_1_point_cloud_1a8e48a0ae066c2585e7320cdaa0cbc8db:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::unordered_map<int, int> idIndexMap
+
+xlo, ylo, zlo
+

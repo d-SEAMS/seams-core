@@ -1,0 +1,24 @@
+.. index:: pair: struct; clump::Domain
+.. _doxid-structclump_1_1_domain:
+
+struct clump::Domain
+====================
+
+.. toctree::
+	:hidden:
+
+Largest connected component of a Boolean site mask (Stoddard). percolation is N_largest / N_subset. Does not classify ice.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/cluster.hpp>
+	
+	struct Domain {
+		// fields
+	
+		int :target:`largest<doxid-structclump_1_1_domain_1a81b32e2237269a4ac983c5c894aee8bd>` = 0;
+		int :target:`subset<doxid-structclump_1_1_domain_1a51cef87b47075b4c44641511e66247b0>` = 0;
+		double :target:`percolation<doxid-structclump_1_1_domain_1acfa4b2b1ec2f872af09f9edc6c201b11>` = 0.0;
+	};

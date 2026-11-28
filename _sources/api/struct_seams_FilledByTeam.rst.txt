@@ -1,0 +1,41 @@
+.. index:: pair: struct; seams::FilledByTeam
+.. _doxid-structseams_1_1_filled_by_team:
+
+template struct seams::FilledByTeam
+===================================
+
+.. toctree::
+	:hidden:
+
+	struct_seams_FilledByTeam_rebind.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/par_team.hpp>
+	
+	template <class T>
+	struct FilledByTeam: public std::allocator< T > {
+		// structs
+	
+		template <class U>
+		struct :ref:`rebind<doxid-structseams_1_1_filled_by_team_1_1rebind>`;
+
+		// construction
+	
+		:target:`FilledByTeam<doxid-structseams_1_1_filled_by_team_1a66557ca4c098935f86dd35b2239526c4>`();
+	
+		template <class U>
+		:target:`FilledByTeam<doxid-structseams_1_1_filled_by_team_1ae01cc2721f262d748f9f2dc0d10580fe>`(const FilledByTeam<U>&);
+
+		// methods
+	
+		template <class U>
+		void :target:`construct<doxid-structseams_1_1_filled_by_team_1ad56508bd0eb35c23b7e1ac7ef6aa5060>`(U* p);
+	
+		template <class U, class... Args>
+		void :target:`construct<doxid-structseams_1_1_filled_by_team_1aa513af07fecbe5e3d08708669950d214>`(U* p, Args&&... args);
+	};

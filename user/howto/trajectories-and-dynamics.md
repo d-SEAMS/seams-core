@@ -1,0 +1,167 @@
+<!-- https://docs.dseams.info/user/howto/trajectories-and-dynamics.md -->
+
+# Trajectories, dipoles, and time-correlation functions {#trajectories-dipoles-and-time-correlation-functions}
+
+Confined-water trajectories wrap molecules across periodic boundaries, split
+transport into axial and in-plane components, and track orientational and
+hydrogen-bond relaxation over thousands of frames. `pydseams.TrajectorySequence`,
+`include/seams.h`, and `include/seams.hpp` provide multi-frame streaming,
+triclinic minimum-image unwrapping, per-molecule orientation vectors, and
+bounded-lag multi-origin accumulators.
+
+## Multi-frame `TrajectorySequence` container {#multi-frame-trajectorysequence-container}
+
+`pydseams.open_trajectory` returns a `pydseams.TrajectorySequence` over a
+LAMMPS dump or any chemfiles-supported trajectory, for lazy iteration, `len`,
+positive and negative indexing, and `start:stop:step` slicing without loading
+every frame into memory at once.
+
+```python
+>>> import pydseams
+>>> traj = pydseams.open_trajectory("input/traj/nucleation_three.lammpstrj")
+>>> len(traj)
+3
+>>> traj[0].n_atoms == traj[-1].n_atoms
+True
+>>> len(traj[:2])
+2
+```
+
+`pydseams.Trajectory` names a different class. Throughout 2.14.x it stays an
+alias of the single-frame `pydseams.Frame`, so `Trajectory is Frame` holds and
+`Trajectory(path, atom_type=...)`, `classify_chill_plus`, `load_frame`, and
+`filename` behave as before. A future major version may rebind `Trajectory` to
+the sequence class.
+
+```python
+>>> import pydseams
+>>> pydseams.Trajectory is pydseams.Frame
+True
+>>> isinstance(pydseams.open_trajectory("input/traj/exampleTraj.lammpstrj"), pydseams.TrajectorySequence)
+True
+```
+
+## Periodic molecule unwrapping {#periodic-molecule-unwrapping}
+
+`unwrap_centres` and `seams_traj_unwrap_centres` assemble each molecule onto its
+anchor atom inside every frame before computing mass-weighted or geometric
+centres, then accumulate Euclidean minimum-image displacements across frames.
+Orthogonal, tilted triclinic, and time-varying NPT nine-number cells
+(`ox, oy, oz, lx, ly, lz, xy, xz, yz`) are accepted. Each step is the shortest
+lattice image in the frame’s own cell. On a tilted cell this can differ by a
+whole lattice vector from rounding each fractional coordinate. Unwrapping is
+exact while each molecule moves less than half the shortest lattice vector
+between saved frames.
+
+```python
+>>> import pydseams
+>>> traj = pydseams.open_trajectory("input/traj/nucleation_three.lammpstrj")
+>>> unwrapped = traj.unwrap_centres()
+>>> unwrapped.centres.shape
+(3, 4096, 3)
+>>> int(unwrapped.mol_ids[0])
+1
+```
+
+## Molecular dipoles and axis order parameters {#molecular-dipoles-and-axis-order-parameters}
+
+`water_vectors` computes each water molecule’s minimum-image O-to-H-midpoint
+vector, unit bisector, and H-to-H vector. `molecule_dipoles` computes
+charge-weighted dipole vectors $\sum_a q_a (\mathbf{r}_a - \mathbf{R})$ when
+atomic charges are supplied, or geometric anchor-to-site vectors when charges
+are omitted. `orientation_order` projects any molecular vector set onto a chosen
+axis and returns per-molecule $\cos\theta$, $P_2(\cos\theta)$, and the
+ensemble means $\langle P_1\rangle$ and $\langle P_2\rangle$.
+
+```python
+>>> import pydseams
+>>> traj = pydseams.open_trajectory("input/traj/exampleTraj.lammpstrj", all_atoms=True)
+>>> wv = pydseams.water_vectors(traj[0], oxygen_type=2, hydrogen_type=1)
+>>> wv.bisector.shape
+(250, 3)
+>>> order = pydseams.orientation_order(wv.bisector, axis=(0.0, 0.0, 1.0))
+>>> -1.0 <= order.mean_p1 <= 1.0 and -0.5 <= order.mean_p2 <= 1.0
+True
+```
+
+## Streaming time-correlation functions {#streaming-time-correlation-functions}
+
+All three correlation accumulators keep a ring buffer of `max_lag + 1` frames
+(`max_lag=0` retains every lag) and sample origins every `origin_stride` frames:
+
+- `MsdAccumulator` (`seams_msd`) decomposes $\langle|\Delta\mathbf{r}(t)|^2\rangle$
+  along an arbitrary channel axis $\hat{\mathbf{e}}$ into 1D axial
+  $\langle(\Delta\mathbf{r}\cdot\hat{\mathbf{e}})^2\rangle$ and 2D lateral
+  components, with Einstein slope fits $D_{\text{tot}} = \text{slope}/6$,
+  $D_{\text{ax}} = \text{slope}/2$, $D_{\text{lat}} = \text{slope}/4$, and
+  log-log exponent $\alpha$.
+- `HbondLifetimeAccumulator` (`seams_hbond_tcf`) accumulates both the
+  intermittent Luzar-Chandler correlation $C_{\text{HB}}(t)$ (counting bonds
+  that break and reform) and the continuous Rapaport survival $S_{\text{HB}}(t)$
+  (counting bonds unbroken over $[t_0, t_0 + t]$) from per-frame donor-acceptor
+  edge lists.
+- `ReorientationAccumulator` (`seams_reorient`) accumulates the first and second
+  Legendre orientational correlations $C_1(t) = \langle P_1(\hat{\mathbf{u}}(0)\cdot\hat{\mathbf{u}}(t))\rangle$
+  and $C_2(t) = \langle P_2(\hat{\mathbf{u}}(0)\cdot\hat{\mathbf{u}}(t))\rangle$
+  together with trapezoidal integral and single-exponential relaxation times
+  $\tau_1$ and $\tau_2$.
+
+Coordinates are in Angstrom and `dt` is the time between saved frames in
+whatever unit the caller picks. MSD values are then in $\text{Å}^2$, lag
+times in that unit, and diffusion coefficients in $\text{Å}^2$ per that unit.
+With `dt` in ps, `DiffusionFit.d_total_cm2_s` converts $\text{Å}^2/\text{ps}$
+to $\text{cm}^2/\text{s}$. Lifetimes and relaxation times are in the unit of
+`dt`.
+
+`TrajectorySequence` matches atoms across frames by atom ID, because a LAMMPS
+dump may list atoms in a different order each frame. `unwrap_positions`,
+`unwrap_centres`, `msd`, `molecule_dipoles`, `orientation_order`,
+`water_vectors`, and `reorientation` read each frame in the first frame’s atom
+order. When molecule IDs come from the file, `unwrap_centres`, `msd` with
+`by_molecule=True`, `molecule_dipoles`, dipole `orientation_order` and
+`reorientation`, `water_vectors`, and `hbond_lifetime` (when it reads the
+trajectory) require each atom to keep its first-frame molecule.
+`reorientation` and `orientation_order` match their vectors by molecule ID.
+Arrays passed in directly, such as `reorientation(vectors=...)` or
+`reorientation_tcf`, are taken row for row as the same particles in every
+frame.
+
+```python
+>>> import pydseams
+>>> acc = pydseams.HbondLifetimeAccumulator(max_lag=4, origin_stride=1, dt=1.0)
+>>> acc.push([(0, 1)])
+>>> acc.push([])
+>>> acc.push([(0, 1)])
+>>> curve = acc.curve()
+>>> (float(curve.c_hb[2]), float(curve.s_hb[2]))
+(1.0, 0.0)
+```
+
+## C API call {#c-api-call}
+
+From C, `seams_msd_create`, `seams_hbond_tcf_create`, and `seams_reorient_create`
+expose the same streaming accumulators over `libseams` (`include/seams.h`), and
+`seams::Msd`, `seams::HbondTcf`, and `seams::Reorientation` wrap them in
+`include/seams.hpp`.
+
+```c
+#include <assert.h>
+#include <math.h>
+#include "seams.h"
+
+int main(void) {
+  const double axis[3] = {0.0, 0.0, 1.0};
+  const double box[9] = {0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0};
+  seams_msd *msd = NULL;
+  assert(seams_msd_create(1, 3, 1, 1.0, axis, &msd) == SEAMS_OK);
+  for (int f = 0; f < 4; ++f) {
+    double xyz[3] = {fmod(1.0 + 2.0 * f, 10.0), 1.0, fmod(1.0 + 3.0 * f, 10.0)};
+    assert(seams_msd_push(msd, xyz, 1, box, 9) == SEAMS_OK);
+  }
+  double d_tot = 0.0, d_ax = 0.0, d_lat = 0.0, alpha = 0.0;
+  assert(seams_msd_fit(msd, 1.0, 3.0, &d_tot, &d_ax, &d_lat, &alpha) == SEAMS_OK);
+  assert(fabs(alpha - 2.0) < 1e-10);
+  seams_msd_destroy(msd);
+  return 0;
+}
+```

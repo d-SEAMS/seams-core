@@ -1,0 +1,18 @@
+.. index:: pair: enum; Kind
+.. _doxid-namespaceiface_1a3b2d1ed3ca7f783de29e8fde851b5395:
+
+enum iface::Kind
+================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <interface_order.hpp>
+
+	enum Kind {
+	    :target:`slab<doxid-namespaceiface_1a3b2d1ed3ca7f783de29e8fde851b5395ae52ce0141772cd5abea43f36ab85f387>`    = 0,
+	    :target:`nucleus<doxid-namespaceiface_1a3b2d1ed3ca7f783de29e8fde851b5395a91c7e4ea85be233a81041a3eefedc8ad>` = 1,
+	};
+

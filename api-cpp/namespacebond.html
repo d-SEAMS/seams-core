@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: bond Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacebond.html">
+<meta property="og:title" content="seams-core: bond Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacebond.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: bond Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacebond.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">bond Namespace Reference<div class="ingroups"><a class="el" href="group__bond.html">Bond</a></div></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Functions for bond-related analyses.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:DirectedHydrogenBond" id="r_DirectedHydrogenBond"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structbond_1_1DirectedHydrogenBond.html">DirectedHydrogenBond</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a0d2c82ff243a829941715b0932a784a5" id="r_a0d2c82ff243a829941715b0932a784a5"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a0d2c82ff243a829941715b0932a784a5">populateHbonds</a> (std::string filename, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int targetFrame, int Htype, double distCutoff=2.42, double angleCutoff=30.0)</td></tr>
+<tr class="memitem:ae349d52bd4fcad7dfc379793b3318f90" id="r_ae349d52bd4fcad7dfc379793b3318f90"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ae349d52bd4fcad7dfc379793b3318f90">populateHbondsWithInputClouds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;hCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, double distCutoff=2.42, double angleCutoff=30.0)</td></tr>
+<tr class="memitem:a6da2515806a7ed8d96d2dfdcfcafd352" id="r_a6da2515806a7ed8d96d2dfdcfcafd352"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a6da2515806a7ed8d96d2dfdcfcafd352">donatedHydrogenBond</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;hCloud, int acceptorIndex, int donorIndex, const std::vector&lt; int &gt; &amp;donorHs, double distCutoff=2.42, double angleCutoff=30.0)</td></tr>
+<tr class="memitem:a9f06dd103536f428975d2d74b6ca76aa" id="r_a9f06dd103536f428975d2d74b6ca76aa"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a9f06dd103536f428975d2d74b6ca76aa">populateHbondsFromDonors</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;hCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;donorHs, double distCutoff=2.42, double angleCutoff=30.0)</td></tr>
+<tr class="memitem:a47a064a0ab9021e9f8db28e8ce49dda0" id="r_a47a064a0ab9021e9f8db28e8ce49dda0"><td class="memItemLeft">std::vector&lt; <a class="el" href="structbond_1_1DirectedHydrogenBond.html">DirectedHydrogenBond</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a47a064a0ab9021e9f8db28e8ce49dda0">directedHydrogenBonds</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, double pairCutoff, double distCutoff, double angleCutoff, const std::vector&lt; int &gt; &amp;donorTypes, const std::vector&lt; int &gt; &amp;acceptorTypes, int hydrogenType, bool excludeSameMol=true)</td></tr>
+<tr class="memitem:ad59cd4a5d8b517b98e0352d28609a892" id="r_ad59cd4a5d8b517b98e0352d28609a892"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ad59cd4a5d8b517b98e0352d28609a892">getHbondDistanceOH</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;oCloud, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;hCloud, int oAtomIndex, int hAtomIndex)</td></tr>
+<tr class="memitem:a8f1473246e183fb78fc3ceef0ef1c363" id="r_a8f1473246e183fb78fc3ceef0ef1c363"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a8f1473246e183fb78fc3ceef0ef1c363">populateBonds</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a0014dcec62d33a21212d98067bfeec5d" id="r_a0014dcec62d33a21212d98067bfeec5d"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a0014dcec62d33a21212d98067bfeec5d">populateBonds</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; <a class="el" href="namespacecage.html#aaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;atomTypes)</td></tr>
+<tr class="memitem:a41156a4dd14e84d45a1f6f22ba3a4b41" id="r_a41156a4dd14e84d45a1f6f22ba3a4b41"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a41156a4dd14e84d45a1f6f22ba3a4b41">createBondsFromCages</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, <a class="el" href="namespacecage.html#a5787314f51b5927c213db48b81c21d95">cage::cageType</a> type, int &amp;nRings)</td></tr>
+<tr class="memitem:a4dc0b40b8a6510d7a0e48303302e9c41" id="r_a4dc0b40b8a6510d7a0e48303302e9c41"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a4dc0b40b8a6510d7a0e48303302e9c41">trimBonds</a> (std::vector&lt; std::vector&lt; int &gt; &gt; bonds)</td></tr>
+<tr class="memdesc:a4dc0b40b8a6510d7a0e48303302e9c41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove duplicate bonds.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Functions for bond-related analyses. </p>
+<p>This namespace contains functions that are used for determining the hydrogen bonds, or lists of bonded atoms for write-outs to data files and visualization.</p>
+<p>These functions are distinct from the neighbour-list building functions. Bonds can be built from cages, ring lists etc.</p>
+<p>Hydrogen bonds are determined using a strict geometric criterion.</p>
+<p>A hydrogen bond between two water molecules exists when:</p>
+<ol type="1">
+<li>The distance between the acceptor oxygen atom and the donor hydrogen atom is less than 2.42 Angstrom</li>
+<li>The angle between the O-O vector and the O-H vector should be less than 30 degrees</li>
+</ol>
+<p>Those numbers are the water defaults on populateHbonds and populateHbondsWithInputClouds. populateHbondsFromDonors takes the same defaults so a water donor-H set stays comparable; other chemistries pass their own cutoffs. They are not an ionic-liquid default.</p>
+<h3 class="doxsection"><a class="anchor" id="autotoc_md0"></a>
+Changelog</h3>
+<ul>
+<li>Amrita Goswami [<a href="mailto:amrita16thaug646@gmail.com">amrita16thaug646@gmail.com</a>]; date modified: Nov 13, 2019</li>
+<li>Rohit Goswami [<a href="mailto:rog32@hi.is">rog32@hi.is</a>]; date modified: Mar 20, 2021 </li>
+</ul>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a41156a4dd14e84d45a1f6f22ba3a4b41" name="a41156a4dd14e84d45a1f6f22ba3a4b41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41156a4dd14e84d45a1f6f22ba3a4b41">&#9670;&#160;</a></span>createBondsFromCages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; bond::createBondsFromCages </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacecage.html#a5787314f51b5927c213db48b81c21d95">cage::cageType</a></td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;</td>          <td class="paramname"><span class="paramname"><em>nRings</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Creates a vector of vectors containing bond connectivity information from the rings vector of vectors and cage information </p>
+
+</div>
+</div>
+<a id="a47a064a0ab9021e9f8db28e8ce49dda0" name="a47a064a0ab9021e9f8db28e8ce49dda0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47a064a0ab9021e9f8db28e8ce49dda0">&#9670;&#160;</a></span>directedHydrogenBonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structbond_1_1DirectedHydrogenBond.html">DirectedHydrogenBond</a> &gt; bond::directedHydrogenBonds </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>pairCutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>distCutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>angleCutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>donorTypes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>acceptorTypes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hydrogenType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>excludeSameMol</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Directed donor-hydrogen-acceptor edges on one cloud.</p>
+<p>Atoms whose type equals hydrogenType are hydrogens. Every other atom is a heavy atom. Each hydrogen is given to the nearest heavy atom of a donor type that shares its molID; the lower index wins an equal distance. A hydrogen with no such heavy atom donates nothing. An edge is kept when the acceptor-hydrogen minimum image is strictly shorter than distCutoff and the acceptor-first angle is less than or equal to angleCutoff. The neighbour list keeps a donor-acceptor pair only when its minimum image is strictly shorter than pairCutoff. excludeSameMol drops a pair that shares a molID. An empty donor or acceptor type list returns no edges. Results are sorted by donor, hydrogen, acceptor. </p>
+
+</div>
+</div>
+<a id="a6da2515806a7ed8d96d2dfdcfcafd352" name="a6da2515806a7ed8d96d2dfdcfcafd352"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6da2515806a7ed8d96d2dfdcfcafd352">&#9670;&#160;</a></span>donatedHydrogenBond()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool bond::donatedHydrogenBond </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>hCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>acceptorIndex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>donorIndex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>donorHs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>distCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2.42</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>angleCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">30.0</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Geometric test for one donor-acceptor assignment. donorHs are hCloud indices on the donor. O-O is gen::relDist(yCloud, acceptor, donor). O-H uses <a class="el" href="namespacegen.html#a2fbd5127b1fdc22c99f5cd6d57d4bf86" title="Inline generic function for obtaining the unwrapped periodic distance between one particle and anothe...">gen::relDistFromPoint</a> (dump MIC). </p>
+
+</div>
+</div>
+<a id="ad59cd4a5d8b517b98e0352d28609a892" name="ad59cd4a5d8b517b98e0352d28609a892"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad59cd4a5d8b517b98e0352d28609a892">&#9670;&#160;</a></span>getHbondDistanceOH()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double bond::getHbondDistanceOH </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>oCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>hCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>oAtomIndex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hAtomIndex</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Calculates the distance of the hydrogen bond between O and H (of different atoms), given the respective pointClouds and the indices to each atom </p>
+
+</div>
+</div>
+<a id="a8f1473246e183fb78fc3ceef0ef1c363" name="a8f1473246e183fb78fc3ceef0ef1c363"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f1473246e183fb78fc3ceef0ef1c363">&#9670;&#160;</a></span>populateBonds() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; bond::populateBonds </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a vector of vectors containing bond connectivity information. May contain duplicates! Gets the bond information from the vector of vectors containing the neighbour list by index </p>
+
+</div>
+</div>
+<a id="a0014dcec62d33a21212d98067bfeec5d" name="a0014dcec62d33a21212d98067bfeec5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0014dcec62d33a21212d98067bfeec5d">&#9670;&#160;</a></span>populateBonds() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; bond::populateBonds </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="namespacecage.html#aaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atomTypes</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a vector of vectors containing bond connectivity information Gets the bond information from the vector of vectors containing the neighbour list by index. Bonds between dummy atoms are not filled. </p>
+
+</div>
+</div>
+<a id="a0d2c82ff243a829941715b0932a784a5" name="a0d2c82ff243a829941715b0932a784a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d2c82ff243a829941715b0932a784a5">&#9670;&#160;</a></span>populateHbonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; bond::populateHbonds </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>targetFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>Htype</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>distCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2.42</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>angleCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">30.0</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a vector of vectors (similar to the neighbour list conventions) containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O&ndash;O and O&ndash;H vectors from the neighbour list already constructed. The geometric criterion defaults to the water values (acceptor&ndash;H distance below 2.42 Angstrom, O-O-H angle below 30 degrees); other hydrogen-bonded systems pass their own thresholds </p>
+
+</div>
+</div>
+<a id="a9f06dd103536f428975d2d74b6ca76aa" name="a9f06dd103536f428975d2d74b6ca76aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f06dd103536f428975d2d74b6ca76aa">&#9670;&#160;</a></span>populateHbondsFromDonors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; bond::populateHbondsFromDonors </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>hCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>donorHs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>distCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2.42</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>angleCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">30.0</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Hydrogen-bond network from an explicit donor-H set. donorHs are hCloud indices; each is paired with the heavy atom that shares its molID. Water callers build donorHs from hAtomMolList (two H per molecule). </p>
+
+</div>
+</div>
+<a id="ae349d52bd4fcad7dfc379793b3318f90" name="ae349d52bd4fcad7dfc379793b3318f90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae349d52bd4fcad7dfc379793b3318f90">&#9670;&#160;</a></span>populateHbondsWithInputClouds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; bond::populateHbondsWithInputClouds </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>hCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>distCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2.42</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>angleCutoff</em></span><span class="paramdefsep"> = </span><span class="paramdefval">30.0</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Create a vector of vectors (similar to the neighbour list conventions) containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O&ndash;O and O&ndash;H vectors from the neighbour list already constructed, taking a PointCloud for the H atoms as input </p>
+
+</div>
+</div>
+<a id="a4dc0b40b8a6510d7a0e48303302e9c41" name="a4dc0b40b8a6510d7a0e48303302e9c41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4dc0b40b8a6510d7a0e48303302e9c41">&#9670;&#160;</a></span>trimBonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; bond::trimBonds </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; int &gt; &gt;</td>          <td class="paramname"><span class="paramname"><em>bonds</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove duplicate bonds. </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacebond.html">bond</a></li>
+  </ul>
+</div>
+</body>
+</html>

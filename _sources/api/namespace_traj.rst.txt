@@ -1,0 +1,206 @@
+.. index:: pair: namespace; traj
+.. _doxid-namespacetraj:
+
+namespace traj
+==============
+
+.. toctree::
+	:hidden:
+
+	struct_traj_BoxCell.rst
+	struct_traj_DecayFitResult.rst
+	struct_traj_DiffusionFitResult.rst
+	struct_traj_DipoleVectorsResult.rst
+	struct_traj_OrientationOrderResult.rst
+	struct_traj_WaterVectorsResult.rst
+	class_traj_HbondLifetimeAccumulator.rst
+	class_traj_MsdAccumulator.rst
+	class_traj_ReorientationAccumulator.rst
+	class_traj_TrajectoryUnwrapper.rst
+
+Overview
+~~~~~~~~
+
+Multi-frame PBC unwrapping, molecular orientation/dipole vectors, and streaming time-correlation accumulators. :ref:`More...<details-namespacetraj>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace traj {
+
+	// structs
+
+	struct :ref:`BoxCell<doxid-structtraj_1_1_box_cell>`;
+	struct :ref:`DecayFitResult<doxid-structtraj_1_1_decay_fit_result>`;
+	struct :ref:`DiffusionFitResult<doxid-structtraj_1_1_diffusion_fit_result>`;
+	struct :ref:`DipoleVectorsResult<doxid-structtraj_1_1_dipole_vectors_result>`;
+	struct :ref:`OrientationOrderResult<doxid-structtraj_1_1_orientation_order_result>`;
+	struct :ref:`WaterVectorsResult<doxid-structtraj_1_1_water_vectors_result>`;
+
+	// classes
+
+	class :ref:`HbondLifetimeAccumulator<doxid-classtraj_1_1_hbond_lifetime_accumulator>`;
+	class :ref:`MsdAccumulator<doxid-classtraj_1_1_msd_accumulator>`;
+	class :ref:`ReorientationAccumulator<doxid-classtraj_1_1_reorientation_accumulator>`;
+	class :ref:`TrajectoryUnwrapper<doxid-classtraj_1_1_trajectory_unwrapper>`;
+
+	// global variables
+
+	std::size_t :ref:`kMaxTriples<doxid-namespacetraj_1ad8cb21828b993601438bf38279e0b824>`                                      = static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /(3* sizeof(double));
+	std::size_t :ref:`kMaxBoxes<doxid-namespacetraj_1a2ecd29a692ba55ca538537616cb537c8>`                                    = static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /(9* sizeof(double));
+	std::size_t :ref:`kMaxLag<doxid-namespacetraj_1a2841ae5305a4d67453e4915e76fbbb24>`                                  = static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /     sizeof(double) - 1;
+
+	// global functions
+
+	bool :ref:`checkedMul<doxid-namespacetraj_1a1df97d2479431f14ac706d4d6adf56f3>`(std::size_t a, std::size_t b, std::size_t& out);
+	bool :ref:`unwrapPositions<doxid-namespacetraj_1acd1ec30372a1199d0884328a40a64b0d>`(const double* xyzFrames, std::size_t nFrames, std::size_t nAtoms, const double* boxes, std::size_t nBoxes, double* unwrappedOut);
+	bool :ref:`moleculeCentres<doxid-namespacetraj_1a2ed0f252ff303683e24712a8e4467209>`(const double* xyz, std::size_t nAtoms, const :ref:`BoxCell<doxid-structtraj_1_1_box_cell>`& cell, const int* molIds, const double* masses, std::vector<int>& uniqueMolIds, std::vector<double>& centresOut);
+	bool :ref:`moleculeCentres<doxid-namespacetraj_1a5fab8c3c489e767ae16b12e214522ede>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const double* masses, std::vector<int>& uniqueMolIds, std::vector<double>& centresOut);
+	bool :ref:`unwrapMoleculeCentres<doxid-namespacetraj_1a2715d53a41d779b454c38fed623c3479>`(const double* xyzFrames, std::size_t nFrames, std::size_t nAtoms, const double* boxes, std::size_t nBoxes, const int* molIds, const double* masses, std::vector<int>& uniqueMolIds, std::vector<double>& unwrappedCentresOut);
+	bool :ref:`waterOrientationVectors<doxid-namespacetraj_1a21858b7a69e47025b3e85476e4538f42>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, int oxygenType, int hydrogenType, :ref:`WaterVectorsResult<doxid-structtraj_1_1_water_vectors_result>`& out, double covalentCutoff = 1.35);
+	bool :ref:`moleculeDipoleVectors<doxid-namespacetraj_1a08e3e784e00530ff2253e678b197c6ea>`(const double* xyz, std::size_t nAtoms, const :ref:`BoxCell<doxid-structtraj_1_1_box_cell>`& cell, const int* molIds, const double* charges, :ref:`DipoleVectorsResult<doxid-structtraj_1_1_dipole_vectors_result>`& out);
+	bool :target:`moleculeDipoleVectors<doxid-namespacetraj_1a561309d3712fabc38c19554b27e3e0e6>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const int* molIdsOverride, const double* charges, :ref:`DipoleVectorsResult<doxid-structtraj_1_1_dipole_vectors_result>`& out);
+	bool :target:`axisOrderParameters<doxid-namespacetraj_1a331d4af7cd14720e7193d5814591eccf>`(const double* vectors, std::size_t nVectors, const double axis[3], :ref:`OrientationOrderResult<doxid-structtraj_1_1_orientation_order_result>`& out);
+	bool :target:`fitDiffusionCurve<doxid-namespacetraj_1a899ca3ff86c500081c986eadfd136731>`(const std::vector<double>& lagTime, const std::vector<double>& msdTotal, const std::vector<double>& msdAxial, const std::vector<double>& msdLateral, double tStart, double tEnd, :ref:`DiffusionFitResult<doxid-structtraj_1_1_diffusion_fit_result>`& out);
+	bool :target:`fitCorrelationDecay<doxid-namespacetraj_1a8ef0829c3f17f710c707119e1c63a04a>`(const std::vector<double>& lagTime, const std::vector<double>& corr, double tStart, double tEnd, :ref:`DecayFitResult<doxid-structtraj_1_1_decay_fit_result>`& out);
+
+	} // namespace traj
+.. _details-namespacetraj:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Multi-frame PBC unwrapping, molecular orientation/dipole vectors, and streaming time-correlation accumulators.
+
+Global Variables
+----------------
+
+.. index:: pair: variable; kMaxTriples
+.. _doxid-namespacetraj_1ad8cb21828b993601438bf38279e0b824:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t kMaxTriples                                      = static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /(3* sizeof(double))
+
+Largest particle or vector count n whose 3 \* n doubles one std::vector can hold.
+
+Larger counts are refused, so 3 \* n never wraps.
+
+.. index:: pair: variable; kMaxBoxes
+.. _doxid-namespacetraj_1a2ecd29a692ba55ca538537616cb537c8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t kMaxBoxes                                    = static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /(9* sizeof(double))
+
+Largest box count n whose 9 \* n doubles fit in a single array.
+
+Larger counts are refused, so 9 \* n and pointer offsets never overflow.
+
+.. index:: pair: variable; kMaxLag
+.. _doxid-namespacetraj_1a2841ae5305a4d67453e4915e76fbbb24:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t kMaxLag                                  = static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /     sizeof(double) - 1
+
+Largest max_lag whose max_lag + 1 lag bins one std::vector can hold.
+
+Larger lags are refused, so max_lag + 1 never wraps to zero.
+
+Global Functions
+----------------
+
+.. index:: pair: function; checkedMul
+.. _doxid-namespacetraj_1a1df97d2479431f14ac706d4d6adf56f3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool checkedMul(std::size_t a, std::size_t b, std::size_t& out)
+
+out = a \* b; false, leaving out alone, when that overflows size_t.
+
+.. index:: pair: function; unwrapPositions
+.. _doxid-namespacetraj_1acd1ec30372a1199d0884328a40a64b0d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool unwrapPositions(const double* xyzFrames, std::size_t nFrames, std::size_t nAtoms, const double* boxes, std::size_t nBoxes, double* unwrappedOut)
+
+Unwrap a multi-frame coordinate array [nFrames \* 3 \* nAtoms].
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- boxes
+
+		- Either 1 cell (9 doubles) or nFrames cells (9 \* nFrames doubles).
+
+.. index:: pair: function; moleculeCentres
+.. _doxid-namespacetraj_1a2ed0f252ff303683e24712a8e4467209:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool moleculeCentres(const double* xyz, std::size_t nAtoms, const :ref:`BoxCell<doxid-structtraj_1_1_box_cell>`& cell, const int* molIds, const double* masses, std::vector<int>& uniqueMolIds, std::vector<double>& centresOut)
+
+Compute intact PBC-assembled per-molecule centres for one frame.
+
+Molecules appear in first-seen order of molIds. If masses is nullptr, equal atom weights are used.
+
+.. index:: pair: function; moleculeCentres
+.. _doxid-namespacetraj_1a5fab8c3c489e767ae16b12e214522ede:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool moleculeCentres(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const double* masses, std::vector<int>& uniqueMolIds, std::vector<double>& centresOut)
+
+Cloud overload using stored atom coordinates and molIDs.
+
+.. index:: pair: function; unwrapMoleculeCentres
+.. _doxid-namespacetraj_1a2715d53a41d779b454c38fed623c3479:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool unwrapMoleculeCentres(const double* xyzFrames, std::size_t nFrames, std::size_t nAtoms, const double* boxes, std::size_t nBoxes, const int* molIds, const double* masses, std::vector<int>& uniqueMolIds, std::vector<double>& unwrappedCentresOut)
+
+Compute and unwrap molecule centres across nFrames frames.
+
+.. index:: pair: function; waterOrientationVectors
+.. _doxid-namespacetraj_1a21858b7a69e47025b3e85476e4538f42:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool waterOrientationVectors(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, int oxygenType, int hydrogenType, :ref:`WaterVectorsResult<doxid-structtraj_1_1_water_vectors_result>`& out, double covalentCutoff = 1.35)
+
+Extract per-water O->midpoint(H1,H2) and H1->H2 vectors under MIC.
+
+Pairs each oxygen (oxygenType) with its two hydrogens (hydrogenType) by shared molID when multi-atom molecule IDs exist, falling back to the two nearest hydrogens within covalentCutoff Angstrom when molIDs do not group O and H atoms.
+
+.. index:: pair: function; moleculeDipoleVectors
+.. _doxid-namespacetraj_1a08e3e784e00530ff2253e678b197c6ea:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool moleculeDipoleVectors(const double* xyz, std::size_t nAtoms, const :ref:`BoxCell<doxid-structtraj_1_1_box_cell>`& cell, const int* molIds, const double* charges, :ref:`DipoleVectorsResult<doxid-structtraj_1_1_dipole_vectors_result>`& out)
+
+Compute per-molecule dipole or geometric orientation vectors.
+
+When charges is non-null, computes sum_a q_a (r_a^intact - R_geom) in e\*A (origin-independent for neutral molecules and translation-invariant for ions). When charges is null, computes the mean MIC bond vector from the first atom of each molecule to its remaining atoms (reducing to O->H-midpoint for O-H-H).
+

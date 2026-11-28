@@ -1,0 +1,19 @@
+===============
+Getting started
+===============
+
+
+Install the engine, then classify one frame.
+
+The install page builds ``seams`` from a source checkout or with
+pixi. The quickstart then classifies an eight-molecule cubic cell from
+C and from Python, and reads the bundled TIP4P frame
+``input/traj/exampleTraj.lammpstrj`` (250 oxygens, LAMMPS type 2). The
+videos page is the recording of that run.
+
+.. toctree::
+   :maxdepth: 1
+
+   install
+   quickstart
+   ../videos/index

@@ -1,0 +1,11 @@
+.. index:: pair: group; Neighbour lists
+.. _doxid-group__capi__neigh:
+
+Neighbour lists
+===============
+
+.. toctree::
+	:hidden:
+
+Cutoff, mutual, and k-nearest graphs as CSR.
+

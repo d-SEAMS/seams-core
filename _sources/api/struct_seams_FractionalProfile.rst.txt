@@ -1,0 +1,82 @@
+.. index:: pair: struct; seams::FractionalProfile
+.. _doxid-structseams_1_1_fractional_profile:
+
+struct seams::FractionalProfile
+===============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Number and mass density of one histogram. :ref:`More...<details-structseams_1_1_fractional_profile>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct FractionalProfile {
+		// fields
+	
+		std::vector<double> :ref:`coordinate<doxid-structseams_1_1_fractional_profile_1a9f01718b1fbd6d4b3b4371921213f5a8>`;
+		std::vector<double> :ref:`number_density<doxid-structseams_1_1_fractional_profile_1a88019bd082fbac906c2dcdfd32197aa4>`;
+		std::vector<double> :ref:`mass_density<doxid-structseams_1_1_fractional_profile_1adf87111bc73e1d325f5e02cbba6bc77b>`;
+		std::vector<double> :ref:`volume<doxid-structseams_1_1_fractional_profile_1a59b59ab824ab2ec0e7c834c5683c5232>`;
+	};
+.. _details-structseams_1_1_fractional_profile:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Number and mass density of one histogram.
+
+Fields
+------
+
+.. index:: pair: variable; coordinate
+.. _doxid-structseams_1_1_fractional_profile_1a9f01718b1fbd6d4b3b4371921213f5a8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> coordinate
+
+Bin centres.
+
+Fractional, or radians for azimuth.
+
+.. index:: pair: variable; number_density
+.. _doxid-structseams_1_1_fractional_profile_1a88019bd082fbac906c2dcdfd32197aa4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> number_density
+
+Atoms per cubic Angstrom.
+
+.. index:: pair: variable; mass_density
+.. _doxid-structseams_1_1_fractional_profile_1adf87111bc73e1d325f5e02cbba6bc77b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> mass_density
+
+Caller mass units per cubic Angstrom.
+
+Mass 1 when masses is empty. An amu mass is amu per cubic Angstrom; times 1.66054 it is g/cm^3.
+
+.. index:: pair: variable; volume
+.. _doxid-structseams_1_1_fractional_profile_1a59b59ab824ab2ec0e7c834c5683c5232:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> volume
+
+Bin volume, cubic Angstrom.
+

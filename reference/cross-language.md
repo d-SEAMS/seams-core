@@ -1,0 +1,67 @@
+<!-- https://docs.dseams.info/reference/cross-language.md -->
+
+# One task on every front {#one-task-on-every-front}
+
+The task is CHILL+ on frame 1 of `input/traj/mW_cubic.lammpstrj`, LAMMPS type 1.
+The result is 4096 cubic sites.
+
+| language | call | cubic |
+| --- | --- | --- |
+| CLI | seams chill-plus input/traj/mW_cubic.lammpstrj --type 1 --frame 1 | 4096 |
+| Python, yoda frame | pydseams.read(path, atom_type=1).chill_plus().cubic | 4096 |
+| Python, language frame | userframe.read(path, atom_type=1).chill_plus().cubic | 4096 |
+| R | sum(chill_plus(read_frame(path, type=1L))$name = “cubic”)= | 4096 |
+| Julia | chill_plus(read_frame(path; type=1)).counts["cubic"] | 4096 |
+
+The distribution is `pip install pydseamslib`.
+The imports are `pydseams` and `dseams`.
+`from dseams import userframe` is the language frame.
+R is the `dseams` package from [dseams-r](https://github.com/d-SEAMS/dseams-r).
+Its `chill_plus` returns a data frame with a `name` column.
+Julia is `Dseams` from [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl), which calls `libseams_lang` with `ccall`.
+`ChillPlus.counts` is the histogram.
+
+Every front defaults to the cutoff neighbour list (`graph = "cutoff"`, pairs closer than `cutoff`, 3.5 Å).
+`graph = "mutual"` is the mutual four-nearest list with candidates inside `cutoff + 1.5`, under the same name on every front.
+On this lattice the two lists label the same sites cubic.
+On the mixed TIP4P dump (`input/traj/exampleTraj.lammpstrj`, type 2) they do not:
+
+| front | mutual-list call |
+| --- | --- |
+| CLI | seams chill-plus FILE --type 2 --graph mutual |
+| Python language frame | userframe.Frame.chill_plus(graph”mutual”)= |
+| R | chill_plus(frame, graph = "mutual") |
+| Julia | chill_plus(frame; graph = "mutual") |
+
+`pydseams.Frame.chill_plus` takes no `graph` argument.
+It labels the frame’s neighbour list.
+On a one-species dump with no hydrogens that list is the cutoff list.
+`userframe.Frame.chill_plus` defaults to `graph="cutoff"` and accepts `"mutual"`.
+
+The cutoff list gives 9 interClathrate and 241 water.
+The mutual list gives 1 clathrate, 7 interClathrate, and 242 water.
+
+A cage signature takes the same face-edge window on every front.
+The default is `2.65,3.15` in the coordinate units of the file.
+`none` leaves the cage bound to the face census.
+
+| front | call |
+| --- | --- |
+| CLI | seams cages FILE --signature 512 --cage-edge none |
+| Python language frame | userframe.Frame.cages_by_signature("512", edge”none”)= |
+| C | seams_frame_signature_edge(frame, 3.5, 1, "cutoff", "512", "none", &n_cages, &n_atoms) |
+
+`pydseams.Frame.cages_by_signature` has no `edge` argument.
+Lua `dseams.cages_by_signature(cloud, spec, o)` calls `findBySignature` and does not read a window.
+
+The same CLI lines on bundled frames:
+
+```bash
+seams chill-plus input/traj/exampleTraj.lammpstrj --type 2 --graph mutual
+seams cages input/traj/genice_sI.lammpstrj --type 1 --signature 512 --cage-edge none
+```
+
+A null C edge string keeps the default.
+Set the window to the heavy-atom contact range of the model.
+Widen it for a compressed cell or a guest that stretches a cage.
+A nanometer file uses `0.265,0.315`.

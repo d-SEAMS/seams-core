@@ -1,0 +1,102 @@
+.. index:: pair: struct; seams::DirectedBond
+.. _doxid-structseams_1_1_directed_bond:
+
+struct seams::DirectedBond
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+One directed hydrogen bond. :ref:`More...<details-structseams_1_1_directed_bond>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct DirectedBond {
+		// fields
+	
+		int :ref:`donor<doxid-structseams_1_1_directed_bond_1ae53ef90c5ea42ce9925c662707315a8a>` = -1;
+		int :ref:`hydrogen<doxid-structseams_1_1_directed_bond_1ad2c3a14c146a0c0780678e61dc6d7a33>` = -1;
+		int :ref:`acceptor<doxid-structseams_1_1_directed_bond_1a6ed1688d42936f9b67bed7cd096bea3a>` = -1;
+		double :ref:`d_AH<doxid-structseams_1_1_directed_bond_1a35a5d4621a4e08a6b06ee5de76628f81>` = 0;
+		double :ref:`d_DA<doxid-structseams_1_1_directed_bond_1a16027458a198927b7e1e0790e5ff5e41>` = 0;
+		double :ref:`angle<doxid-structseams_1_1_directed_bond_1ab689f971ef44723d48ccf6415f721c78>` = 0;
+	};
+.. _details-structseams_1_1_directed_bond:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+One directed hydrogen bond.
+
+Indices are frame indices. Heavies from set_hydrogen_frame occupy ``[0, n_heavy)`` and hydrogens follow. ``:ref:`angle <doxid-structseams_1_1_directed_bond_1ab689f971ef44723d48ccf6415f721c78>``` is acceptor-first degrees: 0 is a linear donor-hydrogen-acceptor geometry.
+
+Fields
+------
+
+.. index:: pair: variable; donor
+.. _doxid-structseams_1_1_directed_bond_1ae53ef90c5ea42ce9925c662707315a8a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int donor = -1
+
+Donor heavy-atom index.
+
+.. index:: pair: variable; hydrogen
+.. _doxid-structseams_1_1_directed_bond_1ad2c3a14c146a0c0780678e61dc6d7a33:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int hydrogen = -1
+
+Hydrogen index.
+
+.. index:: pair: variable; acceptor
+.. _doxid-structseams_1_1_directed_bond_1a6ed1688d42936f9b67bed7cd096bea3a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int acceptor = -1
+
+Acceptor heavy-atom index.
+
+.. index:: pair: variable; d_AH
+.. _doxid-structseams_1_1_directed_bond_1a35a5d4621a4e08a6b06ee5de76628f81:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double d_AH = 0
+
+Acceptor-hydrogen distance, Angstrom.
+
+.. index:: pair: variable; d_DA
+.. _doxid-structseams_1_1_directed_bond_1a16027458a198927b7e1e0790e5ff5e41:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double d_DA = 0
+
+Donor-acceptor distance, Angstrom.
+
+.. index:: pair: variable; angle
+.. _doxid-structseams_1_1_directed_bond_1ab689f971ef44723d48ccf6415f721c78:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double angle = 0
+
+Acceptor-first angle, degrees.
+

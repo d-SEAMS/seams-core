@@ -1,0 +1,97 @@
+.. index:: pair: struct; seams::DirectedBondOptions
+.. _doxid-structseams_1_1_directed_bond_options:
+
+struct seams::DirectedBondOptions
+=================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for directed hydrogen bonds. :ref:`More...<details-structseams_1_1_directed_bond_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct DirectedBondOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_directed_bond_options_1a73638d49134ff045f130f3b4f9ad2e01>` = 3.5;
+		double :ref:`distance<doxid-structseams_1_1_directed_bond_options_1ad5246f90f08e9f855006192e23f60d98>` = 2.42;
+		double :ref:`angle<doxid-structseams_1_1_directed_bond_options_1af69231bdeb48bb12d4fa6bcf4c944de6>` = 30;
+		int :ref:`hydrogen<doxid-structseams_1_1_directed_bond_options_1aeb9419f53886b890d49f561d86c677da>` = 2;
+		bool :ref:`exclude_same_mol<doxid-structseams_1_1_directed_bond_options_1ac963c4bcdcc076d756fa4daeca01c4f8>` = true;
+	};
+.. _details-structseams_1_1_directed_bond_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for directed hydrogen bonds.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_directed_bond_options_1a73638d49134ff045f130f3b4f9ad2e01:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Donor-acceptor cutoff, Angstrom.
+
+Strictly inside.
+
+.. index:: pair: variable; distance
+.. _doxid-structseams_1_1_directed_bond_options_1ad5246f90f08e9f855006192e23f60d98:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double distance = 2.42
+
+Acceptor-hydrogen cutoff, Angstrom.
+
+Strictly inside.
+
+.. index:: pair: variable; angle
+.. _doxid-structseams_1_1_directed_bond_options_1af69231bdeb48bb12d4fa6bcf4c944de6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double angle = 30
+
+Acceptor-first angle, degrees.
+
+Kept at or below this value.
+
+.. index:: pair: variable; hydrogen
+.. _doxid-structseams_1_1_directed_bond_options_1aeb9419f53886b890d49f561d86c677da:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int hydrogen = 2
+
+Hydrogen species.
+
+Must be positive and distinct from the type sets.
+
+.. index:: pair: variable; exclude_same_mol
+.. _doxid-structseams_1_1_directed_bond_options_1ac963c4bcdcc076d756fa4daeca01c4f8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool exclude_same_mol = true
+
+Drop a donor and acceptor that share a molID.
+

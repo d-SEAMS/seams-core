@@ -1,0 +1,19 @@
+.. index:: pair: enum; RingRows
+.. _doxid-namespaceprimitive_1aed13e96b5a55094ac56900f6c6044bc8:
+
+enum primitive::RingRows
+========================
+
+Which adjacency the ring search packs before it walks. Auto uses one sorted array per row: a single pass on one thread, a team on several. Vectors keeps a std::vector per atom. Packed forces the array even when the team has one thread. The ring set does not depend on the choice.
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <franzblau.hpp>
+
+	enum RingRows {
+	    :target:`Auto<doxid-namespaceprimitive_1aed13e96b5a55094ac56900f6c6044bc8a06b9281e396db002010bde1de57262eb>`,
+	    :target:`Vectors<doxid-namespaceprimitive_1aed13e96b5a55094ac56900f6c6044bc8ab3f69e461542074d9696ee29ded180a0>`,
+	    :target:`Packed<doxid-namespaceprimitive_1aed13e96b5a55094ac56900f6c6044bc8aa1977c3f68d4d3bbfe14d0e51a575482>`,
+	};
+

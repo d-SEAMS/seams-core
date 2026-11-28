@@ -1,0 +1,75 @@
+.. index:: pair: enum; iceType
+.. _doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529:
+
+enum cage::iceType
+==================
+
+Overview
+~~~~~~~~
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage.hpp>
+
+	enum iceType {
+	    :ref:`dummy<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790>`,
+	    :ref:`hc<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884>`,
+	    :ref:`ddc<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2>`,
+	    :ref:`mixed<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529a1d770934d44de09b0d24f04fd01708ba>`,
+	    :target:`pnc<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529aa249368f2cd1048692453ad95620f4ff>`,
+	    :target:`mixed2<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529a46e9b291e68a6be0227ba8520aed1f55>`,
+	};
+
+.. _details-namespacecage_1aaac41828990e32b9d6e7db4426b61529:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Enum Values
+-----------
+
+.. index:: pair: enumvalue; dummy
+.. _doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529a275876e34cf609db118f3d84b799a790:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	dummy
+
+Type for an atom which does not belong to any kind of cage.
+
+.. index:: pair: enumvalue; hc
+.. _doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529a6320c1115d5bc2b6ca615b96be050884:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	hc
+
+Type for an atom which belongs to an HC.
+
+.. index:: pair: enumvalue; ddc
+.. _doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529ab66ef205d4bba3390bc51642b3f397d2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	ddc
+
+Type for an atom which belongs to a DDC.
+
+.. index:: pair: enumvalue; mixed
+.. _doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529a1d770934d44de09b0d24f04fd01708ba:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	mixed
+
+Type for an atom which is part of a mixed ring, shared by both a DDC and an HC.
+

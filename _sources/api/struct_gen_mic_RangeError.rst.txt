@@ -1,0 +1,22 @@
+.. index:: pair: struct; gen::mic::RangeError
+.. _doxid-structgen_1_1mic_1_1_range_error:
+
+struct gen::mic::RangeError
+===========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/euclidean_mic.hpp>
+	
+	struct RangeError: public std::runtime_error {
+		// construction
+	
+		:target:`~RangeError<doxid-structgen_1_1mic_1_1_range_error_1a35ae2f14f0d9303854de52912473cc5e>`();
+	};

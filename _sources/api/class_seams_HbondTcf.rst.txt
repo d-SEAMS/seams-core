@@ -1,0 +1,126 @@
+.. index:: pair: class; seams::HbondTcf
+.. _doxid-classseams_1_1_hbond_tcf:
+
+class seams::HbondTcf
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Owned streaming hydrogen-bond lifetime accumulator. :ref:`More...<details-classseams_1_1_hbond_tcf>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	class HbondTcf: public :ref:`seams::detail::Handle<doxid-classseams_1_1detail_1_1_handle>` {
+	public:
+		// construction
+	
+		:ref:`HbondTcf<doxid-classseams_1_1_hbond_tcf_1a394338893a9f4a26b3aa20c54b00483c>`(std::size_t max_lag, std::size_t origin_stride, double dt, bool directed = true);
+
+		// methods
+	
+		void :ref:`push<doxid-classseams_1_1_hbond_tcf_1a1f364d0fa6b961f007f113ad5c45d5b7>`(std::span<const int> donors, std::span<const int> acceptors);
+		:ref:`HbondLifetimeCurve<doxid-structseams_1_1_hbond_lifetime_curve>` :ref:`curve<doxid-classseams_1_1_hbond_tcf_1a7411bea93a5a0b848103c0ec7f5ebab4>`() const;
+		:ref:`HbondLifetimeFit<doxid-structseams_1_1_hbond_lifetime_fit>` :ref:`fit<doxid-classseams_1_1_hbond_tcf_1a8e49415806c7b6ca43ea0dd0763d9913>`(double t_start = 0.0, double t_end = 0.0) const;
+	};
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-inherited-code-block
+
+	public:
+		// methods
+	
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1a0dd2050fdf4ea17474fcfd3297824dab>`(const :ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&);
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1aca8fcb7f880767384894fc88094d262f>`(:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&& other);
+		:ref:`operator bool<doxid-classseams_1_1detail_1_1_handle_1ae58d780619badcc49127f4b5e6e78d4e>`() const;
+
+.. _details-classseams_1_1_hbond_tcf:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Owned streaming hydrogen-bond lifetime accumulator.
+
+Construction
+------------
+
+.. index:: pair: function; HbondTcf
+.. _doxid-classseams_1_1_hbond_tcf_1a394338893a9f4a26b3aa20c54b00483c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	HbondTcf(std::size_t max_lag, std::size_t origin_stride, double dt, bool directed = true)
+
+Allocate an H-bond lifetime accumulator.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- max_lag
+
+		- Maximum lag in frames, or 0 for all lags.
+
+	*
+		- origin_stride
+
+		- Frame stride between origins.
+
+	*
+		- dt
+
+		- Frame spacing.
+
+	*
+		- directed
+
+		- True for directed ``(donor, acceptor)`` edges.
+
+Methods
+-------
+
+.. index:: pair: function; push
+.. _doxid-classseams_1_1_hbond_tcf_1a1f364d0fa6b961f007f113ad5c45d5b7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void push(std::span<const int> donors, std::span<const int> acceptors)
+
+Push one frame's ``(donor, acceptor)`` arrays.
+
+.. index:: pair: function; curve
+.. _doxid-classseams_1_1_hbond_tcf_1a7411bea93a5a0b848103c0ec7f5ebab4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`HbondLifetimeCurve<doxid-structseams_1_1_hbond_lifetime_curve>` curve() const
+
+Read intermittent C_HB and continuous S_HB curves.
+
+.. index:: pair: function; fit
+.. _doxid-classseams_1_1_hbond_tcf_1a8e49415806c7b6ca43ea0dd0763d9913:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`HbondLifetimeFit<doxid-structseams_1_1_hbond_lifetime_fit>` fit(double t_start = 0.0, double t_end = 0.0) const
+
+Fit integrated and single-exponential lifetimes.
+

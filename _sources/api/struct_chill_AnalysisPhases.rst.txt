@@ -1,0 +1,25 @@
+.. index:: pair: struct; chill::AnalysisPhases
+.. _doxid-structchill_1_1_analysis_phases:
+
+struct chill::AnalysisPhases
+============================
+
+.. toctree::
+	:hidden:
+
+Rebuild, local kernel, halo exchange, and the write-back to the frame.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/bop.hpp>
+	
+	struct AnalysisPhases {
+		// fields
+	
+		double :target:`rebuildMs<doxid-structchill_1_1_analysis_phases_1ae9966726af77bda3d0998d325bd22038>` = 0;
+		double :target:`computeMs<doxid-structchill_1_1_analysis_phases_1a4e0e90e6894d3426342675db8716ad99>` = 0;
+		double :target:`exchangeMs<doxid-structchill_1_1_analysis_phases_1a2ffc9f732d0178519c6e64939a03b539>` = 0;
+		double :target:`reduceMs<doxid-structchill_1_1_analysis_phases_1a3aaa5577581b24a9e76d3c589cc33e4d>` = 0;
+	};

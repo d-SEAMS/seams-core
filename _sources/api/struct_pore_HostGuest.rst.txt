@@ -1,0 +1,27 @@
+.. index:: pair: struct; pore::HostGuest
+.. _doxid-structpore_1_1_host_guest:
+
+struct pore::HostGuest
+======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/pore.hpp>
+	
+	struct HostGuest {
+		// fields
+	
+		std::vector<int> :target:`guest<doxid-structpore_1_1_host_guest_1a278ea790cc703c1840d40af5869cafe2>`;
+		std::vector<int> :target:`nearest<doxid-structpore_1_1_host_guest_1a2a9d9572d19a509e0af85a4a8fb1fbd9>`;
+		std::vector<int> :target:`nearest_type<doxid-structpore_1_1_host_guest_1ad64cc01f529a0925f4c6b3a066ae6066>`;
+		std::vector<double> :target:`distance<doxid-structpore_1_1_host_guest_1af22f9f4cbc2a31cc40343744ca3e1010>`;
+		std::vector<int> :target:`framework_types<doxid-structpore_1_1_host_guest_1a51b763a5717192e2502abe72c83adab7>`;
+		std::vector<int> :target:`contacts<doxid-structpore_1_1_host_guest_1a86899968c22324fdb0b211533300d633>`;
+	};

@@ -1,0 +1,28 @@
+WEBVTT
+
+NOTE
+Draft cues converted from captions.srt. Final wording and timing are recorded later.
+
+1
+00:00:00.300 --> 00:00:15.100 line:95% align:center size:80%
+The command-line tool is the seams binary from the seams-core pixi environment. pixi run build is meson setup build followed by meson compile -C build. After that, seams is the program on screen.
+
+2
+00:00:15.500 --> 00:00:25.300 line:95% align:center size:80%
+I point seams read at input/traj/ice1h.lammpstrj. The line is nop 128 frame 1. One frame, 128 oxygens. docs_engine_openmm asserts this cell.
+
+3
+00:00:25.850 --> 00:00:38.570 line:95% align:center size:80%
+seams cn with cutoff 3.5 and type 1 prints nI 128. Every oxygen has neighbours inside the cutoff. That list is the input to rings and to CHILL+.
+
+4
+00:00:38.920 --> 00:00:48.300 line:95% align:center size:80%
+seams rings prints rings 256 and the histogram 6 256. The cell is six-rings only. docs_engine_openmm calls this six-rings 256.
+
+5
+00:00:48.800 --> 00:00:59.430 line:95% align:center size:80%
+seams steinhardt for l 6 prints q6 0.625855. seams chill-plus prints hexagonal 128. The frame is entirely hexagonal ice under the published rule.
+
+6
+00:01:00.030 --> 00:01:16.500 line:95% align:center size:80%
+I read the four lines as one result. nop 128, nI 128, q6 0.625855, hexagonal 128, and 6 256. If a later change moves any of those, this ice Ih cell is the first place I look.

@@ -1,0 +1,32 @@
+<!-- https://docs.dseams.info/user/tutorials/nanotube.md -->
+
+# Quasi-one-dimensional ice {#quasi-one-dimensional-ice}
+
+A nanotube ice is a stack of prism blocks of one ring size.
+`seams prisms` counts perfect and imperfect prisms of size 3 to 6 on the mutual four-nearest graph.
+The 2020 nanotube trajectory is figshare project 73545.
+It is not in this repository, so this page does not give that file’s prism count.
+
+The in-tree confined frame is `input/traj/exampleTraj.lammpstrj`, 250 oxygens, LAMMPS type 2.
+
+```bash
+seams prisms input/traj/exampleTraj.lammpstrj --type 2
+```
+
+```default
+nop 250
+size 3 perfect 0 imperfect 0
+size 4 perfect 51 imperfect 0
+size 5 perfect 0 imperfect 0
+size 6 perfect 0 imperfect 0
+perfect 51 imperfect 0
+```
+
+Fifty-one perfect four-membered prisms.
+Ice Ih (`input/traj/ice1h.lammpstrj`, type 1) and frame 1 of the cubic cell (`input/traj/mW_cubic.lammpstrj`, type 1) print perfect 0 and imperfect 0 on every size.
+Those crystals are hexagonal cages and double-diamond cages.
+They are not a prism stack under this count.
+
+The sheet census and the in-plane RDF are [Confined water](confined-water.md).
+Bulk CHILL+ and cages on the same mixed dump are [the mixed TIP4P tutorial](bulk-ice.md).
+The Lua examples for a nanotube dump are [example_lua/iceNanotube](https://github.com/d-SEAMS/yodaStruct/tree/main/example_lua/iceNanotube) in yodaStruct.

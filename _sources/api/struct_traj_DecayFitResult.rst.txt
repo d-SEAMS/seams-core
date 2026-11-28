@@ -1,0 +1,25 @@
+.. index:: pair: struct; traj::DecayFitResult
+.. _doxid-structtraj_1_1_decay_fit_result:
+
+struct traj::DecayFitResult
+===========================
+
+.. toctree::
+	:hidden:
+
+Integrated and single-exponential relaxation time summary.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	struct DecayFitResult {
+		// fields
+	
+		double :target:`tauIntegral<doxid-structtraj_1_1_decay_fit_result_1aef16e65246fb2d1b78ed0da8589a1136>` = 0.0;
+		double :target:`tauExp<doxid-structtraj_1_1_decay_fit_result_1aa6059ccafde71cb7c24852fad2762bc9>` = 0.0;
+		double :target:`amplitude<doxid-structtraj_1_1_decay_fit_result_1a16f98f05c5146c187056a8779074009b>` = 1.0;
+		double :target:`r2<doxid-structtraj_1_1_decay_fit_result_1aba19d242b9fe2c2e37c311af89d0135e>` = 0.0;
+	};

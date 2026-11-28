@@ -1,0 +1,47 @@
+<!-- https://docs.dseams.info/user/tutorials/clathrate.md -->
+
+# Classify a clathrate {#classify-a-clathrate}
+
+Hexagonal cages on ice Ih, double-diamond cages on cubic ice, and the sI, sII and sH census on the repeated cells.
+The commands below use the unit cells in this tree.
+
+GenIce builds the three empty clathrate hosts. The cage search is a signature census: closed polyhedra whose faces match a ring-size list.
+
+| cell | file | waters | census |
+| --- | --- | --- | --- |
+| sI | input/traj/genice_sI.lammpstrj | 46 | 2 of 5^{12}, 6 of 5^{12}6^{2} |
+| sII | input/traj/genice_sII.lammpstrj | 136 | 16 of 5^{12}, 8 of 5^{12}6^{4} |
+| sH | input/traj/genice_sH.lammpstrj | 136 | 12 of 5^{12}, 8 of 4^{3}5^{6}6^{3}, 4 of 5^{12}6^{8} |
+
+The sH unit cell is 3 of $5^{12}$, 2 of $4^{3}5^{6}6^{3}$, and 1 of $5^{12}6^{8}$.
+The file is that cell four times, so the census is $12, 8, 4$.
+sH is skewed: the dump stores an `xy` tilt.
+sI and sII are orthogonal.
+
+The default face-edge window is `2.65,3.15` in the coordinate units of the file.
+These dumps are angstroms.
+On all three files that window and `--cage-edge none` print the same cage counts.
+`none` keeps every primitive ring the neighbour list already accepted, and the cage bound is the face census alone.
+
+```bash
+seams cages input/traj/genice_sI.lammpstrj --type 1 --graph cutoff --signature 512+51262
+seams cages input/traj/genice_sII.lammpstrj --type 1 --graph cutoff --signature 512+51264
+seams cages input/traj/genice_sH.lammpstrj --type 1 --graph cutoff --signature 512+sh+51268
+```
+
+```default
+nop 46 graph cutoff signature 5:12 cages 2 atoms 40
+nop 46 graph cutoff signature 5:12,6:2 cages 6 atoms 46
+nop 136 graph cutoff signature 5:12 cages 16 atoms 136
+nop 136 graph cutoff signature 5:12,6:4 cages 8 atoms 128
+nop 136 graph cutoff signature 5:12 cages 12 atoms 136
+nop 136 graph cutoff signature 4:3,5:6,6:3 cages 8 atoms 112
+nop 136 graph cutoff signature 5:12,6:8 cages 4 atoms 120
+```
+
+`512` is $5^{12}$, `51262` is $5^{12}6^{2}$, `51264` is $5^{12}6^{4}$, `sh` is $4^{3}5^{6}6^{3}$, and `51268` is $5^{12}6^{8}$.
+The same three commands with `--cage-edge none` print these lines again.
+
+![sI host with one methane in each cage.](../../_images/overlay-web1.png)
+
+*sI with one methane in each cage. The census above is the empty host.*

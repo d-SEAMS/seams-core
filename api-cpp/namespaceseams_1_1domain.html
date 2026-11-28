@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: seams::domain Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespaceseams_1_1domain.html">
+<meta property="og:title" content="seams-core: seams::domain Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespaceseams_1_1domain.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: seams::domain Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespaceseams_1_1domain.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams::domain Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:Share" id="r_Share"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1domain_1_1Share.html">Share</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One rank's share of a frame.  <a href="structseams_1_1domain_1_1Share.html#details">More...</a><br /></td></tr>
+<tr class="memitem:RingSummary" id="r_RingSummary"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1domain_1_1RingSummary.html">RingSummary</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">What the ring analyses read off a frame's primitive rings.  <a href="structseams_1_1domain_1_1RingSummary.html#details">More...</a><br /></td></tr>
+<tr class="memitem:RingPhases" id="r_RingPhases"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1domain_1_1RingPhases.html">RingPhases</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:ab1bfe8a7863d4a64c57f3ea273eacfc3" id="r_ab1bfe8a7863d4a64c57f3ea273eacfc3"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> = <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt;double&gt;, double&gt;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a08b7a66725169b459556ffeb9a2791de" id="r_a08b7a66725169b459556ffeb9a2791de"><td class="memItemLeft"><a class="el" href="structseams_1_1domain_1_1RingSummary.html">RingSummary</a>&#160;</td><td class="memItemRight"><a class="el" href="#a08b7a66725169b459556ffeb9a2791de">summarize</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;ringList, int nAtoms, int maxDepth)</td></tr>
+<tr class="memdesc:a08b7a66725169b459556ffeb9a2791de"><td class="mdescLeft">&#160;</td><td class="mdescRight">The summary of <em class="arg">ringList</em> over a frame of <em class="arg">nAtoms</em> atoms.  <br /></td></tr>
+<tr class="memitem:ad678cb494640b797ce08a5c07565785c" id="r_ad678cb494640b797ce08a5c07565785c"><td class="memItemLeft">std::uint64_t&#160;</td><td class="memItemRight"><a class="el" href="#ad678cb494640b797ce08a5c07565785c">hilbertKey</a> (std::uint32_t x, std::uint32_t y, std::uint32_t z, int bits)</td></tr>
+<tr class="memdesc:ad678cb494640b797ce08a5c07565785c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Position of cell (x, y, z) along the Hilbert curve over a 2^bits grid.  <br /></td></tr>
+<tr class="memitem:a0a3449f33e010e244fcd5cac2d7b0127" id="r_a0a3449f33e010e244fcd5cac2d7b0127"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0a3449f33e010e244fcd5cac2d7b0127">ringHaloBonds</a> (int ringSize)</td></tr>
+<tr class="memitem:a6f6deb8c754079286665782899343096" id="r_a6f6deb8c754079286665782899343096"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a6f6deb8c754079286665782899343096">ringHops</a> (int maxDepth)</td></tr>
+<tr class="memitem:ae27bcdb378d3e3ff8d64c523885ba8fc" id="r_ae27bcdb378d3e3ff8d64c523885ba8fc"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae27bcdb378d3e3ff8d64c523885ba8fc">ringRowHops</a> (int maxDepth)</td></tr>
+<tr class="memitem:a98d70d81f9a7b925ff2ddefedb2be450" id="r_a98d70d81f9a7b925ff2ddefedb2be450"><td class="memItemLeft"><a class="el" href="structseams_1_1domain_1_1Share.html">Share</a>&#160;</td><td class="memItemRight"><a class="el" href="#a98d70d81f9a7b925ff2ddefedb2be450">decompose</a> (const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;cloud, int rank, int nRanks, double halo)</td></tr>
+<tr class="memitem:ab0d8b6bbc022b7e14dbf042227f7f211" id="r_ab0d8b6bbc022b7e14dbf042227f7f211"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ab0d8b6bbc022b7e14dbf042227f7f211">haloRanks</a> (const <a class="el" href="structseams_1_1domain_1_1Share.html">Share</a> &amp;share)</td></tr>
+<tr class="memitem:ad442b81299c26dea6b2393169fe36717" id="r_ad442b81299c26dea6b2393169fe36717"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ad442b81299c26dea6b2393169fe36717">markSources</a> (const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;cloud, const <a class="el" href="structseams_1_1domain_1_1Share.html">Share</a> &amp;share, double inner, std::vector&lt; char &gt; &amp;source)</td></tr>
+<tr class="memitem:a117adcb3bb1eb7b853386cdb464eded8" id="r_a117adcb3bb1eb7b853386cdb464eded8"><td class="memItemLeft"><a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a>&#160;</td><td class="memItemRight"><a class="el" href="#a117adcb3bb1eb7b853386cdb464eded8">subCloud</a> (const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;cloud, const std::vector&lt; int &gt; &amp;atoms)</td></tr>
+<tr class="memdesc:a117adcb3bb1eb7b853386cdb464eded8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The listed atoms of <em class="arg">cloud</em>, in that order, in the same box.  <br /></td></tr>
+<tr class="memitem:ab982f532567f97c32b948bf06caa992b" id="r_ab982f532567f97c32b948bf06caa992b"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ab982f532567f97c32b948bf06caa992b">rings</a> (const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;cloud, double cutoff, int maxDepth, int rank, int nRanks)</td></tr>
+<tr class="memitem:a08a5acca2a0f3c2819ead054726c6ca1" id="r_a08a5acca2a0f3c2819ead054726c6ca1"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#a08a5acca2a0f3c2819ead054726c6ca1">ownedRings</a> (const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;local, double cutoff, int maxDepth, const std::vector&lt; char &gt; &amp;owned)</td></tr>
+<tr class="memitem:a46e8c2344b67a28640bfe7c9d5b4694c" id="r_a46e8c2344b67a28640bfe7c9d5b4694c"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a46e8c2344b67a28640bfe7c9d5b4694c">ringsFromRows</a> (const std::vector&lt; int &gt; &amp;frame, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;neigh, const std::vector&lt; int &gt; &amp;sources, int maxDepth)</td></tr>
+<tr class="memitem:a453ef082fca2ef42494d0049acf16d0f" id="r_a453ef082fca2ef42494d0049acf16d0f"><td class="memItemLeft"><a class="el" href="structseams_1_1domain_1_1RingPhases.html">RingPhases</a>&#160;</td><td class="memItemRight"><a class="el" href="#a453ef082fca2ef42494d0049acf16d0f">lastRingPhases</a> ()</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a6d72aace5c44e5211dd6b56fc39a0cb9" id="r_a6d72aace5c44e5211dd6b56fc39a0cb9"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a6d72aace5c44e5211dd6b56fc39a0cb9">kRingHaloHalf</a> = 2</td></tr>
+<tr class="memitem:a7580f1167d570f49cc932c686891ef17" id="r_a7580f1167d570f49cc932c686891ef17"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a7580f1167d570f49cc932c686891ef17">kWorkNeigh</a> = 1</td></tr>
+<tr class="memdesc:a7580f1167d570f49cc932c686891ef17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tags for the measured cell weights. Zero keeps the point-count cut.  <br /></td></tr>
+<tr class="memitem:a50da7a35a542332983f5649d0a5d3362" id="r_a50da7a35a542332983f5649d0a5d3362"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a50da7a35a542332983f5649d0a5d3362">kWorkChill</a> = 2</td></tr>
+<tr class="memitem:a20030ac72f0d29d7e5970a0a697e774d" id="r_a20030ac72f0d29d7e5970a0a697e774d"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a20030ac72f0d29d7e5970a0a697e774d">kWorkQ6</a> = 3</td></tr>
+<tr class="memitem:ad4e08f4cf2275b5c9e856cdeae452365" id="r_ad4e08f4cf2275b5c9e856cdeae452365"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#ad4e08f4cf2275b5c9e856cdeae452365">kWorkRings</a> = 4</td></tr>
+</table>
+<a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
+<a id="ab1bfe8a7863d4a64c57f3ea273eacfc3" name="ab1bfe8a7863d4a64c57f3ea273eacfc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">&#9670;&#160;</a></span>Cloud</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">seams::domain::Cloud</a> = <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt;double&gt;, double&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00029">29</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a98d70d81f9a7b925ff2ddefedb2be450" name="a98d70d81f9a7b925ff2ddefedb2be450"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98d70d81f9a7b925ff2ddefedb2be450">&#9670;&#160;</a></span>decompose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1domain_1_1Share.html">Share</a> seams::domain::decompose </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>rank</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nRanks</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>halo</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The atoms rank <em class="arg">rank</em> of <em class="arg">nRanks</em> owns, and every atom in a cell painted within <em class="arg">halo</em> of an owned cell. Without a periodic box rank 0 owns every atom. </p>
+
+</div>
+</div>
+<a id="ab0d8b6bbc022b7e14dbf042227f7f211" name="ab0d8b6bbc022b7e14dbf042227f7f211"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0d8b6bbc022b7e14dbf042227f7f211">&#9670;&#160;</a></span>haloRanks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; seams::domain::haloRanks </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structseams_1_1domain_1_1Share.html">Share</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>share</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Ranks that own a halo atom of <em class="arg">share</em>, sorted, without this rank. The relation is symmetric: a cell within <em class="arg">halo</em> of both sides is listed by each owner. </p>
+
+</div>
+</div>
+<a id="ad678cb494640b797ce08a5c07565785c" name="ad678cb494640b797ce08a5c07565785c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad678cb494640b797ce08a5c07565785c">&#9670;&#160;</a></span>hilbertKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::uint64_t seams::domain::hilbertKey </td>
+          <td>(</td>
+          <td class="paramtype">std::uint32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::uint32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::uint32_t</td>          <td class="paramname"><span class="paramname"><em>z</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>bits</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Position of cell (x, y, z) along the Hilbert curve over a 2^bits grid. </p>
+
+</div>
+</div>
+<a id="a453ef082fca2ef42494d0049acf16d0f" name="a453ef082fca2ef42494d0049acf16d0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a453ef082fca2ef42494d0049acf16d0f">&#9670;&#160;</a></span>lastRingPhases()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1domain_1_1RingPhases.html">RingPhases</a> seams::domain::lastRingPhases </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad442b81299c26dea6b2393169fe36717" name="ad442b81299c26dea6b2393169fe36717"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad442b81299c26dea6b2393169fe36717">&#9670;&#160;</a></span>markSources()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::domain::markSources </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structseams_1_1domain_1_1Share.html">Share</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>share</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>inner</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; char &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>source</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>One where a local atom is owned or lies within <em class="arg">inner</em> of the owned block. <em class="arg">inner</em> below zero marks only the owned atoms. </p>
+
+</div>
+</div>
+<a id="a08a5acca2a0f3c2819ead054726c6ca1" name="a08a5acca2a0f3c2819ead054726c6ca1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08a5acca2a0f3c2819ead054726c6ca1">&#9670;&#160;</a></span>ownedRings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; seams::domain::ownedRings </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>local</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; char &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>owned</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p><a class="el" href="classseams_1_1Rings.html" title="Owned primitive-ring set.">Rings</a> of a cloud that is already one share, in share order. <em class="arg">owned</em> selects the sources. Member indices are local. </p>
+
+</div>
+</div>
+<a id="a0a3449f33e010e244fcd5cac2d7b0127" name="a0a3449f33e010e244fcd5cac2d7b0127"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a3449f33e010e244fcd5cac2d7b0127">&#9670;&#160;</a></span>ringHaloBonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::domain::ringHaloBonds </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>ringSize</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00062">62</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   62</span>                                       {</div>
+<div class="line"><span class="lineno">   63</span>  <span class="keywordflow">return</span> ringSize &gt; 0 ? ringSize / <a class="code hl_variable" href="#a6d72aace5c44e5211dd6b56fc39a0cb9">kRingHaloHalf</a> : 0;</div>
+<div class="line"><span class="lineno">   64</span>}</div>
+<div class="ttc" id="anamespaceseams_1_1domain_html_a6d72aace5c44e5211dd6b56fc39a0cb9"><div class="ttname"><a href="#a6d72aace5c44e5211dd6b56fc39a0cb9">seams::domain::kRingHaloHalf</a></div><div class="ttdeci">constexpr int kRingHaloHalf</div><div class="ttdef"><b>Definition</b> <a href="domain_8hpp_source.html#l00060">domain.hpp:60</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a6f6deb8c754079286665782899343096" name="a6f6deb8c754079286665782899343096"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f6deb8c754079286665782899343096">&#9670;&#160;</a></span>ringHops()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::domain::ringHops </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Cutoffs of coordinates a rank needs when it builds every neighbour row itself. One bond is at most one cutoff, so the coordinate skin is <a class="el" href="#a0a3449f33e010e244fcd5cac2d7b0127">ringHaloBonds()</a> cutoffs. </p>
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00069">69</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   69</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="#a0a3449f33e010e244fcd5cac2d7b0127">ringHaloBonds</a>(maxDepth); }</div>
+<div class="ttc" id="anamespaceseams_1_1domain_html_a0a3449f33e010e244fcd5cac2d7b0127"><div class="ttname"><a href="#a0a3449f33e010e244fcd5cac2d7b0127">seams::domain::ringHaloBonds</a></div><div class="ttdeci">int ringHaloBonds(int ringSize)</div><div class="ttdef"><b>Definition</b> <a href="domain_8hpp_source.html#l00062">domain.hpp:62</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ae27bcdb378d3e3ff8d64c523885ba8fc" name="ae27bcdb378d3e3ff8d64c523885ba8fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae27bcdb378d3e3ff8d64c523885ba8fc">&#9670;&#160;</a></span>ringRowHops()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::domain::ringRowHops </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Cutoffs of neighbour rows the ring search reads past the owned block. The coordinate halo on the distributed path is one cutoff; rows out to this reach are computed by their owners and exchanged. Edges that leave the reach are dropped, which is the graph a coordinate halo of this many cutoffs would have built. </p>
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00076">76</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   76</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="#a6f6deb8c754079286665782899343096">ringHops</a>(maxDepth); }</div>
+<div class="ttc" id="anamespaceseams_1_1domain_html_a6f6deb8c754079286665782899343096"><div class="ttname"><a href="#a6f6deb8c754079286665782899343096">seams::domain::ringHops</a></div><div class="ttdeci">int ringHops(int maxDepth)</div><div class="ttdef"><b>Definition</b> <a href="domain_8hpp_source.html#l00069">domain.hpp:69</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ab982f532567f97c32b948bf06caa992b" name="ab982f532567f97c32b948bf06caa992b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab982f532567f97c32b948bf06caa992b">&#9670;&#160;</a></span>rings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; seams::domain::rings </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>rank</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nRanks</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Primitive rings of the cutoff graph up to <em class="arg">maxDepth</em> members whose lowest-indexed member rank <em class="arg">rank</em> owns, by frame index, as <a class="el" href="namespaceprimitive.html#a69f1b870183f33e58426c88ee93f0635">primitive::ringNetwork</a> lists them for the graph with ascending rows. Each rank needs only its share, and the ranks' rings partition the frame's. </p>
+
+</div>
+</div>
+<a id="a46e8c2344b67a28640bfe7c9d5b4694c" name="a46e8c2344b67a28640bfe7c9d5b4694c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46e8c2344b67a28640bfe7c9d5b4694c">&#9670;&#160;</a></span>ringsFromRows()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; seams::domain::ringsFromRows </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>frame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>neigh</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>sources</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Primitive rings from neighbour rows already in hand. <em class="arg">frame</em>[i] is the frame index of a vertex whose neighbours are <em class="arg">neigh</em>[i], also frame indices. A neighbour that is not one of <em class="arg">frame</em> is dropped. <em class="arg">sources</em> lists the frames that may enumerate a ring. Members in the result are frame indices. </p>
+
+</div>
+</div>
+<a id="a117adcb3bb1eb7b853386cdb464eded8" name="a117adcb3bb1eb7b853386cdb464eded8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a117adcb3bb1eb7b853386cdb464eded8">&#9670;&#160;</a></span>subCloud()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> seams::domain::subCloud </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atoms</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The listed atoms of <em class="arg">cloud</em>, in that order, in the same box. </p>
+
+</div>
+</div>
+<a id="a08b7a66725169b459556ffeb9a2791de" name="a08b7a66725169b459556ffeb9a2791de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08b7a66725169b459556ffeb9a2791de">&#9670;&#160;</a></span>summarize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1domain_1_1RingSummary.html">RingSummary</a> seams::domain::summarize </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ringList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The summary of <em class="arg">ringList</em> over a frame of <em class="arg">nAtoms</em> atoms. </p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a6d72aace5c44e5211dd6b56fc39a0cb9" name="a6d72aace5c44e5211dd6b56fc39a0cb9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d72aace5c44e5211dd6b56fc39a0cb9">&#9670;&#160;</a></span>kRingHaloHalf</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::domain::kRingHaloHalf = 2</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Bonds of ghost skin around an owned atom. A primitive ring of length at most <em class="arg">ringSize</em> lies in the closed ball of radius floor(ringSize/2) about any of its members (formal/Formal/Halo.lean, primitive_ring_subset_ball), so this many bonds hold the ring and any shortcut the primitivity test can see. </p>
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00060">60</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a50da7a35a542332983f5649d0a5d3362" name="a50da7a35a542332983f5649d0a5d3362"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50da7a35a542332983f5649d0a5d3362">&#9670;&#160;</a></span>kWorkChill</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::domain::kWorkChill = 2</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00085">85</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7580f1167d570f49cc932c686891ef17" name="a7580f1167d570f49cc932c686891ef17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7580f1167d570f49cc932c686891ef17">&#9670;&#160;</a></span>kWorkNeigh</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::domain::kWorkNeigh = 1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tags for the measured cell weights. Zero keeps the point-count cut. </p>
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00084">84</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a20030ac72f0d29d7e5970a0a697e774d" name="a20030ac72f0d29d7e5970a0a697e774d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20030ac72f0d29d7e5970a0a697e774d">&#9670;&#160;</a></span>kWorkQ6</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::domain::kWorkQ6 = 3</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00086">86</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ad4e08f4cf2275b5c9e856cdeae452365" name="ad4e08f4cf2275b5c9e856cdeae452365"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4e08f4cf2275b5c9e856cdeae452365">&#9670;&#160;</a></span>kWorkRings</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::domain::kWorkRings = 4</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="domain_8hpp_source.html#l00087">87</a> of file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceseams.html">seams</a></li><li class="navelem"><a href="namespaceseams_1_1domain.html">domain</a></li>
+  </ul>
+</div>
+</body>
+</html>

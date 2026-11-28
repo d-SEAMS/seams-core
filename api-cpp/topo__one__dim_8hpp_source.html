@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/topo_one_dim.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/topo__one__dim_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/topo_one_dim.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/topo__one__dim_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/topo_one_dim.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('topo__one__dim_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">topo_one_dim.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="topo__one__dim_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) 2018--present d-SEAMS core team</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef SEAMS_TOPO_ONE_DIM_H_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define SEAMS_TOPO_ONE_DIM_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;<a class="code" href="order__parameter_8hpp.html">order_parameter.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;<a class="code" href="ring_8hpp.html">ring.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;<a class="code" href="seams__input_8hpp.html">seams_input.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;<a class="code" href="seams__output_8hpp.html">seams_output.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;<a class="code" href="shapeMatch_8hpp.html">shapeMatch.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacering.html">ring</a> {</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="namespacering.html#ad2c0de03f0e0c05c82c0d8a760285c57">   50</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#ad2c0de03f0e0c05c82c0d8a760285c57">findPrisms</a>(</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings, std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordtype">int</span> &amp;nPerfectPrisms, <span class="keywordtype">int</span> &amp;nImperfectPrisms,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    std::vector&lt;double&gt; &amp;rmsdPerAtom, <span class="keywordtype">bool</span> doShapeMatching = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="namespacering.html#a7e4aa899821d2c2dbf314c85e0fd12ce">   59</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a7e4aa899821d2c2dbf314c85e0fd12ce">basalPrismConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>                          std::vector&lt;int&gt; &amp;basal1, std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespacering.html#a55b285a12dd4d3b71906d50714f15e8b">   64</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a55b285a12dd4d3b71906d50714f15e8b">relaxedPrismConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>                            std::vector&lt;int&gt; &amp;basal1, std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="namespacering.html#a413087caad14553f11508908f3e69af8">   69</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a413087caad14553f11508908f3e69af8">discardExtraTetragonBlocks</a>(</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    std::vector&lt;int&gt; &amp;basal1, std::vector&lt;int&gt; &amp;basal2,</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="namespacering.html#a12f36b4fcda3a6aef2e7db9f90eb65b4">   75</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a12f36b4fcda3a6aef2e7db9f90eb65b4">prismAnalysis</a>(std::string path, <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>                  <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>                  <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>                  <span class="keywordtype">int</span> maxDepth, <span class="keywordtype">int</span> &amp;atomID, <span class="keywordtype">int</span> firstFrame, <span class="keywordtype">int</span> currentFrame,</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>                  <span class="keywordtype">bool</span> doShapeMatching = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="namespacering.html#a6895dac772704d2ca5fa188904c88763">   83</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a6895dac772704d2ca5fa188904c88763">assignPrismType</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                    <span class="keyword">const</span> std::vector&lt;int&gt; &amp;listPrism, <span class="keywordtype">int</span> ringSize,</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                    <span class="keyword">const</span> std::vector&lt;ring::strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                    std::vector&lt;int&gt; &amp;atomTypes,</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>                    std::vector&lt;ring::strucType&gt; &amp;atomState);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="namespacering.html#a507134ef6c0ceaf5c09b5c7d96ad7ee2">   90</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a507134ef6c0ceaf5c09b5c7d96ad7ee2">deformedPrismTypes</a>(<span class="keyword">const</span> std::vector&lt;ring::strucType&gt; &amp;atomState,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>                       std::vector&lt;int&gt; &amp;atomTypes, <span class="keywordtype">int</span> maxDepth);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="namespacering.html#a5f5496ef80d800cb0e9b4d87b6cca4bf">   94</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a5f5496ef80d800cb0e9b4d87b6cca4bf">rmAxialTranslations</a>(</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> &amp;atomID,</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">int</span> firstFrame, <span class="keywordtype">int</span> currentFrame);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>}  <span class="comment">// namespace ring</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#endif  </span><span class="comment">// __TOPOCONFINED_H_</span></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespacering_html"><div class="ttname"><a href="namespacering.html">ring</a></div><div class="ttdoc">Topological network criteria functions.</div><div class="ttdef"><b>Definition</b> <a href="cage__affiliation_8hpp_source.html#l00055">cage_affiliation.hpp:55</a></div></div>
+<div class="ttc" id="anamespacering_html_a12f36b4fcda3a6aef2e7db9f90eb65b4"><div class="ttname"><a href="namespacering.html#a12f36b4fcda3a6aef2e7db9f90eb65b4">ring::prismAnalysis</a></div><div class="ttdeci">int prismAnalysis(std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int maxDepth, int &amp;atomID, int firstFrame, int currentFrame, bool doShapeMatching=false)</div></div>
+<div class="ttc" id="anamespacering_html_a413087caad14553f11508908f3e69af8"><div class="ttname"><a href="namespacering.html#a413087caad14553f11508908f3e69af8">ring::discardExtraTetragonBlocks</a></div><div class="ttdeci">bool discardExtraTetragonBlocks(std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div></div>
+<div class="ttc" id="anamespacering_html_a507134ef6c0ceaf5c09b5c7d96ad7ee2"><div class="ttname"><a href="namespacering.html#a507134ef6c0ceaf5c09b5c7d96ad7ee2">ring::deformedPrismTypes</a></div><div class="ttdeci">int deformedPrismTypes(const std::vector&lt; ring::strucType &gt; &amp;atomState, std::vector&lt; int &gt; &amp;atomTypes, int maxDepth)</div><div class="ttdoc">Get the atom type values for deformed prisms.</div></div>
+<div class="ttc" id="anamespacering_html_a55b285a12dd4d3b71906d50714f15e8b"><div class="ttname"><a href="namespacering.html#a55b285a12dd4d3b71906d50714f15e8b">ring::relaxedPrismConditions</a></div><div class="ttdeci">bool relaxedPrismConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</div></div>
+<div class="ttc" id="anamespacering_html_a5f5496ef80d800cb0e9b4d87b6cca4bf"><div class="ttname"><a href="namespacering.html#a5f5496ef80d800cb0e9b4d87b6cca4bf">ring::rmAxialTranslations</a></div><div class="ttdeci">int rmAxialTranslations(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int &amp;atomID, int firstFrame, int currentFrame)</div><div class="ttdoc">Shift the entire ice nanotube and remove axial translations.</div></div>
+<div class="ttc" id="anamespacering_html_a6895dac772704d2ca5fa188904c88763"><div class="ttname"><a href="namespacering.html#a6895dac772704d2ca5fa188904c88763">ring::assignPrismType</a></div><div class="ttdeci">int assignPrismType(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;listPrism, int ringSize, const std::vector&lt; ring::strucType &gt; &amp;ringType, std::vector&lt; int &gt; &amp;atomTypes, std::vector&lt; ring::strucType &gt; &amp;atomState)</div></div>
+<div class="ttc" id="anamespacering_html_a7e4aa899821d2c2dbf314c85e0fd12ce"><div class="ttname"><a href="namespacering.html#a7e4aa899821d2c2dbf314c85e0fd12ce">ring::basalPrismConditions</a></div><div class="ttdeci">bool basalPrismConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</div></div>
+<div class="ttc" id="anamespacering_html_ad2c0de03f0e0c05c82c0d8a760285c57"><div class="ttname"><a href="namespacering.html#ad2c0de03f0e0c05c82c0d8a760285c57">ring::findPrisms</a></div><div class="ttdeci">std::vector&lt; int &gt; findPrisms(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; strucType &gt; &amp;ringType, int &amp;nPerfectPrisms, int &amp;nImperfectPrisms, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;rmsdPerAtom, bool doShapeMatching=false)</div></div>
+<div class="ttc" id="aorder__parameter_8hpp_html"><div class="ttname"><a href="order__parameter_8hpp.html">order_parameter.hpp</a></div></div>
+<div class="ttc" id="aring_8hpp_html"><div class="ttname"><a href="ring_8hpp.html">ring.hpp</a></div><div class="ttdoc">File containing common functions used by bulk and confined topological network critera.</div></div>
+<div class="ttc" id="aseams__input_8hpp_html"><div class="ttname"><a href="seams__input_8hpp.html">seams_input.hpp</a></div><div class="ttdoc">File for functions that read in files).</div></div>
+<div class="ttc" id="aseams__output_8hpp_html"><div class="ttname"><a href="seams__output_8hpp.html">seams_output.hpp</a></div></div>
+<div class="ttc" id="ashapeMatch_8hpp_html"><div class="ttname"><a href="shapeMatch_8hpp.html">shapeMatch.hpp</a></div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00152">mol_sys.hpp:152</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="topo__one__dim_8hpp.html">topo_one_dim.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

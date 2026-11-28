@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: site Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacesite.html">
+<meta property="og:title" content="seams-core: site Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacesite.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: site Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacesite.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">site Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:BrinePocket" id="r_BrinePocket"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1BrinePocket.html">BrinePocket</a></td></tr>
+<tr class="memitem:ConcentrationBin" id="r_ConcentrationBin"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1ConcentrationBin.html">ConcentrationBin</a></td></tr>
+<tr class="memitem:ConcentrationProfile" id="r_ConcentrationProfile"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a></td></tr>
+<tr class="memitem:DensityZ" id="r_DensityZ"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1DensityZ.html">DensityZ</a></td></tr>
+<tr class="memitem:FrontLayerReport" id="r_FrontLayerReport"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1FrontLayerReport.html">FrontLayerReport</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waters within <span class="tt">halfWidth</span> of either front, their primitive-ring census, and the coordination defects (a water whose oxygen neighbour count is not 4).  <a href="structsite_1_1FrontLayerReport.html#details">More...</a><br /></td></tr>
+<tr class="memitem:FrontOptions" id="r_FrontOptions"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1FrontOptions.html">FrontOptions</a></td></tr>
+<tr class="memitem:FrontPair" id="r_FrontPair"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1FrontPair.html">FrontPair</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Two planar fronts of one ice slab in a periodic box.  <a href="structsite_1_1FrontPair.html#details">More...</a><br /></td></tr>
+<tr class="memitem:FrontSnapshot" id="r_FrontSnapshot"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1FrontSnapshot.html">FrontSnapshot</a></td></tr>
+<tr class="memitem:GuestOccupancy" id="r_GuestOccupancy"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Guests read against enumerated cages.  <a href="structsite_1_1GuestOccupancy.html#details">More...</a><br /></td></tr>
+<tr class="memitem:IceClusterIons" id="r_IceClusterIons"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connected components of ice atoms on the water graph, and the ion count per component: each ion is assigned to the cluster of the nearest ice atom within <span class="tt">cutoff</span>.  <a href="structsite_1_1IceClusterIons.html#details">More...</a><br /></td></tr>
+<tr class="memitem:InsideTrace" id="r_InsideTrace"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1InsideTrace.html">InsideTrace</a></td></tr>
+<tr class="memitem:IonEnvironment" id="r_IonEnvironment"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a></td></tr>
+<tr class="memitem:LinearFit" id="r_LinearFit"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1LinearFit.html">LinearFit</a></td></tr>
+<tr class="memitem:PocketCensus" id="r_PocketCensus"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1PocketCensus.html">PocketCensus</a></td></tr>
+<tr class="memitem:RejectionCoefficient" id="r_RejectionCoefficient"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1RejectionCoefficient.html">RejectionCoefficient</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">k = c_ice / c_liquid, both molalities of formula units.  <a href="structsite_1_1RejectionCoefficient.html#details">More...</a><br /></td></tr>
+<tr class="memitem:Table" id="r_Table"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1Table.html">Table</a></td></tr>
+<tr class="memitem:TrapEvent" id="r_TrapEvent"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1TrapEvent.html">TrapEvent</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:adda3a91ca98e5b5e1ffb889ae6440c90" id="r_adda3a91ca98e5b5e1ffb889ae6440c90"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> { <br />
+&#160;&#160;<a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48">unspecified</a>
+, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63">cationHead</a>
+, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6">anion</a>
+, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01">tail</a>
+, <br />
+&#160;&#160;<a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e">donorH</a>
+, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d">acceptor</a>
+, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947">polar</a>
+, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04">apolar</a>
+, <br />
+&#160;&#160;<a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8">waterO</a>
+, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab">waterH</a>
+, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f">solvent</a>
+<br />
+ }</td></tr>
+<tr class="memitem:aa3661d15289b4b8576f48217ed337ca3" id="r_aa3661d15289b4b8576f48217ed337ca3"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a> { <br />
+&#160;&#160;<a class="el" href="#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">waterIce</a>
+, <a class="el" href="#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d">ionicLiquid</a>
+, <a class="el" href="#aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88">moltenSalt</a>
+, <a class="el" href="#aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5">des</a>
+, <br />
+&#160;&#160;<a class="el" href="#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41">electrolyte</a>
+, <a class="el" href="#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879">confinedIL</a>
+, <a class="el" href="#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9">confinedWater</a>
+, <a class="el" href="#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">networkFormer</a>
+<br />
+ }</td></tr>
+<tr class="memitem:a7cdb003964d40a8454361db4b34b4791" id="r_a7cdb003964d40a8454361db4b34b4791"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#a7cdb003964d40a8454361db4b34b4791">IonState</a> { <a class="el" href="#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">liquid</a> = 0
+, <a class="el" href="#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">front</a> = 1
+, <a class="el" href="#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a">ice</a> = 2
+ }</td></tr>
+<tr class="memdesc:a7cdb003964d40a8454361db4b34b4791"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ions read against a per-atom ice assignment.  <a href="#a7cdb003964d40a8454361db4b34b4791">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ad2c663055abfccc0db54cad890f6865c" id="r_ad2c663055abfccc0db54cad890f6865c"><td class="memItemLeft"><a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad2c663055abfccc0db54cad890f6865c">concentrationProfile</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;waterIndices, const std::vector&lt; int &gt; &amp;ionIndices, int nBins, int axis=2, int ionsPerFormula=2)</td></tr>
+<tr class="memitem:a03abaa05da31ce30d440505f4507a8d8" id="r_a03abaa05da31ce30d440505f4507a8d8"><td class="memItemLeft"><a class="el" href="structsite_1_1FrontPair.html">FrontPair</a>&#160;</td><td class="memItemRight"><a class="el" href="#a03abaa05da31ce30d440505f4507a8d8">locateFronts</a> (const <a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a> &amp;profile, double cut=0.5)</td></tr>
+<tr class="memitem:a7b0b14e15325d993b4acdd83ff8014a4" id="r_a7b0b14e15325d993b4acdd83ff8014a4"><td class="memItemLeft"><a class="el" href="structsite_1_1RejectionCoefficient.html">RejectionCoefficient</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7b0b14e15325d993b4acdd83ff8014a4">rejectionCoefficient</a> (const <a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a> &amp;profile, double bulkIce=0.85, double bulkLiquid=0.15)</td></tr>
+<tr class="memitem:ab5e571561bc356c66fac347d8f8924e2" id="r_ab5e571561bc356c66fac347d8f8924e2"><td class="memItemLeft"><a class="el" href="structsite_1_1LinearFit.html">LinearFit</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab5e571561bc356c66fac347d8f8924e2">linearFit</a> (const std::vector&lt; double &gt; &amp;time, const std::vector&lt; double &gt; &amp;value)</td></tr>
+<tr class="memitem:a50195ca7ff3fd7ab4e2e251f4b4aaccf" id="r_a50195ca7ff3fd7ab4e2e251f4b4aaccf"><td class="memItemLeft"><a class="el" href="structsite_1_1PocketCensus.html">PocketCensus</a>&#160;</td><td class="memItemRight"><a class="el" href="#a50195ca7ff3fd7ab4e2e251f4b4aaccf">brinePockets</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;waterIndices, const std::vector&lt; int &gt; &amp;ionIndices, double cutoff)</td></tr>
+<tr class="memitem:a7694aef3e4594497247dfece31f0285b" id="r_a7694aef3e4594497247dfece31f0285b"><td class="memItemLeft"><a class="el" href="structsite_1_1FrontLayerReport.html">FrontLayerReport</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7694aef3e4594497247dfece31f0285b">frontLayer</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; int &gt; &amp;waterIndices, const <a class="el" href="structsite_1_1FrontPair.html">FrontPair</a> &amp;fronts, double halfWidth, double cutoff, int maxRing, int axis=2)</td></tr>
+<tr class="memitem:ad9acb3de62cc0af6b28a6f8197f2d24c" id="r_ad9acb3de62cc0af6b28a6f8197f2d24c"><td class="memItemLeft">std::vector&lt; <a class="el" href="structsite_1_1TrapEvent.html">TrapEvent</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ad9acb3de62cc0af6b28a6f8197f2d24c">trappingTransitions</a> (const <a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a> &amp;before, const <a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a> &amp;after)</td></tr>
+<tr class="memdesc:ad9acb3de62cc0af6b28a6f8197f2d24c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A trapping event is a change of <a class="el" href="#a7cdb003964d40a8454361db4b34b4791" title="Ions read against a per-atom ice assignment.">IonState</a> into ice.  <br /></td></tr>
+<tr class="memitem:a55dc246b8a7c6b02d1a57349bdbf98a8" id="r_a55dc246b8a7c6b02d1a57349bdbf98a8"><td class="memItemLeft"><a class="el" href="structsite_1_1FrontSnapshot.html">FrontSnapshot</a>&#160;</td><td class="memItemRight"><a class="el" href="#a55dc246b8a7c6b02d1a57349bdbf98a8">analyseFront</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;waterIndices, const std::vector&lt; int &gt; &amp;ionIndices, const <a class="el" href="structsite_1_1FrontOptions.html">FrontOptions</a> &amp;options={})</td></tr>
+<tr class="memitem:a75c8588cd72dda60fecb01240009ca6c" id="r_a75c8588cd72dda60fecb01240009ca6c"><td class="memItemLeft"><a class="el" href="structsite_1_1DensityZ.html">DensityZ</a>&#160;</td><td class="memItemRight"><a class="el" href="#a75c8588cd72dda60fecb01240009ca6c">densityZ</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int nbin, int axis)</td></tr>
+<tr class="memdesc:a75c8588cd72dda60fecb01240009ca6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Histogram Point::{x,y,z} for typeI (0 = every atom). axis is 0, 1, or 2.  <br /></td></tr>
+<tr class="memitem:a0e086c58b6a8de67c895bd1e034f58e6" id="r_a0e086c58b6a8de67c895bd1e034f58e6"><td class="memItemLeft"><a class="el" href="structsite_1_1DensityZ.html">DensityZ</a>&#160;</td><td class="memItemRight"><a class="el" href="#a0e086c58b6a8de67c895bd1e034f58e6">densityZ</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> kind, int nbin, int axis)</td></tr>
+<tr class="memdesc:a0e086c58b6a8de67c895bd1e034f58e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same histogram, restricted to atoms whose <a class="el" href="structsite_1_1Table.html">Table</a> kind matches.  <br /></td></tr>
+<tr class="memitem:a05342583b5b8258d5347b3f18983d4b2" id="r_a05342583b5b8258d5347b3f18983d4b2"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a05342583b5b8258d5347b3f18983d4b2">iceScoreAllowed</a> (<a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a> f)</td></tr>
+<tr class="memitem:a3043411870d52f19774d045fa21dfc09" id="r_a3043411870d52f19774d045fa21dfc09"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#a3043411870d52f19774d045fa21dfc09">refuseIceScore</a> (<a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a> f)</td></tr>
+<tr class="memitem:a1dacaa43f0631e0bc75cc37531b89ce7" id="r_a1dacaa43f0631e0bc75cc37531b89ce7"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#a1dacaa43f0631e0bc75cc37531b89ce7">familyName</a> (<a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a> f)</td></tr>
+<tr class="memitem:a44e7fbcc66c892d4e98d896e5041cf4c" id="r_a44e7fbcc66c892d4e98d896e5041cf4c"><td class="memItemLeft"><a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a>&#160;</td><td class="memItemRight"><a class="el" href="#a44e7fbcc66c892d4e98d896e5041cf4c">parseFamily</a> (std::string_view name)</td></tr>
+<tr class="memitem:a651f87e7aaca786cffd536a4d2b286c4" id="r_a651f87e7aaca786cffd536a4d2b286c4"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a651f87e7aaca786cffd536a4d2b286c4">indicesOf</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> kind)</td></tr>
+<tr class="memitem:a1dd96ee4ccc36bc86f348ec029859b53" id="r_a1dd96ee4ccc36bc86f348ec029859b53"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a1dd96ee4ccc36bc86f348ec029859b53">lammpsTypeOfKind</a> (const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table, <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> kind)</td></tr>
+<tr class="memitem:a55a0dd31fcceddabfa6cda601eeb807c" id="r_a55a0dd31fcceddabfa6cda601eeb807c"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a55a0dd31fcceddabfa6cda601eeb807c">ionCloud</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;src, const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table)</td></tr>
+<tr class="memitem:ab556d24c5f6d7d7be9ba2e4d975259be" id="r_ab556d24c5f6d7d7be9ba2e4d975259be"><td class="memItemLeft"><a class="el" href="structsite_1_1Table.html">Table</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab556d24c5f6d7d7be9ba2e4d975259be">parseSiteSpec</a> (std::string_view spec)</td></tr>
+<tr class="memitem:aff6bc7a17064a71c1ca2e4b210b72d3f" id="r_aff6bc7a17064a71c1ca2e4b210b72d3f"><td class="memItemLeft"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a>&#160;</td><td class="memItemRight"><a class="el" href="#aff6bc7a17064a71c1ca2e4b210b72d3f">ionEnvironment</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;ionIndices, const std::vector&lt; int &gt; &amp;waterTypes, double cutoff)</td></tr>
+<tr class="memdesc:aff6bc7a17064a71c1ca2e4b210b72d3f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">iceFlag</span> is indexed like <span class="tt">yCloud.pts</span>.  <br /></td></tr>
+<tr class="memitem:a59c0f056c026caebb259d8c8e0d032e1" id="r_a59c0f056c026caebb259d8c8e0d032e1"><td class="memItemLeft"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a>&#160;</td><td class="memItemRight"><a class="el" href="#a59c0f056c026caebb259d8c8e0d032e1">ionEnvironment</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;ionIndices, int waterType, double cutoff)</td></tr>
+<tr class="memdesc:a59c0f056c026caebb259d8c8e0d032e1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">waterType</span> 0 accepts every non-ion. Any other value is that one type.  <br /></td></tr>
+<tr class="memitem:a3327b0f82b57a80d113b241dec0eb711" id="r_a3327b0f82b57a80d113b241dec0eb711"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a3327b0f82b57a80d113b241dec0eb711">shellRingCensus</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
+<tr class="memdesc:a3327b0f82b57a80d113b241dec0eb711"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rings of the water network that pass through a first shell: the census by size of every ring with at least one vertex in <span class="tt">shell</span>.  <br /></td></tr>
+<tr class="memitem:a99a4e8b8fb177f7fea900ac24f145d45" id="r_a99a4e8b8fb177f7fea900ac24f145d45"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a99a4e8b8fb177f7fea900ac24f145d45">cappedRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
+<tr class="memdesc:a99a4e8b8fb177f7fea900ac24f145d45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capped rings: the water-only primitive rings of <span class="tt">rings</span> (the ring network of the water graph, ions not vertices) of at most <span class="tt">maxRingSize</span> members, every member of which lies in <span class="tt">shell</span>.  <br /></td></tr>
+<tr class="memitem:a1e366213de1b2f4f04c86f8364b609f6" id="r_a1e366213de1b2f4f04c86f8364b609f6"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a1e366213de1b2f4f04c86f8364b609f6">brokenRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
+<tr class="memdesc:a1e366213de1b2f4f04c86f8364b609f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Broken rings: the primitive rings, of at most <span class="tt">maxRingSize</span> members, of the water graph <span class="tt">nList</span> (by index, leading self entry, ions not bonded) plus one virtual ion vertex bonded to every water of <span class="tt">shell</span>, that contain the ion.  <br /></td></tr>
+<tr class="memitem:adf97b42407e86bc9d067855b19397ac8" id="r_adf97b42407e86bc9d067855b19397ac8"><td class="memItemLeft"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a>&#160;</td><td class="memItemRight"><a class="el" href="#adf97b42407e86bc9d067855b19397ac8">guestOccupancy</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;cages, const std::vector&lt; int &gt; &amp;guestIndices, double radius)</td></tr>
+<tr class="memdesc:adf97b42407e86bc9d067855b19397ac8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">cages</span> are vertex index lists into <span class="tt">yCloud.pts</span>; <span class="tt">radius</span> in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).  <br /></td></tr>
+<tr class="memitem:a208c6e1f8e6106530d6c75bb16dccaad" id="r_a208c6e1f8e6106530d6c75bb16dccaad"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a208c6e1f8e6106530d6c75bb16dccaad">periodicCentroid</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;atoms)</td></tr>
+<tr class="memdesc:a208c6e1f8e6106530d6c75bb16dccaad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there.  <br /></td></tr>
+<tr class="memitem:a9231f841816296c279bcf08186f332de" id="r_a9231f841816296c279bcf08186f332de"><td class="memItemLeft">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#a9231f841816296c279bcf08186f332de">insideRayDirections</a> ()</td></tr>
+<tr class="memdesc:a9231f841816296c279bcf08186f332de"><td class="mdescLeft">&#160;</td><td class="mdescRight">The fixed, ordered unit directions the inside test casts rays along.  <br /></td></tr>
+<tr class="memitem:aeeb8b9fec48dcc2b70f40cafe705a0c2" id="r_aeeb8b9fec48dcc2b70f40cafe705a0c2"><td class="memItemLeft"><a class="el" href="structsite_1_1InsideTrace.html">InsideTrace</a>&#160;</td><td class="memItemRight"><a class="el" href="#aeeb8b9fec48dcc2b70f40cafe705a0c2">pointInFacesTrace</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces, const std::array&lt; double, 3 &gt; &amp;guest, const std::array&lt; double, 3 &gt; *center=nullptr)</td></tr>
+<tr class="memdesc:aeeb8b9fec48dcc2b70f40cafe705a0c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The inside predicate for one cage.  <br /></td></tr>
+<tr class="memitem:a5e215d2d1aaa78e5e54c511d3617ea1d" id="r_a5e215d2d1aaa78e5e54c511d3617ea1d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a5e215d2d1aaa78e5e54c511d3617ea1d">pointInFaces</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces, const std::array&lt; double, 3 &gt; &amp;guest, const std::array&lt; double, 3 &gt; *center=nullptr)</td></tr>
+<tr class="memitem:a84113178c851924869bd3fee27af749b" id="r_a84113178c851924869bd3fee27af749b"><td class="memItemLeft"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a>&#160;</td><td class="memItemRight"><a class="el" href="#a84113178c851924869bd3fee27af749b">guestOccupancyInside</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;cageFaces, const std::vector&lt; int &gt; &amp;guestIndices)</td></tr>
+<tr class="memdesc:a84113178c851924869bd3fee27af749b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Occupancy by the inside predicate (<span class="tt"><a class="el" href="#a5e215d2d1aaa78e5e54c511d3617ea1d">pointInFaces</a></span>) on every cage.  <br /></td></tr>
+<tr class="memitem:a2c1ad7bff89d54bbb4c2a22f93e3eeaf" id="r_a2c1ad7bff89d54bbb4c2a22f93e3eeaf"><td class="memItemLeft"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2c1ad7bff89d54bbb4c2a22f93e3eeaf">iceClusterIonCensus</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;ice, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nListByIndex, const std::vector&lt; int &gt; &amp;ionIndices, double cutoff)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a830c5d5e28d9456dcc61abd3d558ab7f" id="r_a830c5d5e28d9456dcc61abd3d558ab7f"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a830c5d5e28d9456dcc61abd3d558ab7f">kWaterMolarMassKg</a> = 0.01801528</td></tr>
+<tr class="memitem:a17c7ad054eafa92f5e5238e14109b97a" id="r_a17c7ad054eafa92f5e5238e14109b97a"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a17c7ad054eafa92f5e5238e14109b97a">kInsideRelTol</a> = 1e-9</td></tr>
+<tr class="memdesc:a17c7ad054eafa92f5e5238e14109b97a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance of the inside test, in units of the largest distance from c_F to a cage vertex.  <br /></td></tr>
+</table>
+<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="aa3661d15289b4b8576f48217ed337ca3" name="aa3661d15289b4b8576f48217ed337ca3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3661d15289b4b8576f48217ed337ca3">&#9670;&#160;</a></span>Family</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">site::Family</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd" name="aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd"></a>waterIce&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d" name="aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d"></a>ionicLiquid&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88" name="aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88"></a>moltenSalt&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5" name="aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5"></a>des&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41" name="aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41"></a>electrolyte&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879" name="aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879"></a>confinedIL&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9" name="aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9"></a>confinedWater&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64" name="aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64"></a>networkFormer&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00041">41</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   41</span>                  {</div>
+<div class="line"><span class="lineno">   42</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">waterIce</a>,      <span class="comment">// default; CHILL/TUM allowed</span></div>
+<div class="line"><span class="lineno">   43</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d">ionicLiquid</a>,   <span class="comment">// CHILL/TUM refused</span></div>
+<div class="line"><span class="lineno">   44</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88">moltenSalt</a>,    <span class="comment">// CHILL/TUM refused</span></div>
+<div class="line"><span class="lineno">   45</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5">des</a>,           <span class="comment">// CHILL/TUM refused</span></div>
+<div class="line"><span class="lineno">   46</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41">electrolyte</a>,   <span class="comment">// CHILL/TUM only if the caller also names a waterIce subset</span></div>
+<div class="line"><span class="lineno">   47</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879">confinedIL</a>,    <span class="comment">// CHILL/TUM refused</span></div>
+<div class="line"><span class="lineno">   48</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9">confinedWater</a>, <span class="comment">// 2D RDF / monolayer rings; bulk CHILL refused</span></div>
+<div class="line"><span class="lineno">   49</span>  <a class="code hl_enumvalue" href="#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">networkFormer</a>  <span class="comment">// silica / BeF2; Franzblau yes, CHILL no</span></div>
+<div class="line"><span class="lineno">   50</span>};</div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41">site::Family::electrolyte</a></div><div class="ttdeci">@ electrolyte</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00046">site.hpp:46</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5">site::Family::des</a></div><div class="ttdeci">@ des</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00045">site.hpp:45</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9">site::Family::confinedWater</a></div><div class="ttdeci">@ confinedWater</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00048">site.hpp:48</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88">site::Family::moltenSalt</a></div><div class="ttdeci">@ moltenSalt</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00044">site.hpp:44</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">site::Family::waterIce</a></div><div class="ttdeci">@ waterIce</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00042">site.hpp:42</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879">site::Family::confinedIL</a></div><div class="ttdeci">@ confinedIL</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00047">site.hpp:47</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d">site::Family::ionicLiquid</a></div><div class="ttdeci">@ ionicLiquid</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00043">site.hpp:43</a></div></div>
+<div class="ttc" id="anamespacesite_html_aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64"><div class="ttname"><a href="#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">site::Family::networkFormer</a></div><div class="ttdeci">@ networkFormer</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00049">site.hpp:49</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a7cdb003964d40a8454361db4b34b4791" name="a7cdb003964d40a8454361db4b34b4791"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7cdb003964d40a8454361db4b34b4791">&#9670;&#160;</a></span>IonState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#a7cdb003964d40a8454361db4b34b4791">site::IonState</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Ions read against a per-atom ice assignment. </p>
+<p>Ions are not part of the hydrogen-bond network; the assignment is computed on the water and each ion is classed by its first water shell: every shell molecule labeled is <span class="tt">ice</span>, none is <span class="tt">liquid</span>, otherwise <span class="tt">front</span>. An ion with an empty shell is liquid. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c" name="a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c"></a>liquid&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd" name="a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd"></a>front&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a" name="a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a"></a>ice&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00086">86</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   86</span>{ <a class="code hl_enumvalue" href="#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">liquid</a> = 0, <a class="code hl_enumvalue" href="#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">front</a> = 1, <a class="code hl_enumvalue" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71a7bdff76536f12a7c5ffde207e72cfe3a">ice</a> = 2 };</div>
+<div class="ttc" id="anamespacephase_html_a45206ea8c1350d175974e9a54cde9c71a7bdff76536f12a7c5ffde207e72cfe3a"><div class="ttname"><a href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71a7bdff76536f12a7c5ffde207e72cfe3a">phase::GlassKind::ice</a></div><div class="ttdeci">@ ice</div><div class="ttdef"><b>Definition</b> <a href="phase_8hpp_source.html#l00013">phase.hpp:13</a></div></div>
+<div class="ttc" id="anamespacesite_html_a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd"><div class="ttname"><a href="#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">site::IonState::front</a></div><div class="ttdeci">@ front</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00086">site.hpp:86</a></div></div>
+<div class="ttc" id="anamespacesite_html_a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c"><div class="ttname"><a href="#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">site::IonState::liquid</a></div><div class="ttdeci">@ liquid</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00086">site.hpp:86</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="adda3a91ca98e5b5e1ffb889ae6440c90" name="adda3a91ca98e5b5e1ffb889ae6440c90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90">&#9670;&#160;</a></span>Kind</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90">site::Kind</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48" name="adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48"></a>unspecified&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63" name="adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63"></a>cationHead&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6" name="adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6"></a>anion&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01" name="adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01"></a>tail&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e" name="adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e"></a>donorH&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d" name="adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d"></a>acceptor&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947" name="adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947"></a>polar&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04" name="adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04"></a>apolar&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8" name="adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8"></a>waterO&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab" name="adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab"></a>waterH&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f" name="adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f"></a>solvent&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00027">27</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   27</span>                {</div>
+<div class="line"><span class="lineno">   28</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48">unspecified</a>,</div>
+<div class="line"><span class="lineno">   29</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63">cationHead</a>,</div>
+<div class="line"><span class="lineno">   30</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6">anion</a>,</div>
+<div class="line"><span class="lineno">   31</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01">tail</a>,</div>
+<div class="line"><span class="lineno">   32</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e">donorH</a>,</div>
+<div class="line"><span class="lineno">   33</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d">acceptor</a>,</div>
+<div class="line"><span class="lineno">   34</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947">polar</a>,</div>
+<div class="line"><span class="lineno">   35</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04">apolar</a>,</div>
+<div class="line"><span class="lineno">   36</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8">waterO</a>,</div>
+<div class="line"><span class="lineno">   37</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab">waterH</a>,</div>
+<div class="line"><span class="lineno">   38</span>  <a class="code hl_enumvalue" href="#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f">solvent</a></div>
+<div class="line"><span class="lineno">   39</span>};</div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63">site::Kind::cationHead</a></div><div class="ttdeci">@ cationHead</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00029">site.hpp:29</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8">site::Kind::waterO</a></div><div class="ttdeci">@ waterO</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00036">site.hpp:36</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab">site::Kind::waterH</a></div><div class="ttdeci">@ waterH</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00037">site.hpp:37</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d">site::Kind::acceptor</a></div><div class="ttdeci">@ acceptor</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00033">site.hpp:33</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e">site::Kind::donorH</a></div><div class="ttdeci">@ donorH</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00032">site.hpp:32</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6">site::Kind::anion</a></div><div class="ttdeci">@ anion</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00030">site.hpp:30</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01">site::Kind::tail</a></div><div class="ttdeci">@ tail</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00031">site.hpp:31</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f">site::Kind::solvent</a></div><div class="ttdeci">@ solvent</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00038">site.hpp:38</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48">site::Kind::unspecified</a></div><div class="ttdeci">@ unspecified</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00028">site.hpp:28</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04">site::Kind::apolar</a></div><div class="ttdeci">@ apolar</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00035">site.hpp:35</a></div></div>
+<div class="ttc" id="anamespacesite_html_adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947"><div class="ttname"><a href="#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947">site::Kind::polar</a></div><div class="ttdeci">@ polar</div><div class="ttdef"><b>Definition</b> <a href="site_8hpp_source.html#l00034">site.hpp:34</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a55dc246b8a7c6b02d1a57349bdbf98a8" name="a55dc246b8a7c6b02d1a57349bdbf98a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55dc246b8a7c6b02d1a57349bdbf98a8">&#9670;&#160;</a></span>analyseFront()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1FrontSnapshot.html">FrontSnapshot</a> site::analyseFront </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>iceFlag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>waterIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ionIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1FrontOptions.html">FrontOptions</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>options</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a50195ca7ff3fd7ab4e2e251f4b4aaccf" name="a50195ca7ff3fd7ab4e2e251f4b4aaccf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50195ca7ff3fd7ab4e2e251f4b4aaccf">&#9670;&#160;</a></span>brinePockets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1PocketCensus.html">PocketCensus</a> site::brinePockets </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>iceFlag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>waterIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ionIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1e366213de1b2f4f04c86f8364b609f6" name="a1e366213de1b2f4f04c86f8364b609f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e366213de1b2f4f04c86f8364b609f6">&#9670;&#160;</a></span>brokenRings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; site::brokenRings </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>shell</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Broken rings: the primitive rings, of at most <span class="tt">maxRingSize</span> members, of the water graph <span class="tt">nList</span> (by index, leading self entry, ions not bonded) plus one virtual ion vertex bonded to every water of <span class="tt">shell</span>, that contain the ion. </p>
+<p>These are the rings the water-only network lost. Each ring is in ring order and writes the virtual ion as <span class="tt">static_cast&lt;int&gt;(nList.size())</span>. </p>
+
+</div>
+</div>
+<a id="a99a4e8b8fb177f7fea900ac24f145d45" name="a99a4e8b8fb177f7fea900ac24f145d45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99a4e8b8fb177f7fea900ac24f145d45">&#9670;&#160;</a></span>cappedRings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; site::cappedRings </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>shell</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Capped rings: the water-only primitive rings of <span class="tt">rings</span> (the ring network of the water graph, ions not vertices) of at most <span class="tt">maxRingSize</span> members, every member of which lies in <span class="tt">shell</span>. </p>
+<p>The ion sits above a complete water ring. </p>
+
+</div>
+</div>
+<a id="ad2c663055abfccc0db54cad890f6865c" name="ad2c663055abfccc0db54cad890f6865c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2c663055abfccc0db54cad890f6865c">&#9670;&#160;</a></span>concentrationProfile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a> site::concentrationProfile </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>iceFlag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>waterIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ionIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nBins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>ionsPerFormula</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0e086c58b6a8de67c895bd1e034f58e6" name="a0e086c58b6a8de67c895bd1e034f58e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e086c58b6a8de67c895bd1e034f58e6">&#9670;&#160;</a></span>densityZ() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1DensityZ.html">DensityZ</a> site::densityZ </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>table</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a></td>          <td class="paramname"><span class="paramname"><em>kind</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nbin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Same histogram, restricted to atoms whose <a class="el" href="structsite_1_1Table.html">Table</a> kind matches. </p>
+
+</div>
+</div>
+<a id="a75c8588cd72dda60fecb01240009ca6c" name="a75c8588cd72dda60fecb01240009ca6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75c8588cd72dda60fecb01240009ca6c">&#9670;&#160;</a></span>densityZ() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1DensityZ.html">DensityZ</a> site::densityZ </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nbin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Histogram Point::{x,y,z} for typeI (0 = every atom). axis is 0, 1, or 2. </p>
+
+</div>
+</div>
+<a id="a1dacaa43f0631e0bc75cc37531b89ce7" name="a1dacaa43f0631e0bc75cc37531b89ce7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dacaa43f0631e0bc75cc37531b89ce7">&#9670;&#160;</a></span>familyName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * site::familyName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a></td>          <td class="paramname"><span class="paramname"><em>f</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7694aef3e4594497247dfece31f0285b" name="a7694aef3e4594497247dfece31f0285b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7694aef3e4594497247dfece31f0285b">&#9670;&#160;</a></span>frontLayer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1FrontLayerReport.html">FrontLayerReport</a> site::frontLayer </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>waterIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1FrontPair.html">FrontPair</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>fronts</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>halfWidth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRing</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adf97b42407e86bc9d067855b19397ac8" name="adf97b42407e86bc9d067855b19397ac8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf97b42407e86bc9d067855b19397ac8">&#9670;&#160;</a></span>guestOccupancy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a> site::guestOccupancy </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cages</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>guestIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><span class="tt">cages</span> are vertex index lists into <span class="tt">yCloud.pts</span>; <span class="tt">radius</span> in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage). </p>
+
+</div>
+</div>
+<a id="a84113178c851924869bd3fee27af749b" name="a84113178c851924869bd3fee27af749b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84113178c851924869bd3fee27af749b">&#9670;&#160;</a></span>guestOccupancyInside()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a> site::guestOccupancyInside </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageFaces</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>guestIndices</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Occupancy by the inside predicate (<span class="tt"><a class="el" href="#a5e215d2d1aaa78e5e54c511d3617ea1d">pointInFaces</a></span>) on every cage. </p>
+<p>Among cages that contain the guest the nearest centroid wins. <span class="tt">rings</span> is the ring list the cage faces index; <span class="tt">cageFaces[c]</span> is the face indices of cage c. </p>
+
+</div>
+</div>
+<a id="a2c1ad7bff89d54bbb4c2a22f93e3eeaf" name="a2c1ad7bff89d54bbb4c2a22f93e3eeaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c1ad7bff89d54bbb4c2a22f93e3eeaf">&#9670;&#160;</a></span>iceClusterIonCensus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a> site::iceClusterIonCensus </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nListByIndex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ionIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a05342583b5b8258d5347b3f18983d4b2" name="a05342583b5b8258d5347b3f18983d4b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05342583b5b8258d5347b3f18983d4b2">&#9670;&#160;</a></span>iceScoreAllowed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool site::iceScoreAllowed </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a></td>          <td class="paramname"><span class="paramname"><em>f</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a651f87e7aaca786cffd536a4d2b286c4" name="a651f87e7aaca786cffd536a4d2b286c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a651f87e7aaca786cffd536a4d2b286c4">&#9670;&#160;</a></span>indicesOf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; site::indicesOf </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>table</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a></td>          <td class="paramname"><span class="paramname"><em>kind</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9231f841816296c279bcf08186f332de" name="a9231f841816296c279bcf08186f332de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9231f841816296c279bcf08186f332de">&#9670;&#160;</a></span>insideRayDirections()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp; site::insideRayDirections </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The fixed, ordered unit directions the inside test casts rays along. </p>
+
+</div>
+</div>
+<a id="a55a0dd31fcceddabfa6cda601eeb807c" name="a55a0dd31fcceddabfa6cda601eeb807c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55a0dd31fcceddabfa6cda601eeb807c">&#9670;&#160;</a></span>ionCloud()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; site::ionCloud </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>table</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aff6bc7a17064a71c1ca2e4b210b72d3f" name="aff6bc7a17064a71c1ca2e4b210b72d3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff6bc7a17064a71c1ca2e4b210b72d3f">&#9670;&#160;</a></span>ionEnvironment() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a> site::ionEnvironment </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>iceFlag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ionIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>waterTypes</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><span class="tt">iceFlag</span> is indexed like <span class="tt">yCloud.pts</span>. </p>
+<p>An empty <span class="tt">waterTypes</span> accepts every atom that is not an ion. A non-empty list keeps every named type, the same union <span class="tt">cutoffWater</span> uses. <span class="tt">cutoff</span> is the first shell radius in the cloud's length unit. </p>
+
+</div>
+</div>
+<a id="a59c0f056c026caebb259d8c8e0d032e1" name="a59c0f056c026caebb259d8c8e0d032e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59c0f056c026caebb259d8c8e0d032e1">&#9670;&#160;</a></span>ionEnvironment() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a> site::ionEnvironment </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>iceFlag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ionIndices</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>waterType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><span class="tt">waterType</span> 0 accepts every non-ion. Any other value is that one type. </p>
+
+</div>
+</div>
+<a id="a1dd96ee4ccc36bc86f348ec029859b53" name="a1dd96ee4ccc36bc86f348ec029859b53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dd96ee4ccc36bc86f348ec029859b53">&#9670;&#160;</a></span>lammpsTypeOfKind()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int site::lammpsTypeOfKind </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>table</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a></td>          <td class="paramname"><span class="paramname"><em>kind</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab5e571561bc356c66fac347d8f8924e2" name="ab5e571561bc356c66fac347d8f8924e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5e571561bc356c66fac347d8f8924e2">&#9670;&#160;</a></span>linearFit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1LinearFit.html">LinearFit</a> site::linearFit </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>time</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a03abaa05da31ce30d440505f4507a8d8" name="a03abaa05da31ce30d440505f4507a8d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03abaa05da31ce30d440505f4507a8d8">&#9670;&#160;</a></span>locateFronts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1FrontPair.html">FrontPair</a> site::locateFronts </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>profile</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cut</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0.5</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a44e7fbcc66c892d4e98d896e5041cf4c" name="a44e7fbcc66c892d4e98d896e5041cf4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44e7fbcc66c892d4e98d896e5041cf4c">&#9670;&#160;</a></span>parseFamily()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a> site::parseFamily </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab556d24c5f6d7d7be9ba2e4d975259be" name="ab556d24c5f6d7d7be9ba2e4d975259be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab556d24c5f6d7d7be9ba2e4d975259be">&#9670;&#160;</a></span>parseSiteSpec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1Table.html">Table</a> site::parseSiteSpec </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>spec</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a208c6e1f8e6106530d6c75bb16dccaad" name="a208c6e1f8e6106530d6c75bb16dccaad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a208c6e1f8e6106530d6c75bb16dccaad">&#9670;&#160;</a></span>periodicCentroid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; site::periodicCentroid </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atoms</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there. </p>
+
+</div>
+</div>
+<a id="a5e215d2d1aaa78e5e54c511d3617ea1d" name="a5e215d2d1aaa78e5e54c511d3617ea1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e215d2d1aaa78e5e54c511d3617ea1d">&#9670;&#160;</a></span>pointInFaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool site::pointInFaces </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>faces</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>guest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; *</td>          <td class="paramname"><span class="paramname"><em>center</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aeeb8b9fec48dcc2b70f40cafe705a0c2" name="aeeb8b9fec48dcc2b70f40cafe705a0c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeeb8b9fec48dcc2b70f40cafe705a0c2">&#9670;&#160;</a></span>pointInFacesTrace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1InsideTrace.html">InsideTrace</a> site::pointInFacesTrace </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>faces</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>guest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; *</td>          <td class="paramname"><span class="paramname"><em>center</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The inside predicate for one cage. </p>
+<p>The face vertices and the guest are unwrapped about c_F (<span class="tt">center</span>, or the periodic centroid of the distinct face vertices when null) and each face is fan-triangulated from its own centroid. The guest is inside when it lies on a triangle within <span class="tt"><a class="el" href="#a17c7ad054eafa92f5e5238e14109b97a" title="Relative tolerance of the inside test, in units of the largest distance from c_F to a cage vertex.">kInsideRelTol</a></span>; otherwise a ray is cast along the first direction of <span class="tt"><a class="el" href="#a9231f841816296c279bcf08186f332de" title="The fixed, ordered unit directions the inside test casts rays along.">insideRayDirections()</a></span> that passes no triangle edge or vertex within that tolerance, and the guest is inside when the ray meets an odd number of triangles. When every direction grazes, the one with the widest clearance decides. </p>
+
+</div>
+</div>
+<a id="a3043411870d52f19774d045fa21dfc09" name="a3043411870d52f19774d045fa21dfc09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3043411870d52f19774d045fa21dfc09">&#9670;&#160;</a></span>refuseIceScore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * site::refuseIceScore </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#aa3661d15289b4b8576f48217ed337ca3">Family</a></td>          <td class="paramname"><span class="paramname"><em>f</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7b0b14e15325d993b4acdd83ff8014a4" name="a7b0b14e15325d993b4acdd83ff8014a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b0b14e15325d993b4acdd83ff8014a4">&#9670;&#160;</a></span>rejectionCoefficient()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1RejectionCoefficient.html">RejectionCoefficient</a> site::rejectionCoefficient </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1ConcentrationProfile.html">ConcentrationProfile</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>profile</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>bulkIce</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0.85</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>bulkLiquid</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0.15</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3327b0f82b57a80d113b241dec0eb711" name="a3327b0f82b57a80d113b241dec0eb711"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3327b0f82b57a80d113b241dec0eb711">&#9670;&#160;</a></span>shellRingCensus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; site::shellRingCensus </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>shell</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Rings of the water network that pass through a first shell: the census by size of every ring with at least one vertex in <span class="tt">shell</span>. </p>
+<p>An ion is not a vertex of the network, so the rings it would have closed are gone and the rings its shell still carries measure how far the network survives around it (the hydration-shell ring census of a brine or an ionic solution). <span class="tt">census[s]</span> counts rings of size s up to <span class="tt">maxRingSize</span>. </p>
+
+</div>
+</div>
+<a id="ad9acb3de62cc0af6b28a6f8197f2d24c" name="ad9acb3de62cc0af6b28a6f8197f2d24c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9acb3de62cc0af6b28a6f8197f2d24c">&#9670;&#160;</a></span>trappingTransitions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structsite_1_1TrapEvent.html">TrapEvent</a> &gt; site::trappingTransitions </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>before</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>after</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>A trapping event is a change of <a class="el" href="#a7cdb003964d40a8454361db4b34b4791" title="Ions read against a per-atom ice assignment.">IonState</a> into ice. </p>
+<p>A release is a change out of ice. Other changes are recorded as well; the caller filters on <span class="tt">to</span>. </p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a17c7ad054eafa92f5e5238e14109b97a" name="a17c7ad054eafa92f5e5238e14109b97a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17c7ad054eafa92f5e5238e14109b97a">&#9670;&#160;</a></span>kInsideRelTol</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double site::kInsideRelTol = 1e-9</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Relative tolerance of the inside test, in units of the largest distance from c_F to a cage vertex. </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00170">170</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a830c5d5e28d9456dcc61abd3d558ab7f" name="a830c5d5e28d9456dcc61abd3d558ab7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a830c5d5e28d9456dcc61abd3d558ab7f">&#9670;&#160;</a></span>kWaterMolarMassKg</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double site::kWaterMolarMassKg = 0.01801528</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="brine__front_8hpp_source.html#l00033">33</a> of file <a class="el" href="brine__front_8hpp_source.html">brine_front.hpp</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacesite.html">site</a></li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,773 @@
+.. index:: pair: class; seams::System
+.. _doxid-classseams_1_1_system:
+
+class seams::System
+===================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+One frame: coordinates, a cell, and the analyses that read them. :ref:`More...<details-classseams_1_1_system>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	class System: public :ref:`seams::detail::Handle<doxid-classseams_1_1detail_1_1_handle>` {
+	public:
+		// construction
+	
+		:ref:`System<doxid-classseams_1_1_system_1a8f6a67e67ca298b5dfe9af6483ab62e5>`();
+
+		// methods
+	
+		void :ref:`set_ortho<doxid-classseams_1_1_system_1ad4d74603f143fbac7bdb86497e762627>`(std::span<const double> xyz, double lx, double ly, double lz);
+		void :ref:`set_ortho<doxid-classseams_1_1_system_1a350bd6a7659bf0d77077e81fd97ad966>`(std::span<const double> xyz, std::span<const double, 3> origin, std::span<const double, 3> lengths, std::span<const int> types = {}, std::span<const int> ids = {});
+		void :ref:`set_frame<doxid-classseams_1_1_system_1ae61de30cae54c423c079e9b1ec02a972>`(std::span<const double> xyz, std::span<const double, 9> box9, std::span<const int> types = {}, std::span<const int> ids = {});
+		std::pair<std::vector<int>, std::vector<int>> :target:`chill<doxid-classseams_1_1_system_1ad751438d8209823d2fba0fa4a17a8748>`(double cutoff, int type, int graph, int rule);
+		std::pair<std::vector<double>, std::vector<double>> :target:`steinhardt<doxid-classseams_1_1_system_1ac1de17b0dea554a2c1264d61fa881ece>`(double cutoff, int order, bool average);
+		void :ref:`read<doxid-classseams_1_1_system_1a9d94d3c981d95d18f61b404c5b362a46>`(std::string_view path, int frame, int type_filter);
+		int :ref:`count<doxid-classseams_1_1_system_1a8c9e0e865138a0eca7d35de5cc9bdd2c>`() const;
+		:ref:`Classification<doxid-structseams_1_1_classification>` :ref:`chill<doxid-classseams_1_1_system_1ae4a6555fb25a75db01c122e65f3a2a30>`(const :ref:`ChillOptions<doxid-structseams_1_1_chill_options>`& options);
+		:ref:`Classification<doxid-structseams_1_1_classification>` :ref:`chill_plus<doxid-classseams_1_1_system_1a211926876b948d826f42520fb823b5c6>`(const :ref:`ChillOptions<doxid-structseams_1_1_chill_options>`& options);
+		:ref:`Steinhardt<doxid-structseams_1_1_steinhardt>` :ref:`steinhardt<doxid-classseams_1_1_system_1aa8841ba03f0a37fe4238bd15e26756b2>`(const :ref:`SteinhardtOptions<doxid-structseams_1_1_steinhardt_options>`& options);
+		:ref:`Steinhardt<doxid-structseams_1_1_steinhardt>` :ref:`ql<doxid-classseams_1_1_system_1a6327a361caa00807236bb9a6b06baf59>`(const :ref:`OrderOptions<doxid-structseams_1_1_order_options>`& options);
+		:ref:`Q4Q6<doxid-structseams_1_1_q4_q6>` :ref:`q4q6<doxid-classseams_1_1_system_1a70a06e349cc0b7d0e40548688bdd6c78>`(double cutoff, int species = 0);
+		:ref:`Q6Bar<doxid-structseams_1_1_q6_bar>` :ref:`q6bar<doxid-classseams_1_1_system_1a2a2161e5b3ef753e7a30770b5ae8f9ad>`(const :ref:`Q6BarOptions<doxid-structseams_1_1_q6_bar_options>`& options);
+		:ref:`Neighbours<doxid-classseams_1_1_neighbours>` :ref:`neighbours<doxid-classseams_1_1_system_1a4d801a1b3769b60e6755996f259524b5>`(const :ref:`NeighbourOptions<doxid-structseams_1_1_neighbour_options>`& options);
+		:ref:`ChordlessCycles<doxid-structseams_1_1_chordless_cycles>` :ref:`rings_chordless<doxid-classseams_1_1_system_1ad15949f9fb3f4b14731ab684a5a9a64d>`(const :ref:`NeighbourOptions<doxid-structseams_1_1_neighbour_options>`& options, int size);
+		:ref:`Neighbours<doxid-classseams_1_1_neighbours>` :ref:`knn<doxid-classseams_1_1_system_1acf212e23e209901ccdab1e7db2e8b586>`(const :ref:`KnnOptions<doxid-structseams_1_1_knn_options>`& options);
+		std::vector<int> :ref:`neighbour_degree<doxid-classseams_1_1_system_1a34e5b40b8af54af8b82683cd18a0b27e>`(double cutoff, int species = 0);
+		:ref:`Rings<doxid-classseams_1_1_rings>` :ref:`rings<doxid-classseams_1_1_system_1a0b8aec70940ac3656cdc8bdef4b54484>`(const :ref:`RingOptions<doxid-structseams_1_1_ring_options>`& options);
+		:ref:`Cages<doxid-classseams_1_1_cages>` :ref:`cages<doxid-classseams_1_1_system_1ab2d09941bd77f2425f36bc10f9412a4d>`(const :ref:`CageOptions<doxid-structseams_1_1_cage_options>`& options);
+		:ref:`SignatureMatch<doxid-structseams_1_1_signature_match>` :ref:`signature_cages<doxid-classseams_1_1_system_1a2725db4dfd10f187d428636af413c058>`(const :ref:`SignatureOptions<doxid-structseams_1_1_signature_options>`& options);
+		:ref:`Distribution<doxid-structseams_1_1_distribution>` :ref:`rdf<doxid-classseams_1_1_system_1a3d082e8faf1bba7d2c8a21b618ff6f29>`(const :ref:`DistributionOptions<doxid-structseams_1_1_distribution_options>`& options);
+		:ref:`RunningCoordination<doxid-structseams_1_1_running_coordination>` :ref:`running_cn<doxid-classseams_1_1_system_1a2aa713e72bbdca8cce25839ebdfd82dc>`(const :ref:`DistributionOptions<doxid-structseams_1_1_distribution_options>`& options);
+		double :ref:`coordination<doxid-classseams_1_1_system_1a8915d6d040203915be8dbc2d1e5b9ec0>`(const :ref:`DistributionOptions<doxid-structseams_1_1_distribution_options>`& options);
+		int :ref:`hbonds<doxid-classseams_1_1_system_1acff446749dbb4303e07bf1effe76619a>`(const :ref:`BondOptions<doxid-structseams_1_1_bond_options>`& options);
+		void :ref:`set_hydrogen_frame<doxid-classseams_1_1_system_1a436cc3439e72744b4fb72cb81d77d507>`(std::span<const double> heavy_xyz, std::span<const int> heavy_types, std::span<const int> heavy_mols, std::span<const double> hydrogen_xyz, std::span<const int> hydrogen_types, std::span<const int> hydrogen_mols, std::span<const double, 9> box9, std::span<const int> heavy_ids, std::span<const int> hydrogen_ids);
+		std::vector<:ref:`DirectedBond<doxid-structseams_1_1_directed_bond>`> :ref:`directed_hbonds<doxid-classseams_1_1_system_1a2973b81134dc90e4881d4245850bd386>`(std::span<const int> donor_types, std::span<const int> acceptor_types, const :ref:`DirectedBondOptions<doxid-structseams_1_1_directed_bond_options>`& options);
+		:ref:`DensityProfile<doxid-structseams_1_1_density_profile>` :ref:`density<doxid-classseams_1_1_system_1a5f59a8c3c4fed580c66a98e55f11df49>`(const :ref:`DensityOptions<doxid-structseams_1_1_density_options>`& options);
+		:ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>` :ref:`fractional_density<doxid-classseams_1_1_system_1a35bdafbf662a5b7480aeadcb0130e12e>`(const :ref:`FractionalDensityOptions<doxid-structseams_1_1_fractional_density_options>`& options);
+		:ref:`PoreFrame<doxid-structseams_1_1_pore_frame>` :ref:`pore_frame<doxid-classseams_1_1_system_1a836e8e93c06819b13e0429432ea2b8f1>`(const :ref:`PoreFrameOptions<doxid-structseams_1_1_pore_frame_options>`& options);
+		:ref:`PoreProfiles<doxid-structseams_1_1_pore_profiles>` :ref:`pore_profiles<doxid-classseams_1_1_system_1a2e19c474256a2d098a75620da077f51e>`(const :ref:`PoreProfileOptions<doxid-structseams_1_1_pore_profile_options>`& options);
+		:ref:`HostGuestContacts<doxid-structseams_1_1_host_guest_contacts>` :ref:`host_guest<doxid-classseams_1_1_system_1af1101085808c751c5aa21a7d776744f5>`(const :ref:`HostGuestOptions<doxid-structseams_1_1_host_guest_options>`& options);
+		:ref:`Fingerprint<doxid-classseams_1_1_fingerprint>` :ref:`fingerprint<doxid-classseams_1_1_system_1aa710b592870f05e7333b1b306831231a>`(const :ref:`FingerprintOptions<doxid-structseams_1_1_fingerprint_options>`& options);
+		:ref:`Contacts<doxid-structseams_1_1_contacts>` :ref:`contact_pairs<doxid-classseams_1_1_system_1a7c4b898b89200fdc381e179ad4e0a0af>`(std::string_view spec);
+		:ref:`DomainReport<doxid-structseams_1_1_domain_report>` :ref:`domains<doxid-classseams_1_1_system_1ac5b0b9b6c2b68f42dafcb9faedf34b45>`(const :ref:`DomainOptions<doxid-structseams_1_1_domain_options>`& options);
+		:ref:`PrismCensus<doxid-structseams_1_1_prism_census>` :ref:`prisms<doxid-classseams_1_1_system_1a4038d857de37f2df4e790e418c119b7c>`(const :ref:`PrismOptions<doxid-structseams_1_1_prism_options>`& options);
+		std::vector<int> :ref:`monolayer<doxid-classseams_1_1_system_1ab46ee10bb9b1fe4f0ed2ef97727ac4d5>`(const :ref:`SheetOptions<doxid-structseams_1_1_sheet_options>`& options);
+		std::vector<int> :ref:`site_table<doxid-classseams_1_1_system_1a8d5f5b1be32204fe8cbb385b08bd5ea5>`(std::string_view spec);
+		std::vector<int> :ref:`symmetry<doxid-classseams_1_1_system_1af7707ba5be76aa88e3f1e8e94210f61c>`(double shell_rmsd);
+		:ref:`Brine<doxid-classseams_1_1_brine>` :ref:`brine<doxid-classseams_1_1_system_1a9dbdf793c6bb177ea1c4d6289d1177aa>`(std::span<const int> ice, const :ref:`BrineOptions<doxid-structseams_1_1_brine_options>`& options);
+		std::vector<int> :ref:`mols<doxid-classseams_1_1_system_1ac7ffae175e6efbd0c5631e7136dcd4f7>`() const;
+		void :ref:`set_mols<doxid-classseams_1_1_system_1a284ceff427a3921416afe3edc4cd7a1f>`(std::span<const int> mol_ids);
+		:ref:`MoleculeCentres<doxid-structseams_1_1_molecule_centres>` :ref:`molecule_centres<doxid-classseams_1_1_system_1a59d77e7f4a64dc76eb70c9cf30468021>`(std::span<const int> mol_ids = {}, std::span<const double> masses = {}) const;
+		:ref:`WaterVectors<doxid-structseams_1_1_water_vectors>` :ref:`water_vectors<doxid-classseams_1_1_system_1a7bc8e999229eed689ea3cf2c04ffc4d6>`(int oxygen_type, int hydrogen_type) const;
+		:ref:`MoleculeDipoles<doxid-structseams_1_1_molecule_dipoles>` :ref:`molecule_dipoles<doxid-classseams_1_1_system_1ab7e320364de89452eb5edda6f20cef31>`(std::span<const int> mol_ids = {}, std::span<const double> charges = {}) const;
+	};
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-inherited-code-block
+
+	public:
+		// methods
+	
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1a0dd2050fdf4ea17474fcfd3297824dab>`(const :ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&);
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1aca8fcb7f880767384894fc88094d262f>`(:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&& other);
+		:ref:`operator bool<doxid-classseams_1_1detail_1_1_handle_1ae58d780619badcc49127f4b5e6e78d4e>`() const;
+
+.. _details-classseams_1_1_system:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+One frame: coordinates, a cell, and the analyses that read them.
+
+Move-only. The destructor frees the C handle. Methods that read the frame require exclusive use of this object. The :ref:`Steinhardt <doxid-structseams_1_1_steinhardt>` scratch inside the library is process-global, so two frames must not run ``:ref:`steinhardt <doxid-namespaceseams_1_1steinhardt>```, ``:ref:`ql <doxid-classseams_1_1_system_1a6327a361caa00807236bb9a6b06baf59>```, ``:ref:`q4q6 <doxid-classseams_1_1_system_1a70a06e349cc0b7d0e40548688bdd6c78>```, or ``:ref:`q6bar <doxid-classseams_1_1_system_1a2a2161e5b3ef753e7a30770b5ae8f9ad>``` at the same time. ``:ref:`set_num_threads <doxid-group__seams__cpp_1gade81b9f566b717d94390a5499824893f>``` is also process-global.
+
+Construction
+------------
+
+.. index:: pair: function; System
+.. _doxid-classseams_1_1_system_1a8f6a67e67ca298b5dfe9af6483ab62e5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	System()
+
+Allocate an empty frame.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- :ref:`Error <doxid-classseams_1_1_error>`
+
+		- with status ``Memory`` when the allocation fails.
+
+Methods
+-------
+
+.. index:: pair: function; set_ortho
+.. _doxid-classseams_1_1_system_1ad4d74603f143fbac7bdb86497e762627:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void set_ortho(std::span<const double> xyz, double lx, double ly, double lz)
+
+Store points in an orthorhombic cell whose origin is zero.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- xyz
+
+		- Interleaved x, y, z. Length is a multiple of 3. Angstrom.
+
+	*
+		- lx
+
+		- Edge length along x, Angstrom.
+
+	*
+		- ly
+
+		- Edge length along y, Angstrom.
+
+	*
+		- lz
+
+		- Edge length along z, Angstrom.
+
+.. index:: pair: function; set_ortho
+.. _doxid-classseams_1_1_system_1a350bd6a7659bf0d77077e81fd97ad966:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void set_ortho(std::span<const double> xyz, std::span<const double, 3> origin, std::span<const double, 3> lengths, std::span<const int> types = {}, std::span<const int> ids = {})
+
+Store points in an orthorhombic cell.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- xyz
+
+		- Interleaved x, y, z. Length is a multiple of 3. Angstrom.
+
+	*
+		- origin
+
+		- Cell origin, Angstrom.
+
+	*
+		- lengths
+
+		- Edge lengths, Angstrom. Each must be positive.
+
+	*
+		- types
+
+		- One species per atom, or an empty span.
+
+	*
+		- ids
+
+		- One id per atom, or an empty span.
+
+.. index:: pair: function; set_frame
+.. _doxid-classseams_1_1_system_1ae61de30cae54c423c079e9b1ec02a972:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void set_frame(std::span<const double> xyz, std::span<const double, 9> box9, std::span<const int> types = {}, std::span<const int> ids = {})
+
+Store points and a general nine-number cell.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- xyz
+
+		- Interleaved coordinates, Angstrom.
+
+	*
+		- box9
+
+		- ``ox, oy, oz, lx, ly, lz, xy, xz, yz``.
+
+	*
+		- types
+
+		- One species per atom, or empty.
+
+	*
+		- ids
+
+		- One id per atom, or empty.
+
+.. index:: pair: function; read
+.. _doxid-classseams_1_1_system_1a9d94d3c981d95d18f61b404c5b362a46:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void read(std::string_view path, int frame, int type_filter)
+
+Read one frame from a trajectory path.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- path
+
+		- XYZ, CON, chemfiles, or a LAMMPS dump.
+
+	*
+		- frame
+
+		- 1-based frame index.
+
+	*
+		- type_filter
+
+		- Species to keep. Negative keeps every atom.
+
+.. index:: pair: function; count
+.. _doxid-classseams_1_1_system_1a8c9e0e865138a0eca7d35de5cc9bdd2c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int count() const
+
+Number of points in the frame.
+
+
+
+.. rubric:: Returns:
+
+The atom count. An empty frame returns 0.
+
+.. index:: pair: function; chill
+.. _doxid-classseams_1_1_system_1ae4a6555fb25a75db01c122e65f3a2a30:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Classification<doxid-structseams_1_1_classification>` chill(const :ref:`ChillOptions<doxid-structseams_1_1_chill_options>`& options)
+
+Original CHILL labels and nine population counts.
+
+.. index:: pair: function; chill_plus
+.. _doxid-classseams_1_1_system_1a211926876b948d826f42520fb823b5c6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Classification<doxid-structseams_1_1_classification>` chill_plus(const :ref:`ChillOptions<doxid-structseams_1_1_chill_options>`& options)
+
+CHILL+ labels and nine population counts.
+
+.. index:: pair: function; steinhardt
+.. _doxid-classseams_1_1_system_1aa8841ba03f0a37fe4238bd15e26756b2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Steinhardt<doxid-structseams_1_1_steinhardt>` steinhardt(const :ref:`SteinhardtOptions<doxid-structseams_1_1_steinhardt_options>`& options)
+
+Local q_l on the cutoff shell.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- options
+
+		- Cutoff, species, degree, and whether to average.
+
+.. index:: pair: function; ql
+.. _doxid-classseams_1_1_system_1a6327a361caa00807236bb9a6b06baf59:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Steinhardt<doxid-structseams_1_1_steinhardt>` ql(const :ref:`OrderOptions<doxid-structseams_1_1_order_options>`& options)
+
+Local q_l on a named graph.
+
+.. index:: pair: function; q4q6
+.. _doxid-classseams_1_1_system_1a70a06e349cc0b7d0e40548688bdd6c78:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Q4Q6<doxid-structseams_1_1_q4_q6>` q4q6(double cutoff, int species = 0)
+
+Local q4 and q6 on the cutoff shell.
+
+.. index:: pair: function; q6bar
+.. _doxid-classseams_1_1_system_1a2a2161e5b3ef753e7a30770b5ae8f9ad:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Q6Bar<doxid-structseams_1_1_q6_bar>` q6bar(const :ref:`Q6BarOptions<doxid-structseams_1_1_q6_bar_options>`& options)
+
+q6-bar, its mean and median, and the ice count above the cut.
+
+.. index:: pair: function; neighbours
+.. _doxid-classseams_1_1_system_1a4d801a1b3769b60e6755996f259524b5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Neighbours<doxid-classseams_1_1_neighbours>` neighbours(const :ref:`NeighbourOptions<doxid-structseams_1_1_neighbour_options>`& options)
+
+Cutoff or mutual neighbour list.
+
+.. index:: pair: function; rings_chordless
+.. _doxid-classseams_1_1_system_1ad15949f9fb3f4b14731ab684a5a9a64d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`ChordlessCycles<doxid-structseams_1_1_chordless_cycles>` rings_chordless(const :ref:`NeighbourOptions<doxid-structseams_1_1_neighbour_options>`& options, int size)
+
+Chordless cycles of one length on a neighbour graph.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- options
+
+		- :ref:`Graph <doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` of the cycles.
+
+	*
+		- size
+
+		- Cycle length, from 3 through 12.
+
+
+
+.. rubric:: Returns:
+
+:ref:`Neighbours::chordless <doxid-classseams_1_1_neighbours_1a13edfc37618cf2779867c27eb72ed1fd>` on that graph.
+
+.. index:: pair: function; knn
+.. _doxid-classseams_1_1_system_1acf212e23e209901ccdab1e7db2e8b586:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Neighbours<doxid-classseams_1_1_neighbours>` knn(const :ref:`KnnOptions<doxid-structseams_1_1_knn_options>`& options)
+
+k-nearest neighbour list.
+
+.. index:: pair: function; neighbour_degree
+.. _doxid-classseams_1_1_system_1a34e5b40b8af54af8b82683cd18a0b27e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> neighbour_degree(double cutoff, int species = 0)
+
+Degree of each atom on the cutoff graph.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- cutoff
+
+		- Positive cutoff, Angstrom.
+
+	*
+		- species
+
+		- Species filter. Zero keeps every atom.
+
+.. index:: pair: function; rings
+.. _doxid-classseams_1_1_system_1a0b8aec70940ac3656cdc8bdef4b54484:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Rings<doxid-classseams_1_1_rings>` rings(const :ref:`RingOptions<doxid-structseams_1_1_ring_options>`& options)
+
+Primitive rings up to a maximum size.
+
+.. index:: pair: function; cages
+.. _doxid-classseams_1_1_system_1ab2d09941bd77f2425f36bc10f9412a4d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Cages<doxid-classseams_1_1_cages>` cages(const :ref:`CageOptions<doxid-structseams_1_1_cage_options>`& options)
+
+Hexagonal and double-diamond cage membership.
+
+.. index:: pair: function; signature_cages
+.. _doxid-classseams_1_1_system_1a2725db4dfd10f187d428636af413c058:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`SignatureMatch<doxid-structseams_1_1_signature_match>` signature_cages(const :ref:`SignatureOptions<doxid-structseams_1_1_signature_options>`& options)
+
+Closed cages of one ring census.
+
+.. index:: pair: function; rdf
+.. _doxid-classseams_1_1_system_1a3d082e8faf1bba7d2c8a21b618ff6f29:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Distribution<doxid-structseams_1_1_distribution>` rdf(const :ref:`DistributionOptions<doxid-structseams_1_1_distribution_options>`& options)
+
+Partial radial distribution and the cell volume.
+
+.. index:: pair: function; running_cn
+.. _doxid-classseams_1_1_system_1a2aa713e72bbdca8cce25839ebdfd82dc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`RunningCoordination<doxid-structseams_1_1_running_coordination>` running_cn(const :ref:`DistributionOptions<doxid-structseams_1_1_distribution_options>`& options)
+
+Running coordination number along the partial RDF.
+
+.. index:: pair: function; coordination
+.. _doxid-classseams_1_1_system_1a8915d6d040203915be8dbc2d1e5b9ec0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double coordination(const :ref:`DistributionOptions<doxid-structseams_1_1_distribution_options>`& options)
+
+Coordination number integrated to rmax.
+
+.. index:: pair: function; hbonds
+.. _doxid-classseams_1_1_system_1acff446749dbb4303e07bf1effe76619a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int hbonds(const :ref:`BondOptions<doxid-structseams_1_1_bond_options>`& options)
+
+Hydrogen-bond count.
+
+.. index:: pair: function; set_hydrogen_frame
+.. _doxid-classseams_1_1_system_1a436cc3439e72744b4fb72cb81d77d507:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void set_hydrogen_frame(std::span<const double> heavy_xyz, std::span<const int> heavy_types, std::span<const int> heavy_mols, std::span<const double> hydrogen_xyz, std::span<const int> hydrogen_types, std::span<const int> hydrogen_mols, std::span<const double, 9> box9, std::span<const int> heavy_ids, std::span<const int> hydrogen_ids)
+
+Store heavies and a separate hydrogen cloud.
+
+An empty id or mol span uses the C API default for that cloud.
+
+.. index:: pair: function; directed_hbonds
+.. _doxid-classseams_1_1_system_1a2973b81134dc90e4881d4245850bd386:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`DirectedBond<doxid-structseams_1_1_directed_bond>`> directed_hbonds(std::span<const int> donor_types, std::span<const int> acceptor_types, const :ref:`DirectedBondOptions<doxid-structseams_1_1_directed_bond_options>`& options)
+
+Directed hydrogen bonds for one donor type set and one acceptor type set.
+
+.. index:: pair: function; density
+.. _doxid-classseams_1_1_system_1a5f59a8c3c4fed580c66a98e55f11df49:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`DensityProfile<doxid-structseams_1_1_density_profile>` density(const :ref:`DensityOptions<doxid-structseams_1_1_density_options>`& options)
+
+Number density along one cell axis.
+
+.. index:: pair: function; fractional_density
+.. _doxid-classseams_1_1_system_1a35bdafbf662a5b7480aeadcb0130e12e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>` fractional_density(const :ref:`FractionalDensityOptions<doxid-structseams_1_1_fractional_density_options>`& options)
+
+Number and mass density along a cell axis or a Cartesian direction.
+
+.. index:: pair: function; pore_frame
+.. _doxid-classseams_1_1_system_1a836e8e93c06819b13e0429432ea2b8f1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`PoreFrame<doxid-structseams_1_1_pore_frame>` pore_frame(const :ref:`PoreFrameOptions<doxid-structseams_1_1_pore_frame_options>`& options)
+
+Pore axis and centre, supplied or taken from the framework.
+
+.. index:: pair: function; pore_profiles
+.. _doxid-classseams_1_1_system_1a2e19c474256a2d098a75620da077f51e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`PoreProfiles<doxid-structseams_1_1_pore_profiles>` pore_profiles(const :ref:`PoreProfileOptions<doxid-structseams_1_1_pore_profile_options>`& options)
+
+Radial, azimuthal, and axial densities about a pore axis.
+
+.. index:: pair: function; host_guest
+.. _doxid-classseams_1_1_system_1af1101085808c751c5aa21a7d776744f5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`HostGuestContacts<doxid-structseams_1_1_host_guest_contacts>` host_guest(const :ref:`HostGuestOptions<doxid-structseams_1_1_host_guest_options>`& options)
+
+Nearest framework site and contact counts for each guest.
+
+.. index:: pair: function; fingerprint
+.. _doxid-classseams_1_1_system_1aa710b592870f05e7333b1b306831231a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Fingerprint<doxid-classseams_1_1_fingerprint>` fingerprint(const :ref:`FingerprintOptions<doxid-structseams_1_1_fingerprint_options>`& options)
+
+Topological fingerprint of the bonded graph.
+
+.. index:: pair: function; contact_pairs
+.. _doxid-classseams_1_1_system_1a7c4b898b89200fdc381e179ad4e0a0af:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Contacts<doxid-structseams_1_1_contacts>` contact_pairs(std::string_view spec)
+
+Mutual nearest unlike contacts.
+
+``spec`` is site-table text.
+
+.. index:: pair: function; domains
+.. _doxid-classseams_1_1_system_1ac5b0b9b6c2b68f42dafcb9faedf34b45:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`DomainReport<doxid-structseams_1_1_domain_report>` domains(const :ref:`DomainOptions<doxid-structseams_1_1_domain_options>`& options)
+
+Largest polar or apolar domain.
+
+.. index:: pair: function; prisms
+.. _doxid-classseams_1_1_system_1a4038d857de37f2df4e790e418c119b7c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`PrismCensus<doxid-structseams_1_1_prism_census>` prisms(const :ref:`PrismOptions<doxid-structseams_1_1_prism_options>`& options)
+
+Perfect and imperfect prism counts by ring size.
+
+.. index:: pair: function; monolayer
+.. _doxid-classseams_1_1_system_1ab46ee10bb9b1fe4f0ed2ef97727ac4d5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> monolayer(const :ref:`SheetOptions<doxid-structseams_1_1_sheet_options>`& options)
+
+Primitive-ring histogram of a monolayer.
+
+
+
+.. rubric:: Returns:
+
+``counts[k]`` is the number of rings of size k.
+
+.. index:: pair: function; site_table
+.. _doxid-classseams_1_1_system_1a8d5f5b1be32204fe8cbb385b08bd5ea5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> site_table(std::string_view spec)
+
+Per-atom site kind.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- spec
+
+		- Site-table text, for example ``1=waterO``.
+
+
+
+.. rubric:: Returns:
+
+One kind code per atom.
+
+.. index:: pair: function; symmetry
+.. _doxid-classseams_1_1_system_1af7707ba5be76aa88e3f1e8e94210f61c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> symmetry(double shell_rmsd)
+
+Per-atom ice-shell label.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- shell_rmsd
+
+		- Positive residual ceiling, or a non-positive value for the library ceiling.
+
+
+
+.. rubric:: Returns:
+
+0 ice Ih, 1 ice Ic, 2 stacking disorder, or -1 when the shell does not match.
+
+.. index:: pair: function; brine
+.. _doxid-classseams_1_1_system_1a9dbdf793c6bb177ea1c4d6289d1177aa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Brine<doxid-classseams_1_1_brine>` brine(std::span<const int> ice, const :ref:`BrineOptions<doxid-structseams_1_1_brine_options>`& options)
+
+Planar ice front from an ice assignment.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- ice
+
+		- Non-zero when the atom is ice. Length must equal ``:ref:`count() <doxid-classseams_1_1_system_1a8c9e0e865138a0eca7d35de5cc9bdd2c>```.
+
+	*
+		- options
+
+		- Water species, ion species, bins, and axis.
+
+.. index:: pair: function; mols
+.. _doxid-classseams_1_1_system_1ac7ffae175e6efbd0c5631e7136dcd4f7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> mols() const
+
+Copy the stored molecule ids out.
+
+.. index:: pair: function; set_mols
+.. _doxid-classseams_1_1_system_1a284ceff427a3921416afe3edc4cd7a1f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void set_mols(std::span<const int> mol_ids)
+
+Replace the stored molecule ids on a loaded frame.
+
+.. index:: pair: function; molecule_centres
+.. _doxid-classseams_1_1_system_1a59d77e7f4a64dc76eb70c9cf30468021:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`MoleculeCentres<doxid-structseams_1_1_molecule_centres>` molecule_centres(std::span<const int> mol_ids = {}, std::span<const double> masses = {}) const
+
+Intact periodic centres of molecules in this frame.
+
+.. index:: pair: function; water_vectors
+.. _doxid-classseams_1_1_system_1a7bc8e999229eed689ea3cf2c04ffc4d6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`WaterVectors<doxid-structseams_1_1_water_vectors>` water_vectors(int oxygen_type, int hydrogen_type) const
+
+Water O-to-H-midpoint and H-to-H vectors under minimum image.
+
+.. index:: pair: function; molecule_dipoles
+.. _doxid-classseams_1_1_system_1ab7e320364de89452eb5edda6f20cef31:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`MoleculeDipoles<doxid-structseams_1_1_molecule_dipoles>` molecule_dipoles(std::span<const int> mol_ids = {}, std::span<const double> charges = {}) const
+
+Per-molecule dipole or geometric orientation vectors.
+

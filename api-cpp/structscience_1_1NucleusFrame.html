@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: science::NucleusFrame Struct Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/structscience_1_1NucleusFrame.html">
+<meta property="og:title" content="seams-core: science::NucleusFrame Struct Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/structscience_1_1NucleusFrame.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: science::NucleusFrame Struct Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('structscience_1_1NucleusFrame.html','','structscience_1_1NucleusFrame-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">science::NucleusFrame Struct Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="science__front_8hpp_source.html">src/include/internal/science_front.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:ae24819f5b91d93001cc9de31de1f27ed" id="r_ae24819f5b91d93001cc9de31de1f27ed"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae24819f5b91d93001cc9de31de1f27ed">frame</a> = 0</td></tr>
+<tr class="memitem:ab92ddf6fb9f277813ea2efc722abbaa2" id="r_ab92ddf6fb9f277813ea2efc722abbaa2"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ab92ddf6fb9f277813ea2efc722abbaa2">nop</a> = 0</td></tr>
+<tr class="memitem:ac6f3132ac61922aa6271362fb6b25da9" id="r_ac6f3132ac61922aa6271362fb6b25da9"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac6f3132ac61922aa6271362fb6b25da9">chillCubic</a> = 0</td></tr>
+<tr class="memitem:a036e28171c1aa635a82e49eee43f6c3c" id="r_a036e28171c1aa635a82e49eee43f6c3c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a036e28171c1aa635a82e49eee43f6c3c">chillHex</a> = 0</td></tr>
+<tr class="memitem:ae1b5b15f30e00deee49210ca8f069f69" id="r_ae1b5b15f30e00deee49210ca8f069f69"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae1b5b15f30e00deee49210ca8f069f69">chillInter</a> = 0</td></tr>
+<tr class="memitem:acb3af6eb9ee0c807fcb3b1be208479b6" id="r_acb3af6eb9ee0c807fcb3b1be208479b6"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#acb3af6eb9ee0c807fcb3b1be208479b6">chillLiquid</a> = 0</td></tr>
+<tr class="memitem:a667faf32288c7eced3afb2bae8c67619" id="r_a667faf32288c7eced3afb2bae8c67619"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a667faf32288c7eced3afb2bae8c67619">shellCubic</a> = 0</td></tr>
+<tr class="memitem:a9793bcf3f6eeac967a5a4587273f1b2f" id="r_a9793bcf3f6eeac967a5a4587273f1b2f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a9793bcf3f6eeac967a5a4587273f1b2f">shellHex</a> = 0</td></tr>
+<tr class="memitem:a865540b3457e7a49b2034f75db045bc7" id="r_a865540b3457e7a49b2034f75db045bc7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a865540b3457e7a49b2034f75db045bc7">shellStack</a> = 0</td></tr>
+<tr class="memitem:ac4da89facc1476eb8c8fcf336772b41c" id="r_ac4da89facc1476eb8c8fcf336772b41c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac4da89facc1476eb8c8fcf336772b41c">shellOther</a> = 0</td></tr>
+<tr class="memitem:a744200ee9860e40329e7a6c263ac6c8d" id="r_a744200ee9860e40329e7a6c263ac6c8d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a744200ee9860e40329e7a6c263ac6c8d">q6Ice</a> = 0</td></tr>
+<tr class="memitem:ab1fc7c219945cc64edc68528b8f45e0a" id="r_ab1fc7c219945cc64edc68528b8f45e0a"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ab1fc7c219945cc64edc68528b8f45e0a">q6barMean</a> = 0</td></tr>
+<tr class="memitem:a9e7e493f259de3886cf32e9751b66965" id="r_a9e7e493f259de3886cf32e9751b66965"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a9e7e493f259de3886cf32e9751b66965">stackAsCubic</a> = 0</td></tr>
+<tr class="memdesc:a9e7e493f259de3886cf32e9751b66965"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shell-stacking molecules, split by the published CHILL+ label.  <br /></td></tr>
+<tr class="memitem:a1ace7f774f3978ba559bd0fa91413c07" id="r_a1ace7f774f3978ba559bd0fa91413c07"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a1ace7f774f3978ba559bd0fa91413c07">stackAsHex</a> = 0</td></tr>
+<tr class="memitem:a745906ca39180dc42a1ae25e62384f64" id="r_a745906ca39180dc42a1ae25e62384f64"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a745906ca39180dc42a1ae25e62384f64">stackAsInter</a> = 0</td></tr>
+<tr class="memitem:a7d2e68f7a3c5704fb0d9a0f068dfdda1" id="r_a7d2e68f7a3c5704fb0d9a0f068dfdda1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a7d2e68f7a3c5704fb0d9a0f068dfdda1">stackAsLiquid</a> = 0</td></tr>
+<tr class="memitem:a437fca100fa2411e90cff226a8d49b77" id="r_a437fca100fa2411e90cff226a8d49b77"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a437fca100fa2411e90cff226a8d49b77">polytypeBoth</a> = 0</td></tr>
+<tr class="memitem:af8010fe56c17cd8bc7c20200f371601b" id="r_af8010fe56c17cd8bc7c20200f371601b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af8010fe56c17cd8bc7c20200f371601b">polytypeAgree</a> = 0</td></tr>
+<tr class="memitem:a7ca0eb39a72a1fe2ab060d7678aefd83" id="r_a7ca0eb39a72a1fe2ab060d7678aefd83"><td class="memItemLeft"><a class="el" href="structscience_1_1ClusterPart.html">ClusterPart</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7ca0eb39a72a1fe2ab060d7678aefd83">core</a></td></tr>
+<tr class="memitem:a6f959fb9700cb59f2443ca2f2bbedf6a" id="r_a6f959fb9700cb59f2443ca2f2bbedf6a"><td class="memItemLeft"><a class="el" href="structscience_1_1ClusterPart.html">ClusterPart</a>&#160;</td><td class="memItemRight"><a class="el" href="#a6f959fb9700cb59f2443ca2f2bbedf6a">extended</a></td></tr>
+<tr class="memitem:abe866c183a8781bf15d39285db7efdbc" id="r_abe866c183a8781bf15d39285db7efdbc"><td class="memItemLeft"><a class="el" href="structscience_1_1ClusterPart.html">ClusterPart</a>&#160;</td><td class="memItemRight"><a class="el" href="#abe866c183a8781bf15d39285db7efdbc">shell</a></td></tr>
+<tr class="memitem:a0dbe95e9b89faf68160a97be510ca56b" id="r_a0dbe95e9b89faf68160a97be510ca56b"><td class="memItemLeft"><a class="el" href="structscience_1_1ClusterPart.html">ClusterPart</a>&#160;</td><td class="memItemRight"><a class="el" href="#a0dbe95e9b89faf68160a97be510ca56b">q6</a></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00131">131</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ac6f3132ac61922aa6271362fb6b25da9" name="ac6f3132ac61922aa6271362fb6b25da9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6f3132ac61922aa6271362fb6b25da9">&#9670;&#160;</a></span>chillCubic</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::chillCubic = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00134">134</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a036e28171c1aa635a82e49eee43f6c3c" name="a036e28171c1aa635a82e49eee43f6c3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a036e28171c1aa635a82e49eee43f6c3c">&#9670;&#160;</a></span>chillHex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::chillHex = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00135">135</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae1b5b15f30e00deee49210ca8f069f69" name="ae1b5b15f30e00deee49210ca8f069f69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1b5b15f30e00deee49210ca8f069f69">&#9670;&#160;</a></span>chillInter</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::chillInter = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00136">136</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="acb3af6eb9ee0c807fcb3b1be208479b6" name="acb3af6eb9ee0c807fcb3b1be208479b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb3af6eb9ee0c807fcb3b1be208479b6">&#9670;&#160;</a></span>chillLiquid</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::chillLiquid = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00137">137</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7ca0eb39a72a1fe2ab060d7678aefd83" name="a7ca0eb39a72a1fe2ab060d7678aefd83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ca0eb39a72a1fe2ab060d7678aefd83">&#9670;&#160;</a></span>core</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscience_1_1ClusterPart.html">ClusterPart</a> science::NucleusFrame::core</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00153">153</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a6f959fb9700cb59f2443ca2f2bbedf6a" name="a6f959fb9700cb59f2443ca2f2bbedf6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f959fb9700cb59f2443ca2f2bbedf6a">&#9670;&#160;</a></span>extended</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscience_1_1ClusterPart.html">ClusterPart</a> science::NucleusFrame::extended</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00154">154</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae24819f5b91d93001cc9de31de1f27ed" name="ae24819f5b91d93001cc9de31de1f27ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae24819f5b91d93001cc9de31de1f27ed">&#9670;&#160;</a></span>frame</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::frame = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00132">132</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab92ddf6fb9f277813ea2efc722abbaa2" name="ab92ddf6fb9f277813ea2efc722abbaa2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab92ddf6fb9f277813ea2efc722abbaa2">&#9670;&#160;</a></span>nop</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::nop = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00133">133</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af8010fe56c17cd8bc7c20200f371601b" name="af8010fe56c17cd8bc7c20200f371601b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8010fe56c17cd8bc7c20200f371601b">&#9670;&#160;</a></span>polytypeAgree</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::polytypeAgree = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00152">152</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a437fca100fa2411e90cff226a8d49b77" name="a437fca100fa2411e90cff226a8d49b77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a437fca100fa2411e90cff226a8d49b77">&#9670;&#160;</a></span>polytypeBoth</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::polytypeBoth = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Molecules that both the shell and CHILL+ call cubic or hexagonal, and the subset whose polytype agrees. </p>
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00151">151</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0dbe95e9b89faf68160a97be510ca56b" name="a0dbe95e9b89faf68160a97be510ca56b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0dbe95e9b89faf68160a97be510ca56b">&#9670;&#160;</a></span>q6</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscience_1_1ClusterPart.html">ClusterPart</a> science::NucleusFrame::q6</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00156">156</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab1fc7c219945cc64edc68528b8f45e0a" name="ab1fc7c219945cc64edc68528b8f45e0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1fc7c219945cc64edc68528b8f45e0a">&#9670;&#160;</a></span>q6barMean</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double science::NucleusFrame::q6barMean = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00143">143</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a744200ee9860e40329e7a6c263ac6c8d" name="a744200ee9860e40329e7a6c263ac6c8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a744200ee9860e40329e7a6c263ac6c8d">&#9670;&#160;</a></span>q6Ice</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::q6Ice = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00142">142</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="abe866c183a8781bf15d39285db7efdbc" name="abe866c183a8781bf15d39285db7efdbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe866c183a8781bf15d39285db7efdbc">&#9670;&#160;</a></span>shell</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscience_1_1ClusterPart.html">ClusterPart</a> science::NucleusFrame::shell</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00155">155</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a667faf32288c7eced3afb2bae8c67619" name="a667faf32288c7eced3afb2bae8c67619"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a667faf32288c7eced3afb2bae8c67619">&#9670;&#160;</a></span>shellCubic</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::shellCubic = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00138">138</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a9793bcf3f6eeac967a5a4587273f1b2f" name="a9793bcf3f6eeac967a5a4587273f1b2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9793bcf3f6eeac967a5a4587273f1b2f">&#9670;&#160;</a></span>shellHex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::shellHex = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00139">139</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ac4da89facc1476eb8c8fcf336772b41c" name="ac4da89facc1476eb8c8fcf336772b41c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4da89facc1476eb8c8fcf336772b41c">&#9670;&#160;</a></span>shellOther</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::shellOther = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00141">141</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a865540b3457e7a49b2034f75db045bc7" name="a865540b3457e7a49b2034f75db045bc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a865540b3457e7a49b2034f75db045bc7">&#9670;&#160;</a></span>shellStack</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::shellStack = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00140">140</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a9e7e493f259de3886cf32e9751b66965" name="a9e7e493f259de3886cf32e9751b66965"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e7e493f259de3886cf32e9751b66965">&#9670;&#160;</a></span>stackAsCubic</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::stackAsCubic = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Shell-stacking molecules, split by the published CHILL+ label. </p>
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00145">145</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a1ace7f774f3978ba559bd0fa91413c07" name="a1ace7f774f3978ba559bd0fa91413c07"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ace7f774f3978ba559bd0fa91413c07">&#9670;&#160;</a></span>stackAsHex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::stackAsHex = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00146">146</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a745906ca39180dc42a1ae25e62384f64" name="a745906ca39180dc42a1ae25e62384f64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a745906ca39180dc42a1ae25e62384f64">&#9670;&#160;</a></span>stackAsInter</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::stackAsInter = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00147">147</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7d2e68f7a3c5704fb0d9a0f068dfdda1" name="a7d2e68f7a3c5704fb0d9a0f068dfdda1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d2e68f7a3c5704fb0d9a0f068dfdda1">&#9670;&#160;</a></span>stackAsLiquid</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int science::NucleusFrame::stackAsLiquid = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="science__front_8hpp_source.html#l00148">148</a> of file <a class="el" href="science__front_8hpp_source.html">science_front.hpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>src/include/internal/<a class="el" href="science__front_8hpp_source.html">science_front.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacescience.html">science</a></li><li class="navelem"><a href="structscience_1_1NucleusFrame.html">NucleusFrame</a></li>
+  </ul>
+</div>
+</body>
+</html>

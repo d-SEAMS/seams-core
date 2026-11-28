@@ -1,0 +1,41 @@
+.. index:: pair: namespace; seams::team
+.. _doxid-namespaceseams_1_1team:
+
+namespace seams::team
+=====================
+
+.. toctree::
+	:hidden:
+
+	namespace_seams_team_detail.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace team {
+
+	// namespaces
+
+	namespace :ref:`seams::team::detail<doxid-namespaceseams_1_1team_1_1detail>`;
+
+	// global functions
+
+	int :target:`width<doxid-namespaceseams_1_1team_1a30b4e7f5882d5faa3bdc6623070ca480>`();
+	int :target:`parts<doxid-namespaceseams_1_1team_1a39454148a5aa51f7cda1dc6f2f3c4d87>`(int width);
+
+	template <class F>
+	void :target:`run<doxid-namespaceseams_1_1team_1a00df93c8190c21e025222c1498889fdc>`(const std::vector<std::size_t>& sizes, F&& fn);
+
+	template <class F>
+	void :target:`run<doxid-namespaceseams_1_1team_1afda59cde937ae2bcd7a0722b5046fa10>`(std::initializer_list<std::size_t> chunks, F&& fn);
+
+	std::size_t :target:`chunksOf<doxid-namespaceseams_1_1team_1a6ee1589b5f9b7ebc678f2281684d7c33>`(std::size_t n, std::size_t grain);
+
+	template <class F>
+	void :target:`forRange<doxid-namespaceseams_1_1team_1a5b030019303b197563201d6628c4a8ab>`(std::size_t n, std::size_t grain, F&& fn);
+
+	} // namespace team

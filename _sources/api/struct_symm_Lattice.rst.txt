@@ -1,0 +1,23 @@
+.. index:: pair: struct; symm::Lattice
+.. _doxid-structsymm_1_1_lattice:
+
+struct symm::Lattice
+====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/local_symmetry.hpp>
+	
+	struct Lattice {
+		// fields
+	
+		Eigen::Matrix3d :target:`vectors<doxid-structsymm_1_1_lattice_1a5da5f77ea0f950b5844d1e2b25e8a617>` = Eigen::Matrix3d::Identity();
+		Eigen::MatrixXd :target:`cartesian<doxid-structsymm_1_1_lattice_1aaed9a4e19d765f6fbd17da8318cdf751>`;
+	};

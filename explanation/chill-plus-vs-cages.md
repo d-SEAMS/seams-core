@@ -1,0 +1,99 @@
+<!-- https://docs.dseams.info/explanation/chill-plus-vs-cages.md -->
+
+# CHILL+ versus cages {#chill-versus-cages}
+
+Two classifiers in the engine library `libyodaLib` answer different
+questions. A CHILL+ label does not imply a cage, and a cage label
+does not imply a CHILL+ label.
+
+## Four-neighbour star {#four-neighbour-star}
+
+CHILL (`seams chill`, `chill::getCorrel` / `getIceTypeNoPrint`) and
+the published CHILL+ call (`seams chill-plus`, `chill::getCorrelPlus`
+/ `getIceTypePlusNoPrint`) read the bond star of an oxygen.
+
+CHILL is Moore et al., *Phys. Chem. Chem. Phys.* 2010, 12, 4124
+(DOI 10.1039/b919724a). It averages
+$q_3$ over the four nearest neighbours. A staggered bond is
+$c(i,j) \le -0.8$. An eclipsed bond lies on
+$-0.2 \le c(i,j) \le -0.05$. The label is read from those four
+bonds, so a cutoff shell of five or more neighbours can still be ice
+when the four nearest bonds match. The labels are cubic, hexagonal,
+interfacial, and water.
+
+CHILL+ is Nguyen and Molinero, *J. Phys. Chem. B* 2015, 119, 9369
+([10.1021/jp510289t](https://doi.org/10.1021/jp510289t)). The
+eclipsed window is $-0.35 \le c(i,j) \le 0.25$. A crystal,
+clathrate, or interfacial label needs exactly four neighbours inside
+the cutoff. That count is the cutoff shell, taken before the bond
+list is reduced to the four nearest. $q_3$ is the average over
+those four neighbours. The labels are cubic, hexagonal, interfacial,
+clathrate, interfacial clathrate, and water.
+
+A molecule is cubic or hexagonal when its four bonds look like ice,
+even when those neighbours do not close a cage.
+
+The OVITO form of CHILL+ averages $q_3$ over the whole cutoff
+shell. That comparison is
+[the published rule and the OVITO rule](chill-plus-rules.md).
+
+## Cage membership {#cage-membership}
+
+The ice score (`seams cages`, `ring::seededCageAffiliation` by
+default) is cage membership. A molecule in a hexagonal cage (HC) is
+ice Ih. A molecule in a double-diamond cage (DDC) is ice Ic. A
+molecule in both is counted as both. A molecule in neither is water.
+The cages are assembled from six-membered primitive rings on a chosen
+bond graph.
+
+This is topological unit matching (TUM). The methods paper is the
+2020 JCIM article (see [Citation](citation.md)).
+
+The GPU path (`gpu::analyzeResident`) is that TUM ice score only:
+`linkcell::gpu` k-nearest, the mutual four-nearest graph, primitive
+six-rings, and HC/DDC affiliation. CHILL, CHILL+, and $q_{lm}$ stay
+on the host. Only cage labels come back.
+
+## Why they disagree {#why-they-disagree}
+
+A configuration can share the closed star of a vertex (the same
+induced graph and the same coordinates on those five atoms) and still
+carry a different cage label, because the cage predicates read a
+larger neighbourhood of six-rings. Cage membership is not a function
+of the four-neighbour star.
+
+On the mixed TIP4P dump (`input/traj/exampleTraj.lammpstrj`, oxygen
+type 2), `seams chill-plus` uses the cutoff list by default and
+prints `interClathrate 9 water 241`. `--graph mutual` prints
+`clathrate 1 interClathrate 7 water 242`. `seams cages` prints
+`hexagonal 0 cubic 0 both 0 water 250`. A three-eclipsed star is not
+cage membership. The commands are in
+[the mixed TIP4P tutorial](../user/tutorials/bulk-ice.md).
+
+## Bond graph {#bond-graph}
+
+`seams cages --graph` chooses the bond graph those rings are found on:
+
+| value | graph |
+| --- | --- |
+| cutoff | pairs inside the distance cutoff |
+| knn | mutual k-nearest (default k=4). mutual is the same graph |
+| knn-union | union k-nearest, the completion graph of the seeded rule |
+| seeded | mutual seeds and union completions (the CLI default) |
+
+On the 4096-molecule cubic cell (`input/traj/mW_cubic.lammpstrj`,
+type 1) each of the four graphs labels every molecule cubic. On the
+mixed TIP4P dump each of the four graphs labels every oxygen water.
+The split with CHILL+ on that dump is the star.
+
+## Ring-adjacent completion {#ring-adjacent-completion}
+
+`ring::seededCageAffiliation` takes `ringAdjacentCompletion` as its
+fifth argument, default `false`. When the flag is `true`, the
+accepted labels pass through `ring::ringAdjacentCompletion`: a
+permissive six-ring with all but one vertex labeled fills that last
+vertex, and the walk repeats to a fixed point. Hexagonal-cage flags
+and double-diamond-cage flags run as two walks.
+
+`seams cages --complete` sets the flag. The rule and its least fixed
+point are on [Ring-adjacent completion](ring-completion.md).

@@ -1,0 +1,25 @@
+.. index:: pair: struct; seams::product::Cij
+.. _doxid-structseams_1_1product_1_1_cij:
+
+struct seams::product::Cij
+==========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/ozaki.hpp>
+	
+	struct Cij {
+		// fields
+	
+		double :target:`value<doxid-structseams_1_1product_1_1_cij_1a5c1650b776bcce83336af006b57d55f4>`;
+		double :target:`bound<doxid-structseams_1_1product_1_1_cij_1aca8e1f2b23615202c63ecc9aab8d01b3>`;
+		bool :target:`certified<doxid-structseams_1_1product_1_1_cij_1a07e598238f2bb5b4ec6e245420276705>`;
+		const char* :target:`backend<doxid-structseams_1_1product_1_1_cij_1a92b4a8a74a1a8248ae2777513887cd3e>`;
+	};

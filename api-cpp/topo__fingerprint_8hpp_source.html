@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/topo_fingerprint.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/topo__fingerprint_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/topo_fingerprint.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/topo__fingerprint_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/topo_fingerprint.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('topo__fingerprint_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">topo_fingerprint.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="topo__fingerprint_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">// SPDX-License-Identifier: MIT</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#ifndef SEAMS_TOPO_FINGERPRINT_H_</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#define SEAMS_TOPO_FINGERPRINT_H_</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;map&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span></div>
+<div class="foldopen" id="foldopen00034" data-start="{" data-end="}">
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="namespacetopo.html">   34</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacetopo.html">topo</a> {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e">   38</a></span><span class="keyword">using </span><a class="code hl_typedef" href="namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> = std::vector&lt;std::vector&lt;int&gt;&gt;;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="foldopen" id="foldopen00040" data-start="{" data-end="};">
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="structtopo_1_1LocalKey.html">   40</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structtopo_1_1LocalKey.html">LocalKey</a> {</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="structtopo_1_1LocalKey.html#ade47bf93aa5a68aa40a351f66460f8f4">   41</a></span>  std::string <a class="code hl_variable" href="structtopo_1_1LocalKey.html#ade47bf93aa5a68aa40a351f66460f8f4">key</a>;     </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="structtopo_1_1LocalKey.html#a6d9432eaa28df087d4066dff12e6b779">   42</a></span>  std::string <a class="code hl_variable" href="structtopo_1_1LocalKey.html#a6d9432eaa28df087d4066dff12e6b779">method</a>;  </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="structtopo_1_1LocalKey.html#aaa45c4d7a15d8dff80b3b93e76117655">   43</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structtopo_1_1LocalKey.html#aaa45c4d7a15d8dff80b3b93e76117655">vertices</a> = 0;    </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="structtopo_1_1LocalKey.html#a46842962761d0b24c821e614b0598506">   44</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structtopo_1_1LocalKey.html#a46842962761d0b24c821e614b0598506">edges</a> = 0;       </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>};</div>
+</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="foldopen" id="foldopen00047" data-start="{" data-end="};">
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html">   47</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html#ae73caf3f7d168ea457feb9b8fdb9c9fe">   48</a></span>  std::string <a class="code hl_variable" href="structtopo_1_1FrameFingerprint.html#ae73caf3f7d168ea457feb9b8fdb9c9fe">key</a>;                    </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html#a4d7179bcacbf440ed2a9bd1a8aefb260">   49</a></span>  std::string <a class="code hl_variable" href="structtopo_1_1FrameFingerprint.html#a4d7179bcacbf440ed2a9bd1a8aefb260">method</a>;                 </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html#a7552450f798d8591d7580e8d9422bcb6">   50</a></span>  std::vector&lt;std::string&gt; <a class="code hl_variable" href="structtopo_1_1FrameFingerprint.html#a7552450f798d8591d7580e8d9422bcb6">atomKeys</a>;  </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html#a7b460d00fe40ddad15c680fec009eecf">   51</a></span>  std::map&lt;std::string, int&gt; <a class="code hl_variable" href="structtopo_1_1FrameFingerprint.html#a7b460d00fe40ddad15c680fec009eecf">classes</a>; </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html#af25731956ad220bebec8965a6e8432bc">   52</a></span>  std::vector&lt;int&gt; <a class="code hl_variable" href="structtopo_1_1FrameFingerprint.html#af25731956ad220bebec8965a6e8432bc">ringCensus</a>;        </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html#a410ffeaef275b28480cdfca323f48985">   53</a></span>  std::vector&lt;std::uint64_t&gt; <a class="code hl_variable" href="structtopo_1_1FrameFingerprint.html#a410ffeaef275b28480cdfca323f48985">wlAtom</a>;  </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html#a436b359c7a9bb9b2c849d0e37d13962d">   54</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structtopo_1_1FrameFingerprint.html#a436b359c7a9bb9b2c849d0e37d13962d">hops</a> = 0;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="structtopo_1_1FrameFingerprint.html#a4bbbbc41fb33d1a11d8afe568969e383">   55</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structtopo_1_1FrameFingerprint.html#a4bbbbc41fb33d1a11d8afe568969e383">colored</a> = <span class="keyword">false</span>;              </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>};</div>
+</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182">   60</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182">hopNeighbourhood</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, <span class="keywordtype">int</span> atom, <span class="keywordtype">int</span> hops);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="namespacetopo.html#a5425e76859221b9bfc0dd2b40fb5d6ab">   66</a></span>std::uint64_t <a class="code hl_function" href="namespacetopo.html#a5425e76859221b9bfc0dd2b40fb5d6ab">wlHash</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;adjacency, <span class="keywordtype">int</span> root,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>                     <span class="keywordtype">int</span> rounds, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;colors = {});</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="namespacetopo.html#a7283b1a50d2e515244c1fa44f0f08237">   72</a></span><a class="code hl_struct" href="structtopo_1_1LocalKey.html">LocalKey</a> <a class="code hl_function" href="namespacetopo.html#a7283b1a50d2e515244c1fa44f0f08237">localKey</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, <span class="keywordtype">int</span> atom, <span class="keywordtype">int</span> hops,</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                  <span class="keyword">const</span> std::vector&lt;int&gt; &amp;colors = {});</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="namespacetopo.html#ad643838ac4c2882d71944b9fccd06b46">   77</a></span><a class="code hl_struct" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> <a class="code hl_function" href="namespacetopo.html#ad643838ac4c2882d71944b9fccd06b46">fingerprint</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, <span class="keywordtype">int</span> hops = 2, <span class="keywordtype">int</span> maxRingSize = 7,</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>                             <span class="keyword">const</span> std::vector&lt;int&gt; &amp;colors = {});</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="namespacetopo.html#a6060c5c44262e9a9a2657f77f6f810d2">   83</a></span><a class="code hl_struct" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> <a class="code hl_function" href="namespacetopo.html#a6060c5c44262e9a9a2657f77f6f810d2">incrementalFingerprint</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;prev,</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                                        <span class="keyword">const</span> <a class="code hl_typedef" href="namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows,</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                                        <span class="keyword">const</span> std::vector&lt;int&gt; &amp;dirtyAtoms,</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                                        <span class="keywordtype">int</span> hops, <span class="keywordtype">int</span> maxRingSize = 7,</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>                                        <span class="keyword">const</span> std::vector&lt;int&gt; &amp;colors = {});</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="namespacetopo.html#a704a6805e4842829fa83f16081405519">   90</a></span>std::string <a class="code hl_function" href="namespacetopo.html#a704a6805e4842829fa83f16081405519">hex</a>(std::uint64_t value);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span></div>
+<div class="foldopen" id="foldopen00097" data-start="{" data-end="};">
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="structtopo_1_1KeyLibrary.html">   97</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> {</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="structtopo_1_1KeyLibrary.html#a47594d7eb9d0e045c8dd5c4076e7d83d">   98</a></span>  std::string <a class="code hl_variable" href="structtopo_1_1KeyLibrary.html#a47594d7eb9d0e045c8dd5c4076e7d83d">method</a>;  </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="structtopo_1_1KeyLibrary.html#a25441f901b1852385ceb142544392c80">   99</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structtopo_1_1KeyLibrary.html#a25441f901b1852385ceb142544392c80">hops</a> = 0;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="structtopo_1_1KeyLibrary.html#ab20ce8459ec561c18619d829f19cc1f8">  100</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structtopo_1_1KeyLibrary.html#ab20ce8459ec561c18619d829f19cc1f8">colored</a> = <span class="keyword">false</span>;  </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="structtopo_1_1KeyLibrary.html#a2d23aa2fd8634ff1c0479ba2cc5bd101">  101</a></span>  std::map&lt;std::string, std::string&gt; <a class="code hl_variable" href="structtopo_1_1KeyLibrary.html#a2d23aa2fd8634ff1c0479ba2cc5bd101">labelOf</a>;  </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>};</div>
+</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="namespacetopo.html#ab7a77ab1002ce0af5dda5656f84ae369">  106</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacetopo.html#ab7a77ab1002ce0af5dda5656f84ae369">addToLibrary</a>(<a class="code hl_struct" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib, <span class="keyword">const</span> <a class="code hl_struct" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;fp, <span class="keyword">const</span> std::string &amp;label);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="namespacetopo.html#a57942af5bce01d27654ba8d544195fe0">  111</a></span>std::string <a class="code hl_function" href="namespacetopo.html#a57942af5bce01d27654ba8d544195fe0">writeLibrary</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="namespacetopo.html#ad78791f54d32c853345d0cffe9dcfa0b">  112</a></span><a class="code hl_struct" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> <a class="code hl_function" href="namespacetopo.html#ad78791f54d32c853345d0cffe9dcfa0b">readLibrary</a>(<span class="keyword">const</span> std::string &amp;text);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="};">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="structtopo_1_1LibraryMatch.html">  114</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a> {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="structtopo_1_1LibraryMatch.html#a98c3689a908e2cdd1c3966c1cd3a2aeb">  115</a></span>  std::vector&lt;std::string&gt; <a class="code hl_variable" href="structtopo_1_1LibraryMatch.html#a98c3689a908e2cdd1c3966c1cd3a2aeb">labels</a>;      </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="structtopo_1_1LibraryMatch.html#a07862b670245a0fad0f3914224ad7323">  116</a></span>  std::map&lt;std::string, int&gt; <a class="code hl_variable" href="structtopo_1_1LibraryMatch.html#a07862b670245a0fad0f3914224ad7323">counts</a>;    </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="structtopo_1_1LibraryMatch.html#ade4b4a551af0a37500a5f67bd6452e1c">  117</a></span>  std::vector&lt;int&gt; <a class="code hl_variable" href="structtopo_1_1LibraryMatch.html#ade4b4a551af0a37500a5f67bd6452e1c">depth</a>;               </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="structtopo_1_1LibraryMatch.html#a94c255516e3f25321c5a95fc08ed1b6c">  118</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structtopo_1_1LibraryMatch.html#a94c255516e3f25321c5a95fc08ed1b6c">matched</a> = 0;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>};</div>
+</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="namespacetopo.html#a73c3376495bbd19d8f072ac21af98131">  123</a></span><a class="code hl_struct" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a> <a class="code hl_function" href="namespacetopo.html#a73c3376495bbd19d8f072ac21af98131">matchLibrary</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;fp, <span class="keyword">const</span> <a class="code hl_struct" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="namespacetopo.html#ab73f19fb67b1be4132c0dea9ca09a4e6">  132</a></span><a class="code hl_struct" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a> <a class="code hl_function" href="namespacetopo.html#ab73f19fb67b1be4132c0dea9ca09a4e6">matchLibraries</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, <span class="keyword">const</span> std::vector&lt;KeyLibrary&gt; &amp;libs,</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>                            <span class="keywordtype">int</span> maxRingSize = 7, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;colors = {});</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>} <span class="comment">// namespace topo</span></div>
+</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="preprocessor">#endif </span><span class="comment">// SEAMS_TOPO_FINGERPRINT_H_</span></div>
+<div class="ttc" id="anamespacetopo_html"><div class="ttname"><a href="namespacetopo.html">topo</a></div><div class="ttdef"><b>Definition</b> <a href="#l00034">topo_fingerprint.hpp:34</a></div></div>
+<div class="ttc" id="anamespacetopo_html_a5425e76859221b9bfc0dd2b40fb5d6ab"><div class="ttname"><a href="namespacetopo.html#a5425e76859221b9bfc0dd2b40fb5d6ab">topo::wlHash</a></div><div class="ttdeci">std::uint64_t wlHash(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;adjacency, int root, int rounds, const std::vector&lt; int &gt; &amp;colors={})</div><div class="ttdoc">Weisfeiler-Lehman refinement hash of a graph given by local adjacency lists; root (or -1) starts in i...</div></div>
+<div class="ttc" id="anamespacetopo_html_a57942af5bce01d27654ba8d544195fe0"><div class="ttname"><a href="namespacetopo.html#a57942af5bce01d27654ba8d544195fe0">topo::writeLibrary</a></div><div class="ttdeci">std::string writeLibrary(const KeyLibrary &amp;lib)</div><div class="ttdoc">Text form: a header line # method M hops H colors C (C is 0 or 1; colours is the deprecated alias of ...</div></div>
+<div class="ttc" id="anamespacetopo_html_a6060c5c44262e9a9a2657f77f6f810d2"><div class="ttname"><a href="namespacetopo.html#a6060c5c44262e9a9a2657f77f6f810d2">topo::incrementalFingerprint</a></div><div class="ttdeci">FrameFingerprint incrementalFingerprint(const FrameFingerprint &amp;prev, const Rows &amp;rows, const std::vector&lt; int &gt; &amp;dirtyAtoms, int hops, int maxRingSize=7, const std::vector&lt; int &gt; &amp;colors={})</div><div class="ttdoc">Recompute local keys only for the hop-ball of dirtyAtoms and keep the rest of prev.</div></div>
+<div class="ttc" id="anamespacetopo_html_a704a6805e4842829fa83f16081405519"><div class="ttname"><a href="namespacetopo.html#a704a6805e4842829fa83f16081405519">topo::hex</a></div><div class="ttdeci">std::string hex(std::uint64_t value)</div><div class="ttdoc">Hex string of a 64-bit hash.</div></div>
+<div class="ttc" id="anamespacetopo_html_a7283b1a50d2e515244c1fa44f0f08237"><div class="ttname"><a href="namespacetopo.html#a7283b1a50d2e515244c1fa44f0f08237">topo::localKey</a></div><div class="ttdeci">LocalKey localKey(const Rows &amp;rows, int atom, int hops, const std::vector&lt; int &gt; &amp;colors={})</div><div class="ttdoc">Key of the rooted neighbourhood of atom.</div></div>
+<div class="ttc" id="anamespacetopo_html_a73c3376495bbd19d8f072ac21af98131"><div class="ttname"><a href="namespacetopo.html#a73c3376495bbd19d8f072ac21af98131">topo::matchLibrary</a></div><div class="ttdeci">LibraryMatch matchLibrary(const FrameFingerprint &amp;fp, const KeyLibrary &amp;lib)</div><div class="ttdoc">Look every atom key of fp up in lib.</div></div>
+<div class="ttc" id="anamespacetopo_html_a770ae81afc5c8c715470d90d4e3c8e6e"><div class="ttname"><a href="namespacetopo.html#a770ae81afc5c8c715470d90d4e3c8e6e">topo::Rows</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; Rows</div><div class="ttdoc">Neighbour rows by index, each row leading with the atom itself, as nneigh::neighbourListByIndex retur...</div><div class="ttdef"><b>Definition</b> <a href="#l00038">topo_fingerprint.hpp:38</a></div></div>
+<div class="ttc" id="anamespacetopo_html_ab73f19fb67b1be4132c0dea9ca09a4e6"><div class="ttname"><a href="namespacetopo.html#ab73f19fb67b1be4132c0dea9ca09a4e6">topo::matchLibraries</a></div><div class="ttdeci">LibraryMatch matchLibraries(const Rows &amp;rows, const std::vector&lt; KeyLibrary &gt; &amp;libs, int maxRingSize=7, const std::vector&lt; int &gt; &amp;colors={})</div><div class="ttdoc">Match against libraries at several depths: an atom takes the label of the deepest library that holds ...</div></div>
+<div class="ttc" id="anamespacetopo_html_ab7a77ab1002ce0af5dda5656f84ae369"><div class="ttname"><a href="namespacetopo.html#ab7a77ab1002ce0af5dda5656f84ae369">topo::addToLibrary</a></div><div class="ttdeci">void addToLibrary(KeyLibrary &amp;lib, const FrameFingerprint &amp;fp, const std::string &amp;label)</div><div class="ttdoc">Add every distinct key of fp under label; a key already present under other labels carries all of the...</div></div>
+<div class="ttc" id="anamespacetopo_html_ac22724ca2d62a9ecac9d20b5ab0b7182"><div class="ttname"><a href="namespacetopo.html#ac22724ca2d62a9ecac9d20b5ab0b7182">topo::hopNeighbourhood</a></div><div class="ttdeci">std::vector&lt; int &gt; hopNeighbourhood(const Rows &amp;rows, int atom, int hops)</div><div class="ttdoc">Atoms within hops bonds of atom, the atom itself first, then in breadth-first order.</div></div>
+<div class="ttc" id="anamespacetopo_html_ad643838ac4c2882d71944b9fccd06b46"><div class="ttname"><a href="namespacetopo.html#ad643838ac4c2882d71944b9fccd06b46">topo::fingerprint</a></div><div class="ttdeci">FrameFingerprint fingerprint(const Rows &amp;rows, int hops=2, int maxRingSize=7, const std::vector&lt; int &gt; &amp;colors={})</div><div class="ttdoc">Keys of every atom, their histogram, the ring census up to maxRingSize, and the frame key.</div></div>
+<div class="ttc" id="anamespacetopo_html_ad78791f54d32c853345d0cffe9dcfa0b"><div class="ttname"><a href="namespacetopo.html#ad78791f54d32c853345d0cffe9dcfa0b">topo::readLibrary</a></div><div class="ttdeci">KeyLibrary readLibrary(const std::string &amp;text)</div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html">topo::FrameFingerprint</a></div><div class="ttdef"><b>Definition</b> <a href="#l00047">topo_fingerprint.hpp:47</a></div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html_a410ffeaef275b28480cdfca323f48985"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html#a410ffeaef275b28480cdfca323f48985">topo::FrameFingerprint::wlAtom</a></div><div class="ttdeci">std::vector&lt; std::uint64_t &gt; wlAtom</div><div class="ttdoc">per-atom WL hash used in the frame key</div><div class="ttdef"><b>Definition</b> <a href="#l00053">topo_fingerprint.hpp:53</a></div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html_a436b359c7a9bb9b2c849d0e37d13962d"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html#a436b359c7a9bb9b2c849d0e37d13962d">topo::FrameFingerprint::hops</a></div><div class="ttdeci">int hops</div><div class="ttdef"><b>Definition</b> <a href="#l00054">topo_fingerprint.hpp:54</a></div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html_a4bbbbc41fb33d1a11d8afe568969e383"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html#a4bbbbc41fb33d1a11d8afe568969e383">topo::FrameFingerprint::colored</a></div><div class="ttdeci">bool colored</div><div class="ttdoc">keys carry vertex colors</div><div class="ttdef"><b>Definition</b> <a href="#l00055">topo_fingerprint.hpp:55</a></div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html_a4d7179bcacbf440ed2a9bd1a8aefb260"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html#a4d7179bcacbf440ed2a9bd1a8aefb260">topo::FrameFingerprint::method</a></div><div class="ttdeci">std::string method</div><div class="ttdoc">method of the local keys</div><div class="ttdef"><b>Definition</b> <a href="#l00049">topo_fingerprint.hpp:49</a></div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html_a7552450f798d8591d7580e8d9422bcb6"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html#a7552450f798d8591d7580e8d9422bcb6">topo::FrameFingerprint::atomKeys</a></div><div class="ttdeci">std::vector&lt; std::string &gt; atomKeys</div><div class="ttdoc">one local key per atom</div><div class="ttdef"><b>Definition</b> <a href="#l00050">topo_fingerprint.hpp:50</a></div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html_a7b460d00fe40ddad15c680fec009eecf"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html#a7b460d00fe40ddad15c680fec009eecf">topo::FrameFingerprint::classes</a></div><div class="ttdeci">std::map&lt; std::string, int &gt; classes</div><div class="ttdoc">local key -&gt; number of atoms carrying it</div><div class="ttdef"><b>Definition</b> <a href="#l00051">topo_fingerprint.hpp:51</a></div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html_ae73caf3f7d168ea457feb9b8fdb9c9fe"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html#ae73caf3f7d168ea457feb9b8fdb9c9fe">topo::FrameFingerprint::key</a></div><div class="ttdeci">std::string key</div><div class="ttdoc">hash of the sorted local keys and the ring census</div><div class="ttdef"><b>Definition</b> <a href="#l00048">topo_fingerprint.hpp:48</a></div></div>
+<div class="ttc" id="astructtopo_1_1FrameFingerprint_html_af25731956ad220bebec8965a6e8432bc"><div class="ttname"><a href="structtopo_1_1FrameFingerprint.html#af25731956ad220bebec8965a6e8432bc">topo::FrameFingerprint::ringCensus</a></div><div class="ttdeci">std::vector&lt; int &gt; ringCensus</div><div class="ttdoc">ringCensus[s] = primitive rings of size s</div><div class="ttdef"><b>Definition</b> <a href="#l00052">topo_fingerprint.hpp:52</a></div></div>
+<div class="ttc" id="astructtopo_1_1KeyLibrary_html"><div class="ttname"><a href="structtopo_1_1KeyLibrary.html">topo::KeyLibrary</a></div><div class="ttdoc">A dictionary from local keys to labels: the keys of reference structures (a polymorph library),...</div><div class="ttdef"><b>Definition</b> <a href="#l00097">topo_fingerprint.hpp:97</a></div></div>
+<div class="ttc" id="astructtopo_1_1KeyLibrary_html_a25441f901b1852385ceb142544392c80"><div class="ttname"><a href="structtopo_1_1KeyLibrary.html#a25441f901b1852385ceb142544392c80">topo::KeyLibrary::hops</a></div><div class="ttdeci">int hops</div><div class="ttdef"><b>Definition</b> <a href="#l00099">topo_fingerprint.hpp:99</a></div></div>
+<div class="ttc" id="astructtopo_1_1KeyLibrary_html_a2d23aa2fd8634ff1c0479ba2cc5bd101"><div class="ttname"><a href="structtopo_1_1KeyLibrary.html#a2d23aa2fd8634ff1c0479ba2cc5bd101">topo::KeyLibrary::labelOf</a></div><div class="ttdeci">std::map&lt; std::string, std::string &gt; labelOf</div><div class="ttdoc">key -&gt; label</div><div class="ttdef"><b>Definition</b> <a href="#l00101">topo_fingerprint.hpp:101</a></div></div>
+<div class="ttc" id="astructtopo_1_1KeyLibrary_html_a47594d7eb9d0e045c8dd5c4076e7d83d"><div class="ttname"><a href="structtopo_1_1KeyLibrary.html#a47594d7eb9d0e045c8dd5c4076e7d83d">topo::KeyLibrary::method</a></div><div class="ttdeci">std::string method</div><div class="ttdoc">&quot;nauty&quot; or &quot;wl&quot;</div><div class="ttdef"><b>Definition</b> <a href="#l00098">topo_fingerprint.hpp:98</a></div></div>
+<div class="ttc" id="astructtopo_1_1KeyLibrary_html_ab20ce8459ec561c18619d829f19cc1f8"><div class="ttname"><a href="structtopo_1_1KeyLibrary.html#ab20ce8459ec561c18619d829f19cc1f8">topo::KeyLibrary::colored</a></div><div class="ttdeci">bool colored</div><div class="ttdoc">keys were computed with vertex colors</div><div class="ttdef"><b>Definition</b> <a href="#l00100">topo_fingerprint.hpp:100</a></div></div>
+<div class="ttc" id="astructtopo_1_1LibraryMatch_html"><div class="ttname"><a href="structtopo_1_1LibraryMatch.html">topo::LibraryMatch</a></div><div class="ttdef"><b>Definition</b> <a href="#l00114">topo_fingerprint.hpp:114</a></div></div>
+<div class="ttc" id="astructtopo_1_1LibraryMatch_html_a07862b670245a0fad0f3914224ad7323"><div class="ttname"><a href="structtopo_1_1LibraryMatch.html#a07862b670245a0fad0f3914224ad7323">topo::LibraryMatch::counts</a></div><div class="ttdeci">std::map&lt; std::string, int &gt; counts</div><div class="ttdoc">label -&gt; atoms, &quot;&quot; for unmatched</div><div class="ttdef"><b>Definition</b> <a href="#l00116">topo_fingerprint.hpp:116</a></div></div>
+<div class="ttc" id="astructtopo_1_1LibraryMatch_html_a94c255516e3f25321c5a95fc08ed1b6c"><div class="ttname"><a href="structtopo_1_1LibraryMatch.html#a94c255516e3f25321c5a95fc08ed1b6c">topo::LibraryMatch::matched</a></div><div class="ttdeci">int matched</div><div class="ttdef"><b>Definition</b> <a href="#l00118">topo_fingerprint.hpp:118</a></div></div>
+<div class="ttc" id="astructtopo_1_1LibraryMatch_html_a98c3689a908e2cdd1c3966c1cd3a2aeb"><div class="ttname"><a href="structtopo_1_1LibraryMatch.html#a98c3689a908e2cdd1c3966c1cd3a2aeb">topo::LibraryMatch::labels</a></div><div class="ttdeci">std::vector&lt; std::string &gt; labels</div><div class="ttdoc">per atom; &quot;&quot; when no key matches</div><div class="ttdef"><b>Definition</b> <a href="#l00115">topo_fingerprint.hpp:115</a></div></div>
+<div class="ttc" id="astructtopo_1_1LibraryMatch_html_ade4b4a551af0a37500a5f67bd6452e1c"><div class="ttname"><a href="structtopo_1_1LibraryMatch.html#ade4b4a551af0a37500a5f67bd6452e1c">topo::LibraryMatch::depth</a></div><div class="ttdeci">std::vector&lt; int &gt; depth</div><div class="ttdoc">per atom: hops of the library that named it, 0 when none</div><div class="ttdef"><b>Definition</b> <a href="#l00117">topo_fingerprint.hpp:117</a></div></div>
+<div class="ttc" id="astructtopo_1_1LocalKey_html"><div class="ttname"><a href="structtopo_1_1LocalKey.html">topo::LocalKey</a></div><div class="ttdef"><b>Definition</b> <a href="#l00040">topo_fingerprint.hpp:40</a></div></div>
+<div class="ttc" id="astructtopo_1_1LocalKey_html_a46842962761d0b24c821e614b0598506"><div class="ttname"><a href="structtopo_1_1LocalKey.html#a46842962761d0b24c821e614b0598506">topo::LocalKey::edges</a></div><div class="ttdeci">int edges</div><div class="ttdoc">bonds among them</div><div class="ttdef"><b>Definition</b> <a href="#l00044">topo_fingerprint.hpp:44</a></div></div>
+<div class="ttc" id="astructtopo_1_1LocalKey_html_a6d9432eaa28df087d4066dff12e6b779"><div class="ttname"><a href="structtopo_1_1LocalKey.html#a6d9432eaa28df087d4066dff12e6b779">topo::LocalKey::method</a></div><div class="ttdeci">std::string method</div><div class="ttdoc">&quot;nauty&quot; or &quot;wl&quot;</div><div class="ttdef"><b>Definition</b> <a href="#l00042">topo_fingerprint.hpp:42</a></div></div>
+<div class="ttc" id="astructtopo_1_1LocalKey_html_aaa45c4d7a15d8dff80b3b93e76117655"><div class="ttname"><a href="structtopo_1_1LocalKey.html#aaa45c4d7a15d8dff80b3b93e76117655">topo::LocalKey::vertices</a></div><div class="ttdeci">int vertices</div><div class="ttdoc">atoms in the neighbourhood, center included</div><div class="ttdef"><b>Definition</b> <a href="#l00043">topo_fingerprint.hpp:43</a></div></div>
+<div class="ttc" id="astructtopo_1_1LocalKey_html_ade47bf93aa5a68aa40a351f66460f8f4"><div class="ttname"><a href="structtopo_1_1LocalKey.html#ade47bf93aa5a68aa40a351f66460f8f4">topo::LocalKey::key</a></div><div class="ttdeci">std::string key</div><div class="ttdoc">canonical certificate or refinement hash</div><div class="ttdef"><b>Definition</b> <a href="#l00041">topo_fingerprint.hpp:41</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="topo__fingerprint_8hpp.html">topo_fingerprint.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

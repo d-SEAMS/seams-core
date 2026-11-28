@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::SignatureOptions
+.. _doxid-structseams_1_1_signature_options:
+
+struct seams::SignatureOptions
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a signature cage census. :ref:`More...<details-structseams_1_1_signature_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct SignatureOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_signature_options_1af17521ce2dd6b8bed9aa538f20b79624>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_signature_options_1a0c9c4affe1d089cc864a819010026209>` = 0;
+		:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` :ref:`graph<doxid-structseams_1_1_signature_options_1aa9e6baf230b3531b3f4a8d8ca0e9180f>` = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`;
+		std::string :ref:`spec<doxid-structseams_1_1_signature_options_1af74974598f7ee36b0d390f29547af425>` = "512";
+	};
+.. _details-structseams_1_1_signature_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a signature cage census.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_signature_options_1af17521ce2dd6b8bed9aa538f20b79624:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_signature_options_1a0c9c4affe1d089cc864a819010026209:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+.. index:: pair: variable; graph
+.. _doxid-structseams_1_1_signature_options_1aa9e6baf230b3531b3f4a8d8ca0e9180f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` graph = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`
+
+Neighbour graph.
+
+.. index:: pair: variable; spec
+.. _doxid-structseams_1_1_signature_options_1af74974598f7ee36b0d390f29547af425:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string spec = "512"
+
+Ring census text, for example ``512``.
+

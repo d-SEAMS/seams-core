@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::Pockets
+.. _doxid-structseams_1_1_pockets:
+
+struct seams::Pockets
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+:ref:`Brine <doxid-classseams_1_1_brine>` pockets trapped in the ice. :ref:`More...<details-structseams_1_1_pockets>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Pockets {
+		// fields
+	
+		int :ref:`pockets<doxid-structseams_1_1_pockets_1a0e1648c8ebbbb7fa87016fefe924a6a4>` = 0;
+		int :ref:`reservoir_waters<doxid-structseams_1_1_pockets_1a95beb2cf07208fcf0c8b34e6e5976c46>` = 0;
+	};
+.. _details-structseams_1_1_pockets:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+:ref:`Brine <doxid-classseams_1_1_brine>` pockets trapped in the ice.
+
+Fields
+------
+
+.. index:: pair: variable; pockets
+.. _doxid-structseams_1_1_pockets_1a0e1648c8ebbbb7fa87016fefe924a6a4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int pockets = 0
+
+Pocket count, excluding the reservoir.
+
+.. index:: pair: variable; reservoir_waters
+.. _doxid-structseams_1_1_pockets_1a95beb2cf07208fcf0c8b34e6e5976c46:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int reservoir_waters = 0
+
+Waters in the liquid reservoir.
+

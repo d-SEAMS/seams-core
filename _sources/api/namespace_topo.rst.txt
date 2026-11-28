@@ -1,0 +1,187 @@
+.. index:: pair: namespace; topo
+.. _doxid-namespacetopo:
+
+namespace topo
+==============
+
+.. toctree::
+	:hidden:
+
+	struct_topo_FrameFingerprint.rst
+	struct_topo_KeyLibrary.rst
+	struct_topo_LibraryMatch.rst
+	struct_topo_LocalKey.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace topo {
+
+	// typedefs
+
+	typedef std::vector<std::vector<int>> :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`;
+
+	// structs
+
+	struct :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`;
+	struct :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`;
+	struct :ref:`LibraryMatch<doxid-structtopo_1_1_library_match>`;
+	struct :ref:`LocalKey<doxid-structtopo_1_1_local_key>`;
+
+	// global functions
+
+	std::vector<int> :ref:`hopNeighbourhood<doxid-namespacetopo_1ac22724ca2d62a9ecac9d20b5ab0b7182>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops);
+	std::uint64_t :ref:`wlHash<doxid-namespacetopo_1a5425e76859221b9bfc0dd2b40fb5d6ab>`(const std::vector<std::vector<int>>& adjacency, int root, int rounds, const std::vector<int>& colors = {});
+	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` :ref:`localKey<doxid-namespacetopo_1a7283b1a50d2e515244c1fa44f0f08237>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops, const std::vector<int>& colors = {});
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` :ref:`fingerprint<doxid-namespacetopo_1ad643838ac4c2882d71944b9fccd06b46>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7, const std::vector<int>& colors = {});
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` :ref:`incrementalFingerprint<doxid-namespacetopo_1a6060c5c44262e9a9a2657f77f6f810d2>`(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& prev, const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, const std::vector<int>& dirtyAtoms, int hops, int maxRingSize = 7, const std::vector<int>& colors = {});
+	std::string :ref:`hex<doxid-namespacetopo_1a704a6805e4842829fa83f16081405519>`(std::uint64_t value);
+	void :ref:`addToLibrary<doxid-namespacetopo_1ab7a77ab1002ce0af5dda5656f84ae369>`(:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib, const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const std::string& label);
+	std::string :ref:`writeLibrary<doxid-namespacetopo_1a57942af5bce01d27654ba8d544195fe0>`(const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib);
+	:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>` :target:`readLibrary<doxid-namespacetopo_1ad78791f54d32c853345d0cffe9dcfa0b>`(const std::string& text);
+	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` :ref:`matchLibrary<doxid-namespacetopo_1a73c3376495bbd19d8f072ac21af98131>`(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib);
+	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` :ref:`matchLibraries<doxid-namespacetopo_1ab73f19fb67b1be4132c0dea9ca09a4e6>`(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, const std::vector<:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`>& libs, int maxRingSize = 7, const std::vector<int>& colors = {});
+
+	} // namespace topo
+.. _details-namespacetopo:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Typedefs
+--------
+
+.. index:: pair: typedef; Rows
+.. _doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	typedef std::vector<std::vector<int>> Rows
+
+Neighbour rows by index, each row leading with the atom itself, as :ref:`nneigh::neighbourListByIndex <doxid-namespacenneigh_1acf46d8c4b42f15e634ff0076ac83c012>` returns them.
+
+Global Functions
+----------------
+
+.. index:: pair: function; hopNeighbourhood
+.. _doxid-namespacetopo_1ac22724ca2d62a9ecac9d20b5ab0b7182:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> hopNeighbourhood(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops)
+
+Atoms within ``hops`` bonds of ``atom``, the atom itself first, then in breadth-first order.
+
+.. index:: pair: function; wlHash
+.. _doxid-namespacetopo_1a5425e76859221b9bfc0dd2b40fb5d6ab:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::uint64_t wlHash(const std::vector<std::vector<int>>& adjacency, int root, int rounds, const std::vector<int>& colors = {})
+
+Weisfeiler-Lehman refinement hash of a graph given by local adjacency lists; ``root`` (or -1) starts in its own color; ``colors`` (empty or one integer per vertex, such as the atom type) seeds the initial colors.
+
+``rounds`` refinements.
+
+.. index:: pair: function; localKey
+.. _doxid-namespacetopo_1a7283b1a50d2e515244c1fa44f0f08237:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`LocalKey<doxid-structtopo_1_1_local_key>` localKey(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int atom, int hops, const std::vector<int>& colors = {})
+
+Key of the rooted neighbourhood of ``atom``.
+
+``colors`` is empty or one class per row (atom type, species); colored vertices never match vertices of another color.
+
+.. index:: pair: function; fingerprint
+.. _doxid-namespacetopo_1ad643838ac4c2882d71944b9fccd06b46:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` fingerprint(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, int hops = 2, int maxRingSize = 7, const std::vector<int>& colors = {})
+
+Keys of every atom, their histogram, the ring census up to ``maxRingSize``, and the frame key.
+
+``colors`` as in localKey.
+
+.. index:: pair: function; incrementalFingerprint
+.. _doxid-namespacetopo_1a6060c5c44262e9a9a2657f77f6f810d2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>` incrementalFingerprint(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& prev, const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, const std::vector<int>& dirtyAtoms, int hops, int maxRingSize = 7, const std::vector<int>& colors = {})
+
+Recompute local keys only for the hop-ball of ``dirtyAtoms`` and keep the rest of ``prev``.
+
+The ring census is taken on ``rows``. A size or hop mismatch falls back to a full fingerprint.
+
+.. index:: pair: function; hex
+.. _doxid-namespacetopo_1a704a6805e4842829fa83f16081405519:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string hex(std::uint64_t value)
+
+Hex string of a 64-bit hash.
+
+.. index:: pair: function; addToLibrary
+.. _doxid-namespacetopo_1ab7a77ab1002ce0af5dda5656f84ae369:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void addToLibrary(:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib, const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const std::string& label)
+
+Add every distinct key of ``fp`` under ``label``; a key already present under other labels carries all of them, sorted and joined by '|'.
+
+.. index:: pair: function; writeLibrary
+.. _doxid-namespacetopo_1a57942af5bce01d27654ba8d544195fe0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string writeLibrary(const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib)
+
+Text form: a header line ``# method M hops H colors C`` (C is 0 or 1; ``colours`` is the deprecated alias of ``colors``; a header without either word means uncolored), then ``key label`` lines.
+
+.. index:: pair: function; matchLibrary
+.. _doxid-namespacetopo_1a73c3376495bbd19d8f072ac21af98131:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` matchLibrary(const :ref:`FrameFingerprint<doxid-structtopo_1_1_frame_fingerprint>`& fp, const :ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`& lib)
+
+Look every atom key of ``fp`` up in ``lib``.
+
+Throws std::invalid_argument when the methods, hop counts or colorings differ.
+
+.. index:: pair: function; matchLibraries
+.. _doxid-namespacetopo_1ab73f19fb67b1be4132c0dea9ca09a4e6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`LibraryMatch<doxid-structtopo_1_1_library_match>` matchLibraries(const :ref:`Rows<doxid-namespacetopo_1a770ae81afc5c8c715470d90d4e3c8e6e>`& rows, const std::vector<:ref:`KeyLibrary<doxid-structtopo_1_1_key_library>`>& libs, int maxRingSize = 7, const std::vector<int>& colors = {})
+
+Match against libraries at several depths: an atom takes the label of the deepest library that holds its key, and a molecule whose wide neighbourhood is disturbed (a defect two bonds away, a jittered dense polymorph) still gets named by its inner shells.
+
+``depth`` records the hops that named each atom. Every library must share the method of this build and the coloring (``colors`` empty or one per row); throws std::invalid_argument otherwise, or when two libraries share a depth.
+

@@ -1,0 +1,66 @@
+.. index:: pair: class; traj::MsdAccumulator
+.. _doxid-classtraj_1_1_msd_accumulator:
+
+class traj::MsdAccumulator
+==========================
+
+.. toctree::
+	:hidden:
+
+	struct_traj_MsdAccumulator_OriginSlot.rst
+
+Overview
+~~~~~~~~
+
+Streaming multi-origin MSD accumulator with arbitrary-axis split. :ref:`More...<details-classtraj_1_1_msd_accumulator>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	class MsdAccumulator {
+	public:
+		// structs
+	
+		struct :ref:`OriginSlot<doxid-structtraj_1_1_msd_accumulator_1_1_origin_slot>`;
+
+		// construction
+	
+		:target:`MsdAccumulator<doxid-classtraj_1_1_msd_accumulator_1a9b8c0548b9d72167bc8b0d7871deef3b>`(std::size_t nParticles, std::size_t maxLag, std::size_t originStride, double dt, const double axis[3]);
+
+		// methods
+	
+		bool :target:`valid<doxid-classtraj_1_1_msd_accumulator_1a292b3163af065c1d5af9ca8ead3b90af>`() const;
+		std::size_t :target:`numParticles<doxid-classtraj_1_1_msd_accumulator_1ac79c3df53c0b56fd4bbcfa125d820e2b>`() const;
+		std::size_t :target:`framesSeen<doxid-classtraj_1_1_msd_accumulator_1ac18dbee59289b756dbc2784fc4cc77d5>`() const;
+		std::size_t :target:`numLags<doxid-classtraj_1_1_msd_accumulator_1a385de4a03119b5024d6db955f3aab700>`() const;
+		bool :ref:`push<doxid-classtraj_1_1_msd_accumulator_1a5ac00445a0642d11198382453215ecb1>`(const double* xyz, std::size_t nParticles, const double* box9OrNull = nullptr);
+		void :target:`curve<doxid-classtraj_1_1_msd_accumulator_1a6e3815243eb275d3a60811b1a1f150b4>`(std::vector<double>& lagTime, std::vector<double>& total, std::vector<double>& axial, std::vector<double>& lateral, std::vector<std::size_t>& nOrigins) const;
+		bool :target:`fit<doxid-classtraj_1_1_msd_accumulator_1affb887c0e5ea6e40f5c2d79828138266>`(double tStart, double tEnd, :ref:`DiffusionFitResult<doxid-structtraj_1_1_diffusion_fit_result>`& out) const;
+	};
+.. _details-classtraj_1_1_msd_accumulator:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Streaming multi-origin MSD accumulator with arbitrary-axis split.
+
+When maxLag > 0, memory is bounded to O(nParticles \* maxLag / originStride). When maxLag == 0, all lags up to framesSeen - 1 are retained.
+
+Methods
+-------
+
+.. index:: pair: function; push
+.. _doxid-classtraj_1_1_msd_accumulator_1a5ac00445a0642d11198382453215ecb1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool push(const double* xyz, std::size_t nParticles, const double* box9OrNull = nullptr)
+
+Push one frame of coordinates.
+
+If box9OrNull is non-null, coordinates are unwrapped incrementally across consecutive frames before accumulating displacements. If null, xyz is used directly as unwrapped coordinates.
+

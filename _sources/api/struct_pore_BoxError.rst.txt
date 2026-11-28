@@ -1,0 +1,22 @@
+.. index:: pair: struct; pore::BoxError
+.. _doxid-structpore_1_1_box_error:
+
+struct pore::BoxError
+=====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/pore.hpp>
+	
+	struct BoxError: public std::invalid_argument {
+		// construction
+	
+		:target:`~BoxError<doxid-structpore_1_1_box_error_1aeec456910d5cb717a952b55904ffcc26>`();
+	};

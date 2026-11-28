@@ -1,0 +1,26 @@
+.. index:: pair: struct; traj::OrientationOrderResult
+.. _doxid-structtraj_1_1_orientation_order_result:
+
+struct traj::OrientationOrderResult
+===================================
+
+.. toctree::
+	:hidden:
+
+Axis-projected orientational order parameters P1 and P2.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	struct OrientationOrderResult {
+		// fields
+	
+		std::vector<double> :target:`cosTheta<doxid-structtraj_1_1_orientation_order_result_1a2ba28a4cef21c3ee42bb866871cfda10>`;
+		std::vector<double> :target:`p2<doxid-structtraj_1_1_orientation_order_result_1a8a5ab9a88c603a2f197334f0e716cf34>`;
+		double :target:`meanP1<doxid-structtraj_1_1_orientation_order_result_1aa84c33897f7d874169fefb721aeff1e5>` = 0.0;
+		double :target:`meanP2<doxid-structtraj_1_1_orientation_order_result_1a208d1f7343f3ef37d66ab48758f3415f>` = 0.0;
+		std::size_t :target:`nValid<doxid-structtraj_1_1_orientation_order_result_1a0001a487f121b3927c5fc13d3ba9beea>` = 0;
+	};

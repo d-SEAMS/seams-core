@@ -1,0 +1,50 @@
+.. index:: pair: struct; traj::DiffusionFitResult
+.. _doxid-structtraj_1_1_diffusion_fit_result:
+
+struct traj::DiffusionFitResult
+===============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Linear Einstein fit of total, 1D axial, and 2D lateral MSD. :ref:`More...<details-structtraj_1_1_diffusion_fit_result>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	struct DiffusionFitResult {
+		// fields
+	
+		double :target:`dTotal<doxid-structtraj_1_1_diffusion_fit_result_1abda965e80701dea213c720043d04d976>` = 0.0;
+		double :target:`dAxial<doxid-structtraj_1_1_diffusion_fit_result_1a14f500e47de29ba4a8079562ab162f22>` = 0.0;
+		double :target:`dLateral<doxid-structtraj_1_1_diffusion_fit_result_1a63c295520a15a689063a5eb4dfe36680>` = 0.0;
+		double :ref:`alpha<doxid-structtraj_1_1_diffusion_fit_result_1ac551fd15ea9263ba8ca9af0a37c5e80b>` = std::numeric_limits<double>::quiet_NaN();
+		bool :target:`alphaFitted<doxid-structtraj_1_1_diffusion_fit_result_1aa89f50ad80cef599ba48d8689f405fa2>` = false;
+		double :target:`r2Total<doxid-structtraj_1_1_diffusion_fit_result_1a90ad6bf33f22521bc94290d9ca912475>` = 0.0;
+	};
+.. _details-structtraj_1_1_diffusion_fit_result:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Linear Einstein fit of total, 1D axial, and 2D lateral MSD.
+
+Fields
+------
+
+.. index:: pair: variable; alpha
+.. _doxid-structtraj_1_1_diffusion_fit_result_1ac551fd15ea9263ba8ca9af0a37c5e80b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double alpha = std::numeric_limits<double>::quiet_NaN()
+
+NaN unless alphaFitted: the window needs two lags with t > 0 and MSD_total > 1e-20 for the log-log fit.
+

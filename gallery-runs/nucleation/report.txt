@@ -1,0 +1,5 @@
+nucleation full input molecules 4096 frames 148 file-frames 148 file docs/.cache/figshare-11448702/nucleation.lammpstrj
+nucleation full paper molecules 4096 frames 148
+nucleation full frame 1 q6bar 0.26063
+nucleation full frame 148 q6bar 0.287256
+nucleation full lines 148

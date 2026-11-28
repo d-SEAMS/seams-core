@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: seams::FairWidth Class Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/classseams_1_1FairWidth.html">
+<meta property="og:title" content="seams-core: seams::FairWidth Class Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/classseams_1_1FairWidth.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: seams::FairWidth Class Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('classseams_1_1FairWidth.html','','classseams_1_1FairWidth-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams::FairWidth Class Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="thread__team_8hpp_source.html">src/include/internal/thread_team.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a6d084b717363884af15517d3da80ac00" id="r_a6d084b717363884af15517d3da80ac00"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a6d084b717363884af15517d3da80ac00">FairWidth</a> (bool adopt=false)</td></tr>
+<tr class="memitem:a7b71be0388e179106614108c1a50a666" id="r_a7b71be0388e179106614108c1a50a666"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a7b71be0388e179106614108c1a50a666">~FairWidth</a> ()</td></tr>
+<tr class="memitem:a2802d260e5696bfaea5e2b73e1203197" id="r_a2802d260e5696bfaea5e2b73e1203197"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a2802d260e5696bfaea5e2b73e1203197">FairWidth</a> (const FairWidth &amp;)=delete</td></tr>
+<tr class="memitem:ac42c23aabf7ba217801429ec80b1b0d6" id="r_ac42c23aabf7ba217801429ec80b1b0d6"><td class="memItemLeft"><a class="el" href="#a6d084b717363884af15517d3da80ac00">FairWidth</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="#ac42c23aabf7ba217801429ec80b1b0d6">operator=</a> (const <a class="el" href="#a6d084b717363884af15517d3da80ac00">FairWidth</a> &amp;)=delete</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="thread__team_8hpp_source.html#l00418">418</a> of file <a class="el" href="thread__team_8hpp_source.html">thread_team.hpp</a>.</p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a6d084b717363884af15517d3da80ac00" name="a6d084b717363884af15517d3da80ac00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d084b717363884af15517d3da80ac00">&#9670;&#160;</a></span>FairWidth() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">seams::FairWidth::FairWidth </td>
+          <td>(</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>adopt</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel explicit">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="thread__team_8hpp_source.html#l00420">420</a> of file <a class="el" href="thread__team_8hpp_source.html">thread_team.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  421</span>      : placed_() {</div>
+<div class="line"><span class="lineno">  422</span>    <a class="code hl_function" href="namespaceseams.html#aded3399a4ee3ed873ee94fd1ef5742fc">tuneHeap</a>();</div>
+<div class="line"><span class="lineno">  423</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">  424</span>    <span class="keywordflow">if</span> (depth()++ == 0 &amp;&amp; !omp_in_parallel() &amp;&amp; <a class="code hl_function" href="namespaceseams.html#adf03c6a9af70b7c8e5a7a322828ae8ac">fairEnabled</a>()) {</div>
+<div class="line"><span class="lineno">  425</span>      choose();</div>
+<div class="line"><span class="lineno">  426</span>    }</div>
+<div class="line"><span class="lineno">  427</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  428</span>    <span class="keywordflow">if</span> (adopt) {</div>
+<div class="line"><span class="lineno">  429</span>      <a class="code hl_function" href="namespaceseams.html#afd71d1c59950dc2eabbff5aa9362a16c">adoptThreads</a>();</div>
+<div class="line"><span class="lineno">  430</span>    }</div>
+<div class="line"><span class="lineno">  431</span>  }</div>
+<div class="ttc" id="anamespaceseams_html_aded3399a4ee3ed873ee94fd1ef5742fc"><div class="ttname"><a href="namespaceseams.html#aded3399a4ee3ed873ee94fd1ef5742fc">seams::tuneHeap</a></div><div class="ttdeci">void tuneHeap()</div><div class="ttdef"><b>Definition</b> <a href="thread__team_8hpp_source.html#l00090">thread_team.hpp:90</a></div></div>
+<div class="ttc" id="anamespaceseams_html_adf03c6a9af70b7c8e5a7a322828ae8ac"><div class="ttname"><a href="namespaceseams.html#adf03c6a9af70b7c8e5a7a322828ae8ac">seams::fairEnabled</a></div><div class="ttdeci">bool fairEnabled()</div><div class="ttdef"><b>Definition</b> <a href="thread__team_8hpp_source.html#l00410">thread_team.hpp:410</a></div></div>
+<div class="ttc" id="anamespaceseams_html_afd71d1c59950dc2eabbff5aa9362a16c"><div class="ttname"><a href="namespaceseams.html#afd71d1c59950dc2eabbff5aa9362a16c">seams::adoptThreads</a></div><div class="ttdeci">void adoptThreads()</div><div class="ttdef"><b>Definition</b> <a href="thread__team_8hpp_source.html#l00259">thread_team.hpp:259</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a7b71be0388e179106614108c1a50a666" name="a7b71be0388e179106614108c1a50a666"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b71be0388e179106614108c1a50a666">&#9670;&#160;</a></span>~FairWidth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">seams::FairWidth::~FairWidth </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="thread__team_8hpp_source.html#l00432">432</a> of file <a class="el" href="thread__team_8hpp_source.html">thread_team.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  432</span>               {</div>
+<div class="line"><span class="lineno">  433</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">  434</span>    <span class="keywordflow">if</span> (set_) {</div>
+<div class="line"><span class="lineno">  435</span>      omp_set_num_threads(asked_);</div>
+<div class="line"><span class="lineno">  436</span>    }</div>
+<div class="line"><span class="lineno">  437</span>    <span class="keywordflow">if</span> (marked_) {</div>
+<div class="line"><span class="lineno">  438</span>      <a class="code hl_function" href="namespaceseams.html#a127a17333aadfa16f68e0b22f5945b52">askedWidth</a>() = 0;</div>
+<div class="line"><span class="lineno">  439</span>    }</div>
+<div class="line"><span class="lineno">  440</span>    --depth();</div>
+<div class="line"><span class="lineno">  441</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  442</span>  }</div>
+<div class="ttc" id="anamespaceseams_html_a127a17333aadfa16f68e0b22f5945b52"><div class="ttname"><a href="namespaceseams.html#a127a17333aadfa16f68e0b22f5945b52">seams::askedWidth</a></div><div class="ttdeci">int &amp; askedWidth()</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a2802d260e5696bfaea5e2b73e1203197" name="a2802d260e5696bfaea5e2b73e1203197"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2802d260e5696bfaea5e2b73e1203197">&#9670;&#160;</a></span>FairWidth() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">seams::FairWidth::FairWidth </td>
+          <td>(</td>
+          <td class="paramtype">const FairWidth &amp;</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel delete">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="ac42c23aabf7ba217801429ec80b1b0d6" name="ac42c23aabf7ba217801429ec80b1b0d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac42c23aabf7ba217801429ec80b1b0d6">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#a6d084b717363884af15517d3da80ac00">FairWidth</a> &amp; seams::FairWidth::operator= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a6d084b717363884af15517d3da80ac00">FairWidth</a> &amp;</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel delete">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>src/include/internal/<a class="el" href="thread__team_8hpp_source.html">thread_team.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceseams.html">seams</a></li><li class="navelem"><a href="classseams_1_1FairWidth.html">FairWidth</a></li>
+  </ul>
+</div>
+</body>
+</html>

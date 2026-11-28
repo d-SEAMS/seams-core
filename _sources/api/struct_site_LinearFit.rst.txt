@@ -1,0 +1,48 @@
+.. index:: pair: struct; site::LinearFit
+.. _doxid-structsite_1_1_linear_fit:
+
+struct site::LinearFit
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct LinearFit {
+		// fields
+	
+		double :target:`slope<doxid-structsite_1_1_linear_fit_1aa72e22adb4b61619387d990485bd88dd>` = 0;
+		double :target:`intercept<doxid-structsite_1_1_linear_fit_1ac326f633a141b97007523db7c0b5aa11>` = 0;
+		double :ref:`slopeStdErr<doxid-structsite_1_1_linear_fit_1a00e060acf10c883ff41a99d71f74504c>` = 0;
+		int :target:`n<doxid-structsite_1_1_linear_fit_1acb0b29e85abb85d62d447fb4e16c667e>` = 0;
+	};
+.. _details-structsite_1_1_linear_fit:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; slopeStdErr
+.. _doxid-structsite_1_1_linear_fit_1a00e060acf10c883ff41a99d71f74504c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double slopeStdErr = 0
+
+standard error of the slope (not ``stderr``, a macro on musl)
+

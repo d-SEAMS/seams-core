@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: pore Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacepore.html">
+<meta property="og:title" content="seams-core: pore Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacepore.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: pore Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacepore.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">pore Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:BoxError" id="r_BoxError"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structpore_1_1BoxError.html">BoxError</a></td></tr>
+<tr class="memitem:Profile" id="r_Profile"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structpore_1_1Profile.html">Profile</a></td></tr>
+<tr class="memitem:Frame" id="r_Frame"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structpore_1_1Frame.html">Frame</a></td></tr>
+<tr class="memitem:Profiles" id="r_Profiles"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structpore_1_1Profiles.html">Profiles</a></td></tr>
+<tr class="memitem:HostGuest" id="r_HostGuest"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structpore_1_1HostGuest.html">HostGuest</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a36332aa347c241e3821f0c335f71df9a" id="r_a36332aa347c241e3821f0c335f71df9a"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> = <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt;double&gt;, double&gt;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a580fd054684f7573eee94809e16e25c7" id="r_a580fd054684f7573eee94809e16e25c7"><td class="memItemLeft"><a class="el" href="structpore_1_1Profile.html">Profile</a>&#160;</td><td class="memItemRight"><a class="el" href="#a580fd054684f7573eee94809e16e25c7">fractionalAxis</a> (const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, int type, int bins, int axis, double origin, const double *masses)</td></tr>
+<tr class="memdesc:a580fd054684f7573eee94809e16e25c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fractional density along cell axis 0, 1, or 2. Origin is in [0, 1) after wrapping.  <br /></td></tr>
+<tr class="memitem:ac98eeffc5a506b422a107937da3cf147" id="r_ac98eeffc5a506b422a107937da3cf147"><td class="memItemLeft"><a class="el" href="structpore_1_1Profile.html">Profile</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac98eeffc5a506b422a107937da3cf147">alongDirection</a> (const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, int type, int bins, const double direction[3], double origin, const double *masses)</td></tr>
+<tr class="memdesc:ac98eeffc5a506b422a107937da3cf147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Density of the reduced cell projected on a Cartesian direction.  <br /></td></tr>
+<tr class="memitem:a5e822438fb0fdb78d1f233928ff71c5a" id="r_a5e822438fb0fdb78d1f233928ff71c5a"><td class="memItemLeft"><a class="el" href="structpore_1_1Frame.html">Frame</a>&#160;</td><td class="memItemRight"><a class="el" href="#a5e822438fb0fdb78d1f233928ff71c5a">poreFrame</a> (const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, int framework_type, int axis, const double *direction, const double *centre_frac)</td></tr>
+<tr class="memitem:a7b24f77db6c4a365059977e33b856713" id="r_a7b24f77db6c4a365059977e33b856713"><td class="memItemLeft"><a class="el" href="structpore_1_1Profiles.html">Profiles</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7b24f77db6c4a365059977e33b856713">poreProfiles</a> (const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, int type, int radial_bins, int azimuthal_bins, int axial_bins, double r_max, int axis, const double *direction, const double *centre_frac, int framework_type, double origin, const double *masses)</td></tr>
+<tr class="memitem:a76edcb8049b70330f7115d460fce12ef" id="r_a76edcb8049b70330f7115d460fce12ef"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a76edcb8049b70330f7115d460fce12ef">clippedDiskArea</a> (const std::vector&lt; std::array&lt; double, 2 &gt; &gt; &amp;polygon, double radius, double cover, double full)</td></tr>
+<tr class="memitem:a406f5ff58b3a290ec66df9cfb5cf7f89" id="r_a406f5ff58b3a290ec66df9cfb5cf7f89"><td class="memItemLeft"><a class="el" href="structpore_1_1HostGuest.html">HostGuest</a>&#160;</td><td class="memItemRight"><a class="el" href="#a406f5ff58b3a290ec66df9cfb5cf7f89">hostGuest</a> (const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, int guest_type, int framework_type, double cutoff)</td></tr>
+</table>
+<a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
+<a id="a36332aa347c241e3821f0c335f71df9a" name="a36332aa347c241e3821f0c335f71df9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36332aa347c241e3821f0c335f71df9a">&#9670;&#160;</a></span>Cloud</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">pore::Cloud</a> = <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt;double&gt;, double&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="pore_8hpp_source.html#l00087">87</a> of file <a class="el" href="pore_8hpp_source.html">pore.hpp</a>.</p>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ac98eeffc5a506b422a107937da3cf147" name="ac98eeffc5a506b422a107937da3cf147"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac98eeffc5a506b422a107937da3cf147">&#9670;&#160;</a></span>alongDirection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structpore_1_1Profile.html">Profile</a> pore::alongDirection </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>direction</em></span>[3], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>origin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>masses</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Density of the reduced cell projected on a Cartesian direction. </p>
+
+</div>
+</div>
+<a id="a76edcb8049b70330f7115d460fce12ef" name="a76edcb8049b70330f7115d460fce12ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76edcb8049b70330f7115d460fce12ef">&#9670;&#160;</a></span>clippedDiskArea()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double pore::clippedDiskArea </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::array&lt; double, 2 &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>polygon</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>radius</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cover</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>full</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Area of a convex polygon clipped to the disk of <span class="tt">radius</span> centred at the origin. Vertices are an (x, y) ring. A non-positive radius returns 0. Once <span class="tt">radius</span> reaches <span class="tt">cover</span>, the result is <span class="tt">full</span>, which is the polygon's own area when the disk contains it. </p>
+
+</div>
+</div>
+<a id="a580fd054684f7573eee94809e16e25c7" name="a580fd054684f7573eee94809e16e25c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a580fd054684f7573eee94809e16e25c7">&#9670;&#160;</a></span>fractionalAxis()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structpore_1_1Profile.html">Profile</a> pore::fractionalAxis </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>origin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>masses</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fractional density along cell axis 0, 1, or 2. Origin is in [0, 1) after wrapping. </p>
+
+</div>
+</div>
+<a id="a406f5ff58b3a290ec66df9cfb5cf7f89" name="a406f5ff58b3a290ec66df9cfb5cf7f89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a406f5ff58b3a290ec66df9cfb5cf7f89">&#9670;&#160;</a></span>hostGuest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structpore_1_1HostGuest.html">HostGuest</a> pore::hostGuest </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>guest_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>framework_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Nearest framework site and contact counts inside cutoff, one row per guest. framework_type 0 keeps every atom whose type is not guest_type. framework_type equal to guest_type is rejected. distance is negative when the guest has no framework atom. </p>
+
+</div>
+</div>
+<a id="a5e822438fb0fdb78d1f233928ff71c5a" name="a5e822438fb0fdb78d1f233928ff71c5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e822438fb0fdb78d1f233928ff71c5a">&#9670;&#160;</a></span>poreFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structpore_1_1Frame.html">Frame</a> pore::poreFrame </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>framework_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>direction</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>centre_frac</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Pore axis and centre. axis -1 and direction == nullptr selects the longest edge. Any other negative axis is rejected. centre_frac == nullptr selects the framework centroid in the perpendicular plane. </p>
+
+</div>
+</div>
+<a id="a7b24f77db6c4a365059977e33b856713" name="a7b24f77db6c4a365059977e33b856713"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b24f77db6c4a365059977e33b856713">&#9670;&#160;</a></span>poreProfiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structpore_1_1Profiles.html">Profiles</a> pore::poreProfiles </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>radial_bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>azimuthal_bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axial_bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>r_max</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>direction</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>centre_frac</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>framework_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>origin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>masses</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Radial, azimuthal, and axial profiles. The axis must be a cell edge. r_max of zero covers the perpendicular face. A negative value is rejected. Azimuth zero points along the perpendicular projection of cell edge (axis + 1) mod 3. Masses follow fractionalAxis. </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacepore.html">pore</a></li>
+  </ul>
+</div>
+</body>
+</html>

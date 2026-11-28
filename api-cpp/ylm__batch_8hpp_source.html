@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/ylm_batch.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/ylm__batch_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/ylm_batch.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/ylm__batch_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/ylm_batch.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('ylm__batch_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ylm_batch.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ylm__batch_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SEAMS_YLM_BATCH_H_</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SEAMS_YLM_BATCH_H_</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;<a class="code" href="ylm__cartesian_8hpp.html">ylm_cartesian.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams.html">seams</a> {</div>
+<div class="foldopen" id="foldopen00007" data-start="{" data-end="}">
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="namespaceseams_1_1ylm.html">    7</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams_1_1ylm.html">ylm</a> {</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// ylm_cartesian_avx512.cpp is compiled with -mavx512f -mavx512dq -mfma, so</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// any instruction in it may need all three. True when the build has that</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// file, the CPU reports all three and seams::cpu::allowSimdKernels has not</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// turned it off. ylm12AddBonds, ylmAdd8 and ylmSumRows4 are called only</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">// after this returns true; ylmBatch and ylmLocalQl ask it themselves. The</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// scalar path gives the same values.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="namespaceseams_1_1ylm.html#a9e3c01fa4c665466cb3d807b7707a30e">   15</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceseams_1_1ylm.html#a9e3c01fa4c665466cb3d807b7707a30e">avx512Kernels</a>();</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// Add up to eight l = 12 bonds into one interleaved q_lm row (real, imag).</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// n is 1..8. Shorter tails do not contribute. Same values as the scalar</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// solid harmonic.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// Arithmetic only. noexcept so an OpenMP caller does not treat the call</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// as a path to std::terminate: the body is in another translation unit.</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="namespaceseams_1_1ylm.html#ada4c695f58c63cf35bf13377266e998b">   22</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams_1_1ylm.html#ada4c695f58c63cf35bf13377266e998b">ylm12AddBonds</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *dx, <span class="keyword">const</span> <span class="keywordtype">double</span> *dy, <span class="keyword">const</span> <span class="keywordtype">double</span> *dz, <span class="keywordtype">int</span> n,</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>                   <span class="keywordtype">double</span> *qlmInterleaved) <span class="keyword">noexcept</span>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">// Bond-major output: component m of bond b is at b * (2 * orderL + 1) + m.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">// Host only. l is 3, 4 or 6.</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="namespaceseams_1_1ylm.html#aa0a1875983d8c0603569eb020f43fde2">   27</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams_1_1ylm.html#aa0a1875983d8c0603569eb020f43fde2">ylmBatch</a>(<span class="keywordtype">int</span> orderL, <span class="keyword">const</span> <span class="keywordtype">double</span> *dx, <span class="keyword">const</span> <span class="keywordtype">double</span> *dy, <span class="keyword">const</span> <span class="keywordtype">double</span> *dz,</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>              <span class="keywordtype">int</span> n, <span class="keywordtype">double</span> *re, <span class="keywordtype">double</span> *im);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// Eight bonds, AVX-512. The first four sum into accA and the next four</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">// into accB. Each accumulator is interleaved real, imag, length</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">// 2 * (2 * l + 1). l is 4 or 6. The recurrence is the Cartesian</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">// polynomial, not a trigonometric Y_lm.</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="namespaceseams_1_1ylm.html#a004730d0b4797b67aaddb74c91538585">   34</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams_1_1ylm.html#a004730d0b4797b67aaddb74c91538585">ylmAdd8</a>(<span class="keywordtype">int</span> orderL, <span class="keyword">const</span> <span class="keywordtype">double</span> *dx, <span class="keyword">const</span> <span class="keywordtype">double</span> *dy, <span class="keyword">const</span> <span class="keywordtype">double</span> *dz,</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>             <span class="keywordtype">double</span> *accA, <span class="keywordtype">double</span> *accB);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">// Eight atoms, four bonds each. dx, dy and dz are 4 * 8 values, bond</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">// slot in the outer index, and each group of eight is 64-byte aligned.</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">// The solid harmonics stay in SoA while the four bonds are added, then</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// one blocked transpose writes atom a at rows[a * stride + 2 * m].</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">// l is 4 or 6. nKeep leading components are written (m = -l upward).</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// The positive orders are the conjugate partners of those and are not</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// stored. Returns false if any bond has zero length.</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="namespaceseams_1_1ylm.html#a3c7c6ad669d101400691c9c3fe345db3">   44</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceseams_1_1ylm.html#a3c7c6ad669d101400691c9c3fe345db3">ylmSumRows4</a>(<span class="keywordtype">int</span> orderL, <span class="keyword">const</span> <span class="keywordtype">double</span> *dx, <span class="keyword">const</span> <span class="keywordtype">double</span> *dy,</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>                 <span class="keyword">const</span> <span class="keywordtype">double</span> *dz, <span class="keywordtype">double</span> *rows, <span class="keywordtype">int</span> stride, <span class="keywordtype">int</span> nKeep);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">// Eight atoms, a variable shell. dx/dy/dz are bond-major, nbonds groups</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">// of eight. nUsed[a] is the number of leading live bonds of atom a;</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">// a later slot is zero and is not summed. Writes ql[8] for l = 4 or 6.</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">// The sum is the same Cartesian solid harmonic as ylmSumRows4, added in</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">// bond order, then divided by nUsed.</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="namespaceseams_1_1ylm.html#a923509f7c9fcfd004cdd496090ea7a3d">   52</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceseams_1_1ylm.html#a923509f7c9fcfd004cdd496090ea7a3d">ylmLocalQl</a>(<span class="keywordtype">int</span> orderL, <span class="keyword">const</span> <span class="keywordtype">double</span> *dx, <span class="keyword">const</span> <span class="keywordtype">double</span> *dy, <span class="keyword">const</span> <span class="keywordtype">double</span> *dz,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                <span class="keywordtype">int</span> nbonds, <span class="keyword">const</span> <span class="keywordtype">int</span> *nUsed, <span class="keywordtype">double</span> prefactor, <span class="keywordtype">double</span> *ql);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>} <span class="comment">// namespace ylm</span></div>
+</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>} <span class="comment">// namespace seams</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="anamespaceseams_1_1ylm_html"><div class="ttname"><a href="namespaceseams_1_1ylm.html">seams::ylm</a></div><div class="ttdef"><b>Definition</b> <a href="#l00007">ylm_batch.hpp:7</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1ylm_html_a004730d0b4797b67aaddb74c91538585"><div class="ttname"><a href="namespaceseams_1_1ylm.html#a004730d0b4797b67aaddb74c91538585">seams::ylm::ylmAdd8</a></div><div class="ttdeci">void ylmAdd8(int orderL, const double *dx, const double *dy, const double *dz, double *accA, double *accB)</div></div>
+<div class="ttc" id="anamespaceseams_1_1ylm_html_a3c7c6ad669d101400691c9c3fe345db3"><div class="ttname"><a href="namespaceseams_1_1ylm.html#a3c7c6ad669d101400691c9c3fe345db3">seams::ylm::ylmSumRows4</a></div><div class="ttdeci">bool ylmSumRows4(int orderL, const double *dx, const double *dy, const double *dz, double *rows, int stride, int nKeep)</div></div>
+<div class="ttc" id="anamespaceseams_1_1ylm_html_a923509f7c9fcfd004cdd496090ea7a3d"><div class="ttname"><a href="namespaceseams_1_1ylm.html#a923509f7c9fcfd004cdd496090ea7a3d">seams::ylm::ylmLocalQl</a></div><div class="ttdeci">bool ylmLocalQl(int orderL, const double *dx, const double *dy, const double *dz, int nbonds, const int *nUsed, double prefactor, double *ql)</div></div>
+<div class="ttc" id="anamespaceseams_1_1ylm_html_a9e3c01fa4c665466cb3d807b7707a30e"><div class="ttname"><a href="namespaceseams_1_1ylm.html#a9e3c01fa4c665466cb3d807b7707a30e">seams::ylm::avx512Kernels</a></div><div class="ttdeci">bool avx512Kernels()</div></div>
+<div class="ttc" id="anamespaceseams_1_1ylm_html_aa0a1875983d8c0603569eb020f43fde2"><div class="ttname"><a href="namespaceseams_1_1ylm.html#aa0a1875983d8c0603569eb020f43fde2">seams::ylm::ylmBatch</a></div><div class="ttdeci">void ylmBatch(int orderL, const double *dx, const double *dy, const double *dz, int n, double *re, double *im)</div></div>
+<div class="ttc" id="anamespaceseams_1_1ylm_html_ada4c695f58c63cf35bf13377266e998b"><div class="ttname"><a href="namespaceseams_1_1ylm.html#ada4c695f58c63cf35bf13377266e998b">seams::ylm::ylm12AddBonds</a></div><div class="ttdeci">void ylm12AddBonds(const double *dx, const double *dy, const double *dz, int n, double *qlmInterleaved) noexcept</div></div>
+<div class="ttc" id="anamespaceseams_html"><div class="ttname"><a href="namespaceseams.html">seams</a></div><div class="ttdef"><b>Definition</b> <a href="cpu__features_8hpp_source.html#l00030">cpu_features.hpp:30</a></div></div>
+<div class="ttc" id="aylm__cartesian_8hpp_html"><div class="ttname"><a href="ylm__cartesian_8hpp.html">ylm_cartesian.hpp</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="ylm__batch_8hpp.html">ylm_batch.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

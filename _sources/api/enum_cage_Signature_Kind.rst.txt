@@ -1,0 +1,19 @@
+.. index:: pair: enum; Kind
+.. _doxid-structcage_1_1_signature_1aeaa9e4802e930824b43c274cec2486c5:
+
+enum cage::Signature::Kind
+==========================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage.hpp>
+
+	enum Kind {
+	    :target:`Census<doxid-structcage_1_1_signature_1aeaa9e4802e930824b43c274cec2486c5a9e150a2b8f77e55bbb1c616c3edc8a64>`,
+	    :target:`HexC<doxid-structcage_1_1_signature_1aeaa9e4802e930824b43c274cec2486c5a642a6c140874b1f45791fed27e266477>`,
+	    :target:`DoubleDiaC<doxid-structcage_1_1_signature_1aeaa9e4802e930824b43c274cec2486c5aaad57806cd9cd90f11a5ca800094ff73>`,
+	};
+

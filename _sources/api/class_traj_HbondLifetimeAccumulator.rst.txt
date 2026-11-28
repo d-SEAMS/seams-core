@@ -1,0 +1,38 @@
+.. index:: pair: class; traj::HbondLifetimeAccumulator
+.. _doxid-classtraj_1_1_hbond_lifetime_accumulator:
+
+class traj::HbondLifetimeAccumulator
+====================================
+
+.. toctree::
+	:hidden:
+
+	struct_traj_HbondLifetimeAccumulator_OriginSlot.rst
+
+Streaming multi-origin H-bond lifetime accumulator (C_HB and S_HB).
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	class HbondLifetimeAccumulator {
+	public:
+		// structs
+	
+		struct :ref:`OriginSlot<doxid-structtraj_1_1_hbond_lifetime_accumulator_1_1_origin_slot>`;
+
+		// construction
+	
+		:target:`HbondLifetimeAccumulator<doxid-classtraj_1_1_hbond_lifetime_accumulator_1ad5a5b64acb9dcbf7735a689c8815eb19>`(std::size_t maxLag, std::size_t originStride, double dt, bool directed = true);
+
+		// methods
+	
+		bool :target:`valid<doxid-classtraj_1_1_hbond_lifetime_accumulator_1a41b2368fd4cc7b2921a84ea12145cc07>`() const;
+		std::size_t :target:`framesSeen<doxid-classtraj_1_1_hbond_lifetime_accumulator_1a72693c4cbb031173aaf1631dab6a40ef>`() const;
+		std::size_t :target:`numLags<doxid-classtraj_1_1_hbond_lifetime_accumulator_1a5dffd4cc0dc66fa2cfa07c8c97a7591a>`() const;
+		bool :target:`push<doxid-classtraj_1_1_hbond_lifetime_accumulator_1a213b4ea8d3a3be95a9fb7c15325a5e3e>`(const int* donors, const int* acceptors, std::size_t nEdges);
+		void :target:`curve<doxid-classtraj_1_1_hbond_lifetime_accumulator_1af4f06806ca4a1cc5c9f10b08a17333c9>`(std::vector<double>& lagTime, std::vector<double>& cIntermittent, std::vector<double>& sContinuous, std::vector<std::size_t>& nOrigins) const;
+		bool :target:`fit<doxid-classtraj_1_1_hbond_lifetime_accumulator_1ac262ab21d8f52f4e4f69fc33f54c670f>`(double tStart, double tEnd, :ref:`DecayFitResult<doxid-structtraj_1_1_decay_fit_result>`& intermittentFit, :ref:`DecayFitResult<doxid-structtraj_1_1_decay_fit_result>`& continuousFit) const;
+	};

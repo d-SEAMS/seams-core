@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: tum Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacetum.html">
+<meta property="og:title" content="seams-core: tum Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacetum.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: tum Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacetum.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">tum Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:device" id="r_device"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html">device</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:CageCounts" id="r_CageCounts"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a></td></tr>
+<tr class="memitem:SpecializedCaps" id="r_SpecializedCaps"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtum_1_1SpecializedCaps.html">SpecializedCaps</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial buffer sizes of the hop-bound path.  <a href="structtum_1_1SpecializedCaps.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a9dc1d26c60d5f757e66305b65b42aed0" id="r_a9dc1d26c60d5f757e66305b65b42aed0"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a9dc1d26c60d5f757e66305b65b42aed0">preferOffload</a> ()</td></tr>
+<tr class="memdesc:a9dc1d26c60d5f757e66305b65b42aed0"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when SEAMS_OFFLOAD is set and is not "0".  <br /></td></tr>
+<tr class="memitem:a5b6f992c67dea89064fe1bbe224f7533" id="r_a5b6f992c67dea89064fe1bbe224f7533"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="#a5b6f992c67dea89064fe1bbe224f7533">hostCageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
+<tr class="memdesc:a5b6f992c67dea89064fe1bbe224f7533"><td class="mdescLeft">&#160;</td><td class="mdescRight">Host Franzblau six-rings plus cageAffiliation on an index nList (leading self entry, as neighbourListByIndex produces).  <br /></td></tr>
+<tr class="memitem:a50a0ddf8a6606b733a73b4689bda3efa" id="r_a50a0ddf8a6606b733a73b4689bda3efa"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="#a50a0ddf8a6606b733a73b4689bda3efa">specializedCageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
+<tr class="memdesc:a50a0ddf8a6606b733a73b4689bda3efa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hop-bound six-ring enumerator plus affiliation predicates.  <br /></td></tr>
+<tr class="memitem:aec9875e12aa5941e584bd0150771f9bf" id="r_aec9875e12aa5941e584bd0150771f9bf"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="#aec9875e12aa5941e584bd0150771f9bf">specializedCageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structtum_1_1SpecializedCaps.html">SpecializedCaps</a> &amp;caps)</td></tr>
+<tr class="memdesc:aec9875e12aa5941e584bd0150771f9bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">As above, starting from the given buffer sizes.  <br /></td></tr>
+<tr class="memitem:a5db91702c7f7d13a3878708e01999945" id="r_a5db91702c7f7d13a3878708e01999945"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="#a5db91702c7f7d13a3878708e01999945">cageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
+<tr class="memdesc:a5db91702c7f7d13a3878708e01999945"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#a9dc1d26c60d5f757e66305b65b42aed0" title="True when SEAMS_OFFLOAD is set and is not &quot;0&quot;.">preferOffload()</a> selects specializedCageCounts, otherwise hostCageCounts.  <br /></td></tr>
+</table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a5db91702c7f7d13a3878708e01999945" name="a5db91702c7f7d13a3878708e01999945"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5db91702c7f7d13a3878708e01999945">&#9670;&#160;</a></span>cageCounts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a> tum::cageCounts </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="#a9dc1d26c60d5f757e66305b65b42aed0" title="True when SEAMS_OFFLOAD is set and is not &quot;0&quot;.">preferOffload()</a> selects specializedCageCounts, otherwise hostCageCounts. </p>
+
+</div>
+</div>
+<a id="a5b6f992c67dea89064fe1bbe224f7533" name="a5b6f992c67dea89064fe1bbe224f7533"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b6f992c67dea89064fe1bbe224f7533">&#9670;&#160;</a></span>hostCageCounts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a> tum::hostCageCounts </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Host Franzblau six-rings plus cageAffiliation on an index nList (leading self entry, as neighbourListByIndex produces). </p>
+
+</div>
+</div>
+<a id="a9dc1d26c60d5f757e66305b65b42aed0" name="a9dc1d26c60d5f757e66305b65b42aed0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dc1d26c60d5f757e66305b65b42aed0">&#9670;&#160;</a></span>preferOffload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::preferOffload </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>True when SEAMS_OFFLOAD is set and is not "0". </p>
+
+</div>
+</div>
+<a id="a50a0ddf8a6606b733a73b4689bda3efa" name="a50a0ddf8a6606b733a73b4689bda3efa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50a0ddf8a6606b733a73b4689bda3efa">&#9670;&#160;</a></span>specializedCageCounts() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a> tum::specializedCageCounts </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Hop-bound six-ring enumerator plus affiliation predicates. </p>
+<p>Uses the OpenMP target device when offload is compiled and a device exists. </p>
+
+</div>
+</div>
+<a id="aec9875e12aa5941e584bd0150771f9bf" name="aec9875e12aa5941e584bd0150771f9bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9875e12aa5941e584bd0150771f9bf">&#9670;&#160;</a></span>specializedCageCounts() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a> tum::specializedCageCounts </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structtum_1_1SpecializedCaps.html">SpecializedCaps</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>caps</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>As above, starting from the given buffer sizes. </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacetum.html">tum</a></li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!-- https://docs.dseams.info/user/howto/science-front.md -->
+
+# Basal profiles and the nucleation census {#basal-profiles-and-the-nucleation-census}
+
+`science-front` reads a LAMMPS dump and writes either a basal layer
+profile or a single-trajectory nucleation census. The cutoff is
+3.5 Å. q6-bar is the Lechner-Dellago average on that ball, and the
+ice cut is 0.36. CHILL+ is the published Nguyen and Molinero rule:
+q3 over the four nearest neighbours, a crystal row of four
+neighbours inside the cutoff, and the interfacial neighbour test.
+The OVITO rule is a separate label. The calls are `layersOf`,
+`nucleusOf` and `criticalSize`.
+
+The critical size is an upper bound, not a committor. It is the mean
+size of the largest cluster in the contiguous band around that
+cluster’s minimum. The band stops where the size exceeds the minimum
+by the larger of 5 molecules and 15 percent. A minimum in the first
+two frames means the dump starts after the nucleus is already at
+least that large. The interval is a percentile bootstrap of the mean.
+It is not the probability that the cluster will grow.
+
+## Basal slab {#basal-slab}
+
+The frame in this repository is
+`input/traj/interface_f0.lammpstrj`, 864 type-1 molecules, with
+the long edge along z (52.509 Å). One frame writes the layer
+profile:
+
+```bash
+science-front interface input/traj/interface_f0.lammpstrj --bin 1 --out-dir science-out
+```
+
+`interface-layers.csv` is one row per bin.
+`interface-fronts.csv` carries the 0.5 crossings and the 10-90
+widths. On this frame both fronts are defined. The thickness is
+24.816305 Å. The crossings are 0.297222 Å (width 3.036623 Å) and
+25.113528 Å (width 5.290560 Å). A flat crystal, with no fall
+through 0.5, leaves the front undefined.
+
+On the same frame the published rule and the OVITO rule disagree
+on 46 of 864 molecules: 5 on the neighbour test and 41 on the
+four-neighbour q3 shell.
+
+## The 148-frame mW census {#the-148-frame-mw-census}
+
+The trajectory is figshare
+[10.6084/m9.figshare.11448702.v1](https://doi.org/10.6084/m9.figshare.11448702.v1),
+148 frames of 4096 molecules, md5 `c28fc209a2854d2ba49e8f9b55accbe8`.
+`input/traj/nucleation_three.lammpstrj` is its first three frames.
+Place the full dump at
+`data/science-frames/nucleation.lammpstrj` and run:
+
+```bash
+science-front nucleation data/science-frames/nucleation.lammpstrj --out-dir science-out
+```
+
+On that trajectory the largest extended cluster (cubic, hexagonal and
+interfacial) has its minimum in the first two frames. The critical
+size is 153.333 molecules, bootstrap 146 to 164, and `upper_bound`
+is 1. The core cluster, cubic and hexagonal only, is 61.5 molecules
+and is also an upper bound. The q6-bar cluster, cut at 0.36, has its
+minimum later. Its size is 117 molecules and `upper_bound` is 0.
+Each of these is the mean of the band around that series’ minimum.
+
+The first three frames, in `input/traj/nucleation_three.lammpstrj`,
+are the start of that series. The extended sizes are 177, 146
+and 150. The core sizes are 59, 64 and 70.
+
+On frame 2 the published rule and the OVITO rule disagree on 432 of
+4096 molecules: 220 on the neighbour test, 207 on the q3 shell, and
+5 mixed.
+
+The functions are on [Science front](../../stable/science.md).

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/neighbours.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/neighbours_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/neighbours.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/neighbours_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/neighbours.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('neighbours_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">neighbours.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="neighbours_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) 2018--present d-SEAMS core team</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef SEAMS_NEIGHBOURS_H_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define SEAMS_NEIGHBOURS_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;tuple&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;<a class="code" href="generic_8hpp.html">generic.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;linkcell.hpp&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;minimage.h&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="foldopen" id="foldopen00066" data-start="{" data-end="}">
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="namespacenneigh.html">   66</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacenneigh.html">nneigh</a> {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span></div>
+<div class="foldopen" id="foldopen00073" data-start="{" data-end="}">
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a342ae6a7675f0a32caf8087f43d679d8">   73</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#a342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>                          <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow, <span class="keywordtype">double</span> H[3][3],</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                          <span class="keywordtype">double</span> origin[3]) {</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box.size() &gt; 0 ? box[0] : 0.0;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box.size() &gt; 1 ? box[1] : 0.0;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box.size() &gt; 2 ? box[2] : 0.0;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box.size() &gt;= 6 ? box[3] : 0.0;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box.size() &gt;= 6 ? box[4] : 0.0;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box.size() &gt;= 6 ? box[5] : 0.0;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  H[0][0] = xspan - xmax + xmin;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  H[0][1] = 0.0;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  H[0][2] = 0.0;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  H[1][0] = xy;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  H[1][1] = yspan - ymax + ymin;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>  H[1][2] = 0.0;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  H[2][0] = xz;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  H[2][1] = yz;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  H[2][2] = zspan;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  origin[0] = xlo_b - xmin;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  origin[1] = ylo_b - ymin;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  origin[2] = zlo_b;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>}</div>
+</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span></div>
+<div class="foldopen" id="foldopen00104" data-start="{" data-end="}">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a4b7e08068d9fba7d981793100b62de6c">  104</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#a4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                            <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow,</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                            <span class="keywordtype">double</span> lengths[3]) {</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <a class="code hl_function" href="namespacenneigh.html#a342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  lengths[0] = H[0][0];</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  lengths[1] = H[1][1];</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  lengths[2] = H[2][2];</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>}</div>
+</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span></div>
+<div class="foldopen" id="foldopen00116" data-start="{" data-end="}">
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a87d0da315b8e67fc843f91099dceb349">  116</a></span><span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code hl_function" href="namespacenneigh.html#a87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                        <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow) {</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  <span class="keywordtype">double</span> lengths[3];</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  <a class="code hl_function" href="namespacenneigh.html#a4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(box, boxLow, lengths);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  <span class="keywordtype">int</span> axial = 0;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>  <span class="keywordflow">if</span> (lengths[1] &gt; lengths[axial]) {</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    axial = 1;</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  }</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <span class="keywordflow">if</span> (lengths[2] &gt; lengths[axial]) {</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    axial = 2;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  }</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>  <span class="keywordflow">return</span> axial;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>}</div>
+</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="foldopen" id="foldopen00130" data-start="{" data-end="}">
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="namespacenneigh.html#af4937ef59938a2569258cdf136fd33ec">  130</a></span><span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code hl_function" href="namespacenneigh.html#a87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud) {</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacenneigh.html#a87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(yCloud.box, yCloud.boxLow);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>}</div>
+</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span></div>
+<div class="foldopen" id="foldopen00136" data-start="{" data-end="}">
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a7819f2f15dde85f94bf6a4f6632780b8">  136</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#a7819f2f15dde85f94bf6a4f6632780b8">dumpToFrac</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> H[3][3], <span class="keyword">const</span> <span class="keywordtype">double</span> origin[3], <span class="keywordtype">double</span> x,</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>                       <span class="keywordtype">double</span> y, <span class="keywordtype">double</span> z, <span class="keywordtype">double</span> s[3]) {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = H[0][0];</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = H[1][1];</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = H[2][2];</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = H[1][0];</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = H[2][0];</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = H[2][1];</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>  s[2] = (z - origin[2]) / lz;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  s[1] = (y - origin[1] - yz * s[2]) / ly;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>  s[0] = (x - origin[0] - xy * s[1] - xz * s[2]) / lx;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>}</div>
+</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span></div>
+<div class="foldopen" id="foldopen00150" data-start="{" data-end="}">
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a60335297e92e0bd73fba7bfdaca28a26">  150</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#a60335297e92e0bd73fba7bfdaca28a26">dumpFromFrac</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> H[3][3], <span class="keyword">const</span> <span class="keywordtype">double</span> origin[3],</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>                         <span class="keyword">const</span> <span class="keywordtype">double</span> s[3], <span class="keywordtype">double</span> r[3]) {</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  r[0] = origin[0] + H[0][0] * s[0] + H[1][0] * s[1] + H[2][0] * s[2];</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>  r[1] = origin[1] + H[1][1] * s[1] + H[2][1] * s[2];</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  r[2] = origin[2] + H[2][2] * s[2];</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>}</div>
+</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span></div>
+<div class="foldopen" id="foldopen00159" data-start="{" data-end="}">
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="namespacenneigh.html#ad17e972366865905372aa796e946a351">  159</a></span><span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code hl_function" href="namespacenneigh.html#ad17e972366865905372aa796e946a351">dumpVolume</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>                         <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow) {</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>  <a class="code hl_function" href="namespacenneigh.html#a342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> vol = H[0][0] * H[1][1] * H[2][2];</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>  <span class="keywordflow">return</span> vol &lt; 0.0 ? -vol : vol;</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>}</div>
+</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
+<div class="foldopen" id="foldopen00168" data-start="{" data-end="}">
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a786c8abbd20d2751403eb4f2c603cd95">  168</a></span><span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code hl_function" href="namespacenneigh.html#ad17e972366865905372aa796e946a351">dumpVolume</a>(</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud) {</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacenneigh.html#ad17e972366865905372aa796e946a351">dumpVolume</a>(yCloud.box, yCloud.boxLow);</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>}</div>
+</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span></div>
+<div class="foldopen" id="foldopen00178" data-start="{" data-end="}">
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno"><a class="line" href="namespacenneigh.html#ad960860059d8e9d9fdee48c679e1c446">  178</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="namespacenneigh.html#ad960860059d8e9d9fdee48c679e1c446">setBoxFromLammpsEdges</a>(std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                                 std::vector&lt;double&gt; &amp;boxLow, <span class="keywordtype">double</span> xlo,</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                                 <span class="keywordtype">double</span> ylo, <span class="keywordtype">double</span> zlo, <span class="keywordtype">double</span> lx, <span class="keywordtype">double</span> ly,</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                                 <span class="keywordtype">double</span> lz, <span class="keywordtype">double</span> xy, <span class="keywordtype">double</span> xz, <span class="keywordtype">double</span> yz) {</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>  <span class="keywordflow">if</span> (!(lx &gt; 0.0 &amp;&amp; ly &gt; 0.0 &amp;&amp; lz &gt; 0.0)) {</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    box.clear();</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    boxLow.clear();</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>  }</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> tilt =</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>      std::abs(xy) &gt; 0.0 || std::abs(xz) &gt; 0.0 || std::abs(yz) &gt; 0.0;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>  <span class="keywordflow">if</span> (!tilt) {</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    box = {lx, ly, lz};</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    boxLow = {xlo, ylo, zlo};</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>  }</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>  box = {lx + xmax - xmin, ly + ymax - ymin, lz, xy, xz, yz};</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>  boxLow = {xlo + xmin, ylo + ymin, zlo};</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>}</div>
+</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span></div>
+<div class="foldopen" id="foldopen00208" data-start="{" data-end="}">
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a77b70b894f0e7a72a980001e076f2a73">  208</a></span><span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="namespacenneigh.html#a77b70b894f0e7a72a980001e076f2a73">setBoxFromLengthsAngles</a>(std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>                                   std::vector&lt;double&gt; &amp;boxLow, <span class="keywordtype">double</span> a,</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>                                   <span class="keywordtype">double</span> b, <span class="keywordtype">double</span> c, <span class="keywordtype">double</span> alphaDeg,</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>                                   <span class="keywordtype">double</span> betaDeg, <span class="keywordtype">double</span> gammaDeg) {</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>  <span class="keyword">constexpr</span> <span class="keywordtype">double</span> kDeg = 3.14159265358979323846 / 180.0;</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> alpha = alphaDeg * kDeg;</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> beta = betaDeg * kDeg;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> gamma = gammaDeg * kDeg;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cosA = std::cos(alpha);</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cosB = std::cos(beta);</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cosG = std::cos(gamma);</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sinG = std::sin(gamma);</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>  <span class="keywordflow">if</span> (!(a &gt; 0.0 &amp;&amp; b &gt; 0.0 &amp;&amp; c &gt; 0.0) || std::abs(sinG) &lt; 1e-18) {</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    box.clear();</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    boxLow.clear();</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>  }</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>  <span class="keywordtype">double</span> xy = b * cosG;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = b * sinG;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>  <span class="keywordtype">double</span> xz = c * cosB;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>  <span class="keywordtype">double</span> yz = c * (cosA - cosB * cosG) / sinG;</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>  <span class="comment">// cos(90 deg) is a few ulps, not zero. A right angle must stay</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>  <span class="comment">// orthorhombic, or the pair loop takes the triclinic path.</span></div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> tol = 1e-10 * std::max(a, std::max(b, c));</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>  <span class="keywordflow">if</span> (std::abs(xy) &lt; tol) {</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    xy = 0.0;</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>  }</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>  <span class="keywordflow">if</span> (std::abs(xz) &lt; tol) {</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    xz = 0.0;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>  }</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>  <span class="keywordflow">if</span> (std::abs(yz) &lt; tol) {</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    yz = 0.0;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>  }</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz2 = c * c - xz * xz - yz * yz;</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>  <span class="keywordflow">if</span> (!(ly &gt; 0.0) || !(lz2 &gt; 0.0)) {</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    box.clear();</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    boxLow.clear();</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>  }</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="namespacenneigh.html#ad960860059d8e9d9fdee48c679e1c446">setBoxFromLammpsEdges</a>(box, boxLow, 0.0, 0.0, 0.0, a, ly, std::sqrt(lz2),</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>                              xy, xz, yz);</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>}</div>
+</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span></div>
+<div class="foldopen" id="foldopen00252" data-start="{" data-end="}">
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno"><a class="line" href="namespacenneigh.html#afabd1f7a2ce1ce7091ebde087cc80d6d">  252</a></span><span class="keyword">inline</span> lc_cell <a class="code hl_function" href="namespacenneigh.html#afabd1f7a2ce1ce7091ebde087cc80d6d">lammpsBoxToLcCell</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>                                 <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow) {</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="preprocessor">#ifdef SEAMS_HAS_MINIMAGE</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box.size() &gt; 0 ? box[0] : 0.0;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box.size() &gt; 1 ? box[1] : 0.0;</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box.size() &gt; 2 ? box[2] : 0.0;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box.size() &gt;= 6 ? box[3] : 0.0;</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box.size() &gt;= 6 ? box[4] : 0.0;</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box.size() &gt;= 6 ? box[5] : 0.0;</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>  mi_cell raw{};</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>  <span class="keywordflow">if</span> (mi_cell_from_lammps_bounds(xspan, yspan, zspan, xy, xz, yz, xlo_b, ylo_b,</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>                                 zlo_b, &amp;raw) == 0) {</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    lc_cell c = lc_cell_ortho(raw.ax, raw.by, raw.cz);</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    c.ax = raw.ax;</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    c.ay = raw.ay;</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    c.az = raw.az;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    c.bx = raw.bx;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    c.by = raw.by;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    c.bz = raw.bz;</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    c.cx = raw.cx;</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    c.cy = raw.cy;</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    c.cz = raw.cz;</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    c.ox = raw.ox;</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    c.oy = raw.oy;</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    c.oz = raw.oz;</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    <span class="keywordflow">return</span> c;</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>  }</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>  <span class="keywordtype">double</span> H[3][3], o[3];</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>  <a class="code hl_function" href="namespacenneigh.html#a342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, o);</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>  lc_cell c = lc_cell_ortho(H[0][0], H[1][1], H[2][2]);</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>  c.ax = H[0][0];</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>  c.ay = H[0][1];</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>  c.az = H[0][2];</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>  c.bx = H[1][0];</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>  c.by = H[1][1];</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>  c.bz = H[1][2];</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>  c.cx = H[2][0];</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>  c.cy = H[2][1];</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>  c.cz = H[2][2];</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>  c.ox = o[0];</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>  c.oy = o[1];</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>  c.oz = o[2];</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>  <span class="keywordflow">return</span> c;</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>}</div>
+</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
+<div class="foldopen" id="foldopen00301" data-start="{" data-end="}">
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno"><a class="line" href="namespacenneigh.html#ac510fab36f179d7621063cb90dc6ea4c">  301</a></span><span class="keyword">inline</span> linkcell::Cell <a class="code hl_function" href="namespacenneigh.html#ac510fab36f179d7621063cb90dc6ea4c">lammpsBoxToLinkcell</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;box,</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>                                          <span class="keyword">const</span> std::vector&lt;double&gt; &amp;boxLow) {</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>  <span class="keywordflow">return</span> linkcell::Cell(<a class="code hl_function" href="namespacenneigh.html#afabd1f7a2ce1ce7091ebde087cc80d6d">lammpsBoxToLcCell</a>(box, boxLow));</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>}</div>
+</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span></div>
+<div class="foldopen" id="foldopen00310" data-start="{" data-end="}">
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a8b457915e32c2c1c9302a25d0536de7b">  310</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#a8b457915e32c2c1c9302a25d0536de7b">residentFrameCell</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *box, <span class="keyword">const</span> <span class="keywordtype">double</span> *boxLow,</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>                              <span class="keywordtype">int</span> nBox, linkcell::Cell &amp;cell,</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>                              <span class="keyword">const</span> <span class="keywordtype">double</span> *&amp;frameLens) {</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>  cell = linkcell::Cell::ortho(box[0], box[1], box[2]);</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>  frameLens = box;</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>  <span class="keywordflow">if</span> (boxLow != <span class="keyword">nullptr</span> || nBox &gt;= 6) {</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    std::vector&lt;double&gt; dump(<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(std::max(nBox, 3)));</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nBox &amp;&amp; i &lt; static_cast&lt;int&gt;(dump.size()); ++i) {</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>      dump[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)] = box[i];</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>    }</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>    std::vector&lt;double&gt; lo;</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>    <span class="keywordflow">if</span> (boxLow != <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>      lo = {boxLow[0], boxLow[1], boxLow[2]};</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>    }</div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>    cell = <a class="code hl_function" href="namespacenneigh.html#ac510fab36f179d7621063cb90dc6ea4c">lammpsBoxToLinkcell</a>(dump, lo);</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>    frameLens = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>  }</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>}</div>
+</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span></div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a12194f0da6153f5e9f1507c20b7464fc">  340</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#a12194f0da6153f5e9f1507c20b7464fc">linkcellCutoffCsr</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>                       <span class="keywordtype">double</span> rcutoff, <span class="keywordtype">bool</span> half, <span class="keyword">const</span> std::array&lt;bool, 3&gt; &amp;periodic,</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>                       <span class="keyword">const</span> std::vector&lt;int&gt; &amp;mask, <span class="keywordtype">int</span> threads, linkcell::PairCsr &amp;out);</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span></div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span></div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a9566a384474993ea7356e7abc414e40e">  349</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a9566a384474993ea7356e7abc414e40e">neighList</a>(</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>    <span class="keywordtype">int</span> typeI, <span class="keywordtype">int</span> typeJ);</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span></div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno"><a class="line" href="namespacenneigh.html#add6ed18f0c7e2e5fbd10d7cdbf6af429">  355</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#add6ed18f0c7e2e5fbd10d7cdbf6af429">neighListPair</a>(</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>    <span class="keywordtype">int</span> typeI, <span class="keywordtype">int</span> typeJ);</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span></div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a4f12746b56fe9e1c8cfb7d2af32b64ba">  366</a></span><span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;<a class="code hl_function" href="namespacenneigh.html#a4f12746b56fe9e1c8cfb7d2af32b64ba">reusedShellList</a>(</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>    <span class="keyword">const</span> std::vector&lt;char&gt; *source);</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span></div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a2e8dc456dfee46923a3701c3c4d88038">  381</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacenneigh.html#a2e8dc456dfee46923a3701c3c4d88038">blockWindowRows</a>(</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">double</span> rcutoff,</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    <span class="keyword">const</span> std::vector&lt;char&gt; *source, std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rows,</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>    <span class="keywordtype">bool</span> byId = <span class="keyword">true</span>, <span class="keywordtype">bool</span> everyRow = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span></div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a8f5dd92092f5be635273a1ea18b57cb7">  394</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacenneigh.html#a8f5dd92092f5be635273a1ea18b57cb7">cellListRowsThreaded</a>(</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>    <span class="keyword">const</span> std::vector&lt;int&gt; &amp;subset, <span class="keywordtype">double</span> rcutoff,</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rows);</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span></div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a668b0917bd0df1568398d83989e26e4c">  401</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#a668b0917bd0df1568398d83989e26e4c">preferSerialCutoff</a>(<span class="keywordtype">bool</span> on);</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span></div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno"><a class="line" href="namespacenneigh.html#adddaf455a07261396213ebf2a9dc097d">  414</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacenneigh.html#adddaf455a07261396213ebf2a9dc097d">orthoFullCsr</a>(</div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>    <span class="keyword">const</span> std::vector&lt;int&gt; *subset, <span class="keywordtype">double</span> rcutoff, std::vector&lt;int&gt; &amp;offsets,</div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>    std::vector&lt;int&gt; &amp;cols, <span class="keywordtype">bool</span> half = <span class="keyword">false</span>,</div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>    std::vector&lt;std::vector&lt;int&gt;&gt; *directRows = <span class="keyword">nullptr</span>, <span class="keyword">const</span> <span class="keywordtype">int</span> *indexToID = <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>    <span class="keywordtype">bool</span> *wroteRows = <span class="keyword">nullptr</span>, <span class="keywordtype">bool</span> branchy = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span></div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno"><a class="line" href="namespacenneigh.html#ac2ed84e835e8b6949281c88e4d11f43b">  423</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacenneigh.html#ac2ed84e835e8b6949281c88e4d11f43b">refillNeighListO</a>(<span class="keywordtype">double</span> rcutoff,</div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>                      <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>                      <span class="keywordtype">int</span> typeI, std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rows);</div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span></div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno"><a class="line" href="namespacenneigh.html#aa5180c143af9fe9fa47f393e7518bf9b">  428</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacenneigh.html#aa5180c143af9fe9fa47f393e7518bf9b">refillIndexRows</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>                     <span class="keywordtype">double</span> cutoff, std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rows);</div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span></div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a151b16c1d342dbde343e98c91be8f6c7">  434</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacenneigh.html#a151b16c1d342dbde343e98c91be8f6c7">directedKNearestCsr</a>(</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>    <span class="keywordtype">double</span> candidateCutoff, std::vector&lt;int&gt; &amp;offsets, std::vector&lt;int&gt; &amp;cols);</div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span></div>
+<div class="foldopen" id="foldopen00441" data-start="{" data-end="};">
+<div class="line"><a id="l00441" name="l00441"></a><span class="lineno"><a class="line" href="classnneigh_1_1CutoffSkin.html">  441</a></span><span class="keyword">class </span><a class="code hl_function" href="classnneigh_1_1CutoffSkin.html#aeea98d90f7f3fcf17c82d23530a7fc8e">CutoffSkin</a> {</div>
+<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00443" name="l00443"></a><span class="lineno"><a class="line" href="classnneigh_1_1CutoffSkin.html#aeea98d90f7f3fcf17c82d23530a7fc8e">  443</a></span>  <a class="code hl_function" href="classnneigh_1_1CutoffSkin.html#aeea98d90f7f3fcf17c82d23530a7fc8e">CutoffSkin</a>(<span class="keywordtype">double</span> cutoff, <span class="keywordtype">double</span> skin);</div>
+<div class="line"><a id="l00444" name="l00444"></a><span class="lineno"><a class="line" href="classnneigh_1_1CutoffSkin.html#afb2d6ad5afad66636670061b01915fee">  444</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="classnneigh_1_1CutoffSkin.html#afb2d6ad5afad66636670061b01915fee">update</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span>              <span class="keyword">const</span> std::vector&lt;int&gt; *subset = <span class="keyword">nullptr</span>, <span class="keywordtype">bool</span> half = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00446" name="l00446"></a><span class="lineno"><a class="line" href="classnneigh_1_1CutoffSkin.html#a7b1473327d3872ef9cb1850faf21a16b">  446</a></span>  [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classnneigh_1_1CutoffSkin.html#a7b1473327d3872ef9cb1850faf21a16b">lastReused</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> reused_; }</div>
+<div class="line"><a id="l00447" name="l00447"></a><span class="lineno"><a class="line" href="classnneigh_1_1CutoffSkin.html#a646bd46bc143ad26f92fd6bddf638cd4">  447</a></span>  [[nodiscard]] <span class="keyword">const</span> std::vector&lt;int&gt; &amp;<a class="code hl_function" href="classnneigh_1_1CutoffSkin.html#a646bd46bc143ad26f92fd6bddf638cd4">offsets</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> offsets_; }</div>
+<div class="line"><a id="l00448" name="l00448"></a><span class="lineno"><a class="line" href="classnneigh_1_1CutoffSkin.html#a3944f1934058db7a427622d531e616e8">  448</a></span>  [[nodiscard]] <span class="keyword">const</span> std::vector&lt;int&gt; &amp;<a class="code hl_function" href="classnneigh_1_1CutoffSkin.html#a3944f1934058db7a427622d531e616e8">cols</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> cols_; }</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span> </div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span>  <span class="keywordtype">double</span> cutoff_;</div>
+<div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span>  <span class="keywordtype">double</span> skin_;</div>
+<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>  <span class="keywordtype">bool</span> half_{<span class="keyword">false</span>};</div>
+<div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>  <span class="keywordtype">bool</span> reused_{<span class="keyword">false</span>};</div>
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>  <span class="keywordtype">bool</span> have_{<span class="keyword">false</span>};</div>
+<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>  <span class="keywordtype">int</span> nop_{0};</div>
+<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>  std::vector&lt;double&gt; x0_;</div>
+<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>  std::vector&lt;double&gt; y0_;</div>
+<div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>  std::vector&lt;double&gt; z0_;</div>
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>  std::vector&lt;double&gt; box0_;</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>  std::vector&lt;double&gt; boxLow0_;</div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>  std::vector&lt;int&gt; wideOff_;</div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>  std::vector&lt;int&gt; wideCols_;</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>  std::vector&lt;int&gt; offsets_;</div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>  std::vector&lt;int&gt; cols_;</div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>  <span class="keyword">const</span> std::vector&lt;int&gt; *subset_{<span class="keyword">nullptr</span>};</div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span> </div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>  <span class="keywordtype">bool</span> moved(<span class="keyword">const</span> molSys::PointCloud&lt;molSys::Point&lt;double&gt;, <span class="keywordtype">double</span>&gt; &amp;yCloud) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>  <span class="keywordtype">void</span> filter(<span class="keyword">const</span> molSys::PointCloud&lt;molSys::Point&lt;double&gt;, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>};</div>
+</div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span></div>
+<div class="line"><a id="l00473" name="l00473"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a054007bfd5ef4ba81d50851c1eca6d61">  473</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a054007bfd5ef4ba81d50851c1eca6d61">idRowsFromCsr</a>(</div>
+<div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span>    <span class="keyword">const</span> std::vector&lt;int&gt; &amp;indexToID, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;offsets,</div>
+<div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>    <span class="keyword">const</span> std::vector&lt;int&gt; &amp;cols);</div>
+<div class="line"><a id="l00477" name="l00477"></a><span class="lineno">  477</span></div>
+<div class="line"><a id="l00481" name="l00481"></a><span class="lineno"><a class="line" href="namespacenneigh.html#afaf0f0ff09cef581076f99a68018b023">  481</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#afaf0f0ff09cef581076f99a68018b023">neighListO</a>(</div>
+<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>    <span class="keywordtype">int</span> typeI);</div>
+<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span></div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a809f9e0a2a56c0162cdb70ebb64804a7">  488</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a809f9e0a2a56c0162cdb70ebb64804a7">neighListLinkcell</a>(</div>
+<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>    <span class="keywordtype">int</span> typeI);</div>
+<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span></div>
+<div class="line"><a id="l00495" name="l00495"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a651839704a066d725b22212c13c74327">  495</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a651839704a066d725b22212c13c74327">halfNeighList</a>(</div>
+<div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span>    <span class="keywordtype">double</span> rcutoff, <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span>    <span class="keywordtype">int</span> typeI = 1);</div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span></div>
+<div class="line"><a id="l00501" name="l00501"></a><span class="lineno">  501</span></div>
+<div class="line"><a id="l00504" name="l00504"></a><span class="lineno"><a class="line" href="namespacenneigh.html#acf46d8c4b42f15e634ff0076ac83c012">  504</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#acf46d8c4b42f15e634ff0076ac83c012">neighbourListByIndex</a>(</div>
+<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList);</div>
+<div class="line"><a id="l00507" name="l00507"></a><span class="lineno">  507</span></div>
+<div class="line"><a id="l00510" name="l00510"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a97ad6e2c7bfaa504c7e021a527effe73">  510</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a97ad6e2c7bfaa504c7e021a527effe73">getNewNeighbourListByIndex</a>(</div>
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">double</span> cutoff);</div>
+<div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span></div>
+<div class="line"><a id="l00530" name="l00530"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a18cda509d1fc5e680abf22e36348fc61">  530</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a18cda509d1fc5e680abf22e36348fc61">kNearestNeighbourList</a>(</div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>    <span class="keywordtype">double</span> candidateCutoff, <span class="keywordtype">int</span> typeI, <span class="keywordtype">bool</span> mutual = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span></div>
+<div class="line"><a id="l00537" name="l00537"></a><span class="lineno"><a class="line" href="namespacenneigh.html#ac3d73f19a9a16def5e4b6571c9a2b1d5">  537</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#ac3d73f19a9a16def5e4b6571c9a2b1d5">kNearestCsr</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00538" name="l00538"></a><span class="lineno">  538</span>                 <span class="keywordtype">double</span> candidateCutoff, <span class="keywordtype">int</span> typeI, <span class="keywordtype">bool</span> mutual, std::vector&lt;int&gt; &amp;offsets,</div>
+<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>                 std::vector&lt;int&gt; &amp;cols, <span class="keywordtype">bool</span> park = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span></div>
+<div class="line"><a id="l00544" name="l00544"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a50b9380030492980b6f8540c213d8098">  544</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacenneigh.html#a50b9380030492980b6f8540c213d8098">kNearestPacked</a>(</div>
+<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>    <span class="keywordtype">double</span> candidateCutoff, <span class="keywordtype">int</span> typeI, std::vector&lt;double&gt; &amp;xyz,</div>
+<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    std::vector&lt;int&gt; &amp;nom);</div>
+<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span></div>
+<div class="line"><a id="l00551" name="l00551"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a5aeb17070b1a13a028fdcc5d3e7470b6">  551</a></span>std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a18cda509d1fc5e680abf22e36348fc61">kNearestNeighbourList</a>(</div>
+<div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>    <span class="keywordtype">double</span> candidateCutoff, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;types, <span class="keywordtype">bool</span> mutual = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span></div>
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>std::pair&lt;std::vector&lt;std::vector&lt;int&gt;&gt;, std::vector&lt;std::vector&lt;int&gt;&gt;&gt;</div>
+<div class="line"><a id="l00559" name="l00559"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a553a0b3d4dddd477c0dcb06d93361eae">  559</a></span><a class="code hl_function" href="namespacenneigh.html#a553a0b3d4dddd477c0dcb06d93361eae">kNearestNeighbourPair</a>(</div>
+<div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>    <span class="keywordtype">double</span> candidateCutoff, <span class="keywordtype">int</span> typeI);</div>
+<div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span> </div>
+<div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>std::pair&lt;std::vector&lt;std::vector&lt;int&gt;&gt;, std::vector&lt;std::vector&lt;int&gt;&gt;&gt;</div>
+<div class="line"><a id="l00564" name="l00564"></a><span class="lineno"><a class="line" href="namespacenneigh.html#ae83921eb2fdda24a0dcda3638c8a2ebc">  564</a></span><a class="code hl_function" href="namespacenneigh.html#a553a0b3d4dddd477c0dcb06d93361eae">kNearestNeighbourPair</a>(</div>
+<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>    <span class="keywordtype">double</span> candidateCutoff, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;types);</div>
+<div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span></div>
+<div class="line"><a id="l00576" name="l00576"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a139165088e10b53a5efa6034434c9423">  576</a></span>std::pair&lt;double, double&gt; <a class="code hl_function" href="namespacenneigh.html#a139165088e10b53a5efa6034434c9423">shellSeparation</a>(</div>
+<div class="line"><a id="l00577" name="l00577"></a><span class="lineno">  577</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> k,</div>
+<div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span>    <span class="keywordtype">int</span> typeI);</div>
+<div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span></div>
+<div class="line"><a id="l00586" name="l00586"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a57e7804488c926a85c21131b895b6491">  586</a></span>std::vector&lt;std::tuple&lt;int, int, double&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a57e7804488c926a85c21131b895b6491">nearestUnlike</a>(</div>
+<div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> typeI,</div>
+<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>    <span class="keywordtype">int</span> typeJ);</div>
+<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span></div>
+<div class="line"><a id="l00593" name="l00593"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a68ba6195c59b7a1b7c8bb17ec31314a3">  593</a></span>std::vector&lt;std::pair&lt;int, int&gt;&gt; <a class="code hl_function" href="namespacenneigh.html#a68ba6195c59b7a1b7c8bb17ec31314a3">mutualNearestUnlike</a>(</div>
+<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> typeI,</div>
+<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>    <span class="keywordtype">int</span> typeJ);</div>
+<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span></div>
+<div class="line"><a id="l00598" name="l00598"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a752d3e4cbd98fa454a6dc36a4307b75a">  598</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacenneigh.html#a752d3e4cbd98fa454a6dc36a4307b75a">clearNeighbourList</a>(std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList);</div>
+<div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span></div>
+<div class="line"><a id="l00606" name="l00606"></a><span class="lineno"><a class="line" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">  606</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a> { <a class="code hl_enumvalue" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
+<div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span> </div>
+<div class="line"><a id="l00608" name="l00608"></a><span class="lineno"><a class="line" href="namespacenneigh.html#ad285ff1c2c0bd1ca8495f3972faebb8c">  608</a></span><a class="code hl_enumeration" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a> <a class="code hl_function" href="namespacenneigh.html#ad285ff1c2c0bd1ca8495f3972faebb8c">bondGraphFromName</a>(<span class="keyword">const</span> std::string &amp;name);</div>
+<div class="line"><a id="l00609" name="l00609"></a><span class="lineno"><a class="line" href="namespacenneigh.html#a1c78a7396b0353d674abb0290e85d0ec">  609</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="namespacenneigh.html#a1c78a7396b0353d674abb0290e85d0ec">bondGraphName</a>(<a class="code hl_enumeration" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a> graph);</div>
+<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span></div>
+<div class="foldopen" id="foldopen00619" data-start="{" data-end="};">
+<div class="line"><a id="l00619" name="l00619"></a><span class="lineno"><a class="line" href="classnneigh_1_1SkinNeighborList.html">  619</a></span><span class="keyword">class </span><a class="code hl_function" href="classnneigh_1_1SkinNeighborList.html#a80f555acadad22b5edcc4af8285006ed">SkinNeighborList</a> {</div>
+<div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00623" name="l00623"></a><span class="lineno"><a class="line" href="classnneigh_1_1SkinNeighborList.html#a80f555acadad22b5edcc4af8285006ed">  623</a></span>  <a class="code hl_function" href="classnneigh_1_1SkinNeighborList.html#a80f555acadad22b5edcc4af8285006ed">SkinNeighborList</a>(<span class="keywordtype">double</span> cutoff, <span class="keywordtype">double</span> skin, <span class="keywordtype">int</span> typeI,</div>
+<div class="line"><a id="l00624" name="l00624"></a><span class="lineno">  624</span>                   <a class="code hl_enumeration" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a> <a class="code hl_function" href="classnneigh_1_1SkinNeighborList.html#a97e81664c1e98dd63263c6724f5c8514">graph</a> = <a class="code hl_enumvalue" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a>, <span class="keywordtype">int</span> k = 4);</div>
+<div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span> </div>
+<div class="line"><a id="l00626" name="l00626"></a><span class="lineno"><a class="line" href="classnneigh_1_1SkinNeighborList.html#a97e81664c1e98dd63263c6724f5c8514">  626</a></span>  [[nodiscard]] <a class="code hl_enumeration" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a> <a class="code hl_function" href="classnneigh_1_1SkinNeighborList.html#a97e81664c1e98dd63263c6724f5c8514">graph</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> graph_; }</div>
+<div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span></div>
+<div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span>  <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;</div>
+<div class="line"><a id="l00631" name="l00631"></a><span class="lineno"><a class="line" href="classnneigh_1_1SkinNeighborList.html#a81af9074f6b9311b1cba1321b64f21d7">  631</a></span>  <a class="code hl_function" href="classnneigh_1_1SkinNeighborList.html#a81af9074f6b9311b1cba1321b64f21d7">update</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00632" name="l00632"></a><span class="lineno">  632</span> </div>
+<div class="line"><a id="l00633" name="l00633"></a><span class="lineno"><a class="line" href="classnneigh_1_1SkinNeighborList.html#aaca057f10435740a240ca275e619e16e">  633</a></span>  [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classnneigh_1_1SkinNeighborList.html#aaca057f10435740a240ca275e619e16e">lastRebuilt</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+<div class="line"><a id="l00635" name="l00635"></a><span class="lineno"><a class="line" href="classnneigh_1_1SkinNeighborList.html#aadc8965e902b0b2a599c75ac338d15af">  635</a></span>  [[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="classnneigh_1_1SkinNeighborList.html#aadc8965e902b0b2a599c75ac338d15af">lastChangedAtoms</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+<div class="foldopen" id="foldopen00636" data-start="{" data-end="}">
+<div class="line"><a id="l00636" name="l00636"></a><span class="lineno"><a class="line" href="classnneigh_1_1SkinNeighborList.html#ab621667477b3b610de9af803a925f574">  636</a></span>  [[nodiscard]] <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;<a class="code hl_function" href="classnneigh_1_1SkinNeighborList.html#ab621667477b3b610de9af803a925f574">bonds</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00637" name="l00637"></a><span class="lineno">  637</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><a id="l00638" name="l00638"></a><span class="lineno">  638</span>  }</div>
+</div>
+<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span> </div>
+<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>  <span class="keywordtype">double</span> cutoff_;</div>
+<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>  <span class="keywordtype">double</span> skin_;</div>
+<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>  <span class="keywordtype">double</span> cutoffSq_;</div>
+<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>  <span class="keywordtype">double</span> triggerSq_;</div>
+<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>  <span class="keywordtype">int</span> typeI_;</div>
+<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>  <span class="keywordtype">int</span> k_;</div>
+<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>  <a class="code hl_enumeration" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a> graph_{<a class="code hl_enumvalue" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a>};</div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>  <span class="keywordtype">bool</span> mutual_{<span class="keyword">true</span>};</div>
+<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span>  <span class="keywordtype">bool</span> rebuilt_{<span class="keyword">true</span>};</div>
+<div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span>  <span class="keywordtype">int</span> changedAtoms_{0};</div>
+<div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span>  std::vector&lt;double&gt; x0_;</div>
+<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>  std::vector&lt;double&gt; y0_;</div>
+<div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>  std::vector&lt;double&gt; z0_;</div>
+<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>  std::vector&lt;double&gt; box0_;</div>
+<div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span>  std::vector&lt;std::pair&lt;int, int&gt;&gt; candidates_;</div>
+<div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span>  std::vector&lt;std::pair&lt;int, int&gt;&gt; bonded_;</div>
+<div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>  std::vector&lt;std::vector&lt;int&gt;&gt; nList_;</div>
+<div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span> </div>
+<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>  <span class="keywordtype">bool</span> mustRebuild(</div>
+<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>      <span class="keyword">const</span> molSys::PointCloud&lt;molSys::Point&lt;double&gt;, <span class="keywordtype">double</span>&gt; &amp;yCloud) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>  <span class="keywordtype">void</span> rebuildCandidates(</div>
+<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>      <span class="keyword">const</span> molSys::PointCloud&lt;molSys::Point&lt;double&gt;, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>  <span class="keywordtype">void</span> refreshBonds(</div>
+<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>      <span class="keyword">const</span> molSys::PointCloud&lt;molSys::Point&lt;double&gt;, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>};</div>
+</div>
+<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span> </div>
+<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>}  <span class="comment">// namespace nneigh</span></div>
+</div>
+<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span></div>
+<div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span><span class="preprocessor">#endif  </span><span class="comment">// SEAMS_NEIGHBOURS_H_</span></div>
+<div class="ttc" id="aclassnneigh_1_1CutoffSkin_html_a3944f1934058db7a427622d531e616e8"><div class="ttname"><a href="classnneigh_1_1CutoffSkin.html#a3944f1934058db7a427622d531e616e8">nneigh::CutoffSkin::cols</a></div><div class="ttdeci">const std::vector&lt; int &gt; &amp; cols() const</div><div class="ttdef"><b>Definition</b> <a href="#l00448">neighbours.hpp:448</a></div></div>
+<div class="ttc" id="aclassnneigh_1_1CutoffSkin_html_a646bd46bc143ad26f92fd6bddf638cd4"><div class="ttname"><a href="classnneigh_1_1CutoffSkin.html#a646bd46bc143ad26f92fd6bddf638cd4">nneigh::CutoffSkin::offsets</a></div><div class="ttdeci">const std::vector&lt; int &gt; &amp; offsets() const</div><div class="ttdef"><b>Definition</b> <a href="#l00447">neighbours.hpp:447</a></div></div>
+<div class="ttc" id="aclassnneigh_1_1CutoffSkin_html_a7b1473327d3872ef9cb1850faf21a16b"><div class="ttname"><a href="classnneigh_1_1CutoffSkin.html#a7b1473327d3872ef9cb1850faf21a16b">nneigh::CutoffSkin::lastReused</a></div><div class="ttdeci">bool lastReused() const</div><div class="ttdef"><b>Definition</b> <a href="#l00446">neighbours.hpp:446</a></div></div>
+<div class="ttc" id="aclassnneigh_1_1CutoffSkin_html_aeea98d90f7f3fcf17c82d23530a7fc8e"><div class="ttname"><a href="classnneigh_1_1CutoffSkin.html#aeea98d90f7f3fcf17c82d23530a7fc8e">nneigh::CutoffSkin::CutoffSkin</a></div><div class="ttdeci">CutoffSkin(double cutoff, double skin)</div></div>
+<div class="ttc" id="aclassnneigh_1_1CutoffSkin_html_afb2d6ad5afad66636670061b01915fee"><div class="ttname"><a href="classnneigh_1_1CutoffSkin.html#afb2d6ad5afad66636670061b01915fee">nneigh::CutoffSkin::update</a></div><div class="ttdeci">bool update(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; *subset=nullptr, bool half=false)</div></div>
+<div class="ttc" id="aclassnneigh_1_1SkinNeighborList_html_a80f555acadad22b5edcc4af8285006ed"><div class="ttname"><a href="classnneigh_1_1SkinNeighborList.html#a80f555acadad22b5edcc4af8285006ed">nneigh::SkinNeighborList::SkinNeighborList</a></div><div class="ttdeci">SkinNeighborList(double cutoff, double skin, int typeI, BondGraph graph=BondGraph::KnnMutual, int k=4)</div></div>
+<div class="ttc" id="aclassnneigh_1_1SkinNeighborList_html_a81af9074f6b9311b1cba1321b64f21d7"><div class="ttname"><a href="classnneigh_1_1SkinNeighborList.html#a81af9074f6b9311b1cba1321b64f21d7">nneigh::SkinNeighborList::update</a></div><div class="ttdeci">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; update(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div></div>
+<div class="ttc" id="aclassnneigh_1_1SkinNeighborList_html_a97e81664c1e98dd63263c6724f5c8514"><div class="ttname"><a href="classnneigh_1_1SkinNeighborList.html#a97e81664c1e98dd63263c6724f5c8514">nneigh::SkinNeighborList::graph</a></div><div class="ttdeci">BondGraph graph() const</div><div class="ttdef"><b>Definition</b> <a href="#l00626">neighbours.hpp:626</a></div></div>
+<div class="ttc" id="aclassnneigh_1_1SkinNeighborList_html_aaca057f10435740a240ca275e619e16e"><div class="ttname"><a href="classnneigh_1_1SkinNeighborList.html#aaca057f10435740a240ca275e619e16e">nneigh::SkinNeighborList::lastRebuilt</a></div><div class="ttdeci">bool lastRebuilt() const</div><div class="ttdef"><b>Definition</b> <a href="#l00633">neighbours.hpp:633</a></div></div>
+<div class="ttc" id="aclassnneigh_1_1SkinNeighborList_html_aadc8965e902b0b2a599c75ac338d15af"><div class="ttname"><a href="classnneigh_1_1SkinNeighborList.html#aadc8965e902b0b2a599c75ac338d15af">nneigh::SkinNeighborList::lastChangedAtoms</a></div><div class="ttdeci">int lastChangedAtoms() const</div><div class="ttdoc">Atoms whose cutoff bond set changed on the last update.</div><div class="ttdef"><b>Definition</b> <a href="#l00635">neighbours.hpp:635</a></div></div>
+<div class="ttc" id="aclassnneigh_1_1SkinNeighborList_html_ab621667477b3b610de9af803a925f574"><div class="ttname"><a href="classnneigh_1_1SkinNeighborList.html#ab621667477b3b610de9af803a925f574">nneigh::SkinNeighborList::bonds</a></div><div class="ttdeci">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; bonds() const</div><div class="ttdef"><b>Definition</b> <a href="#l00636">neighbours.hpp:636</a></div></div>
+<div class="ttc" id="ageneric_8hpp_html"><div class="ttname"><a href="generic_8hpp.html">generic.hpp</a></div><div class="ttdoc">File for containing generic or common functions.</div></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespacenneigh_html"><div class="ttname"><a href="namespacenneigh.html">nneigh</a></div><div class="ttdoc">Functions for building neighbour lists.</div><div class="ttdef"><b>Definition</b> <a href="#l00066">neighbours.hpp:66</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_a054007bfd5ef4ba81d50851c1eca6d61"><div class="ttname"><a href="namespacenneigh.html#a054007bfd5ef4ba81d50851c1eca6d61">nneigh::idRowsFromCsr</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; idRowsFromCsr(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;indexToID, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</div><div class="ttdoc">Atom-ID rows, self first, from a CSR of cloud indices.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a12194f0da6153f5e9f1507c20b7464fc"><div class="ttname"><a href="namespacenneigh.html#a12194f0da6153f5e9f1507c20b7464fc">nneigh::linkcellCutoffCsr</a></div><div class="ttdeci">void linkcellCutoffCsr(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double rcutoff, bool half, const std::array&lt; bool, 3 &gt; &amp;periodic, const std::vector&lt; int &gt; &amp;mask, int threads, linkcell::PairCsr &amp;out)</div><div class="ttdoc">Cutoff rows of the cloud from linkcell&#39;s threaded CSR search, in cloud indices.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a139165088e10b53a5efa6034434c9423"><div class="ttname"><a href="namespacenneigh.html#a139165088e10b53a5efa6034434c9423">nneigh::shellSeparation</a></div><div class="ttdeci">std::pair&lt; double, double &gt; shellSeparation(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, int typeI)</div><div class="ttdoc">The shell-separation certificate for the exact reduction of the k-nearest graph to the cutoff graph: ...</div></div>
+<div class="ttc" id="anamespacenneigh_html_a151b16c1d342dbde343e98c91be8f6c7"><div class="ttname"><a href="namespacenneigh.html#a151b16c1d342dbde343e98c91be8f6c7">nneigh::directedKNearestCsr</a></div><div class="ttdeci">bool directedKNearestCsr(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, std::vector&lt; int &gt; &amp;offsets, std::vector&lt; int &gt; &amp;cols)</div><div class="ttdoc">Directed k nearest neighbours as a CSR of cloud indices, no self entry.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a18cda509d1fc5e680abf22e36348fc61"><div class="ttname"><a href="namespacenneigh.html#a18cda509d1fc5e680abf22e36348fc61">nneigh::kNearestNeighbourList</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; kNearestNeighbourList(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, bool mutual=true)</div><div class="ttdoc">Bonded graph from the k nearest neighbours of each particle rather than a distance cutoff.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a1c78a7396b0353d674abb0290e85d0ec"><div class="ttname"><a href="namespacenneigh.html#a1c78a7396b0353d674abb0290e85d0ec">nneigh::bondGraphName</a></div><div class="ttdeci">const char * bondGraphName(BondGraph graph)</div></div>
+<div class="ttc" id="anamespacenneigh_html_a2e8dc456dfee46923a3701c3c4d88038"><div class="ttname"><a href="namespacenneigh.html#a2e8dc456dfee46923a3701c3c4d88038">nneigh::blockWindowRows</a></div><div class="ttdeci">bool blockWindowRows(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double rcutoff, const std::vector&lt; char &gt; *source, std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rows, bool byId=true, bool everyRow=false)</div></div>
+<div class="ttc" id="anamespacenneigh_html_a342ae6a7675f0a32caf8087f43d679d8"><div class="ttname"><a href="namespacenneigh.html#a342ae6a7675f0a32caf8087f43d679d8">nneigh::dumpBoundsToH</a></div><div class="ttdeci">void dumpBoundsToH(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double H[3][3], double origin[3])</div><div class="ttdoc">LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).</div><div class="ttdef"><b>Definition</b> <a href="#l00073">neighbours.hpp:73</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_a4b7e08068d9fba7d981793100b62de6c"><div class="ttname"><a href="namespacenneigh.html#a4b7e08068d9fba7d981793100b62de6c">nneigh::dumpCellLengths</a></div><div class="ttdeci">void dumpCellLengths(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double lengths[3])</div><div class="ttdoc">Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).</div><div class="ttdef"><b>Definition</b> <a href="#l00104">neighbours.hpp:104</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_a4f12746b56fe9e1c8cfb7d2af32b64ba"><div class="ttname"><a href="namespacenneigh.html#a4f12746b56fe9e1c8cfb7d2af32b64ba">nneigh::reusedShellList</a></div><div class="ttdeci">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; reusedShellList(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; char &gt; *source)</div></div>
+<div class="ttc" id="anamespacenneigh_html_a50b9380030492980b6f8540c213d8098"><div class="ttname"><a href="namespacenneigh.html#a50b9380030492980b6f8540c213d8098">nneigh::kNearestPacked</a></div><div class="ttdeci">void kNearestPacked(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, std::vector&lt; double &gt; &amp;xyz, std::vector&lt; int &gt; &amp;nom)</div></div>
+<div class="ttc" id="anamespacenneigh_html_a553a0b3d4dddd477c0dcb06d93361eae"><div class="ttname"><a href="namespacenneigh.html#a553a0b3d4dddd477c0dcb06d93361eae">nneigh::kNearestNeighbourPair</a></div><div class="ttdeci">std::pair&lt; std::vector&lt; std::vector&lt; int &gt; &gt;, std::vector&lt; std::vector&lt; int &gt; &gt; &gt; kNearestNeighbourPair(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI)</div><div class="ttdoc">Mutual and union k-nearest graphs from one candidate search.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a57e7804488c926a85c21131b895b6491"><div class="ttname"><a href="namespacenneigh.html#a57e7804488c926a85c21131b895b6491">nneigh::nearestUnlike</a></div><div class="ttdeci">std::vector&lt; std::tuple&lt; int, int, double &gt; &gt; nearestUnlike(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</div><div class="ttdoc">Nearest unlike image of each typeI particle among typeJ particles.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a60335297e92e0bd73fba7bfdaca28a26"><div class="ttname"><a href="namespacenneigh.html#a60335297e92e0bd73fba7bfdaca28a26">nneigh::dumpFromFrac</a></div><div class="ttdeci">void dumpFromFrac(const double H[3][3], const double origin[3], const double s[3], double r[3])</div><div class="ttdoc">Fractional to cartesian coordinates via dump H.</div><div class="ttdef"><b>Definition</b> <a href="#l00150">neighbours.hpp:150</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_a651839704a066d725b22212c13c74327"><div class="ttname"><a href="namespacenneigh.html#a651839704a066d725b22212c13c74327">nneigh::halfNeighList</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; halfNeighList(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI=1)</div></div>
+<div class="ttc" id="anamespacenneigh_html_a668b0917bd0df1568398d83989e26e4c"><div class="ttname"><a href="namespacenneigh.html#a668b0917bd0df1568398d83989e26e4c">nneigh::preferSerialCutoff</a></div><div class="ttdeci">void preferSerialCutoff(bool on)</div><div class="ttdoc">When set, the cutoff lists search on one thread even if the OpenMP team is wider.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a68ba6195c59b7a1b7c8bb17ec31314a3"><div class="ttname"><a href="namespacenneigh.html#a68ba6195c59b7a1b7c8bb17ec31314a3">nneigh::mutualNearestUnlike</a></div><div class="ttdeci">std::vector&lt; std::pair&lt; int, int &gt; &gt; mutualNearestUnlike(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</div><div class="ttdoc">Subset of nearestUnlike where j&#39;s nearest typeI is i (mutual).</div></div>
+<div class="ttc" id="anamespacenneigh_html_a752d3e4cbd98fa454a6dc36a4307b75a"><div class="ttname"><a href="namespacenneigh.html#a752d3e4cbd98fa454a6dc36a4307b75a">nneigh::clearNeighbourList</a></div><div class="ttdeci">int clearNeighbourList(std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</div><div class="ttdoc">Erases memory for a vector of vectors for the neighbour list.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a77b70b894f0e7a72a980001e076f2a73"><div class="ttname"><a href="namespacenneigh.html#a77b70b894f0e7a72a980001e076f2a73">nneigh::setBoxFromLengthsAngles</a></div><div class="ttdeci">bool setBoxFromLengthsAngles(std::vector&lt; double &gt; &amp;box, std::vector&lt; double &gt; &amp;boxLow, double a, double b, double c, double alphaDeg, double betaDeg, double gammaDeg)</div><div class="ttdoc">Crystallographic lengths and angles in degrees, stored as a dump box.</div><div class="ttdef"><b>Definition</b> <a href="#l00208">neighbours.hpp:208</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_a7819f2f15dde85f94bf6a4f6632780b8"><div class="ttname"><a href="namespacenneigh.html#a7819f2f15dde85f94bf6a4f6632780b8">nneigh::dumpToFrac</a></div><div class="ttdeci">void dumpToFrac(const double H[3][3], const double origin[3], double x, double y, double z, double s[3])</div><div class="ttdoc">Cartesian to fractional coordinates via dump H.</div><div class="ttdef"><b>Definition</b> <a href="#l00136">neighbours.hpp:136</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_a809f9e0a2a56c0162cdb70ebb64804a7"><div class="ttname"><a href="namespacenneigh.html#a809f9e0a2a56c0162cdb70ebb64804a7">nneigh::neighListLinkcell</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighListLinkcell(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI)</div></div>
+<div class="ttc" id="anamespacenneigh_html_a87d0da315b8e67fc843f91099dceb349"><div class="ttname"><a href="namespacenneigh.html#a87d0da315b8e67fc843f91099dceb349">nneigh::dumpAxialDim</a></div><div class="ttdeci">int dumpAxialDim(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Longest recovered length: 0 = x, 1 = y, 2 = z.</div><div class="ttdef"><b>Definition</b> <a href="#l00116">neighbours.hpp:116</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_a8b457915e32c2c1c9302a25d0536de7b"><div class="ttname"><a href="namespacenneigh.html#a8b457915e32c2c1c9302a25d0536de7b">nneigh::residentFrameCell</a></div><div class="ttdeci">void residentFrameCell(const double *box, const double *boxLow, int nBox, linkcell::Cell &amp;cell, const double *&amp;frameLens)</div><div class="ttdoc">Cell and optional per-frame ortho lengths for analyzeResident.</div><div class="ttdef"><b>Definition</b> <a href="#l00310">neighbours.hpp:310</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_a8f5dd92092f5be635273a1ea18b57cb7"><div class="ttname"><a href="namespacenneigh.html#a8f5dd92092f5be635273a1ea18b57cb7">nneigh::cellListRowsThreaded</a></div><div class="ttdeci">bool cellListRowsThreaded(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;subset, double rcutoff, std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rows)</div></div>
+<div class="ttc" id="anamespacenneigh_html_a9566a384474993ea7356e7abc414e40e"><div class="ttname"><a href="namespacenneigh.html#a9566a384474993ea7356e7abc414e40e">nneigh::neighList</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighList(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</div><div class="ttdoc">All these functions use atom IDs and not indices.</div></div>
+<div class="ttc" id="anamespacenneigh_html_a97ad6e2c7bfaa504c7e021a527effe73"><div class="ttname"><a href="namespacenneigh.html#a97ad6e2c7bfaa504c7e021a527effe73">nneigh::getNewNeighbourListByIndex</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; getNewNeighbourListByIndex(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double cutoff)</div></div>
+<div class="ttc" id="anamespacenneigh_html_aa5180c143af9fe9fa47f393e7518bf9b"><div class="ttname"><a href="namespacenneigh.html#aa5180c143af9fe9fa47f393e7518bf9b">nneigh::refillIndexRows</a></div><div class="ttdeci">bool refillIndexRows(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rows)</div><div class="ttdoc">Same rows as getNewNeighbourListByIndex, written into rows.</div></div>
+<div class="ttc" id="anamespacenneigh_html_ac2ed84e835e8b6949281c88e4d11f43b"><div class="ttname"><a href="namespacenneigh.html#ac2ed84e835e8b6949281c88e4d11f43b">nneigh::refillNeighListO</a></div><div class="ttdeci">bool refillNeighListO(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rows)</div></div>
+<div class="ttc" id="anamespacenneigh_html_ac3d73f19a9a16def5e4b6571c9a2b1d5"><div class="ttname"><a href="namespacenneigh.html#ac3d73f19a9a16def5e4b6571c9a2b1d5">nneigh::kNearestCsr</a></div><div class="ttdeci">void kNearestCsr(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, bool mutual, std::vector&lt; int &gt; &amp;offsets, std::vector&lt; int &gt; &amp;cols, bool park=true)</div></div>
+<div class="ttc" id="anamespacenneigh_html_ac510fab36f179d7621063cb90dc6ea4c"><div class="ttname"><a href="namespacenneigh.html#ac510fab36f179d7621063cb90dc6ea4c">nneigh::lammpsBoxToLinkcell</a></div><div class="ttdeci">linkcell::Cell lammpsBoxToLinkcell(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdef"><b>Definition</b> <a href="#l00301">neighbours.hpp:301</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_acf46d8c4b42f15e634ff0076ac83c012"><div class="ttname"><a href="namespacenneigh.html#acf46d8c4b42f15e634ff0076ac83c012">nneigh::neighbourListByIndex</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighbourListByIndex(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</div></div>
+<div class="ttc" id="anamespacenneigh_html_ad17e972366865905372aa796e946a351"><div class="ttname"><a href="namespacenneigh.html#ad17e972366865905372aa796e946a351">nneigh::dumpVolume</a></div><div class="ttdeci">double dumpVolume(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Triclinic dump-cell volume, the absolute value of det(H), from dumpBoundsToH.</div><div class="ttdef"><b>Definition</b> <a href="#l00159">neighbours.hpp:159</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_ad285ff1c2c0bd1ca8495f3972faebb8c"><div class="ttname"><a href="namespacenneigh.html#ad285ff1c2c0bd1ca8495f3972faebb8c">nneigh::bondGraphFromName</a></div><div class="ttdeci">BondGraph bondGraphFromName(const std::string &amp;name)</div></div>
+<div class="ttc" id="anamespacenneigh_html_ad960860059d8e9d9fdee48c679e1c446"><div class="ttname"><a href="namespacenneigh.html#ad960860059d8e9d9fdee48c679e1c446">nneigh::setBoxFromLammpsEdges</a></div><div class="ttdeci">bool setBoxFromLammpsEdges(std::vector&lt; double &gt; &amp;box, std::vector&lt; double &gt; &amp;boxLow, double xlo, double ylo, double zlo, double lx, double ly, double lz, double xy, double xz, double yz)</div><div class="ttdoc">LAMMPS edge origin and edge lengths, plus tilt, as a dump box.</div><div class="ttdef"><b>Definition</b> <a href="#l00178">neighbours.hpp:178</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_add6ed18f0c7e2e5fbd10d7cdbf6af429"><div class="ttname"><a href="namespacenneigh.html#add6ed18f0c7e2e5fbd10d7cdbf6af429">nneigh::neighListPair</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighListPair(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</div></div>
+<div class="ttc" id="anamespacenneigh_html_adddaf455a07261396213ebf2a9dc097d"><div class="ttname"><a href="namespacenneigh.html#adddaf455a07261396213ebf2a9dc097d">nneigh::orthoFullCsr</a></div><div class="ttdeci">bool orthoFullCsr(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; *subset, double rcutoff, std::vector&lt; int &gt; &amp;offsets, std::vector&lt; int &gt; &amp;cols, bool half=false, std::vector&lt; std::vector&lt; int &gt; &gt; *directRows=nullptr, const int *indexToID=nullptr, bool *wroteRows=nullptr, bool branchy=false)</div><div class="ttdoc">Full cutoff list as CSR of cloud indices.</div></div>
+<div class="ttc" id="anamespacenneigh_html_ae70187f6d039fe332d7f59be0112ff26"><div class="ttname"><a href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">nneigh::BondGraph</a></div><div class="ttdeci">BondGraph</div><div class="ttdoc">Bond graph for TUM.</div><div class="ttdef"><b>Definition</b> <a href="#l00606">neighbours.hpp:606</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_ae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="#l00606">neighbours.hpp:606</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="#l00606">neighbours.hpp:606</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_ae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="#l00606">neighbours.hpp:606</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_afabd1f7a2ce1ce7091ebde087cc80d6d"><div class="ttname"><a href="namespacenneigh.html#afabd1f7a2ce1ce7091ebde087cc80d6d">nneigh::lammpsBoxToLcCell</a></div><div class="ttdeci">lc_cell lammpsBoxToLcCell(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Map a LAMMPS dump box onto lc_cell.</div><div class="ttdef"><b>Definition</b> <a href="#l00252">neighbours.hpp:252</a></div></div>
+<div class="ttc" id="anamespacenneigh_html_afaf0f0ff09cef581076f99a68018b023"><div class="ttname"><a href="namespacenneigh.html#afaf0f0ff09cef581076f99a68018b023">nneigh::neighListO</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; neighListO(double rcutoff, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int typeI)</div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00152">mol_sys.hpp:152</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="neighbours_8hpp.html">neighbours.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/seams_c_api.h Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/seams__c__api_8h_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/seams_c_api.h Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/seams__c__api_8h_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/seams_c_api.h Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('seams__c__api_8h_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams_c_api.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="seams__c__api_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SEAMS_C_API_H_</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SEAMS_C_API_H_</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">/* C ABI for native callers and for an emscripten/WASM build.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * xyz is n*3, box is ox,oy,oz,lx,ly,lz (ortho). labels[i] is</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * 0 cubic, 1 hexagonal, 2 water, 3 interfacial, 4 clathrate,</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * 5 interClathrate, 6 unclassified, 7 reCubic, 8 reHex.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * Returns 0 on success.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * seams_chill_plus bonds every pair closer than 3.5 A (the cutoff list).</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * seams_chill_plus_graph takes the cutoff and graph: &quot;cutoff&quot; (also NULL</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * or &quot;&quot;) or &quot;mutual&quot;, the mutual four nearest inside cutoff + 1.5. */</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a4779c3619c307b0e9f4aa8b82f01e73d">   16</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a4779c3619c307b0e9f4aa8b82f01e73d">seams_chill_plus_flat</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box, <span class="keywordtype">int</span> *labels);</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a3cdbb04d3443c73b4f3067360bea8bf7">   17</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a3cdbb04d3443c73b4f3067360bea8bf7">seams_chill_plus_graph</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box,</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>                           <span class="keywordtype">double</span> cutoff, <span class="keyword">const</span> <span class="keywordtype">char</span> *graph, <span class="keywordtype">int</span> *labels);</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">/* rule is &quot;chill+&quot; (NULL or &quot;&quot;) or &quot;ovito-chill+&quot;. A YAML or Lua</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * document with a rule field is accepted. Returns 1 on a bad rule. */</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a15b8a71d8194a40d3a495a6d6103dd7b">   21</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a15b8a71d8194a40d3a495a6d6103dd7b">seams_chill_plus_rule</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box,</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>                          <span class="keywordtype">double</span> cutoff, <span class="keyword">const</span> <span class="keywordtype">char</span> *graph, <span class="keyword">const</span> <span class="keywordtype">char</span> *rule,</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>                          <span class="keywordtype">int</span> *labels);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">/* box9 is xlo, ylo, zlo, lx, ly, lz, xy, xz, yz. lx, ly, lz are the</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> * edge lengths xhi-xlo, not the bound spans, and xlo, ylo, zlo are the</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> * edge origin. A zero tilt matches seams_chill_plus_graph. */</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a905d0436a8fd534e4177ff7627143e04">   28</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a905d0436a8fd534e4177ff7627143e04">seams_chill_plus_graph_lammps</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n,</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>                                  <span class="keyword">const</span> <span class="keywordtype">double</span> *box9, <span class="keywordtype">double</span> cutoff,</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>                                  <span class="keyword">const</span> <span class="keywordtype">char</span> *graph, <span class="keywordtype">int</span> *labels);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">/* Local symmetry. points is n*3. Template ids:</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment"> * 0 ice-Ih, 1 ice-Ic, 2 ice-Isd, 3 5^12, 4 5^12 6^2, 5 5^12 6^4,</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment"> * 6 ring-5, 7 ring-6.</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment"> * permutation[i] is the environment index matched to template atom i.</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment"> * rotation9 is row-major and, with translation3, takes that environment</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment"> * atom onto the template. Returns 0 on success. */</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a7b2a4f4bf57d15eb7feb3f526b2bc998">   38</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a7b2a4f4bf57d15eb7feb3f526b2bc998">seams_symmetry_match</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *points, <span class="keywordtype">int</span> n, <span class="keywordtype">int</span> *template_id,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>                         <span class="keywordtype">double</span> *rmsd, <span class="keywordtype">double</span> *hausdorff, <span class="keywordtype">double</span> *rotation9,</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>                         <span class="keywordtype">double</span> *translation3, <span class="keywordtype">int</span> *permutation);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">/* Returns 2 when SOFI is not linked. */</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#ad577898ecee04de6a1a7963f5605a52d">   42</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#ad577898ecee04de6a1a7963f5605a52d">seams_symmetry_point_group</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *points, <span class="keywordtype">int</span> n, <span class="keywordtype">double</span> sym_thr,</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>                               <span class="keywordtype">char</span> *symbol, <span class="keywordtype">int</span> symbol_len, <span class="keywordtype">int</span> *n_operations);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">/* lattice9 is three row vectors (ax,ay,az, bx,by,bz, cx,cy,cz).</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment"> * Returns 2 when spglib is not linked. */</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a2c3719eca0b342deb63fdaad3a4c9287">   46</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a2c3719eca0b342deb63fdaad3a4c9287">seams_symmetry_space_group</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *lattice9, <span class="keyword">const</span> <span class="keywordtype">double</span> *cartesian,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>                               <span class="keywordtype">int</span> n, <span class="keywordtype">double</span> symprec, <span class="keywordtype">int</span> *number, <span class="keywordtype">char</span> *symbol,</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>                               <span class="keywordtype">int</span> symbol_len);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">/* Writes the ideal template. points may be null to query *n_out. */</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#afd32896dc0affc747fc4135223d5b681">   50</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#afd32896dc0affc747fc4135223d5b681">seams_symmetry_template</a>(<span class="keywordtype">int</span> <span class="keywordtype">id</span>, <span class="keywordtype">double</span> *points, <span class="keywordtype">int</span> cap, <span class="keywordtype">int</span> *n_out);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">/* which: 0 ice Ih, 1 ice Ic, 2 stacking-fault cell. */</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#af3d4dc8bf1573a9e50de07be31190cc1">   52</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#af3d4dc8bf1573a9e50de07be31190cc1">seams_symmetry_crystal</a>(<span class="keywordtype">int</span> which, <span class="keywordtype">double</span> *lattice9, <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> cap,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                           <span class="keywordtype">int</span> *n_out);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a286fe6a9075c6439ef46ed62e24e3418">   54</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a286fe6a9075c6439ef46ed62e24e3418">seams_symmetry_backend</a>(<span class="keywordtype">char</span> *name, <span class="keywordtype">int</span> name_len);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment">/* Per-atom ice label. lattice9 is three row vectors. labels[i] is</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment"> * 0 ice-Ih, 1 ice-Ic, 2 ice-Isd, or -1. The second-shell RMSD ceiling</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment"> * is the scale-free ceiling kShellRmsd (0.12). */</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#af1a71a01de96262b637c4f96281db221">   58</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#af1a71a01de96262b637c4f96281db221">seams_symmetry_classify</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *lattice9,</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                            <span class="keywordtype">int</span> *labels);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">/* Same labels with an explicit scale-free residual ceiling. */</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a2a8ad5ce8d5997725826f2b0d81d000f">   61</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a2a8ad5ce8d5997725826f2b0d81d000f">seams_symmetry_classify_tol</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *lattice9,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>                                <span class="keywordtype">double</span> shell_rmsd, <span class="keywordtype">int</span> *labels);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">/* thermal_q is the tetrahedral-order prefilter and bond_ratio is the</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="comment"> * longest/shortest of the four nearest bonds. The shipped gates are</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="comment"> * 0.85 and 1.20. The previous gates were 0.94 and 1.15 with shell_rmsd 0.12. */</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#aed9cb6f8a05fb3491f6fab4f5794724f">   66</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#aed9cb6f8a05fb3491f6fab4f5794724f">seams_symmetry_classify_gates</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *lattice9,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>                                  <span class="keywordtype">double</span> shell_rmsd, <span class="keywordtype">double</span> thermal_q, <span class="keywordtype">double</span> bond_ratio,</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>                                  <span class="keywordtype">int</span> *labels);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">/* Mixed frames. types and mols may be NULL (every atom is then one</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment"> * species, mol id = index + 1). oxygen_type &gt; 0 keeps that LAMMPS type.</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="comment"> * mol_mode 0 ignores molecules, 1 keeps the water oxygen of each</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="comment"> * multi-atom molecule, 2 keeps mol_ids[0..n_mol_ids). A mixed frame</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="comment"> * with mol_mode 0 and oxygen_type 0 is an error. Labels of atoms that</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment"> * are not water oxygens are unclassified (6). ion_ice, ion_liquid and</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment"> * ion_front may be NULL. ion_front is the nearest ice oxygen, or -1.</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment"> * seams_c_error() is the message after a non-zero return.</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment"> * On a single-species cloud the labels match seams_chill_plus_graph_lammps. */</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a2b8636a1c0255423098b356dfbaa2b50">   79</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a2b8636a1c0255423098b356dfbaa2b50">seams_chill_plus_species</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box9,</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                             <span class="keyword">const</span> <span class="keywordtype">int</span> *types, <span class="keyword">const</span> <span class="keywordtype">int</span> *mols,</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                             <span class="keywordtype">int</span> oxygen_type, <span class="keywordtype">int</span> mol_mode, <span class="keyword">const</span> <span class="keywordtype">int</span> *mol_ids,</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                             <span class="keywordtype">int</span> n_mol_ids, <span class="keywordtype">double</span> cutoff, <span class="keyword">const</span> <span class="keywordtype">char</span> *graph,</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>                             <span class="keywordtype">int</span> *labels, <span class="keywordtype">int</span> *ion_ice, <span class="keywordtype">int</span> *ion_liquid,</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                             <span class="keywordtype">double</span> *ion_front);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">/* degree[i] is the oxygen-oxygen neighbour count inside cutoff, or -1</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="comment"> * when atom i is not a selected water oxygen. */</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a945ab239fc029a7acbe76f72121ec83e">   88</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a945ab239fc029a7acbe76f72121ec83e">seams_oxygen_cutoff_degree</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box9,</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                               <span class="keyword">const</span> <span class="keywordtype">int</span> *types, <span class="keyword">const</span> <span class="keywordtype">int</span> *mols,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>                               <span class="keywordtype">int</span> oxygen_type, <span class="keywordtype">int</span> mol_mode,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>                               <span class="keyword">const</span> <span class="keywordtype">int</span> *mol_ids, <span class="keywordtype">int</span> n_mol_ids, <span class="keywordtype">double</span> cutoff,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>                               <span class="keywordtype">int</span> *degree);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#ae2efe84c8d250d2fce58fb7da028484d">   94</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="seams__c__api_8h.html#ae2efe84c8d250d2fce58fb7da028484d">seams_c_error</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="comment">/* Local q4 and q6 on the cutoff shell. Degrees 4 and 6 use the</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment"> * solid-harmonic kernel. xyz is n*3. box is ox,oy,oz,lx,ly,lz.</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment"> * q4 and q6 are n doubles. q4bar and q6bar may be null; a null pointer</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment"> * skips that Lechner-Dellago average. Returns 0 on success. */</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a0c793871e8522bd91c910effc9decde7">  100</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a0c793871e8522bd91c910effc9decde7">seams_q4_q6</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box, <span class="keywordtype">double</span> cutoff,</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                <span class="keywordtype">double</span> *q4, <span class="keywordtype">double</span> *q6, <span class="keywordtype">double</span> *q4bar, <span class="keywordtype">double</span> *q6bar);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">/* box9 is xlo,ylo,zlo,lx,ly,lz,xy,xz,yz, the same cell as</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment"> * seams_chill_plus_graph_lammps. */</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#aaf35eae4a6cfbc834ef146ed56555b45">  104</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#aaf35eae4a6cfbc834ef146ed56555b45">seams_q4_q6_lammps</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box9,</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                       <span class="keywordtype">double</span> cutoff, <span class="keywordtype">double</span> *q4, <span class="keywordtype">double</span> *q6, <span class="keywordtype">double</span> *q4bar,</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                       <span class="keywordtype">double</span> *q6bar);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">/* box9 is xlo, ylo, zlo, lx, ly, lz, xy, xz, yz, the same edges as</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment"> * seams_chill_plus_graph_lammps. The cutoff list is orthoFullCsr: cloud</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="comment"> * indices, no self entry, both directions, squared distance strictly</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="comment"> * below cutoff squared.</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="comment"> * offsets has n + 1 entries. When cols is null, *n_cols receives the</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="comment"> * pair count and the call returns 0. When cols_cap is short, *n_cols is</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment"> * that count and the call returns 2. */</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a050628a119d97a5fd5070aef345853ee">  115</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a050628a119d97a5fd5070aef345853ee">seams_cutoff_csr</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box9, <span class="keywordtype">double</span> cutoff,</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                     <span class="keywordtype">int</span> *offsets, <span class="keywordtype">int</span> *cols, <span class="keywordtype">int</span> cols_cap, <span class="keywordtype">int</span> *n_cols);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="comment">/* Local Steinhardt q_l on that cutoff list. order_l is 3, 4, 6, 8, or 12. */</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a61177c6e29fbc9f4431662d7b77f6b3b">  118</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a61177c6e29fbc9f4431662d7b77f6b3b">seams_ql_cutoff</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box9, <span class="keywordtype">double</span> cutoff,</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>                    <span class="keywordtype">int</span> order_l, <span class="keywordtype">double</span> *ql);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="comment">/* Wall seconds of the last successful seams_cutoff_csr or seams_ql_cutoff</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="comment"> * call on the calling thread. seconds[0] builds the point cloud from xyz,</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="comment"> * [1] the cutoff list, [2] q_l, [3] copies into the caller&#39;s arrays.</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="comment"> * seams_cutoff_csr has no q_l stage. For order 8 or 12, seams_ql_cutoff</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="comment"> * counts the list inside [2] and leaves [1] at 0. */</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#adfe45483219fd9882d34d16c74fbca43">  125</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="seams__c__api_8h.html#adfe45483219fd9882d34d16c74fbca43">seams_c_last_stages</a>(<span class="keywordtype">double</span> seconds[4]);</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="comment">/* Diamond common-neighbour labels. 1 cubic, 0 hexagonal, -1 otherwise. */</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#af044fde824bc475804a89763c9a74120">  127</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#af044fde824bc475804a89763c9a74120">seams_diamond_cna</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box9, <span class="keywordtype">double</span> cutoff,</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>                      <span class="keywordtype">int</span> *labels);</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="comment">/* counts[k] is the number of primitive rings of size k.</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="comment"> * counts_len must be at least max_depth + 1. max_depth is at least 3. */</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="seams__c__api_8h.html#a84bdcf96e064a16b174b7a8a8392b49b">  131</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="seams__c__api_8h.html#a84bdcf96e064a16b174b7a8a8392b49b">seams_primitive_rings</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *xyz, <span class="keywordtype">int</span> n, <span class="keyword">const</span> <span class="keywordtype">double</span> *box9,</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                          <span class="keywordtype">double</span> cutoff, <span class="keywordtype">int</span> max_depth, <span class="keywordtype">int</span> *counts, <span class="keywordtype">int</span> counts_len);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>}</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aseams__c__api_8h_html_a050628a119d97a5fd5070aef345853ee"><div class="ttname"><a href="seams__c__api_8h.html#a050628a119d97a5fd5070aef345853ee">seams_cutoff_csr</a></div><div class="ttdeci">int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff, int *offsets, int *cols, int cols_cap, int *n_cols)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a0c793871e8522bd91c910effc9decde7"><div class="ttname"><a href="seams__c__api_8h.html#a0c793871e8522bd91c910effc9decde7">seams_q4_q6</a></div><div class="ttdeci">int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff, double *q4, double *q6, double *q4bar, double *q6bar)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a15b8a71d8194a40d3a495a6d6103dd7b"><div class="ttname"><a href="seams__c__api_8h.html#a15b8a71d8194a40d3a495a6d6103dd7b">seams_chill_plus_rule</a></div><div class="ttdeci">int seams_chill_plus_rule(const double *xyz, int n, const double *box, double cutoff, const char *graph, const char *rule, int *labels)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a286fe6a9075c6439ef46ed62e24e3418"><div class="ttname"><a href="seams__c__api_8h.html#a286fe6a9075c6439ef46ed62e24e3418">seams_symmetry_backend</a></div><div class="ttdeci">int seams_symmetry_backend(char *name, int name_len)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a2a8ad5ce8d5997725826f2b0d81d000f"><div class="ttname"><a href="seams__c__api_8h.html#a2a8ad5ce8d5997725826f2b0d81d000f">seams_symmetry_classify_tol</a></div><div class="ttdeci">int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9, double shell_rmsd, int *labels)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a2b8636a1c0255423098b356dfbaa2b50"><div class="ttname"><a href="seams__c__api_8h.html#a2b8636a1c0255423098b356dfbaa2b50">seams_chill_plus_species</a></div><div class="ttdeci">int seams_chill_plus_species(const double *xyz, int n, const double *box9, const int *types, const int *mols, int oxygen_type, int mol_mode, const int *mol_ids, int n_mol_ids, double cutoff, const char *graph, int *labels, int *ion_ice, int *ion_liquid, double *ion_front)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a2c3719eca0b342deb63fdaad3a4c9287"><div class="ttname"><a href="seams__c__api_8h.html#a2c3719eca0b342deb63fdaad3a4c9287">seams_symmetry_space_group</a></div><div class="ttdeci">int seams_symmetry_space_group(const double *lattice9, const double *cartesian, int n, double symprec, int *number, char *symbol, int symbol_len)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a3cdbb04d3443c73b4f3067360bea8bf7"><div class="ttname"><a href="seams__c__api_8h.html#a3cdbb04d3443c73b4f3067360bea8bf7">seams_chill_plus_graph</a></div><div class="ttdeci">int seams_chill_plus_graph(const double *xyz, int n, const double *box, double cutoff, const char *graph, int *labels)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a4779c3619c307b0e9f4aa8b82f01e73d"><div class="ttname"><a href="seams__c__api_8h.html#a4779c3619c307b0e9f4aa8b82f01e73d">seams_chill_plus_flat</a></div><div class="ttdeci">int seams_chill_plus_flat(const double *xyz, int n, const double *box, int *labels)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a61177c6e29fbc9f4431662d7b77f6b3b"><div class="ttname"><a href="seams__c__api_8h.html#a61177c6e29fbc9f4431662d7b77f6b3b">seams_ql_cutoff</a></div><div class="ttdeci">int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff, int order_l, double *ql)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a7b2a4f4bf57d15eb7feb3f526b2bc998"><div class="ttname"><a href="seams__c__api_8h.html#a7b2a4f4bf57d15eb7feb3f526b2bc998">seams_symmetry_match</a></div><div class="ttdeci">int seams_symmetry_match(const double *points, int n, int *template_id, double *rmsd, double *hausdorff, double *rotation9, double *translation3, int *permutation)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a84bdcf96e064a16b174b7a8a8392b49b"><div class="ttname"><a href="seams__c__api_8h.html#a84bdcf96e064a16b174b7a8a8392b49b">seams_primitive_rings</a></div><div class="ttdeci">int seams_primitive_rings(const double *xyz, int n, const double *box9, double cutoff, int max_depth, int *counts, int counts_len)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a905d0436a8fd534e4177ff7627143e04"><div class="ttname"><a href="seams__c__api_8h.html#a905d0436a8fd534e4177ff7627143e04">seams_chill_plus_graph_lammps</a></div><div class="ttdeci">int seams_chill_plus_graph_lammps(const double *xyz, int n, const double *box9, double cutoff, const char *graph, int *labels)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_a945ab239fc029a7acbe76f72121ec83e"><div class="ttname"><a href="seams__c__api_8h.html#a945ab239fc029a7acbe76f72121ec83e">seams_oxygen_cutoff_degree</a></div><div class="ttdeci">int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9, const int *types, const int *mols, int oxygen_type, int mol_mode, const int *mol_ids, int n_mol_ids, double cutoff, int *degree)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_aaf35eae4a6cfbc834ef146ed56555b45"><div class="ttname"><a href="seams__c__api_8h.html#aaf35eae4a6cfbc834ef146ed56555b45">seams_q4_q6_lammps</a></div><div class="ttdeci">int seams_q4_q6_lammps(const double *xyz, int n, const double *box9, double cutoff, double *q4, double *q6, double *q4bar, double *q6bar)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_ad577898ecee04de6a1a7963f5605a52d"><div class="ttname"><a href="seams__c__api_8h.html#ad577898ecee04de6a1a7963f5605a52d">seams_symmetry_point_group</a></div><div class="ttdeci">int seams_symmetry_point_group(const double *points, int n, double sym_thr, char *symbol, int symbol_len, int *n_operations)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_adfe45483219fd9882d34d16c74fbca43"><div class="ttname"><a href="seams__c__api_8h.html#adfe45483219fd9882d34d16c74fbca43">seams_c_last_stages</a></div><div class="ttdeci">void seams_c_last_stages(double seconds[4])</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_ae2efe84c8d250d2fce58fb7da028484d"><div class="ttname"><a href="seams__c__api_8h.html#ae2efe84c8d250d2fce58fb7da028484d">seams_c_error</a></div><div class="ttdeci">const char * seams_c_error(void)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_aed9cb6f8a05fb3491f6fab4f5794724f"><div class="ttname"><a href="seams__c__api_8h.html#aed9cb6f8a05fb3491f6fab4f5794724f">seams_symmetry_classify_gates</a></div><div class="ttdeci">int seams_symmetry_classify_gates(const double *xyz, int n, const double *lattice9, double shell_rmsd, double thermal_q, double bond_ratio, int *labels)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_af044fde824bc475804a89763c9a74120"><div class="ttname"><a href="seams__c__api_8h.html#af044fde824bc475804a89763c9a74120">seams_diamond_cna</a></div><div class="ttdeci">int seams_diamond_cna(const double *xyz, int n, const double *box9, double cutoff, int *labels)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_af1a71a01de96262b637c4f96281db221"><div class="ttname"><a href="seams__c__api_8h.html#af1a71a01de96262b637c4f96281db221">seams_symmetry_classify</a></div><div class="ttdeci">int seams_symmetry_classify(const double *xyz, int n, const double *lattice9, int *labels)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_af3d4dc8bf1573a9e50de07be31190cc1"><div class="ttname"><a href="seams__c__api_8h.html#af3d4dc8bf1573a9e50de07be31190cc1">seams_symmetry_crystal</a></div><div class="ttdeci">int seams_symmetry_crystal(int which, double *lattice9, double *xyz, int cap, int *n_out)</div></div>
+<div class="ttc" id="aseams__c__api_8h_html_afd32896dc0affc747fc4135223d5b681"><div class="ttname"><a href="seams__c__api_8h.html#afd32896dc0affc747fc4135223d5b681">seams_symmetry_template</a></div><div class="ttdeci">int seams_symmetry_template(int id, double *points, int cap, int *n_out)</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="seams__c__api_8h.html">seams_c_api.h</a></li>
+  </ul>
+</div>
+</body>
+</html>

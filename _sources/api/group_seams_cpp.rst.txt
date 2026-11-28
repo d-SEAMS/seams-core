@@ -1,0 +1,151 @@
+.. index:: pair: group; C++ API
+.. _doxid-group__seams__cpp:
+
+C++ API
+=======
+
+.. toctree::
+	:hidden:
+
+	struct_seams_BondOptions.rst
+	struct_seams_BrineFronts.rst
+	struct_seams_BrineOptions.rst
+	struct_seams_BrineProfile.rst
+	struct_seams_CageCounts.rst
+	struct_seams_CageOptions.rst
+	struct_seams_ChillOptions.rst
+	struct_seams_ChordlessCycles.rst
+	struct_seams_Classification.rst
+	struct_seams_Contacts.rst
+	struct_seams_DensityOptions.rst
+	struct_seams_DensityProfile.rst
+	struct_seams_DiffusionFit.rst
+	struct_seams_DirectedBond.rst
+	struct_seams_DirectedBondOptions.rst
+	struct_seams_Distribution.rst
+	struct_seams_DistributionOptions.rst
+	struct_seams_DomainOptions.rst
+	struct_seams_DomainReport.rst
+	struct_seams_FingerprintOptions.rst
+	struct_seams_FractionalDensityOptions.rst
+	struct_seams_FractionalProfile.rst
+	struct_seams_HbondLifetimeCurve.rst
+	struct_seams_HbondLifetimeFit.rst
+	struct_seams_HostGuestContacts.rst
+	struct_seams_HostGuestOptions.rst
+	struct_seams_KnnOptions.rst
+	struct_seams_MoleculeCentres.rst
+	struct_seams_MoleculeDipoles.rst
+	struct_seams_MsdCurve.rst
+	struct_seams_NeighbourOptions.rst
+	struct_seams_OrderOptions.rst
+	struct_seams_OrientationOrder.rst
+	struct_seams_Pockets.rst
+	struct_seams_PoreFrame.rst
+	struct_seams_PoreFrameOptions.rst
+	struct_seams_PoreProfileOptions.rst
+	struct_seams_PoreProfiles.rst
+	struct_seams_PrismCensus.rst
+	struct_seams_PrismOptions.rst
+	struct_seams_Q4Q6.rst
+	struct_seams_Q6Bar.rst
+	struct_seams_Q6BarOptions.rst
+	struct_seams_Rejection.rst
+	struct_seams_ReorientationCurve.rst
+	struct_seams_ReorientationFit.rst
+	struct_seams_RingOptions.rst
+	struct_seams_RunningCoordination.rst
+	struct_seams_SheetOptions.rst
+	struct_seams_SignatureMatch.rst
+	struct_seams_SignatureOptions.rst
+	struct_seams_Steinhardt.rst
+	struct_seams_SteinhardtOptions.rst
+	struct_seams_WaterVectors.rst
+	class_seams_Brine.rst
+	class_seams_Cages.rst
+	class_seams_Error.rst
+	class_seams_Fingerprint.rst
+	class_seams_HbondTcf.rst
+	class_seams_Msd.rst
+	class_seams_Neighbours.rst
+	class_seams_Reorientation.rst
+	class_seams_Rings.rst
+	class_seams_System.rst
+
+Move-only handles and value results over ``seams.h``.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// structs
+
+	struct :ref:`seams::BondOptions<doxid-structseams_1_1_bond_options>`;
+	struct :ref:`seams::BrineFronts<doxid-structseams_1_1_brine_fronts>`;
+	struct :ref:`seams::BrineOptions<doxid-structseams_1_1_brine_options>`;
+	struct :ref:`seams::BrineProfile<doxid-structseams_1_1_brine_profile>`;
+	struct :ref:`seams::CageCounts<doxid-structseams_1_1_cage_counts>`;
+	struct :ref:`seams::CageOptions<doxid-structseams_1_1_cage_options>`;
+	struct :ref:`seams::ChillOptions<doxid-structseams_1_1_chill_options>`;
+	struct :ref:`seams::ChordlessCycles<doxid-structseams_1_1_chordless_cycles>`;
+	struct :ref:`seams::Classification<doxid-structseams_1_1_classification>`;
+	struct :ref:`seams::Contacts<doxid-structseams_1_1_contacts>`;
+	struct :ref:`seams::DensityOptions<doxid-structseams_1_1_density_options>`;
+	struct :ref:`seams::DensityProfile<doxid-structseams_1_1_density_profile>`;
+	struct :ref:`seams::DiffusionFit<doxid-structseams_1_1_diffusion_fit>`;
+	struct :ref:`seams::DirectedBond<doxid-structseams_1_1_directed_bond>`;
+	struct :ref:`seams::DirectedBondOptions<doxid-structseams_1_1_directed_bond_options>`;
+	struct :ref:`seams::Distribution<doxid-structseams_1_1_distribution>`;
+	struct :ref:`seams::DistributionOptions<doxid-structseams_1_1_distribution_options>`;
+	struct :ref:`seams::DomainOptions<doxid-structseams_1_1_domain_options>`;
+	struct :ref:`seams::DomainReport<doxid-structseams_1_1_domain_report>`;
+	struct :ref:`seams::FingerprintOptions<doxid-structseams_1_1_fingerprint_options>`;
+	struct :ref:`seams::FractionalDensityOptions<doxid-structseams_1_1_fractional_density_options>`;
+	struct :ref:`seams::FractionalProfile<doxid-structseams_1_1_fractional_profile>`;
+	struct :ref:`seams::HbondLifetimeCurve<doxid-structseams_1_1_hbond_lifetime_curve>`;
+	struct :ref:`seams::HbondLifetimeFit<doxid-structseams_1_1_hbond_lifetime_fit>`;
+	struct :ref:`seams::HostGuestContacts<doxid-structseams_1_1_host_guest_contacts>`;
+	struct :ref:`seams::HostGuestOptions<doxid-structseams_1_1_host_guest_options>`;
+	struct :ref:`seams::KnnOptions<doxid-structseams_1_1_knn_options>`;
+	struct :ref:`seams::MoleculeCentres<doxid-structseams_1_1_molecule_centres>`;
+	struct :ref:`seams::MoleculeDipoles<doxid-structseams_1_1_molecule_dipoles>`;
+	struct :ref:`seams::MsdCurve<doxid-structseams_1_1_msd_curve>`;
+	struct :ref:`seams::NeighbourOptions<doxid-structseams_1_1_neighbour_options>`;
+	struct :ref:`seams::OrderOptions<doxid-structseams_1_1_order_options>`;
+	struct :ref:`seams::OrientationOrder<doxid-structseams_1_1_orientation_order>`;
+	struct :ref:`seams::Pockets<doxid-structseams_1_1_pockets>`;
+	struct :ref:`seams::PoreFrame<doxid-structseams_1_1_pore_frame>`;
+	struct :ref:`seams::PoreFrameOptions<doxid-structseams_1_1_pore_frame_options>`;
+	struct :ref:`seams::PoreProfileOptions<doxid-structseams_1_1_pore_profile_options>`;
+	struct :ref:`seams::PoreProfiles<doxid-structseams_1_1_pore_profiles>`;
+	struct :ref:`seams::PrismCensus<doxid-structseams_1_1_prism_census>`;
+	struct :ref:`seams::PrismOptions<doxid-structseams_1_1_prism_options>`;
+	struct :ref:`seams::Q4Q6<doxid-structseams_1_1_q4_q6>`;
+	struct :ref:`seams::Q6Bar<doxid-structseams_1_1_q6_bar>`;
+	struct :ref:`seams::Q6BarOptions<doxid-structseams_1_1_q6_bar_options>`;
+	struct :ref:`seams::Rejection<doxid-structseams_1_1_rejection>`;
+	struct :ref:`seams::ReorientationCurve<doxid-structseams_1_1_reorientation_curve>`;
+	struct :ref:`seams::ReorientationFit<doxid-structseams_1_1_reorientation_fit>`;
+	struct :ref:`seams::RingOptions<doxid-structseams_1_1_ring_options>`;
+	struct :ref:`seams::RunningCoordination<doxid-structseams_1_1_running_coordination>`;
+	struct :ref:`seams::SheetOptions<doxid-structseams_1_1_sheet_options>`;
+	struct :ref:`seams::SignatureMatch<doxid-structseams_1_1_signature_match>`;
+	struct :ref:`seams::SignatureOptions<doxid-structseams_1_1_signature_options>`;
+	struct :ref:`seams::Steinhardt<doxid-structseams_1_1_steinhardt>`;
+	struct :ref:`seams::SteinhardtOptions<doxid-structseams_1_1_steinhardt_options>`;
+	struct :ref:`seams::WaterVectors<doxid-structseams_1_1_water_vectors>`;
+
+	// classes
+
+	class :ref:`seams::Brine<doxid-classseams_1_1_brine>`;
+	class :ref:`seams::Cages<doxid-classseams_1_1_cages>`;
+	class :ref:`seams::Error<doxid-classseams_1_1_error>`;
+	class :ref:`seams::Fingerprint<doxid-classseams_1_1_fingerprint>`;
+	class :ref:`seams::HbondTcf<doxid-classseams_1_1_hbond_tcf>`;
+	class :ref:`seams::Msd<doxid-classseams_1_1_msd>`;
+	class :ref:`seams::Neighbours<doxid-classseams_1_1_neighbours>`;
+	class :ref:`seams::Reorientation<doxid-classseams_1_1_reorientation>`;
+	class :ref:`seams::Rings<doxid-classseams_1_1_rings>`;
+	class :ref:`seams::System<doxid-classseams_1_1_system>`;
+

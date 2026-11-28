@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/interface_order.hpp File Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/interface__order_8hpp.html">
+<meta property="og:title" content="seams-core: src/include/internal/interface_order.hpp File Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/interface__order_8hpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/interface_order.hpp File Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('interface__order_8hpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">interface_order.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>The two published CHILL+ rules on an interface, and the ring labels of confined ice.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+</div>
+<p><a href="interface__order_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:iface_3A_3AFront" id="r_iface_3A_3AFront"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structiface_1_1Front.html">iface::Front</a></td></tr>
+<tr class="memitem:iface_3A_3AProfile" id="r_iface_3A_3AProfile"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structiface_1_1Profile.html">iface::Profile</a></td></tr>
+<tr class="memitem:iface_3A_3ABin" id="r_iface_3A_3ABin"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structiface_1_1Bin.html">iface::Bin</a></td></tr>
+<tr class="memitem:iface_3A_3AStudy" id="r_iface_3A_3AStudy"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structiface_1_1Study.html">iface::Study</a></td></tr>
+<tr class="memitem:iface_3A_3AGrowthFrame" id="r_iface_3A_3AGrowthFrame"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structiface_1_1GrowthFrame.html">iface::GrowthFrame</a></td></tr>
+<tr class="memitem:iface_3A_3AGrowth" id="r_iface_3A_3AGrowth"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structiface_1_1Growth.html">iface::Growth</a></td></tr>
+<tr class="memitem:iface_3A_3ABootstrapInterval" id="r_iface_3A_3ABootstrapInterval"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structiface_1_1BootstrapInterval.html">iface::BootstrapInterval</a></td></tr>
+<tr class="memitem:iface_3A_3AWillardChandler" id="r_iface_3A_3AWillardChandler"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structiface_1_1WillardChandler.html">iface::WillardChandler</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:iface" id="r_iface"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html">iface</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a880354044e1248a351860d033c05721b" id="r_a880354044e1248a351860d033c05721b"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a880354044e1248a351860d033c05721b">iface::Cause</a> { <br />
+&#160;&#160;<a class="el" href="namespaceiface.html#a880354044e1248a351860d033c05721ba6a6334b478289b4fb3060c4f803eafd3">iface::agree</a> = 0
+, <a class="el" href="namespaceiface.html#a880354044e1248a351860d033c05721ba98b929ea2521b6f39fc260eea7d496af">iface::neighbour</a> = 1
+, <a class="el" href="namespaceiface.html#a880354044e1248a351860d033c05721ba28cb0457fcfa595f8f36771026c95ee1">iface::q3Shell</a> = 2
+, <a class="el" href="namespaceiface.html#a880354044e1248a351860d033c05721ba8775a734047c8689a28062db1ac36d5f">iface::openEdge</a> = 3
+, <br />
+&#160;&#160;<a class="el" href="namespaceiface.html#a880354044e1248a351860d033c05721ba1d770934d44de09b0d24f04fd01708ba">iface::mixed</a> = 4
+<br />
+ }</td></tr>
+<tr class="memitem:a3b2d1ed3ca7f783de29e8fde851b5395" id="r_a3b2d1ed3ca7f783de29e8fde851b5395"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395">iface::Kind</a> { <a class="el" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395ae52ce0141772cd5abea43f36ab85f387">iface::slab</a> = 0
+, <a class="el" href="namespaceiface.html#a3b2d1ed3ca7f783de29e8fde851b5395a91c7e4ea85be233a81041a3eefedc8ad">iface::nucleus</a> = 1
+ }</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ae766328e3e793278b61ae939e2cc2dfe" id="r_ae766328e3e793278b61ae939e2cc2dfe"><td class="memItemLeft"><a class="el" href="structiface_1_1Study.html">Study</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#ae766328e3e793278b61ae939e2cc2dfe">iface::studyCloud</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; cloud, double cutoff=3.5, double binWidth=1.0, bool census=true)</td></tr>
+<tr class="memitem:a2eaebae6d82142d09a0c4e1b0f7c4a67" id="r_a2eaebae6d82142d09a0c4e1b0f7c4a67"><td class="memItemLeft"><a class="el" href="structiface_1_1Study.html">Study</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a2eaebae6d82142d09a0c4e1b0f7c4a67">iface::studyDump</a> (const std::string &amp;path, int frame, double cutoff=3.5, double binWidth=1.0, bool census=true)</td></tr>
+<tr class="memitem:a2bf660dc8d0666212a6e2350c6494d9e" id="r_a2bf660dc8d0666212a6e2350c6494d9e"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a2bf660dc8d0666212a6e2350c6494d9e">iface::formatStudy</a> (const <a class="el" href="structiface_1_1Study.html">Study</a> &amp;study, const std::string &amp;tag)</td></tr>
+<tr class="memitem:a7615303594a4624586db8fc7dad682d0" id="r_a7615303594a4624586db8fc7dad682d0"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a7615303594a4624586db8fc7dad682d0">iface::slope</a> (const std::vector&lt; double &gt; &amp;x, const std::vector&lt; double &gt; &amp;y)</td></tr>
+<tr class="memdesc:a7615303594a4624586db8fc7dad682d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ordinary least squares slope. Empty or a single point returns 0.  <br /></td></tr>
+<tr class="memitem:a4c169525df7e2f69700c7116bf18b707" id="r_a4c169525df7e2f69700c7116bf18b707"><td class="memItemLeft"><a class="el" href="structiface_1_1Growth.html">Growth</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a4c169525df7e2f69700c7116bf18b707">iface::studyTrajectory</a> (const std::string &amp;path, double dumpEveryPs, double cutoff=3.5)</td></tr>
+<tr class="memdesc:a4c169525df7e2f69700c7116bf18b707"><td class="mdescLeft">&#160;</td><td class="mdescRight">Every frame of a dump. time of frame i is (i - 1) * dumpEveryPs.  <br /></td></tr>
+<tr class="memitem:a5cd477867991a043b897b4e58148ff86" id="r_a5cd477867991a043b897b4e58148ff86"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a5cd477867991a043b897b4e58148ff86">iface::formatGrowth</a> (const <a class="el" href="structiface_1_1Growth.html">Growth</a> &amp;growth)</td></tr>
+<tr class="memitem:acc0c4800681d1d5d1397be73a0cf9f77" id="r_acc0c4800681d1d5d1397be73a0cf9f77"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#acc0c4800681d1d5d1397be73a0cf9f77">iface::formatQ6Growth</a> (const std::string &amp;path, double dumpEveryPs, double cutoff=3.5)</td></tr>
+<tr class="memitem:a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4" id="r_a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4">iface::nanotube</a> (int ring, int stacks, double bond=2.75)</td></tr>
+<tr class="memitem:af79131ed074f5600451e7d73408097e4" id="r_af79131ed074f5600451e7d73408097e4"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#af79131ed074f5600451e7d73408097e4">iface::honeycombSheet</a> (int nx, int ny, int layers, double bond=2.75)</td></tr>
+<tr class="memitem:ac3554da1361c67160b4d59db9e1034e1" id="r_ac3554da1361c67160b4d59db9e1034e1"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#ac3554da1361c67160b4d59db9e1034e1">iface::gaussianStepWidth</a> (double xi)</td></tr>
+<tr class="memitem:a0665e3f3b47a112af0e9543fd68f0d95" id="r_a0665e3f3b47a112af0e9543fd68f0d95"><td class="memItemLeft"><a class="el" href="structiface_1_1BootstrapInterval.html">BootstrapInterval</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a0665e3f3b47a112af0e9543fd68f0d95">iface::bootstrapMean</a> (const std::vector&lt; double &gt; &amp;samples, int nDraw, std::uint64_t seed)</td></tr>
+<tr class="memdesc:a0665e3f3b47a112af0e9543fd68f0d95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Percentile bootstrap of the mean. nDraw samples with replacement.  <br /></td></tr>
+<tr class="memitem:a88cfd68ef2f533bc67e97ecb489f975d" id="r_a88cfd68ef2f533bc67e97ecb489f975d"><td class="memItemLeft"><a class="el" href="structiface_1_1BootstrapInterval.html">BootstrapInterval</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a88cfd68ef2f533bc67e97ecb489f975d">iface::pairedDifference</a> (const std::vector&lt; double &gt; &amp;a, const std::vector&lt; double &gt; &amp;b, int nDraw, std::uint64_t seed)</td></tr>
+<tr class="memdesc:a88cfd68ef2f533bc67e97ecb489f975d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mean of a[i] - b[i], resampled by shared index.  <br /></td></tr>
+<tr class="memitem:a05f59884d0d3896c70075a635609406e" id="r_a05f59884d0d3896c70075a635609406e"><td class="memItemLeft"><a class="el" href="structiface_1_1WillardChandler.html">WillardChandler</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a05f59884d0d3896c70075a635609406e">iface::willardChandler</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; cloud, double xi=2.4)</td></tr>
+<tr class="memitem:a1c6874fef9c0ed43cbe05451952c5e87" id="r_a1c6874fef9c0ed43cbe05451952c5e87"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="namespaceiface.html#a1c6874fef9c0ed43cbe05451952c5e87">iface::formatWillardChandler</a> (const <a class="el" href="structiface_1_1WillardChandler.html">WillardChandler</a> &amp;surface)</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>The two published CHILL+ rules on an interface, and the ring labels of confined ice. </p>
+<p>Thresholds are the 2015 values. Nothing here is fitted.</p>
+<p>Nguyen and Molinero, J. Phys. Chem. B 119 (2015) 9369, equation 1 and Table 1: q3 is the mean of Y_3m over the four nearest neighbours, a staggered bond is c(i,j) &lt;= -0.8, an eclipsed bond is -0.35 &lt;= c(i,j) &lt;= 0.25, a crystal row has four neighbours inside the cutoff, and an interfacial row keeps the neighbour test in footnote a of that table.</p>
+<p>OVITO 3.17.2 Chill+ (manual page chill_plus) and the mdapy kernel that was cross-checked against OVITO's ChillPlusModifier: q3 runs over every neighbour inside the cutoff, a staggered bond is c(i,j) &lt; -0.8, an eclipsed bond is -0.35 &lt; c(i,j) &lt; 0.25, and an interfacial row is two staggered bonds, or three staggered and no eclipsed bond, with no neighbour test. </p>
+
+<p class="definition">Definition in file <a class="el" href="interface__order_8hpp_source.html">interface_order.hpp</a>.</p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="interface__order_8hpp.html">interface_order.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

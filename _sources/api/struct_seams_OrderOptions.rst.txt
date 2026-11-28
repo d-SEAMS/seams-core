@@ -1,0 +1,91 @@
+.. index:: pair: struct; seams::OrderOptions
+.. _doxid-structseams_1_1_order_options:
+
+struct seams::OrderOptions
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for q_l on a named graph. :ref:`More...<details-structseams_1_1_order_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct OrderOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_order_options_1ac64ee2da63cbbd63be64341d20712530>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_order_options_1af81301cb12e0ed3fe8bbbc7ef8801420>` = 0;
+		int :ref:`order<doxid-structseams_1_1_order_options_1a6927e64ce630d77891fc96dca2e93d0f>` = 6;
+		:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` :ref:`graph<doxid-structseams_1_1_order_options_1a8790ce84a805a7ae3417d042240579f6>` = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`;
+		bool :ref:`average<doxid-structseams_1_1_order_options_1a56bac6c7de35bbae135b9d75e71ba5d8>` = false;
+	};
+.. _details-structseams_1_1_order_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for q_l on a named graph.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_order_options_1ac64ee2da63cbbd63be64341d20712530:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_order_options_1af81301cb12e0ed3fe8bbbc7ef8801420:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+.. index:: pair: variable; order
+.. _doxid-structseams_1_1_order_options_1a6927e64ce630d77891fc96dca2e93d0f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int order = 6
+
+Degree.
+
+3, 4, 6, 8, or 12.
+
+.. index:: pair: variable; graph
+.. _doxid-structseams_1_1_order_options_1a8790ce84a805a7ae3417d042240579f6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` graph = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`
+
+Cutoff or mutual.
+
+.. index:: pair: variable; average
+.. _doxid-structseams_1_1_order_options_1a56bac6c7de35bbae135b9d75e71ba5d8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool average = false
+
+Also return the neighbour mean.
+

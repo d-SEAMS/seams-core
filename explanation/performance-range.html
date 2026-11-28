@@ -1,0 +1,3275 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Performance, 4096 to 110592 - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Primitive rings and the full graph" href="primitive-rings.html" /><link rel="prev" title="Performance overview" href="performance-overview.html" /><link rel="canonical" href="https://docs.dseams.info/explanation/performance-range.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css?v=f040eaf7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-tokens.css?v=d0993c48" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-family.css?v=ab9c5117" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-shibuya.css?v=86c54dcb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-doxyrest.css?v=cb763bf8" />
+    
+    
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/explanation/performance-range.html"/>
+  <meta property="og:title" content="Performance, 4096 to 110592"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="Neighbour lists and primitive rings from the comparisons other than the release-candidate sitting and the 884736-molecule head-to-head."/>
+    <meta property="og:description" content="Neighbour lists and primitive rings from the comparisons other than the release-candidate sitting and the 884736-molecule head-to-head."/><meta name="twitter:card" content="summary_large_image"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="robots" content="index, follow">
+<meta name="twitter:title" content="Performance, 4096 to 110592 - d-SEAMS">
+<meta name="twitter:description" content="Neighbour lists and primitive rings from the comparisons other than the release-candidate sitting and the 884736-molecule head-to-head.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/explanation/performance-range.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"Performance, 4096 to 110592 - d-SEAMS","description":"Neighbour lists and primitive rings from the comparisons other than the release-candidate sitting and the 884736-molecule head-to-head.","url":"https://docs.dseams.info/explanation/performance-range.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
+<body><nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
+            <span>Libraries</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://linkcell.dseams.info">
+                <span>linkcell</span>
+                <small>Periodic linked-cell neighbour lists</small>
+              </a></li></ul>
+      </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../user/index.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../user/classify.html">Classify ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/order.html">Rings, cages, and order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/interfaces.html">Interfaces, nucleation, and brine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/confined.html">Confined ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/engines.html">Engines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/languages.html">Language walkthroughs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/versions.html">Versions and bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/paper.html">Paper figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/performance.html">Performance and comparisons</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Concepts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="binding-overhead.html">Binding overhead</a></li>
+<li class="toctree-l3"><a class="reference internal" href="c-api.html">The C API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="citation.html">Citation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clavis-trace.html">ClavisCage TRACE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hop-ball.html">Carried rings and the hop ball</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrogen-bonds.html">Directed hydrogen bonds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="interface-order.html">Interface and confined ice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linkcell-scaling.html">Linkcell strong scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ovito-findrings.html">Primitive rings and OVITO FindRings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance.html">Release-candidate sitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-h2h.html">Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-overview.html">Performance overview</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Performance, 4096 to 110592</a></li>
+<li class="toctree-l3"><a class="reference internal" href="primitive-rings.html">Primitive rings and the full graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rings-one-thread.html">Rings on one thread</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sqq.html">SQQ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stacking-disorder.html">Stacking disorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="symmetry.html">Local symmetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="topological-network.html">Topological network criteria</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace-assembly.html">TRACE and signature cages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace-threads.html">Signature-search thread controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_SkinNeighborList.html">class nneigh::SkinNeighborList</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_primitive_RingUpdater.html">class primitive::RingUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_AffiliationUpdater.html">class ring::AffiliationUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_NeighBond.html">class ring::NeighBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Brine.html">class seams::Brine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Cages.html">class seams::Cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Error.html">class seams::Error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_FairWidth.html">class seams::FairWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Fingerprint.html">class seams::Fingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_HbondTcf.html">class seams::HbondTcf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Msd.html">class seams::Msd</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Neighbours.html">class seams::Neighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_PinSession.html">class seams::PinSession</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_RegionErrors.html">class seams::RegionErrors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Reorientation.html">class seams::Reorientation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings.html">class seams::Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings_iterator.html">class seams::Rings::iterator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_System.html">class seams::System</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_detail_Handle.html">template class seams::detail::Handle</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_HbondLifetimeAccumulator.html">class traj::HbondLifetimeAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_MsdAccumulator.html">class traj::MsdAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_ReorientationAccumulator.html">class traj::ReorientationAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_TrajectoryUnwrapper.html">class traj::TrajectoryUnwrapper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_Signature_Kind.html">enum cage::Signature::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_cageType.html">enum cage::cageType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_iceType.html">enum cage::iceType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_ChillPlusRule.html">enum chill::ChillPlusRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_CrystalKind.html">enum chill::CrystalKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Cause.html">enum iface::Cause</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Kind.html">enum iface::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_atom_state_type.html">enum molSys::atom_state_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_bond_type.html">enum molSys::bond_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nneigh_BondGraph.html">enum nneigh::BondGraph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nucleation_CommittorFate.html">enum nucleation::CommittorFate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_phase_GlassKind.html">enum phase::GlassKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_primitive_RingRows.html">enum primitive::RingRows</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_ring_strucType.html">enum ring::strucType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Int8Backend.html">enum seams::product::Int8Backend</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Mode.html">enum seams::product::Mode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Reduction.html">enum seams::product::Reduction</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Family.html">enum site::Family</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_IonState.html">enum site::IonState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Kind.html">enum site::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Crystal.html">enum symm::Crystal</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Kind.html">enum symm::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_topoparam_TetrahedralNeighbours.html">enum topoparam::TetrahedralNeighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_water_MolMode.html">enum water::MolMode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-atoms">seams_system_set_atoms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-positions">seams_system_set_positions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-handle-error">seams_handle_error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-status">seams_status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system">seams_system</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-cagelabel">seams::CageLabel</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#doxid-group-seams-cpp-1ga66e498496a8ac061410534a9f0171779">seams::Status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-chillrule">seams::ChillRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-domainsubset">seams::DomainSubset</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-graph">seams::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-axis">seams::Axis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-set-num-threads">seams::set_num_threads</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5">group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d">group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/global.html">Global Namespace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_bond.html">Bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_cage.html">Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_brine.html">Ice/brine fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_cage.html">Cages and ice shells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame.html">Frames</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame_io.html">Frame reload and read-back</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_meta.html">Library metadata and errors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_more.html">Further analyses</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_neigh.html">Neighbour lists</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_order.html">Order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_pore.html">Pore geometry</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_ring.html">Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_sized.html">Status-returning and length-checked entry points</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_traj.html">Trajectories and dynamics</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_types.html">Types</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_chill.html">Chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_clump.html">Clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_gen.html">Gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_molSys.html">MolSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_primitive.html">Primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_prism3.html">Bulk prisms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf.html">Rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_ring.html">Ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_seams_cpp.html">C++ API</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_sinp.html">Sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_absor.html">namespace absor</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_bond.html">namespace bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_cage.html">namespace cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chill.html">namespace chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chordless.html">namespace chordless</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_clump.html">namespace clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen.html">namespace gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen_mic.html">namespace gen::mic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gpu.html">namespace gpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_iface.html">namespace iface</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ira.html">namespace ira</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_match.html">namespace match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_molSys.html">namespace molSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nneigh.html">namespace nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nucleation.html">namespace nucleation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_phase.html">namespace phase</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pntToPnt.html">namespace pntToPnt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pore.html">namespace pore</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_primitive.html">namespace primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_prism3.html">namespace prism3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf.html">namespace rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf2.html">namespace rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ring.html">namespace ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_science.html">namespace science</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams.html">namespace seams</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cfg.html">namespace seams::cfg</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cpu.html">namespace seams::cpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_detail.html">namespace seams::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_domain.html">namespace seams::domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_minimax.html">namespace seams::minimax</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_product.html">namespace seams::product</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_solid.html">namespace seams::solid</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_sphericart_ylm.html">namespace seams::sphericart_ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_steinhardt.html">namespace seams::steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_team.html">namespace seams::team</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_team_detail.html">namespace seams::team::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_tsan.html">namespace seams::tsan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_wigner.html">namespace seams::wigner</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_ylm.html">namespace seams::ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sinp.html">namespace sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_site.html">namespace site</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sout.html">namespace sout</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sph.html">namespace sph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_std.html">namespace std</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm.html">namespace symm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_avx2.html">namespace symm::avx2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_generic.html">namespace symm::generic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topo.html">namespace topo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topoparam.html">namespace topoparam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_traj.html">namespace traj</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum.html">namespace tum</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum3.html">namespace tum3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum_device.html">namespace tum::device</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_water.html">namespace water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_bond_DirectedHydrogenBond.html">struct bond::DirectedHydrogenBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Cage.html">struct cage::Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_CageShape.html">struct cage::CageShape</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_EdgeWindow.html">struct cage::EdgeWindow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FormerRow.html">struct cage::FormerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FoundCage.html">struct cage::FoundCage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Signature.html">struct cage::Signature</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_AnalysisPhases.html">struct chill::AnalysisPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondClassifier.html">struct chill::BondClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondOrder.html">struct chill::BondOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_ChillPlusResult.html">struct chill::ChillPlusResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_LinearClassifier.html">struct chill::LinearClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlCutoffStages.html">struct chill::QlCutoffStages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlmAtom.html">struct chill::QlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_SteinhardtQl.html">struct chill::SteinhardtQl</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_TemplateHit.html">struct chill::TemplateHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_VoronoiWeights.html">struct chill::VoronoiWeights</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_YlmAtom.html">struct chill::YlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_clump_Domain.html">struct clump::Domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_FracBox.html">struct gen::FracBox</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_mic_RangeError.html">struct gen::mic::RangeError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_BatchResult.html">struct gpu::BatchResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_DeviceInfo.html">struct gpu::DeviceInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Footprint.html">struct gpu::Footprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Plan.html">struct gpu::Plan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Bin.html">struct iface::Bin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_BootstrapInterval.html">struct iface::BootstrapInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Front.html">struct iface::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Growth.html">struct iface::Growth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_GrowthFrame.html">struct iface::GrowthFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Profile.html">struct iface::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Study.html">struct iface::Study</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_WillardChandler.html">struct iface::WillardChandler</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_Match.html">struct ira::Match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_PointGroup.html">struct ira::PointGroup</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Point.html">template struct molSys::Point</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_PointCloud.html">template struct molSys::PointCloud</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Result.html">struct molSys::Result</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Ascent.html">struct nucleation::Ascent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_CommittorCall.html">struct nucleation::CommittorCall</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_FrameRecord.html">struct nucleation::FrameRecord</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_GrowBasin.html">struct nucleation::GrowBasin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_HalfRise.html">struct nucleation::HalfRise</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Lead.html">struct nucleation::Lead</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Shift.html">struct nucleation::Shift</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_phase_IceXXIHit.html">struct phase::IceXXIHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_BoxError.html">struct pore::BoxError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Frame.html">struct pore::Frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_HostGuest.html">struct pore::HostGuest</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Profile.html">struct pore::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Profiles.html">struct pore::Profiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Graph.html">struct primitive::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_RingSearchSplit.html">struct primitive::RingSearchSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Vertex.html">struct primitive::Vertex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_rdf_PartialRdf.html">struct rdf::PartialRdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CageAffiliation.html">struct ring::CageAffiliation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CagePlanes.html">struct ring::CagePlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_DdcSplit.html">struct ring::DdcSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_EquatorChoice.html">struct ring::EquatorChoice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackParts.html">struct ring::PackParts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackingCertificate.html">struct ring::PackingCertificate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_RingSearchIndex.html">struct ring::RingSearchIndex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_SeededAtomLabels.html">struct ring::SeededAtomLabels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_StackingPlanes.html">struct ring::StackingPlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_AtomRow.html">struct science::AtomRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_ClusterPart.html">struct science::ClusterPart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_CriticalSize.html">struct science::CriticalSize</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Front.html">struct science::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_LayerRow.html">struct science::LayerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Layers.html">struct science::Layers</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_NucleusFrame.html">struct science::NucleusFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_SlopeInterval.html">struct science::SlopeInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BondOptions.html">struct seams::BondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineFronts.html">struct seams::BrineFronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineOptions.html">struct seams::BrineOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineProfile.html">struct seams::BrineProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageCounts.html">struct seams::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageOptions.html">struct seams::CageOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChillOptions.html">struct seams::ChillOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChordlessCycles.html">struct seams::ChordlessCycles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Classification.html">struct seams::Classification</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Contacts.html">struct seams::Contacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityOptions.html">struct seams::DensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityProfile.html">struct seams::DensityProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DiffusionFit.html">struct seams::DiffusionFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DirectedBond.html">struct seams::DirectedBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DirectedBondOptions.html">struct seams::DirectedBondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Distribution.html">struct seams::Distribution</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DistributionOptions.html">struct seams::DistributionOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainOptions.html">struct seams::DomainOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainReport.html">struct seams::DomainReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_EdgeSet.html">struct seams::EdgeSet</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FairState.html">struct seams::FairState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FilledByTeam.html">template struct seams::FilledByTeam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FilledByTeam_rebind.html">template struct seams::FilledByTeam::rebind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FingerprintOptions.html">struct seams::FingerprintOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FractionalDensityOptions.html">struct seams::FractionalDensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FractionalProfile.html">struct seams::FractionalProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HbondLifetimeCurve.html">struct seams::HbondLifetimeCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HbondLifetimeFit.html">struct seams::HbondLifetimeFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HostGuestContacts.html">struct seams::HostGuestContacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HostGuestOptions.html">struct seams::HostGuestOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_KnnOptions.html">struct seams::KnnOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MoleculeCentres.html">struct seams::MoleculeCentres</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MoleculeDipoles.html">struct seams::MoleculeDipoles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MsdCurve.html">struct seams::MsdCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_NeighbourOptions.html">struct seams::NeighbourOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrderOptions.html">struct seams::OrderOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrientationOrder.html">struct seams::OrientationOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Pockets.html">struct seams::Pockets</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreFrame.html">struct seams::PoreFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreFrameOptions.html">struct seams::PoreFrameOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreProfileOptions.html">struct seams::PoreProfileOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreProfiles.html">struct seams::PoreProfiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismCensus.html">struct seams::PrismCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismOptions.html">struct seams::PrismOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q4Q6.html">struct seams::Q4Q6</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6Bar.html">struct seams::Q6Bar</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6BarOptions.html">struct seams::Q6BarOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Rejection.html">struct seams::Rejection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ReorientationCurve.html">struct seams::ReorientationCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ReorientationFit.html">struct seams::ReorientationFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RingOptions.html">struct seams::RingOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RunningCoordination.html">struct seams::RunningCoordination</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SheetOptions.html">struct seams::SheetOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureMatch.html">struct seams::SignatureMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureOptions.html">struct seams::SignatureOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Steinhardt.html">struct seams::Steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SteinhardtOptions.html">struct seams::SteinhardtOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_TeamWidth.html">struct seams::TeamWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_WaterVectors.html">struct seams::WaterVectors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cfg_Runtime.html">struct seams::cfg::Runtime</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cpu_Features.html">struct seams::cpu::Features</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_directed_hbond.html">struct seams_directed_hbond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingPhases.html">struct seams::domain::RingPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingSummary.html">struct seams::domain::RingSummary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_Share.html">struct seams::domain::Share</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_hbond_edge.html">struct seams_hbond_edge</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_Cij.html">struct seams::product::Cij</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_ComplexDot.html">struct seams::product::ComplexDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_GemmInfo.html">struct seams::product::GemmInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_RealDot.html">struct seams::product::RealDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_team_detail_Call.html">template struct seams::team::detail::Call</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_tsan_Slot.html">struct seams::tsan::Slot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_sinp_ChemfilesLoadOptions.html">struct sinp::ChemfilesLoadOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_BrinePocket.html">struct site::BrinePocket</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationBin.html">struct site::ConcentrationBin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationProfile.html">struct site::ConcentrationProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_DensityZ.html">struct site::DensityZ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontLayerReport.html">struct site::FrontLayerReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontOptions.html">struct site::FrontOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontPair.html">struct site::FrontPair</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontSnapshot.html">struct site::FrontSnapshot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_GuestOccupancy.html">struct site::GuestOccupancy</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IceClusterIons.html">struct site::IceClusterIons</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_InsideTrace.html">struct site::InsideTrace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IonEnvironment.html">struct site::IonEnvironment</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_LinearFit.html">struct site::LinearFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_PocketCensus.html">struct site::PocketCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_RejectionCoefficient.html">struct site::RejectionCoefficient</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_Table.html">struct site::Table</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_TrapEvent.html">struct site::TrapEvent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_CanonShell.html">struct symm::CanonShell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Group.html">struct symm::Group</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Lattice.html">struct symm::Lattice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Overlay.html">struct symm::Overlay</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Shell17.html">struct symm::Shell17</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Space.html">struct symm::Space</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_FrameFingerprint.html">struct topo::FrameFingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_KeyLibrary.html">struct topo::KeyLibrary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LibraryMatch.html">struct topo::LibraryMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LocalKey.html">struct topo::LocalKey</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topoparam_LayerStack.html">struct topoparam::LayerStack</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_BoxCell.html">struct traj::BoxCell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DecayFitResult.html">struct traj::DecayFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DiffusionFitResult.html">struct traj::DiffusionFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DipoleVectorsResult.html">struct traj::DipoleVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_HbondLifetimeAccumulator_OriginSlot.html">struct traj::HbondLifetimeAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_MsdAccumulator_OriginSlot.html">struct traj::MsdAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_OrientationOrderResult.html">struct traj::OrientationOrderResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_ReorientationAccumulator_OriginSlot.html">struct traj::ReorientationAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_WaterVectorsResult.html">struct traj::WaterVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_CageCounts.html">struct tum::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_SpecializedCaps.html">struct tum::SpecializedCaps</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonReport.html">struct water::IonReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="comparisons-summary-tables.html">Head-to-head summary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="sqq-tables.html">SQQ</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#ice-ic-rings-at-sixteen-repeats">Ice Ic rings at sixteen repeats</a></li>
+<li><a class="reference internal" href="#ice-ic-rings">Ice Ic rings</a></li>
+<li><a class="reference internal" href="#published-method-comparisons">Published-method comparisons</a></li>
+<li><a class="reference internal" href="#ring-comparisons-v0-2-0">Ring comparisons (v0.2.0)</a></li>
+<li><a class="reference internal" href="#ring-comparisons-v0-3-0">Ring comparisons (v0.3.0)</a></li>
+<li><a class="reference internal" href="#small-cell-comparisons">Small-cell comparisons</a></li>
+<li><a class="reference internal" href="#large-cell-comparisons">Large-cell comparisons</a></li>
+<li><a class="reference internal" href="#threaded-comparisons">Threaded comparisons</a></li>
+<li><a class="reference internal" href="#sqq-comparisons">SQQ comparisons</a></li>
+<li><a class="reference internal" href="#neighbour-comparisons">Neighbour comparisons</a></li>
+<li><a class="reference internal" href="#additional-comparisons">Additional comparisons</a></li>
+<li><a class="reference internal" href="#literature-performance">Literature performance</a></li>
+<li><a class="reference internal" href="#thread-scaling">Thread scaling</a></li>
+</ul>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../user/index.html"><span itemprop="name">User guide</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Concepts</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Performance, 4096 to 110592</strong>
+        <meta itemprop="position" content="4" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="performance-4096-to-110592">
+<h1>Performance, 4096 to 110592<a class="headerlink" href="#performance-4096-to-110592" title="Link to this heading">#</a></h1>
+<p>Neighbour lists and primitive rings from the comparisons other
+than the release-candidate sitting and the 884736-molecule head-to-head.
+A row is listed when its stored <code class="docutils literal notranslate"><span class="pre">n</span></code> is at least 6. The interval is
+<code class="docutils literal notranslate"><span class="pre">q1</span> <span class="pre">ms</span></code> and <code class="docutils literal notranslate"><span class="pre">q3</span> <span class="pre">ms</span></code> when recorded, <code class="docutils literal notranslate"><span class="pre">iqr</span> <span class="pre">ms</span></code> when that is
+the recorded interval, and <code class="docutils literal notranslate"><span class="pre">min</span> <span class="pre">ms</span></code> when that is the second time
+recorded. The version column is the version the row recorded. Two of the tables store a variant
+column, <code class="docutils literal notranslate"><span class="pre">rings</span></code> or <code class="docutils literal notranslate"><span class="pre">bonds_and_rings</span></code>.</p>
+<p>One cycless comparison also stores a 1000-molecule row. It is listed with
+that table. Rows whose stored <code class="docutils literal notranslate"><span class="pre">n</span></code> is below 6 are omitted.</p>
+<p>The release-candidate medians are on
+<a class="reference external" href="performance.html">the sitting page</a>.
+The 884736-molecule ice and liquid medians are on
+<a class="reference external" href="performance-h2h.html">the head-to-head</a>.
+What each comparison measures is on
+<a class="reference external" href="performance-overview.html">the overview</a>.</p>
+<section id="ice-ic-rings-at-sixteen-repeats">
+<h2>Ice Ic rings at sixteen repeats<a class="headerlink" href="#ice-ic-rings-at-sixteen-repeats" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>variant</p></th>
+<th class="head"><p>phase</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>min ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>16</p></td>
+<td><p>40.6144</p></td>
+<td><p>37.7373</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>16</p></td>
+<td><p>251.1672</p></td>
+<td><p>239.1735</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>16</p></td>
+<td><p>55.7371</p></td>
+<td><p>53.6951</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>16</p></td>
+<td><p>264.0511</p></td>
+<td><p>253.0655</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="ice-ic-rings">
+<h2>Ice Ic rings<a class="headerlink" href="#ice-ic-rings" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>variant</p></th>
+<th class="head"><p>phase</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>min ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>9.8639</p></td>
+<td><p>9.6972</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>37.8036</p></td>
+<td><p>37.6691</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>13.1411</p></td>
+<td><p>12.3939</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>41.8717</p></td>
+<td><p>41.5144</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>4.0444</p></td>
+<td><p>3.8720</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>26.9074</p></td>
+<td><p>26.1663</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>6.0180</p></td>
+<td><p>5.3213</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>33.4980</p></td>
+<td><p>29.6080</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>99.1698</p></td>
+<td><p>98.6583</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>466.6515</p></td>
+<td><p>457.7944</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>127.1159</p></td>
+<td><p>125.8985</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>500.2296</p></td>
+<td><p>487.4355</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>36.3712</p></td>
+<td><p>32.4421</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>287.1516</p></td>
+<td><p>252.4985</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>50.8056</p></td>
+<td><p>48.5005</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>bonds_and_rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>277.7784</p></td>
+<td><p>256.6581</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="published-method-comparisons">
+<h2>Published-method comparisons<a class="headerlink" href="#published-method-comparisons" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>phase</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>1.371</p></td>
+<td><p>1.359</p></td>
+<td><p>1.425</p></td>
+<td><p>0.066</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>2.053</p></td>
+<td><p>2.018</p></td>
+<td><p>2.091</p></td>
+<td><p>0.074</p></td>
+</tr>
+<tr class="row-even"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>7.690</p></td>
+<td><p>7.616</p></td>
+<td><p>7.767</p></td>
+<td><p>0.151</p></td>
+</tr>
+<tr class="row-odd"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>2.137</p></td>
+<td><p>2.129</p></td>
+<td><p>2.186</p></td>
+<td><p>0.057</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>4.772</p></td>
+<td><p>4.704</p></td>
+<td><p>4.832</p></td>
+<td><p>0.128</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>104.216</p></td>
+<td><p>103.876</p></td>
+<td><p>104.700</p></td>
+<td><p>0.824</p></td>
+</tr>
+<tr class="row-even"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>647.521</p></td>
+<td><p>626.211</p></td>
+<td><p>654.382</p></td>
+<td><p>28.171</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>0.899</p></td>
+<td><p>0.888</p></td>
+<td><p>0.935</p></td>
+<td><p>0.048</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>1.888</p></td>
+<td><p>1.886</p></td>
+<td><p>1.939</p></td>
+<td><p>0.054</p></td>
+</tr>
+<tr class="row-odd"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>7.176</p></td>
+<td><p>7.118</p></td>
+<td><p>7.200</p></td>
+<td><p>0.082</p></td>
+</tr>
+<tr class="row-even"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>1.706</p></td>
+<td><p>1.698</p></td>
+<td><p>1.742</p></td>
+<td><p>0.044</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>4.367</p></td>
+<td><p>4.332</p></td>
+<td><p>4.410</p></td>
+<td><p>0.078</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>110.485</p></td>
+<td><p>110.092</p></td>
+<td><p>111.533</p></td>
+<td><p>1.441</p></td>
+</tr>
+<tr class="row-odd"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>680.332</p></td>
+<td><p>655.590</p></td>
+<td><p>688.590</p></td>
+<td><p>33.000</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>31.603</p></td>
+<td><p>31.592</p></td>
+<td><p>31.694</p></td>
+<td><p>0.102</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>45.102</p></td>
+<td><p>43.999</p></td>
+<td><p>46.509</p></td>
+<td><p>2.510</p></td>
+</tr>
+<tr class="row-even"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>225.169</p></td>
+<td><p>223.259</p></td>
+<td><p>227.522</p></td>
+<td><p>4.264</p></td>
+</tr>
+<tr class="row-odd"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>51.939</p></td>
+<td><p>51.809</p></td>
+<td><p>52.130</p></td>
+<td><p>0.322</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>116.834</p></td>
+<td><p>113.870</p></td>
+<td><p>120.833</p></td>
+<td><p>6.963</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>2651.418</p></td>
+<td><p>2640.428</p></td>
+<td><p>2699.148</p></td>
+<td><p>58.720</p></td>
+</tr>
+<tr class="row-even"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>18672.033</p></td>
+<td><p>18473.917</p></td>
+<td><p>18729.963</p></td>
+<td><p>256.046</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>25.773</p></td>
+<td><p>25.730</p></td>
+<td><p>25.941</p></td>
+<td><p>0.210</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>41.722</p></td>
+<td><p>41.455</p></td>
+<td><p>41.986</p></td>
+<td><p>0.532</p></td>
+</tr>
+<tr class="row-odd"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>216.279</p></td>
+<td><p>210.310</p></td>
+<td><p>224.063</p></td>
+<td><p>13.753</p></td>
+</tr>
+<tr class="row-even"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>47.958</p></td>
+<td><p>47.419</p></td>
+<td><p>48.874</p></td>
+<td><p>1.456</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>110.414</p></td>
+<td><p>109.860</p></td>
+<td><p>111.632</p></td>
+<td><p>1.772</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>2964.323</p></td>
+<td><p>2942.957</p></td>
+<td><p>3115.632</p></td>
+<td><p>172.675</p></td>
+</tr>
+<tr class="row-odd"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>19688.702</p></td>
+<td><p>19593.652</p></td>
+<td><p>19830.579</p></td>
+<td><p>236.927</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>0.430</p></td>
+<td><p>0.427</p></td>
+<td><p>0.443</p></td>
+<td><p>0.016</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>21.425</p></td>
+<td><p>21.320</p></td>
+<td><p>21.522</p></td>
+<td><p>0.202</p></td>
+</tr>
+<tr class="row-even"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>8.430</p></td>
+<td><p>8.333</p></td>
+<td><p>8.568</p></td>
+<td><p>0.235</p></td>
+</tr>
+<tr class="row-odd"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>2.604</p></td>
+<td><p>2.504</p></td>
+<td><p>2.745</p></td>
+<td><p>0.242</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>1.653</p></td>
+<td><p>1.640</p></td>
+<td><p>1.709</p></td>
+<td><p>0.069</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>128.797</p></td>
+<td><p>127.905</p></td>
+<td><p>129.621</p></td>
+<td><p>1.716</p></td>
+</tr>
+<tr class="row-even"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>630.689</p></td>
+<td><p>613.176</p></td>
+<td><p>645.745</p></td>
+<td><p>32.569</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>0.413</p></td>
+<td><p>0.410</p></td>
+<td><p>0.419</p></td>
+<td><p>0.009</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>21.357</p></td>
+<td><p>21.350</p></td>
+<td><p>21.386</p></td>
+<td><p>0.036</p></td>
+</tr>
+<tr class="row-odd"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>7.865</p></td>
+<td><p>7.775</p></td>
+<td><p>7.910</p></td>
+<td><p>0.134</p></td>
+</tr>
+<tr class="row-even"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>1.810</p></td>
+<td><p>1.793</p></td>
+<td><p>1.862</p></td>
+<td><p>0.069</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>1.738</p></td>
+<td><p>1.686</p></td>
+<td><p>1.892</p></td>
+<td><p>0.205</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>133.650</p></td>
+<td><p>133.146</p></td>
+<td><p>134.076</p></td>
+<td><p>0.931</p></td>
+</tr>
+<tr class="row-odd"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>4096</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>676.038</p></td>
+<td><p>652.473</p></td>
+<td><p>678.777</p></td>
+<td><p>26.304</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>10.358</p></td>
+<td><p>10.317</p></td>
+<td><p>12.484</p></td>
+<td><p>2.167</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>62.965</p></td>
+<td><p>61.247</p></td>
+<td><p>64.459</p></td>
+<td><p>3.212</p></td>
+</tr>
+<tr class="row-even"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>216.041</p></td>
+<td><p>211.738</p></td>
+<td><p>221.708</p></td>
+<td><p>9.969</p></td>
+</tr>
+<tr class="row-odd"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>52.525</p></td>
+<td><p>52.356</p></td>
+<td><p>52.731</p></td>
+<td><p>0.375</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>34.116</p></td>
+<td><p>33.861</p></td>
+<td><p>35.772</p></td>
+<td><p>1.910</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>2670.661</p></td>
+<td><p>2666.478</p></td>
+<td><p>2674.465</p></td>
+<td><p>7.986</p></td>
+</tr>
+<tr class="row-even"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>18326.846</p></td>
+<td><p>18267.918</p></td>
+<td><p>18498.089</p></td>
+<td><p>230.171</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>9.663</p></td>
+<td><p>9.526</p></td>
+<td><p>9.825</p></td>
+<td><p>0.299</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>61.494</p></td>
+<td><p>60.923</p></td>
+<td><p>63.063</p></td>
+<td><p>2.140</p></td>
+</tr>
+<tr class="row-odd"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>216.341</p></td>
+<td><p>213.091</p></td>
+<td><p>221.264</p></td>
+<td><p>8.173</p></td>
+</tr>
+<tr class="row-even"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>50.518</p></td>
+<td><p>50.404</p></td>
+<td><p>50.649</p></td>
+<td><p>0.245</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>33.709</p></td>
+<td><p>33.306</p></td>
+<td><p>34.106</p></td>
+<td><p>0.801</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>2981.948</p></td>
+<td><p>2972.034</p></td>
+<td><p>2989.280</p></td>
+<td><p>17.245</p></td>
+</tr>
+<tr class="row-odd"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>21085.739</p></td>
+<td><p>20671.002</p></td>
+<td><p>21266.501</p></td>
+<td><p>595.499</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="ring-comparisons-v0-2-0">
+<h2>Ring comparisons (v0.2.0)<a class="headerlink" href="#ring-comparisons-v0-2-0" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>10.269</p></td>
+<td><p>10.196</p></td>
+<td><p>10.295</p></td>
+<td><p>0.099</p></td>
+</tr>
+<tr class="row-odd"><td><p>rings-statistics-matter</p></td>
+<td><p>0.2.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>123.192</p></td>
+<td><p>123.168</p></td>
+<td><p>123.401</p></td>
+<td><p>0.233</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>107.461</p></td>
+<td><p>106.944</p></td>
+<td><p>107.799</p></td>
+<td><p>0.855</p></td>
+</tr>
+<tr class="row-odd"><td><p>rings-statistics-matter</p></td>
+<td><p>0.2.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>1073.553</p></td>
+<td><p>1072.112</p></td>
+<td><p>1088.850</p></td>
+<td><p>16.738</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>5.498</p></td>
+<td><p>5.429</p></td>
+<td><p>5.599</p></td>
+<td><p>0.171</p></td>
+</tr>
+<tr class="row-odd"><td><p>rings-statistics-matter</p></td>
+<td><p>0.2.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>30.724</p></td>
+<td><p>29.916</p></td>
+<td><p>31.070</p></td>
+<td><p>1.153</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>56.196</p></td>
+<td><p>53.545</p></td>
+<td><p>58.150</p></td>
+<td><p>4.606</p></td>
+</tr>
+<tr class="row-odd"><td><p>rings-statistics-matter</p></td>
+<td><p>0.2.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>258.706</p></td>
+<td><p>250.839</p></td>
+<td><p>267.513</p></td>
+<td><p>16.674</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="ring-comparisons-v0-3-0">
+<h2>Ring comparisons (v0.3.0)<a class="headerlink" href="#ring-comparisons-v0-3-0" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>10.336</p></td>
+<td><p>10.327</p></td>
+<td><p>10.376</p></td>
+<td><p>0.049</p></td>
+</tr>
+<tr class="row-odd"><td><p>rings-statistics-matter</p></td>
+<td><p>0.3.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>124.991</p></td>
+<td><p>124.491</p></td>
+<td><p>125.336</p></td>
+<td><p>0.844</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>105.096</p></td>
+<td><p>104.862</p></td>
+<td><p>105.328</p></td>
+<td><p>0.467</p></td>
+</tr>
+<tr class="row-odd"><td><p>rings-statistics-matter</p></td>
+<td><p>0.3.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>1094.041</p></td>
+<td><p>1093.609</p></td>
+<td><p>1096.499</p></td>
+<td><p>2.890</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>5.259</p></td>
+<td><p>5.193</p></td>
+<td><p>5.342</p></td>
+<td><p>0.148</p></td>
+</tr>
+<tr class="row-odd"><td><p>rings-statistics-matter</p></td>
+<td><p>0.3.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>29.242</p></td>
+<td><p>29.051</p></td>
+<td><p>29.534</p></td>
+<td><p>0.482</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>46.111</p></td>
+<td><p>45.552</p></td>
+<td><p>46.841</p></td>
+<td><p>1.289</p></td>
+</tr>
+<tr class="row-odd"><td><p>rings-statistics-matter</p></td>
+<td><p>0.3.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>247.816</p></td>
+<td><p>247.260</p></td>
+<td><p>250.715</p></td>
+<td><p>3.454</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="small-cell-comparisons">
+<h2>Small-cell comparisons<a class="headerlink" href="#small-cell-comparisons" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>111.587881</p></td>
+<td><p>110.932591</p></td>
+<td><p>112.894357</p></td>
+<td><p>1.961766</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>48.488663</p></td>
+<td><p>46.060893</p></td>
+<td><p>55.687549</p></td>
+<td><p>9.626655</p></td>
+</tr>
+<tr class="row-even"><td><p>matscipy</p></td>
+<td><p>1.3.1</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>2642.873437</p></td>
+<td><p>2489.010310</p></td>
+<td><p>3070.064791</p></td>
+<td><p>581.054481</p></td>
+</tr>
+<tr class="row-odd"><td><p>cycless</p></td>
+<td><p>0.7</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>36801.906556</p></td>
+<td><p>36564.801028</p></td>
+<td><p>37199.719537</p></td>
+<td><p>634.918509</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>6</p></td>
+<td><p>1132.111227</p></td>
+<td><p>1129.723906</p></td>
+<td><p>1141.380609</p></td>
+<td><p>11.656703</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>6</p></td>
+<td><p>564.355867</p></td>
+<td><p>561.745026</p></td>
+<td><p>565.098417</p></td>
+<td><p>3.353391</p></td>
+</tr>
+<tr class="row-even"><td><p>cycless</p></td>
+<td><p>0.7</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>6</p></td>
+<td><p>398433.762302</p></td>
+<td><p>396772.871776</p></td>
+<td><p>400537.838888</p></td>
+<td><p>3764.967113</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="large-cell-comparisons">
+<h2>Large-cell comparisons<a class="headerlink" href="#large-cell-comparisons" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>release-O3</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>45.672647</p></td>
+<td><p>44.948163</p></td>
+<td><p>47.284926</p></td>
+<td><p>2.336763</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>44.577290</p></td>
+<td><p>44.561665</p></td>
+<td><p>44.586987</p></td>
+<td><p>0.025322</p></td>
+</tr>
+<tr class="row-even"><td><p>matscipy</p></td>
+<td><p>1.3.1</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>1309.019366</p></td>
+<td><p>1295.156232</p></td>
+<td><p>1315.440394</p></td>
+<td><p>20.284163</p></td>
+</tr>
+<tr class="row-odd"><td><p>cycless</p></td>
+<td><p>0.7</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>35583.400189</p></td>
+<td><p>35427.172801</p></td>
+<td><p>35660.535723</p></td>
+<td><p>233.362922</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>release-O3</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>6</p></td>
+<td><p>2206.975790</p></td>
+<td><p>2204.130099</p></td>
+<td><p>2209.156010</p></td>
+<td><p>5.025911</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>6</p></td>
+<td><p>553.569150</p></td>
+<td><p>552.296625</p></td>
+<td><p>553.985265</p></td>
+<td><p>1.688640</p></td>
+</tr>
+<tr class="row-even"><td><p>cycless</p></td>
+<td><p>0.7</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>6</p></td>
+<td><p>385129.916359</p></td>
+<td><p>382577.576072</p></td>
+<td><p>386157.654283</p></td>
+<td><p>3580.078211</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The same record stores these 1000-molecule rows. Quartiles were not recorded on them.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>rings</p></td>
+<td><p>1000</p></td>
+<td><p>6</p></td>
+<td><p>3.044</p></td>
+</tr>
+<tr class="row-odd"><td><p>cycless</p></td>
+<td><p>rings</p></td>
+<td><p>1000</p></td>
+<td><p>6</p></td>
+<td><p>3295.845</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="threaded-comparisons">
+<h2>Threaded comparisons<a class="headerlink" href="#threaded-comparisons" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>10.563</p></td>
+<td><p>10.514</p></td>
+<td><p>10.575</p></td>
+<td><p>0.061</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>265.497</p></td>
+<td><p>263.134</p></td>
+<td><p>267.587</p></td>
+<td><p>4.453</p></td>
+</tr>
+<tr class="row-even"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>44.160</p></td>
+<td><p>43.507</p></td>
+<td><p>48.592</p></td>
+<td><p>5.085</p></td>
+</tr>
+<tr class="row-odd"><td><p>matscipy</p></td>
+<td><p>1.3.1</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>1280.353</p></td>
+<td><p>1269.169</p></td>
+<td><p>1285.920</p></td>
+<td><p>16.751</p></td>
+</tr>
+<tr class="row-even"><td><p>cycless</p></td>
+<td><p>0.7</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>35693.574</p></td>
+<td><p>35542.357</p></td>
+<td><p>35782.082</p></td>
+<td><p>239.725</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>105.412</p></td>
+<td><p>104.944</p></td>
+<td><p>105.528</p></td>
+<td><p>0.584</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>2243.860</p></td>
+<td><p>2240.852</p></td>
+<td><p>2246.976</p></td>
+<td><p>6.125</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>596.963</p></td>
+<td><p>592.799</p></td>
+<td><p>599.727</p></td>
+<td><p>6.928</p></td>
+</tr>
+<tr class="row-even"><td><p>cycless</p></td>
+<td><p>0.7</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>382279.618</p></td>
+<td><p>381228.494</p></td>
+<td><p>384056.161</p></td>
+<td><p>2827.667</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>5.673</p></td>
+<td><p>5.620</p></td>
+<td><p>6.027</p></td>
+<td><p>0.407</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>292.194</p></td>
+<td><p>291.833</p></td>
+<td><p>292.252</p></td>
+<td><p>0.419</p></td>
+</tr>
+<tr class="row-odd"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>40.472</p></td>
+<td><p>40.289</p></td>
+<td><p>41.450</p></td>
+<td><p>1.161</p></td>
+</tr>
+<tr class="row-even"><td><p>matscipy</p></td>
+<td><p>1.3.1</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>1259.609</p></td>
+<td><p>1250.081</p></td>
+<td><p>1270.297</p></td>
+<td><p>20.215</p></td>
+</tr>
+<tr class="row-odd"><td><p>cycless</p></td>
+<td><p>0.7</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>35561.341</p></td>
+<td><p>35455.858</p></td>
+<td><p>35634.425</p></td>
+<td><p>178.566</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>52.740</p></td>
+<td><p>51.254</p></td>
+<td><p>53.788</p></td>
+<td><p>2.533</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>2624.489</p></td>
+<td><p>2619.907</p></td>
+<td><p>2627.043</p></td>
+<td><p>7.136</p></td>
+</tr>
+<tr class="row-even"><td><p>OVITO</p></td>
+<td><p>3.17.2</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>353.332</p></td>
+<td><p>339.120</p></td>
+<td><p>360.069</p></td>
+<td><p>20.949</p></td>
+</tr>
+<tr class="row-odd"><td><p>cycless</p></td>
+<td><p>0.7</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>383652.478</p></td>
+<td><p>382331.531</p></td>
+<td><p>390061.522</p></td>
+<td><p>7729.991</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="sqq-comparisons">
+<h2>SQQ comparisons<a class="headerlink" href="#sqq-comparisons" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>18234.926</p></td>
+<td><p>17943.971</p></td>
+<td><p>18534.404</p></td>
+<td><p>590.433</p></td>
+</tr>
+<tr class="row-odd"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>17907.744</p></td>
+<td><p>17660.226</p></td>
+<td><p>18090.320</p></td>
+<td><p>430.095</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="neighbour-comparisons">
+<h2>Neighbour comparisons<a class="headerlink" href="#neighbour-comparisons" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>2.469</p></td>
+<td><p>2.459</p></td>
+<td><p>2.492</p></td>
+<td><p>0.033</p></td>
+</tr>
+<tr class="row-odd"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>9.618</p></td>
+<td><p>9.555</p></td>
+<td><p>9.672</p></td>
+<td><p>0.117</p></td>
+</tr>
+<tr class="row-even"><td><p>matscipy</p></td>
+<td><p>1.3.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>8.465</p></td>
+<td><p>8.448</p></td>
+<td><p>8.477</p></td>
+<td><p>0.028</p></td>
+</tr>
+<tr class="row-odd"><td><p>ASE</p></td>
+<td><p>3.29.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>112.474</p></td>
+<td><p>110.329</p></td>
+<td><p>113.581</p></td>
+<td><p>3.253</p></td>
+</tr>
+<tr class="row-even"><td><p>MDAnalysis</p></td>
+<td><p>2.11.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>60.567</p></td>
+<td><p>60.462</p></td>
+<td><p>60.796</p></td>
+<td><p>0.333</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>25.778</p></td>
+<td><p>25.546</p></td>
+<td><p>25.936</p></td>
+<td><p>0.390</p></td>
+</tr>
+<tr class="row-even"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>111.369</p></td>
+<td><p>110.103</p></td>
+<td><p>112.937</p></td>
+<td><p>2.834</p></td>
+</tr>
+<tr class="row-odd"><td><p>matscipy</p></td>
+<td><p>1.3.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>75.898</p></td>
+<td><p>75.837</p></td>
+<td><p>75.965</p></td>
+<td><p>0.129</p></td>
+</tr>
+<tr class="row-even"><td><p>ASE</p></td>
+<td><p>3.29.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>1604.503</p></td>
+<td><p>1504.165</p></td>
+<td><p>1695.186</p></td>
+<td><p>191.021</p></td>
+</tr>
+<tr class="row-odd"><td><p>MDAnalysis</p></td>
+<td><p>2.11.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>616.682</p></td>
+<td><p>616.009</p></td>
+<td><p>617.807</p></td>
+<td><p>1.798</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>2.804</p></td>
+<td><p>2.769</p></td>
+<td><p>2.819</p></td>
+<td><p>0.050</p></td>
+</tr>
+<tr class="row-odd"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>3.604</p></td>
+<td><p>3.507</p></td>
+<td><p>3.669</p></td>
+<td><p>0.162</p></td>
+</tr>
+<tr class="row-even"><td><p>matscipy</p></td>
+<td><p>1.3.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>8.446</p></td>
+<td><p>8.389</p></td>
+<td><p>8.479</p></td>
+<td><p>0.090</p></td>
+</tr>
+<tr class="row-odd"><td><p>ASE</p></td>
+<td><p>3.29.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>111.092</p></td>
+<td><p>109.233</p></td>
+<td><p>113.390</p></td>
+<td><p>4.157</p></td>
+</tr>
+<tr class="row-even"><td><p>MDAnalysis</p></td>
+<td><p>2.11.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>60.761</p></td>
+<td><p>60.582</p></td>
+<td><p>61.115</p></td>
+<td><p>0.533</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>23.709</p></td>
+<td><p>23.658</p></td>
+<td><p>23.849</p></td>
+<td><p>0.190</p></td>
+</tr>
+<tr class="row-even"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>35.486</p></td>
+<td><p>34.613</p></td>
+<td><p>36.147</p></td>
+<td><p>1.534</p></td>
+</tr>
+<tr class="row-odd"><td><p>matscipy</p></td>
+<td><p>1.3.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>76.010</p></td>
+<td><p>75.604</p></td>
+<td><p>76.174</p></td>
+<td><p>0.570</p></td>
+</tr>
+<tr class="row-even"><td><p>ASE</p></td>
+<td><p>3.29.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>1555.691</p></td>
+<td><p>1495.967</p></td>
+<td><p>1714.615</p></td>
+<td><p>218.647</p></td>
+</tr>
+<tr class="row-odd"><td><p>MDAnalysis</p></td>
+<td><p>2.11.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>640.507</p></td>
+<td><p>635.309</p></td>
+<td><p>649.452</p></td>
+<td><p>14.143</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="additional-comparisons">
+<h2>Additional comparisons<a class="headerlink" href="#additional-comparisons" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>111.135094</p></td>
+<td><p>110.916012</p></td>
+<td><p>112.175543</p></td>
+<td><p>1.259532</p></td>
+</tr>
+<tr class="row-odd"><td><p>fastatomstruct</p></td>
+<td><p>2.2.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>6</p></td>
+<td><p>1886.681944</p></td>
+<td><p>1884.951009</p></td>
+<td><p>1887.565763</p></td>
+<td><p>2.614754</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.13.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>6</p></td>
+<td><p>1132.575774</p></td>
+<td><p>1128.797129</p></td>
+<td><p>1135.430546</p></td>
+<td><p>6.633418</p></td>
+</tr>
+<tr class="row-odd"><td><p>fastatomstruct</p></td>
+<td><p>2.2.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>6</p></td>
+<td><p>464469.419662</p></td>
+<td><p>458386.323833</p></td>
+<td><p>516170.701190</p></td>
+<td><p>57784.377358</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="literature-performance">
+<h2>Literature performance<a class="headerlink" href="#literature-performance" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>phase</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>12.958</p></td>
+<td><p>12.838</p></td>
+<td><p>12.989</p></td>
+<td><p>0.151</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>42.080</p></td>
+<td><p>41.377</p></td>
+<td><p>44.607</p></td>
+<td><p>3.230</p></td>
+</tr>
+<tr class="row-even"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>175.153</p></td>
+<td><p>172.227</p></td>
+<td><p>176.516</p></td>
+<td><p>4.289</p></td>
+</tr>
+<tr class="row-odd"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>48.884</p></td>
+<td><p>48.787</p></td>
+<td><p>49.050</p></td>
+<td><p>0.262</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>91.763</p></td>
+<td><p>91.509</p></td>
+<td><p>91.963</p></td>
+<td><p>0.454</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>2187.852</p></td>
+<td><p>2184.765</p></td>
+<td><p>2333.600</p></td>
+<td><p>148.834</p></td>
+</tr>
+<tr class="row-even"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>15248.409</p></td>
+<td><p>14125.922</p></td>
+<td><p>16741.508</p></td>
+<td><p>2615.587</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>11.104</p></td>
+<td><p>10.968</p></td>
+<td><p>11.167</p></td>
+<td><p>0.199</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>40.669</p></td>
+<td><p>40.610</p></td>
+<td><p>40.915</p></td>
+<td><p>0.304</p></td>
+</tr>
+<tr class="row-odd"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>163.995</p></td>
+<td><p>163.547</p></td>
+<td><p>164.557</p></td>
+<td><p>1.010</p></td>
+</tr>
+<tr class="row-even"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>46.531</p></td>
+<td><p>46.490</p></td>
+<td><p>46.570</p></td>
+<td><p>0.080</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>93.249</p></td>
+<td><p>92.989</p></td>
+<td><p>93.520</p></td>
+<td><p>0.531</p></td>
+</tr>
+<tr class="row-even"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>2480.431</p></td>
+<td><p>2480.232</p></td>
+<td><p>2480.707</p></td>
+<td><p>0.475</p></td>
+</tr>
+<tr class="row-odd"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ih</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>15078.363</p></td>
+<td><p>14924.850</p></td>
+<td><p>15106.081</p></td>
+<td><p>181.231</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>4.287</p></td>
+<td><p>4.217</p></td>
+<td><p>4.917</p></td>
+<td><p>0.699</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>62.605</p></td>
+<td><p>60.708</p></td>
+<td><p>64.508</p></td>
+<td><p>3.801</p></td>
+</tr>
+<tr class="row-even"><td><p>pyscal3</p></td>
+<td><p>4.1.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>185.708</p></td>
+<td><p>184.344</p></td>
+<td><p>186.781</p></td>
+<td><p>2.437</p></td>
+</tr>
+<tr class="row-odd"><td><p>vesin</p></td>
+<td><p>0.6.2</p></td>
+<td><p>neighbours</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>50.681</p></td>
+<td><p>50.570</p></td>
+<td><p>50.754</p></td>
+<td><p>0.185</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>28.945</p></td>
+<td><p>28.785</p></td>
+<td><p>28.984</p></td>
+<td><p>0.199</p></td>
+</tr>
+<tr class="row-odd"><td><p>mdapy</p></td>
+<td><p>2.0.0</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>1640.954</p></td>
+<td><p>1621.690</p></td>
+<td><p>1648.211</p></td>
+<td><p>26.521</p></td>
+</tr>
+<tr class="row-even"><td><p>SQQ</p></td>
+<td><p>0.5.8</p></td>
+<td><p>rings</p></td>
+<td><p>Ic</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>8</p></td>
+<td><p>13893.758</p></td>
+<td><p>13821.643</p></td>
+<td><p>13955.952</p></td>
+<td><p>134.309</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="thread-scaling">
+<h2>Thread scaling<a class="headerlink" href="#thread-scaling" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>code</p></th>
+<th class="head"><p>version</p></th>
+<th class="head"><p>operation</p></th>
+<th class="head"><p>molecules</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>n</p></th>
+<th class="head"><p>median ms</p></th>
+<th class="head"><p>q1 ms</p></th>
+<th class="head"><p>q3 ms</p></th>
+<th class="head"><p>iqr ms</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>10.299252</p></td>
+<td><p>10.261927</p></td>
+<td><p>10.354240</p></td>
+<td><p>0.092313</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>2.468468</p></td>
+<td><p>2.424342</p></td>
+<td><p>2.490518</p></td>
+<td><p>0.066175</p></td>
+</tr>
+<tr class="row-even"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>8.915335</p></td>
+<td><p>8.851913</p></td>
+<td><p>8.964867</p></td>
+<td><p>0.112954</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>2</p></td>
+<td><p>6</p></td>
+<td><p>10.110864</p></td>
+<td><p>10.040353</p></td>
+<td><p>10.197245</p></td>
+<td><p>0.156892</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>2</p></td>
+<td><p>6</p></td>
+<td><p>4.106972</p></td>
+<td><p>3.946993</p></td>
+<td><p>4.282538</p></td>
+<td><p>0.335546</p></td>
+</tr>
+<tr class="row-odd"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>2</p></td>
+<td><p>6</p></td>
+<td><p>8.817703</p></td>
+<td><p>8.801575</p></td>
+<td><p>8.890655</p></td>
+<td><p>0.089080</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>4</p></td>
+<td><p>6</p></td>
+<td><p>7.916049</p></td>
+<td><p>7.903666</p></td>
+<td><p>7.928577</p></td>
+<td><p>0.024911</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>4</p></td>
+<td><p>6</p></td>
+<td><p>2.971567</p></td>
+<td><p>2.887652</p></td>
+<td><p>3.073902</p></td>
+<td><p>0.186250</p></td>
+</tr>
+<tr class="row-even"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>4</p></td>
+<td><p>6</p></td>
+<td><p>8.882313</p></td>
+<td><p>8.856983</p></td>
+<td><p>8.962473</p></td>
+<td><p>0.105490</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>6.601498</p></td>
+<td><p>6.355700</p></td>
+<td><p>6.879690</p></td>
+<td><p>0.523989</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>2.495717</p></td>
+<td><p>2.454365</p></td>
+<td><p>2.639916</p></td>
+<td><p>0.185551</p></td>
+</tr>
+<tr class="row-odd"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>10648</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>8.784102</p></td>
+<td><p>8.770565</p></td>
+<td><p>8.907169</p></td>
+<td><p>0.136605</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>108.403743</p></td>
+<td><p>108.278570</p></td>
+<td><p>109.328177</p></td>
+<td><p>1.049607</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>26.150925</p></td>
+<td><p>26.057293</p></td>
+<td><p>26.208578</p></td>
+<td><p>0.151285</p></td>
+</tr>
+<tr class="row-even"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>1</p></td>
+<td><p>6</p></td>
+<td><p>93.371628</p></td>
+<td><p>92.780331</p></td>
+<td><p>94.134392</p></td>
+<td><p>1.354061</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>2</p></td>
+<td><p>6</p></td>
+<td><p>93.702919</p></td>
+<td><p>92.039755</p></td>
+<td><p>94.748914</p></td>
+<td><p>2.709158</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>2</p></td>
+<td><p>6</p></td>
+<td><p>34.627535</p></td>
+<td><p>34.227728</p></td>
+<td><p>35.009590</p></td>
+<td><p>0.781863</p></td>
+</tr>
+<tr class="row-odd"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>2</p></td>
+<td><p>6</p></td>
+<td><p>96.067373</p></td>
+<td><p>94.042745</p></td>
+<td><p>97.254565</p></td>
+<td><p>3.211820</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>4</p></td>
+<td><p>6</p></td>
+<td><p>72.181870</p></td>
+<td><p>67.034210</p></td>
+<td><p>74.167574</p></td>
+<td><p>7.133364</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>4</p></td>
+<td><p>6</p></td>
+<td><p>26.159324</p></td>
+<td><p>25.778553</p></td>
+<td><p>26.654682</p></td>
+<td><p>0.876129</p></td>
+</tr>
+<tr class="row-even"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>4</p></td>
+<td><p>6</p></td>
+<td><p>94.534256</p></td>
+<td><p>93.408520</p></td>
+<td><p>95.962458</p></td>
+<td><p>2.553939</p></td>
+</tr>
+<tr class="row-odd"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>rings</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>54.698942</p></td>
+<td><p>53.365478</p></td>
+<td><p>55.871387</p></td>
+<td><p>2.505909</p></td>
+</tr>
+<tr class="row-even"><td><p>d-SEAMS</p></td>
+<td><p>2.14.0</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>21.958728</p></td>
+<td><p>21.868050</p></td>
+<td><p>22.052830</p></td>
+<td><p>0.184780</p></td>
+</tr>
+<tr class="row-odd"><td><p>freud</p></td>
+<td><p>3.6.1</p></td>
+<td><p>neighbours</p></td>
+<td><p>110592</p></td>
+<td><p>8</p></td>
+<td><p>6</p></td>
+<td><p>97.420461</p></td>
+<td><p>95.379828</p></td>
+<td><p>99.318677</p></td>
+<td><p>3.938849</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="performance-overview.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Performance overview</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="primitive-rings.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Primitive rings and the full graph</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=4c4eaf79"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

@@ -1,0 +1,25 @@
+.. index:: pair: struct; site::ConcentrationProfile
+.. _doxid-structsite_1_1_concentration_profile:
+
+struct site::ConcentrationProfile
+=================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct ConcentrationProfile {
+		// fields
+	
+		std::vector<:ref:`ConcentrationBin<doxid-structsite_1_1_concentration_bin>`> :target:`bins<doxid-structsite_1_1_concentration_profile_1afade88c3ea0c72beb79d0ca0975986f6>`;
+		double :target:`binWidth<doxid-structsite_1_1_concentration_profile_1a518989efc33266775aa8567ad6a9caad>` = 0;
+		double :target:`zOrigin<doxid-structsite_1_1_concentration_profile_1a018c3a858562e6c50eb2082c31064cb2>` = 0;
+		double :target:`length<doxid-structsite_1_1_concentration_profile_1ac797de12c4c6ffe9a2a6777921a65504>` = 0;
+	};

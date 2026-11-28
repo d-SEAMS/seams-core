@@ -1,0 +1,235 @@
+<!-- https://docs.dseams.info/reference/api.md -->
+
+# API map {#api-map}
+
+Lookup for the C++ identifiers in `src/include/internal`.
+The generated reference of these headers is the API.
+This page is the map onto that reference.
+It is not a tutorial.
+
+## Fronts {#fronts}
+
+One engine (`libyodaLib`). Flags live on
+[seams CLI](cli.md). Formats live on
+[data formats](data-formats.md).
+
+| Front | Package | First call |
+| --- | --- | --- |
+| CLI | this repo (seams) | seams read FILE, seams chill-plus FILE, seams cages FILE |
+| Stable C | this repo (libseams, seams.h) | seams_system_create |
+| Language ABI | this repo (libseams_lang, bindings/cxx/seams_lang.h) | seams_frame_read |
+| Python | PydSEAMSlib (import pydseams) | pydseams.read(...) returns pydseams.Frame |
+| Python language frame | PydSEAMSlib (from dseams import userframe) | userframe.read(...) |
+| Python arrays | PydSEAMSlib (import dseams) | dseams.Frame |
+| Lua | yodaStruct | require("dseams") |
+| Compiled module | PydSEAMSlib | pydseams.yoda (_core and cyoda are aliases) |
+
+The same three CLI calls on the bundled multi-type frame:
+
+```bash
+seams read input/traj/il_tiny.lammpstrj
+seams chill-plus input/traj/il_tiny.lammpstrj
+seams cages input/traj/il_tiny.lammpstrj
+```
+
+`pydseams.yoda` exposes the C++ names (`getCorrelPlus`,
+`neighbourListByIndex`, `findBySignature`, `seededCageAffiliation`).
+`dseams.Frame` calls the C API in `include/seams.h`.
+`dseams.userframe.Frame` calls `libseams_lang`.
+Chemfiles-aware language bindings can call `seams_frame_read_options`
+with `seams_chemfiles_load_options`. The structure carries residue and
+atom include/exclude arrays plus `NAME=ID` type-map entries; a null
+options pointer is identical to `seams_frame_read`.
+
+## Headers {#headers}
+
+Analysis headers under `src/include/internal`.
+The same directory holds the kernels those calls use: threading,
+SIMD distance, device batches, and Cartesian `Y_lm`.
+
+| Header | Namespace | Role |
+| --- | --- | --- |
+| mol_sys.hpp | molSys | Point, PointCloud, bond and ice enums |
+| seams_input.hpp | sinp | LAMMPS / XYZ / chemfiles / readcon readers. readLammpsTrjO keeps every atom of one type and flags inSlice; readLammpsTrjreduced drops atoms outside the slice. Same slice arguments, different keep. |
+| seams_output.hpp | sout | dump, cage, ring, and cluster writers |
+| seams_config.hpp | seams::cfg | runtime knobs seams --print-config prints |
+| seams_c_api.h | C | flat entries inside the library, including seams_q4_q6 |
+| neighbours.hpp | nneigh | cutoff, k-nearest, skin neighbour lists |
+| bop.hpp | chill, sph | CHILL, CHILL+, q6, Steinhardt ql |
+| chill_plus_scheme.hpp | chill | published and OVITO CHILL+ rule selection |
+| chill_offload.hpp | chill | host or OpenMP-target CHILL+ |
+| franzblau.hpp | primitive | Franzblau primitive rings |
+| ring.hpp | ring | ring helpers and strucType |
+| chordless.hpp | chordless | chordless cycles on a CSR, size at most 12 |
+| topo_bulk.hpp | ring, prism3 | HC / DDC search, bulk polygons; contractibleRings drops rings that wind the periodic cell |
+| topo_one_dim.hpp | ring | ice-nanotube prisms |
+| topo_two_dim.hpp | ring | monolayer polygons |
+| topo_fingerprint.hpp | topo | local and frame topology keys |
+| cage.hpp | cage | Cage, cageType, iceType, Signature |
+| cage_affiliation.hpp | ring | claim-free HC / DDC flags; seededCageAffiliation and ringAdjacentCompletion |
+| cage_canon.hpp | cage | nauty canonical certificates |
+| cage_enum.hpp | cage | findBySignature, closed polyhedra from a ring-size census whose faces tile a sphere; findBySignatures, several signatures in one search; EdgeWindow / parseEdgeWindow, the optional face-edge window (default 2.65,3.15, none leaves the cage bound to the face census); isSpherePolyhedron; findIncompleteBySignature, cups and incomplete cages on the same ring adjacency |
+| bulkTUM.hpp | tum3 | topological unit matching |
+| tum_offload.hpp | tum | hop-bound six-rings and cage affiliation; SEAMS_OFFLOAD |
+| bond.hpp | bond | geometric hydrogen bonds |
+| absOrientation.hpp | absor | Horn absolute orientation |
+| pntCorrespondence.hpp | pntToPnt | reference / target point sets |
+| shapeMatch.hpp | match | prism shape-matching |
+| cluster.hpp | clump | Stillinger ice clusters |
+| order_parameter.hpp | topoparam | tetrahedral order, LSI, height% and coverage area |
+| rdf.hpp | rdf | partial 3D g_IJ(r) and site-site CN |
+| rdf2d.hpp | rdf2 | in-plane radial distribution |
+| density.hpp | site | type- or kind-resolved \rho along one axis |
+| site.hpp | site | type-to-kind table and material family |
+| brine_front.hpp | site | ion front against the ice assignment |
+| selection.hpp | gen, ring | type and slice selections |
+| water_select.hpp | water | oxygen selection on a mixed frame |
+| generic.hpp | gen | periodic distance, angles, medians |
+| structure_desc.hpp | chill | SOAP, template overlay, linear classifier |
+| voronoi_qlm.hpp | chill | Voronoi-weighted Steinhardt |
+| diamond_cna.hpp | symm | shell labels: 1 cubic, 0 hexagonal, 2 stacking-disordered, -1 otherwise |
+| local_symmetry.hpp | symm | IRA, SOFI, and spglib shell, point, and space groups |
+| ira_sofi.hpp | ira | IRA match and SOFI point groups |
+| phase.hpp | phase | glass kind, open channels, hydrogen-direction keys |
+| interface_order.hpp | iface | interface order parameters |
+| science_front.hpp | science | layer profiles and the single-trajectory critical size |
+| nucleation_pathway.hpp | nucleation | one-frame ice census and trajectory reductions |
+| domain.hpp | seams::domain | periodic frame split across MPI ranks |
+| sphericart_ylm.hpp | seams::sphericart_ylm | batched Cartesian Y_lm |
+| steinhardt_device.hpp | seams::steinhardt | host / MPI / offload Steinhardt kernel |
+| wigner_wl.hpp | seams::wigner | normalized \hat{w}_l for l = 4 and 6 |
+| simd_distance.hpp | seams | Highway periodic distance |
+
+## Cutoff CSR {#cutoff-csr}
+
+The list both boxes build is one CSR of cloud indices.
+`offsets` has length `nop + 1`.
+The partners of atom `i` are `cols[offsets[i] .. offsets[i + 1]]`, sorted, with no self entry.
+A pair is kept when the squared minimum image is strictly below the cutoff squared.
+`half` keeps that pair only on the lower cloud index.
+A length-3 `box` is orthorhombic (`Lx, Ly, Lz`).
+A length of at least 6 is a LAMMPS dump: bound spans, then tilt factors `xy, xz, yz`.
+Both enter `nneigh::orthoFullCsr`.
+The length-3 path fills the 27 image shifts once and walks that stencil when every cell is at most the cutoff and the grid has at least two cells on each axis.
+A wider cell uses the fractional minimum image.
+The builders call `omp_set_dynamic(0)` and take the team from `omp_get_max_threads`.
+Set `OMP_NUM_THREADS`.
+There is no thread-count argument.
+A region that is already parallel does not fork again.
+
+| name | signature |
+| --- | --- |
+| nneigh::orthoFullCsr | bool (const PointCloud&, const vector<int>* subset, double rcutoff, vector<int>& offsets, vector<int>& cols, bool half = false, vector<vector<int>>* directRows = nullptr, const int* indexToID = nullptr, bool* wroteRows = nullptr, bool branchy = false). Null subset is every atom. Returns false when the box is not usable. Scratch is refilled on the next call. directRows, indexToID, and wroteRows are filled when box.size()==3. A dump box (size() >= 6) does not use them. |
+| nneigh::CutoffSkin | CutoffSkin(double cutoff, double skin). Candidates are built at cutoff + skin. |
+| CutoffSkin::update | bool update(const PointCloud&, const vector<int>* subset = nullptr, bool half = false). Rebuilds when the subset, half, or moved changed, then filter~s to ~cutoff. |
+| CutoffSkin::lastReused | bool lastReused() const. True when the last update kept the wide list. |
+| CutoffSkin::offsets, cols | offsets() and cols(), the filtered CSR. |
+| CutoffSkin::moved | Private. True when there is no previous list, or the atom count, the box, boxLow, or any minimum-image displacement has changed by more than skin/2. |
+| CutoffSkin::filter | Private. Copies the wide CSR down to pairs whose current squared minimum image is below cutoff squared. |
+| nneigh::idRowsFromCsr | vector<vector<int>> (const PointCloud&, const vector<int>& indexToID, const vector<int>& offsets, const vector<int>& cols). Atom-ID rows, self first. |
+| chill::classifyBondsCsr | void (PointCloud&, const vector<int>& offsets, const vector<int>& cols, const BondClassifier& rule, bool isSlice = false). Bond labels c_ij from the CSR. |
+| chill::chillPlusFromCsr | int (PointCloud&, const vector<int>& offsets, const vector<int>& cols, bool keepBonds = true). Four nearest of each row, real l = 3 harmonics, CHILL+ labels. Returns the cubic count. keepBonds false still writes iceType and skips the bond vectors. |
+| symm::diamondFromCsr | void (const PointCloud&, const vector<int>& offsets, const vector<int>& cols, vector<int>& kind). Cubic shell is 1, hexagonal is 0, stacking-disordered is 2, and anything else is -1. The CSR arguments stay so older callers keep the signature; the kernel builds the 3.5 Å shell itself. |
+| chill::steinhardtQlCutoff | SteinhardtQl (const PointCloud&, double cutoff, int orderL, int typeI, bool average, bool invariants = false). orthoFullCsr for one type, then q_l. Degrees 4 and 6 on an orthorhombic or restricted-triclinic cell use the solid-harmonic kernel. qlBar is filled only when average is true. invariants fills wl for l = 4 or 6. orderL is 3, 4, 6, 8, or 12. |
+
+The walk and the skin are in
+[Cutoff neighbour lists](../user/howto/neighbour-lists.md).
+
+## Explicit primitive rings and periodic winding {#explicit-primitive-rings-and-periodic-winding}
+
+`primitive::ringNetworkSymmetrized(offsets, columns, maxDepth)` accepts a
+caller CSR.  It unions directed edges with their reverse, removes self and
+duplicate edges, and then calls the same Franzblau primitive-ring search as
+the cutoff graph.  `primitive::ringSizeHistogram` counts the returned rows by
+size.  Malformed offsets and out-of-range columns are errors.
+
+The stable C entry is `seams_rings_from_csr`.  The existing
+`seams_rings_histogram_n` and `seams_rings_vertices` queries read its handle.
+The language ABI used by Python is `seams_graph_rings`; its first call with
+null packed-row buffers queries their lengths.
+
+When geometry accompanies the graph, `ring::ringWindings` sums the
+minimum-image bond steps around each cycle in its listed vertex order and
+expresses the total in cell vectors.  The result is the oriented integer
+winding: a ring that crosses the cell once along $+x$ is $+1$ on axis 0,
+and the reverse traversal is $-1$.  `seams_rings_winding` and
+`seams_frame_ring_winding` report the signed component along a selected pore
+axis.  A ring is contractible only when all three components are zero.  Thus
+an axis winding of zero does not by itself imply contractibility.
+
+## Tetrahedral order and LSI {#tetrahedral-order-and-lsi}
+
+`topoparam::tetrahedralOrder` accepts independent centre and partner index
+selections.  A centre is removed from its own partner set.  The
+`NearestFour` convention uses the four nearest selected partners without a
+radial cutoff.  The `WithinCutoff` convention uses all $N$ selected
+partners at or inside the cutoff and evaluates
+
+$$
+q = 1 - \frac{9}{2N(N-1)}
+    \sum_{j<k}\left(\cos\psi_{jk}+\frac{1}{3}\right)^2 .
+$$
+
+For $N=4$ this is the Errington–Debenedetti factor $3/8$, and
+`NearestFour` always uses it.  A perfect tetrahedron gives $q=1$.  For
+uncorrelated directions each term averages $4/9$, so an ideal gas
+averages $q=0$ for every $N$.
+Both conventions return quiet NaN when fewer than four neighbours are
+available; they never substitute zero.
+
+`topoparam::localStructureIndex` is the Shiratani–Sasai index.  It sorts
+selected-partner distances so that
+$r_1<\dots<r_N\le r_c<r_{N+1}$, takes the $N$ gaps
+$\Delta_i=r_{i+1}-r_i$ for $i=1,\dots,N$, and returns their population
+variance
+
+$$
+I = \frac{1}{N}\sum_{i=1}^{N}\left(\Delta_i-\bar\Delta\right)^2 .
+$$
+
+The last gap reaches the first partner beyond the cutoff.  A centre with no
+partner inside the cutoff, or none beyond it, returns quiet NaN.
+
+The stable C entries are `seams_tetrahedral_order` and `seams_lsi`.
+`seams_frame_tetrahedral` and `seams_frame_lsi` are the language ABI consumed
+by Python.  A null selection with length zero means every frame atom; output
+order follows centre-selection order.
+
+The face-edge window is the same string on the fronts that take it.
+The default is `2.65,3.15` in the coordinate units of the file.
+`none` (also `off` or `false`) leaves the cage bound to the face census.
+The CLI flag is `--cage-edge`.
+`dseams.userframe.Frame.cages_by_signature("512", edge="none")` passes it to `seams_frame_signature_edge`.
+A null C edge string keeps the default.
+`pydseams.Frame.cages_by_signature` and Lua `dseams.cages_by_signature` call `findBySignature` and do not read that window.
+Choose the window as the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
+A nanometer file uses `0.265,0.315`.
+
+## Fast q4 and q6 {#fast-q4-and-q6}
+
+Degrees 4 and 6 on an orthorhombic or restricted-triclinic cutoff shell use the solid-harmonic kernel inside `chill::steinhardtQlCutoff`.
+`seams_q4q6` in `include/seams.h` is the installed pair on `libseams`.
+It writes local `q4` and `q6`.
+`seams_frame_q4_q6` in `bindings/cxx/seams_lang.h` returns both local values and, when the pointers are non-null, the Lechner-Dellago averages.
+`seams_q4_q6` in `src/include/internal/seams_c_api.h` is the flat entry inside the library, not the installed `seams_q4q6`.
+Its box is `ox, oy, oz, lx, ly, lz`, the six numbers `seams_chill_plus` already takes.
+`seams_q4_q6_lammps` takes the nine-number LAMMPS cell.
+Both return 0 on success.
+`q4` and `q6` are required.
+A null `q4bar` or `q6bar` skips that average.
+
+The Python, R and Julia `q4_q6` wrappers in their binding repositories call `seams_frame_q4_q6`.
+`seams steinhardt` prints the means of the degrees named by `--l` (default $q_4$ and $q_6$) and of each Lechner-Dellago average.
+The $q_4$ and $q_6$ means are this kernel.
+`dseams.Frame.q4q6` returns the two local arrays from `seams_q4q6`.
+
+## Fused q4, q6 and CHILL+ {#fused-q4-q6-and-chill}
+
+`seams_frame_q4_q6_chill` in `bindings/cxx/seams_lang.h` builds one cutoff list and, on that pass, the local Steinhardt $q_4$ and $q_6$, the Lechner-Dellago averages $\bar q_4$ and $\bar q_6$, and the published CHILL+ labels.
+The averages are the same neighbour mean of $q_{lm}$ as `steinhardtQlCutoff` with averaging on.
+`q4bar` and `q6bar` may be null.
+Labels use the published closed edges, not `ovito-chill+`.
+
+`q4_q6_chill` in PydSEAMSlib `examples/ctypes/chill_plus.py` calls that entry and returns `q4`, `q6`, `q4bar`, `q6bar`, `labels` and `counts`.
+`SEAMS_LANG_LIB` selects `libseams_lang`.
+Nucleation analysis reads `q6bar`.

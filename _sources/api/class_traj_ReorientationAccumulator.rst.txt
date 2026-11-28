@@ -1,0 +1,39 @@
+.. index:: pair: class; traj::ReorientationAccumulator
+.. _doxid-classtraj_1_1_reorientation_accumulator:
+
+class traj::ReorientationAccumulator
+====================================
+
+.. toctree::
+	:hidden:
+
+	struct_traj_ReorientationAccumulator_OriginSlot.rst
+
+Streaming multi-origin orientational time-correlation accumulator for C1(t) = <P1(u(0).u(t))> and C2(t) = <P2(u(0).u(t))>.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	class ReorientationAccumulator {
+	public:
+		// structs
+	
+		struct :ref:`OriginSlot<doxid-structtraj_1_1_reorientation_accumulator_1_1_origin_slot>`;
+
+		// construction
+	
+		:target:`ReorientationAccumulator<doxid-classtraj_1_1_reorientation_accumulator_1ad2d65bf49acbb73436eb546b5414f609>`(std::size_t nVectors, std::size_t maxLag, std::size_t originStride, double dt);
+
+		// methods
+	
+		bool :target:`valid<doxid-classtraj_1_1_reorientation_accumulator_1a47424442d9c5b1557ada48c826091076>`() const;
+		std::size_t :target:`numVectors<doxid-classtraj_1_1_reorientation_accumulator_1a548ff51592b15eea1b30a0151edc2f2d>`() const;
+		std::size_t :target:`framesSeen<doxid-classtraj_1_1_reorientation_accumulator_1aa7b06f4a42e7645810f29ae2d642b2de>`() const;
+		std::size_t :target:`numLags<doxid-classtraj_1_1_reorientation_accumulator_1afa81a047e2a4321967990604eeacc56a>`() const;
+		bool :target:`push<doxid-classtraj_1_1_reorientation_accumulator_1a48250acbed15839230a2eabfc9f95f23>`(const double* vectors, std::size_t nVectors);
+		void :target:`curve<doxid-classtraj_1_1_reorientation_accumulator_1a7999fd66807f1c51735f348c13994bb3>`(std::vector<double>& lagTime, std::vector<double>& c1, std::vector<double>& c2, std::vector<std::size_t>& nOrigins) const;
+		bool :target:`fit<doxid-classtraj_1_1_reorientation_accumulator_1a0aa893b4d2e432655ac688c13ba0f255>`(double tStart, double tEnd, :ref:`DecayFitResult<doxid-structtraj_1_1_decay_fit_result>`& c1Fit, :ref:`DecayFitResult<doxid-structtraj_1_1_decay_fit_result>`& c2Fit) const;
+	};

@@ -1,0 +1,30 @@
+.. index:: pair: struct; seams::team::detail::Call
+.. _doxid-structseams_1_1team_1_1detail_1_1_call:
+
+template struct seams::team::detail::Call
+=========================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/team_run.hpp>
+	
+	template <class F>
+	struct Call {
+		// fields
+	
+		F* :target:`fn<doxid-structseams_1_1team_1_1detail_1_1_call_1a397508c635b1b63cfff31ac1c32a9b4e>`;
+		std::atomic<bool> :target:`failed<doxid-structseams_1_1team_1_1detail_1_1_call_1a7fc50e5cd971557f8930c35e701cd426>` {false};
+		std::exception_ptr :target:`failure<doxid-structseams_1_1team_1_1detail_1_1_call_1a063522ca73bd706b87d6762ad27bfa8a>`;
+
+		// methods
+	
+		void :target:`one<doxid-structseams_1_1team_1_1detail_1_1_call_1ad7676aeef89517f232ed73fe99efb173>`(std::size_t stage, std::size_t chunk, std::size_t worker);
+		static void :target:`trampoline<doxid-structseams_1_1team_1_1detail_1_1_call_1a76cfa4d4f291b260cdcef57181bcffa8>`(void* ctx, std::size_t stage, std::size_t chunk, std::size_t worker);
+	};

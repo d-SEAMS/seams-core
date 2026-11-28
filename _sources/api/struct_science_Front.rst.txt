@@ -1,0 +1,57 @@
+.. index:: pair: struct; science::Front
+.. _doxid-structscience_1_1_front:
+
+struct science::Front
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/science_front.hpp>
+	
+	struct Front {
+		// fields
+	
+		double :target:`position<doxid-structscience_1_1_front_1a66cc33efa07132372159ae1103a91796>` = 0;
+		double :ref:`width<doxid-structscience_1_1_front_1aa03a9481eca40cb6095c3dac1378d092>` = 0;
+		bool :ref:`defined<doxid-structscience_1_1_front_1a3225164eefddc154c7dbf7e4591f4d2b>` = false;
+	};
+.. _details-structscience_1_1_front:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; width
+.. _doxid-structscience_1_1_front_1aa03a9481eca40cb6095c3dac1378d092:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double width = 0
+
+0.5 crossing along the profile, angstrom
+
+.. index:: pair: variable; defined
+.. _doxid-structscience_1_1_front_1a3225164eefddc154c7dbf7e4591f4d2b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool defined = false
+
+10-90 width of that crossing
+

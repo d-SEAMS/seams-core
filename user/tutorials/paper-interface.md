@@ -1,0 +1,53 @@
+<!-- https://docs.dseams.info/user/tutorials/paper-interface.md -->
+
+# CHILL+ on an ice/water slab {#chill-on-an-ice-water-slab}
+
+An interface is where a rule is easy to fool. The crystal half should
+be hexagonal ice. The liquid half should be water. The molecules in
+between are the ones where the published CHILL+ rule and the OVITO
+rule can part company, because they do not use the same neighbour test.
+
+This example builds a small slab.
+GenIce supplies a 2 by 2 by 1 ice Ih cell, oxygen only, so the
+hydrogen disorder is not part of the label. A copy of that cell is
+shifted by one box length along z and shaken by less than an angstrom.
+The shake is why the upper half is liquid: the oxygens are no longer
+on lattice sites. OpenMM then minimises the stack for eight steps with
+the lower half restrained. The restraint is why the crystal survives
+the relax. The cutoff is 3.5 Å, the same shell CHILL+ will read, and
+it has to sit under half the shortest box edge or OpenMM refuses the
+periodic force.
+
+The published rule prints
+
+```text
+interface published hexagonal 68 interfacial 19 water 41
+```
+
+The OVITO rule prints
+
+```text
+interface ovito hexagonal 68 interfacial 20 water 40
+```
+
+Both lines sum to 128, the oxygen count of the doubled cell. Both
+rules call 68 oxygens hexagonal. They move one molecule between
+interfacial and water. That single molecule is the reason to name the
+rule when you quote an interface count.
+
+## Full run {#full-run}
+
+The supplied paper frame is `input/traj/interface_f0.lammpstrj`:
+864 molecules, one frame.
+
+```text
+interface full input molecules 864 frames 1 file-frames 1 file input/traj/interface_f0.lammpstrj
+interface full paper molecules 864 frames 1
+interface full published hexagonal 352 interfacial 49 water 434 clathrate 3 interClathrate 25
+interface full ovito hexagonal 346 interfacial 57 water 437 clathrate 3 interClathrate 20
+interface full phi-c 0.00283286
+interface full stack HHHHHHHH....C.
+```
+
+The stack is eight hexagonal slabs, a gap, and one cubic layer.
+Hexagonal is 352 on the published rule and 346 on the OVITO rule.

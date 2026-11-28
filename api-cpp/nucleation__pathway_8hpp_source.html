@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/nucleation_pathway.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/nucleation__pathway_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/nucleation_pathway.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/nucleation__pathway_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/nucleation_pathway.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('nucleation__pathway_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">nucleation_pathway.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="nucleation__pathway_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) d-SEAMS developers</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef SEAMS_NUCLEATION_PATHWAY_HPP_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define SEAMS_NUCLEATION_PATHWAY_HPP_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="foldopen" id="foldopen00043" data-start="{" data-end="}">
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="namespacenucleation.html">   43</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacenucleation.html">nucleation</a> {</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a3bc244ef7bf44479500a58d1387a0373">   46</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">double</span> <a class="code hl_variable" href="namespacenucleation.html#a3bc244ef7bf44479500a58d1387a0373">kCutoffA</a> = 3.5;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a64fc5d22d7f2818a0d819ee1a947f087">   49</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">int</span> <a class="code hl_variable" href="namespacenucleation.html#a64fc5d22d7f2818a0d819ee1a947f087">kRingDepth</a> = 7;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="namespacenucleation.html#af2f1477e5e5f99cbe98f4ab5b95091ae">   54</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">double</span> <a class="code hl_variable" href="namespacenucleation.html#af2f1477e5e5f99cbe98f4ab5b95091ae">kQ6BarIceCut</a> = 0.36;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespacenucleation.html#ae22c8a1c01ef593e140430321e5e0408">   64</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">double</span> <a class="code hl_variable" href="namespacenucleation.html#ae22c8a1c01ef593e140430321e5e0408">kQ6SolidCutoffA</a> = 3.2;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="namespacenucleation.html#af73c2233ed742db47c5be20f42681db7">   65</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">double</span> <a class="code hl_variable" href="namespacenucleation.html#af73c2233ed742db47c5be20f42681db7">kQ6SolidCut</a> = 0.5;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="foldopen" id="foldopen00067" data-start="{" data-end="};">
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html">   67</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structnucleation_1_1FrameRecord.html">FrameRecord</a> {</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a361b7fd80ffc66fd55d24fe46e2d7c8b">   68</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a361b7fd80ffc66fd55d24fe46e2d7c8b">frame</a> = 0;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a0f0c1f60bbb1a7c4d352cd82b5c093b3">   69</a></span>  <span class="keywordtype">long</span> <span class="keywordtype">long</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a0f0c1f60bbb1a7c4d352cd82b5c093b3">timestep</a> = 0;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a726a5d69d146d7cd2558ae2c3cbf3d38">   70</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a726a5d69d146d7cd2558ae2c3cbf3d38">nop</a> = 0;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#aa860e6255e88e382e4d32ee462e2ab39">   72</a></span>  <span class="keywordtype">long</span> <span class="keywordtype">long</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#aa860e6255e88e382e4d32ee462e2ab39">ringCount</a>[8] = {};</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#ad085e3ee3ce53381bc1120181b6a4135">   73</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#ad085e3ee3ce53381bc1120181b6a4135">chillCubic</a> = 0;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#ac486c61b5fb9792804184d9755181a5e">   74</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#ac486c61b5fb9792804184d9755181a5e">chillHex</a> = 0;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#ad4430aad94e3425b463c229a674785d7">   75</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#ad4430aad94e3425b463c229a674785d7">chillInter</a> = 0;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a32949cee9e6626019b6c26544550a980">   76</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a32949cee9e6626019b6c26544550a980">chillClath</a> = 0;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#ab9e4b19bff8a79a8d54c772f92d59848">   77</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#ab9e4b19bff8a79a8d54c772f92d59848">chillInterClath</a> = 0;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#adf4c60fa57cda08898d63d00d2d617ca">   78</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#adf4c60fa57cda08898d63d00d2d617ca">chillWater</a> = 0;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a87d28f0d62c5bccd8e422e33b494f832">   79</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a87d28f0d62c5bccd8e422e33b494f832">ovitoCubic</a> = 0;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a4d92d4425cddd1f960b12252baa21fd8">   80</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a4d92d4425cddd1f960b12252baa21fd8">ovitoHex</a> = 0;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a910d2bc380d31d978654ea3923ac67a1">   81</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a910d2bc380d31d978654ea3923ac67a1">ovitoInter</a> = 0;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#ae8d146450ea369c4dace47717165e778">   82</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#ae8d146450ea369c4dace47717165e778">ovitoClath</a> = 0;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a53512557e94460cb3b60d4c94e91ab55">   83</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a53512557e94460cb3b60d4c94e91ab55">ovitoInterClath</a> = 0;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#af0d80e996e397ad75a5e6f136f1edf9e">   84</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#af0d80e996e397ad75a5e6f136f1edf9e">ovitoWater</a> = 0;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a9443aacb9ca52493d4ec9ad6fa9a592d">   85</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a9443aacb9ca52493d4ec9ad6fa9a592d">symCubic</a> = 0;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#aa1d3e714650ce473976dbc7553f9b82e">   86</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#aa1d3e714650ce473976dbc7553f9b82e">symHex</a> = 0;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a549a24b459b68027343c9a29b919ae0e">   87</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a549a24b459b68027343c9a29b919ae0e">q6barMean</a> = 0;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#af154d34d36f13feb34973251968fa215">   88</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#af154d34d36f13feb34973251968fa215">q6barP50</a> = 0;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#ab6629222f4d6f0455e34e126ddfd0169">   89</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#ab6629222f4d6f0455e34e126ddfd0169">q6barIce</a> = 0;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a6cd74e949e22133d8200f1ad404afffa">   93</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a6cd74e949e22133d8200f1ad404afffa">nChillCore</a> = 0;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a5a1ec6e925b2ac452d4a87102a23879a">   94</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a5a1ec6e925b2ac452d4a87102a23879a">cChillCore</a> = 0;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a6f0ea23563bf7661b2faaa173d59ada4">   95</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a6f0ea23563bf7661b2faaa173d59ada4">hChillCore</a> = 0;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a30a34109d9972284cb706d7c1288e20b">   96</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a30a34109d9972284cb706d7c1288e20b">nChillExt</a> = 0;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#ae108d2ebebd6aae9425c092b2b666d60">   97</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#ae108d2ebebd6aae9425c092b2b666d60">cChillExt</a> = 0;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a9d95e2b0b82df4cf50e985f495511a05">   98</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a9d95e2b0b82df4cf50e985f495511a05">hChillExt</a> = 0;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a6aab0d669e14c872f1938966538869ff">   99</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a6aab0d669e14c872f1938966538869ff">nOvitoCore</a> = 0;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a192494834dd17325ff2408532d17eb09">  100</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a192494834dd17325ff2408532d17eb09">cOvitoCore</a> = 0;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a5d6f75be8cd680b04b71c9b6d57bf35b">  101</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a5d6f75be8cd680b04b71c9b6d57bf35b">hOvitoCore</a> = 0;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a3565bce56f8d7bf24c759b9a353f3f66">  102</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a3565bce56f8d7bf24c759b9a353f3f66">nOvitoExt</a> = 0;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a0949ce58c20c8388fccaadce9738933c">  103</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a0949ce58c20c8388fccaadce9738933c">cOvitoExt</a> = 0;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#abbcb93e9558d8f7cb40f28109f5d6d17">  104</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#abbcb93e9558d8f7cb40f28109f5d6d17">hOvitoExt</a> = 0;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a32a1add9b985d7f19e45722e3ae5b85f">  105</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a32a1add9b985d7f19e45722e3ae5b85f">nQ6</a> = 0;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a1db5185a6e64185b71e2a9297900d781">  106</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a1db5185a6e64185b71e2a9297900d781">cQ6</a> = 0;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a0d74de83c8a67df58b9e16ef82e4ed09">  107</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a0d74de83c8a67df58b9e16ef82e4ed09">hQ6</a> = 0;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a0a0a0f95f888315189a81efadd098a45">  108</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a0a0a0f95f888315189a81efadd098a45">nSym</a> = 0;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#afa9207e9993ea6199d342cfd0507b3dd">  109</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#afa9207e9993ea6199d342cfd0507b3dd">cSym</a> = 0;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a7d6b5614187992dffc4eb36cc66591e8">  110</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a7d6b5614187992dffc4eb36cc66591e8">hSym</a> = 0;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a5360897dacffa563dc9c750db938a950">  113</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a5360897dacffa563dc9c750db938a950">nQ6Solid</a> = 0;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#a4fa7cc32a5eaacf6533293e98270045d">  114</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#a4fa7cc32a5eaacf6533293e98270045d">cQ6Solid</a> = 0;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="structnucleation_1_1FrameRecord.html#aea7c3129353e1888d3336b3de5ea2039">  115</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1FrameRecord.html#aea7c3129353e1888d3336b3de5ea2039">hQ6Solid</a> = 0;</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>};</div>
+</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>[[nodiscard]] std::vector&lt;double&gt;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a047d583af8b7c503376f262d63dc9ade">  122</a></span><a class="code hl_function" href="namespacenucleation.html#a047d583af8b7c503376f262d63dc9ade">q6DotScore</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;cloud,</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>           <span class="keyword">const</span> std::vector&lt;int&gt; &amp;offsets, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;cols);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>[[nodiscard]] <a class="code hl_struct" href="structnucleation_1_1FrameRecord.html">FrameRecord</a></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a64e04b196b84bc47a828f2875823e5b8">  129</a></span><a class="code hl_function" href="namespacenucleation.html#a64e04b196b84bc47a828f2875823e5b8">analyzeFrame</a>(<a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;cloud,</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>             <span class="keywordtype">double</span> cutoff, <span class="keywordtype">int</span> ringDepth, <span class="keywordtype">int</span> typeI, <span class="keywordtype">double</span> q6Cut, <span class="keywordtype">int</span> frame);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a536f149502c3e4e03088aa2287700cb2">  133</a></span>[[nodiscard]] <span class="keywordtype">double</span> <a class="code hl_function" href="namespacenucleation.html#a536f149502c3e4e03088aa2287700cb2">stackFraction</a>(<span class="keywordtype">int</span> cubic, <span class="keywordtype">int</span> hexagonal);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span></div>
+<div class="foldopen" id="foldopen00137" data-start="{" data-end="};">
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="structnucleation_1_1Ascent.html">  137</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structnucleation_1_1Ascent.html">Ascent</a> {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="structnucleation_1_1Ascent.html#a3c22e7749621bc6b9403194f413cd305">  138</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1Ascent.html#a3c22e7749621bc6b9403194f413cd305">index</a> = 0;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="structnucleation_1_1Ascent.html#ab6b1641fd7dabdf416ac1d7cb544d141">  139</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1Ascent.html#ab6b1641fd7dabdf416ac1d7cb544d141">maxIndex</a> = 0;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="structnucleation_1_1Ascent.html#a3cab97326641acc87cb6ae483ece4bb9">  140</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1Ascent.html#a3cab97326641acc87cb6ae483ece4bb9">baseline</a> = 0;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="structnucleation_1_1Ascent.html#af6cd4481e9609a7568110576e642a04c">  141</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1Ascent.html#af6cd4481e9609a7568110576e642a04c">maximum</a> = 0;</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="structnucleation_1_1Ascent.html#a84b51a9634ecad74e4a0dfe69fadbd5e">  142</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structnucleation_1_1Ascent.html#a84b51a9634ecad74e4a0dfe69fadbd5e">climbed</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>};</div>
+</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a262df71b584718ece21536f3c0235c1c">  145</a></span>[[nodiscard]] <a class="code hl_struct" href="structnucleation_1_1Ascent.html">Ascent</a> <a class="code hl_function" href="namespacenucleation.html#a262df71b584718ece21536f3c0235c1c">finalAscent</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;series);</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span></div>
+<div class="foldopen" id="foldopen00151" data-start="{" data-end="};">
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="structnucleation_1_1GrowBasin.html">  151</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structnucleation_1_1GrowBasin.html">GrowBasin</a> {</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="structnucleation_1_1GrowBasin.html#a38630802207a54fd2bb1875691afff26">  152</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structnucleation_1_1GrowBasin.html#a38630802207a54fd2bb1875691afff26">occupied</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="structnucleation_1_1GrowBasin.html#aa70d2c6fd74cde88999bc3aee94d50b2">  153</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1GrowBasin.html#aa70d2c6fd74cde88999bc3aee94d50b2">barrier</a> = 0;</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno"><a class="line" href="structnucleation_1_1GrowBasin.html#a88792d60c940cd47ffe153d157c93cd1">  154</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1GrowBasin.html#a88792d60c940cd47ffe153d157c93cd1">index</a> = -1;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>};</div>
+</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="namespacenucleation.html#af17120d989b41a986f036b3ff5e3fb1b">  157</a></span>[[nodiscard]] <a class="code hl_struct" href="structnucleation_1_1GrowBasin.html">GrowBasin</a> <a class="code hl_function" href="namespacenucleation.html#af17120d989b41a986f036b3ff5e3fb1b">growBasin</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;series);</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span></div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83">  163</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842">CommittorFate</a> { <a class="code hl_enumvalue" href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45">uncommitted</a>, <a class="code hl_enumvalue" href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83">committed</a>, <a class="code hl_enumvalue" href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980">truncated</a> };</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="foldopen" id="foldopen00165" data-start="{" data-end="};">
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="structnucleation_1_1CommittorCall.html">  165</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structnucleation_1_1CommittorCall.html">CommittorCall</a> {</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="structnucleation_1_1CommittorCall.html#a7409b97c45a308034b5b633d29fa899d">  166</a></span>  <a class="code hl_enumeration" href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842">CommittorFate</a> <a class="code hl_variable" href="structnucleation_1_1CommittorCall.html#a7409b97c45a308034b5b633d29fa899d">fate</a> = <a class="code hl_enumvalue" href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45">CommittorFate::uncommitted</a>;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="structnucleation_1_1CommittorCall.html#a1b265b1d24155d256d29bc10d350dd56">  167</a></span>  <a class="code hl_struct" href="structnucleation_1_1GrowBasin.html">GrowBasin</a> <a class="code hl_variable" href="structnucleation_1_1CommittorCall.html#a1b265b1d24155d256d29bc10d350dd56">basin</a>;</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno"><a class="line" href="structnucleation_1_1CommittorCall.html#ab14475a4fc2b795e4ede222e1beea2b4">  168</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structnucleation_1_1CommittorCall.html#ab14475a4fc2b795e4ede222e1beea2b4">cutAtTwiceN</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>};</div>
+</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a6ab0c778ff2e5e2e9e6ccd004131da2f">  171</a></span>[[nodiscard]] <a class="code hl_struct" href="structnucleation_1_1CommittorCall.html">CommittorCall</a> <a class="code hl_function" href="namespacenucleation.html#a6ab0c778ff2e5e2e9e6ccd004131da2f">committorOf</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;series, <span class="keywordtype">int</span> molecules);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span></div>
+<div class="foldopen" id="foldopen00177" data-start="{" data-end="};">
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno"><a class="line" href="structnucleation_1_1HalfRise.html">  177</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structnucleation_1_1HalfRise.html">HalfRise</a> {</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno"><a class="line" href="structnucleation_1_1HalfRise.html#a1615ddaa62260eb138b06ba738f7a558">  178</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structnucleation_1_1HalfRise.html#a1615ddaa62260eb138b06ba738f7a558">ok</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno"><a class="line" href="structnucleation_1_1HalfRise.html#acf7d0863f46e8f0b00cfd6064043e49f">  179</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1HalfRise.html#acf7d0863f46e8f0b00cfd6064043e49f">index</a> = -1;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="structnucleation_1_1HalfRise.html#adfca7258b76c1b185fa1c00c76773973">  180</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1HalfRise.html#adfca7258b76c1b185fa1c00c76773973">start</a> = 0;</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno"><a class="line" href="structnucleation_1_1HalfRise.html#ab537094a68e4c90ecc642967e5c94535">  181</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1HalfRise.html#ab537094a68e4c90ecc642967e5c94535">level</a> = 0;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="structnucleation_1_1HalfRise.html#a00828436b70c6306f53d0986d741160a">  182</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1HalfRise.html#a00828436b70c6306f53d0986d741160a">maximum</a> = 0;</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>};</div>
+</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="namespacenucleation.html#aa82d23fac82576f11e89429522c25ba8">  185</a></span>[[nodiscard]] <a class="code hl_struct" href="structnucleation_1_1HalfRise.html">HalfRise</a> <a class="code hl_function" href="namespacenucleation.html#aa82d23fac82576f11e89429522c25ba8">halfRise</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;series);</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span></div>
+<div class="foldopen" id="foldopen00189" data-start="{" data-end="};">
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="structnucleation_1_1Lead.html">  189</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structnucleation_1_1Lead.html">Lead</a> {</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="structnucleation_1_1Lead.html#a04b19b8c2019025d462f8d711491ca28">  190</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structnucleation_1_1Lead.html#a04b19b8c2019025d462f8d711491ca28">ok</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="structnucleation_1_1Lead.html#ab74ff2b4d9a6d17ba87b45f46b92eb27">  191</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1Lead.html#ab74ff2b4d9a6d17ba87b45f46b92eb27">ascentFrames</a> = 0;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="structnucleation_1_1Lead.html#a8d6b8e15917279b4158b644a16c8b0d8">  192</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1Lead.html#a8d6b8e15917279b4158b644a16c8b0d8">halfFrames</a> = 0;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="structnucleation_1_1Lead.html#ad7e0c99fb6f338f03b07bcdb25f842c9">  193</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1Lead.html#ad7e0c99fb6f338f03b07bcdb25f842c9">corrLag</a> = 0;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="structnucleation_1_1Lead.html#acb43858c82a90b9acf24275cbbca9e78">  194</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structnucleation_1_1Lead.html#acb43858c82a90b9acf24275cbbca9e78">corr</a> = 0;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>};</div>
+</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a24db8d7542dd5836a3e8026d591accd9">  199</a></span>[[nodiscard]] <a class="code hl_struct" href="structnucleation_1_1Lead.html">Lead</a> <a class="code hl_function" href="namespacenucleation.html#a24db8d7542dd5836a3e8026d591accd9">ringLead</a>(<span class="keyword">const</span> std::vector&lt;double&gt; &amp;ringFraction,</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>                            <span class="keyword">const</span> std::vector&lt;double&gt; &amp;iceFraction);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="foldopen" id="foldopen00202" data-start="{" data-end="};">
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="structnucleation_1_1Shift.html">  202</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structnucleation_1_1Shift.html">Shift</a> {</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno"><a class="line" href="structnucleation_1_1Shift.html#a1e8b191c1a9a48d90b3c548220c5b81f">  203</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1Shift.html#a1e8b191c1a9a48d90b3c548220c5b81f">dSize</a> = 0;</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno"><a class="line" href="structnucleation_1_1Shift.html#a43e2bc9f99230f24ed434557dea6728a">  204</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structnucleation_1_1Shift.html#a43e2bc9f99230f24ed434557dea6728a">dFrame</a> = 0;</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>};</div>
+</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="namespacenucleation.html#a607b48d72ffc919887fa6243d2eb4e9d">  209</a></span>[[nodiscard]] <a class="code hl_struct" href="structnucleation_1_1Shift.html">Shift</a> <a class="code hl_function" href="namespacenucleation.html#a607b48d72ffc919887fa6243d2eb4e9d">definitionShift</a>(<span class="keywordtype">int</span> sizeA, <span class="keywordtype">int</span> frameA, <span class="keywordtype">int</span> sizeB, <span class="keywordtype">int</span> frameB);</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>} <span class="comment">// namespace nucleation</span></div>
+</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespacenucleation_html"><div class="ttname"><a href="namespacenucleation.html">nucleation</a></div><div class="ttdef"><b>Definition</b> <a href="#l00043">nucleation_pathway.hpp:43</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_a047d583af8b7c503376f262d63dc9ade"><div class="ttname"><a href="namespacenucleation.html#a047d583af8b7c503376f262d63dc9ade">nucleation::q6DotScore</a></div><div class="ttdeci">std::vector&lt; double &gt; q6DotScore(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</div></div>
+<div class="ttc" id="anamespacenucleation_html_a24db8d7542dd5836a3e8026d591accd9"><div class="ttname"><a href="namespacenucleation.html#a24db8d7542dd5836a3e8026d591accd9">nucleation::ringLead</a></div><div class="ttdeci">Lead ringLead(const std::vector&lt; double &gt; &amp;ringFraction, const std::vector&lt; double &gt; &amp;iceFraction)</div></div>
+<div class="ttc" id="anamespacenucleation_html_a262df71b584718ece21536f3c0235c1c"><div class="ttname"><a href="namespacenucleation.html#a262df71b584718ece21536f3c0235c1c">nucleation::finalAscent</a></div><div class="ttdeci">Ascent finalAscent(const std::vector&lt; double &gt; &amp;series)</div></div>
+<div class="ttc" id="anamespacenucleation_html_a3bc244ef7bf44479500a58d1387a0373"><div class="ttname"><a href="namespacenucleation.html#a3bc244ef7bf44479500a58d1387a0373">nucleation::kCutoffA</a></div><div class="ttdeci">constexpr double kCutoffA</div><div class="ttdoc">Published CHILL+ cutoff. Not a fitted parameter.</div><div class="ttdef"><b>Definition</b> <a href="#l00046">nucleation_pathway.hpp:46</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_a536f149502c3e4e03088aa2287700cb2"><div class="ttname"><a href="namespacenucleation.html#a536f149502c3e4e03088aa2287700cb2">nucleation::stackFraction</a></div><div class="ttdeci">double stackFraction(int cubic, int hexagonal)</div><div class="ttdoc">Cubic / (cubic + hexagonal). Quiet NaN when the denominator is 0.</div></div>
+<div class="ttc" id="anamespacenucleation_html_a607b48d72ffc919887fa6243d2eb4e9d"><div class="ttname"><a href="namespacenucleation.html#a607b48d72ffc919887fa6243d2eb4e9d">nucleation::definitionShift</a></div><div class="ttdeci">Shift definitionShift(int sizeA, int frameA, int sizeB, int frameB)</div></div>
+<div class="ttc" id="anamespacenucleation_html_a64e04b196b84bc47a828f2875823e5b8"><div class="ttname"><a href="namespacenucleation.html#a64e04b196b84bc47a828f2875823e5b8">nucleation::analyzeFrame</a></div><div class="ttdeci">FrameRecord analyzeFrame(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;cloud, double cutoff, int ringDepth, int typeI, double q6Cut, int frame)</div></div>
+<div class="ttc" id="anamespacenucleation_html_a64fc5d22d7f2818a0d819ee1a947f087"><div class="ttname"><a href="namespacenucleation.html#a64fc5d22d7f2818a0d819ee1a947f087">nucleation::kRingDepth</a></div><div class="ttdeci">constexpr int kRingDepth</div><div class="ttdoc">Primitive rings through this size. Depth 7 is the adjacency-row search.</div><div class="ttdef"><b>Definition</b> <a href="#l00049">nucleation_pathway.hpp:49</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_a6ab0c778ff2e5e2e9e6ccd004131da2f"><div class="ttname"><a href="namespacenucleation.html#a6ab0c778ff2e5e2e9e6ccd004131da2f">nucleation::committorOf</a></div><div class="ttdeci">CommittorCall committorOf(const std::vector&lt; double &gt; &amp;series, int molecules)</div></div>
+<div class="ttc" id="anamespacenucleation_html_aa82d23fac82576f11e89429522c25ba8"><div class="ttname"><a href="namespacenucleation.html#aa82d23fac82576f11e89429522c25ba8">nucleation::halfRise</a></div><div class="ttdeci">HalfRise halfRise(const std::vector&lt; double &gt; &amp;series)</div></div>
+<div class="ttc" id="anamespacenucleation_html_ab77482862038cd733af94a8bc4802842"><div class="ttname"><a href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842">nucleation::CommittorFate</a></div><div class="ttdeci">CommittorFate</div><div class="ttdef"><b>Definition</b> <a href="#l00163">nucleation_pathway.hpp:163</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45"><div class="ttname"><a href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45">nucleation::CommittorFate::uncommitted</a></div><div class="ttdeci">@ uncommitted</div><div class="ttdef"><b>Definition</b> <a href="#l00163">nucleation_pathway.hpp:163</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980"><div class="ttname"><a href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980">nucleation::CommittorFate::truncated</a></div><div class="ttdeci">@ truncated</div><div class="ttdef"><b>Definition</b> <a href="#l00163">nucleation_pathway.hpp:163</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83"><div class="ttname"><a href="namespacenucleation.html#ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83">nucleation::CommittorFate::committed</a></div><div class="ttdeci">@ committed</div><div class="ttdef"><b>Definition</b> <a href="#l00163">nucleation_pathway.hpp:163</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_ae22c8a1c01ef593e140430321e5e0408"><div class="ttname"><a href="namespacenucleation.html#ae22c8a1c01ef593e140430321e5e0408">nucleation::kQ6SolidCutoffA</a></div><div class="ttdeci">constexpr double kQ6SolidCutoffA</div><div class="ttdef"><b>Definition</b> <a href="#l00064">nucleation_pathway.hpp:64</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_af17120d989b41a986f036b3ff5e3fb1b"><div class="ttname"><a href="namespacenucleation.html#af17120d989b41a986f036b3ff5e3fb1b">nucleation::growBasin</a></div><div class="ttdeci">GrowBasin growBasin(const std::vector&lt; double &gt; &amp;series)</div></div>
+<div class="ttc" id="anamespacenucleation_html_af2f1477e5e5f99cbe98f4ab5b95091ae"><div class="ttname"><a href="namespacenucleation.html#af2f1477e5e5f99cbe98f4ab5b95091ae">nucleation::kQ6BarIceCut</a></div><div class="ttdeci">constexpr double kQ6BarIceCut</div><div class="ttdef"><b>Definition</b> <a href="#l00054">nucleation_pathway.hpp:54</a></div></div>
+<div class="ttc" id="anamespacenucleation_html_af73c2233ed742db47c5be20f42681db7"><div class="ttname"><a href="namespacenucleation.html#af73c2233ed742db47c5be20f42681db7">nucleation::kQ6SolidCut</a></div><div class="ttdeci">constexpr double kQ6SolidCut</div><div class="ttdef"><b>Definition</b> <a href="#l00065">nucleation_pathway.hpp:65</a></div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00152">mol_sys.hpp:152</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Ascent_html"><div class="ttname"><a href="structnucleation_1_1Ascent.html">nucleation::Ascent</a></div><div class="ttdef"><b>Definition</b> <a href="#l00137">nucleation_pathway.hpp:137</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Ascent_html_a3c22e7749621bc6b9403194f413cd305"><div class="ttname"><a href="structnucleation_1_1Ascent.html#a3c22e7749621bc6b9403194f413cd305">nucleation::Ascent::index</a></div><div class="ttdeci">int index</div><div class="ttdef"><b>Definition</b> <a href="#l00138">nucleation_pathway.hpp:138</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Ascent_html_a3cab97326641acc87cb6ae483ece4bb9"><div class="ttname"><a href="structnucleation_1_1Ascent.html#a3cab97326641acc87cb6ae483ece4bb9">nucleation::Ascent::baseline</a></div><div class="ttdeci">double baseline</div><div class="ttdef"><b>Definition</b> <a href="#l00140">nucleation_pathway.hpp:140</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Ascent_html_a84b51a9634ecad74e4a0dfe69fadbd5e"><div class="ttname"><a href="structnucleation_1_1Ascent.html#a84b51a9634ecad74e4a0dfe69fadbd5e">nucleation::Ascent::climbed</a></div><div class="ttdeci">bool climbed</div><div class="ttdef"><b>Definition</b> <a href="#l00142">nucleation_pathway.hpp:142</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Ascent_html_ab6b1641fd7dabdf416ac1d7cb544d141"><div class="ttname"><a href="structnucleation_1_1Ascent.html#ab6b1641fd7dabdf416ac1d7cb544d141">nucleation::Ascent::maxIndex</a></div><div class="ttdeci">int maxIndex</div><div class="ttdef"><b>Definition</b> <a href="#l00139">nucleation_pathway.hpp:139</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Ascent_html_af6cd4481e9609a7568110576e642a04c"><div class="ttname"><a href="structnucleation_1_1Ascent.html#af6cd4481e9609a7568110576e642a04c">nucleation::Ascent::maximum</a></div><div class="ttdeci">double maximum</div><div class="ttdef"><b>Definition</b> <a href="#l00141">nucleation_pathway.hpp:141</a></div></div>
+<div class="ttc" id="astructnucleation_1_1CommittorCall_html"><div class="ttname"><a href="structnucleation_1_1CommittorCall.html">nucleation::CommittorCall</a></div><div class="ttdef"><b>Definition</b> <a href="#l00165">nucleation_pathway.hpp:165</a></div></div>
+<div class="ttc" id="astructnucleation_1_1CommittorCall_html_a1b265b1d24155d256d29bc10d350dd56"><div class="ttname"><a href="structnucleation_1_1CommittorCall.html#a1b265b1d24155d256d29bc10d350dd56">nucleation::CommittorCall::basin</a></div><div class="ttdeci">GrowBasin basin</div><div class="ttdef"><b>Definition</b> <a href="#l00167">nucleation_pathway.hpp:167</a></div></div>
+<div class="ttc" id="astructnucleation_1_1CommittorCall_html_a7409b97c45a308034b5b633d29fa899d"><div class="ttname"><a href="structnucleation_1_1CommittorCall.html#a7409b97c45a308034b5b633d29fa899d">nucleation::CommittorCall::fate</a></div><div class="ttdeci">CommittorFate fate</div><div class="ttdef"><b>Definition</b> <a href="#l00166">nucleation_pathway.hpp:166</a></div></div>
+<div class="ttc" id="astructnucleation_1_1CommittorCall_html_ab14475a4fc2b795e4ede222e1beea2b4"><div class="ttname"><a href="structnucleation_1_1CommittorCall.html#ab14475a4fc2b795e4ede222e1beea2b4">nucleation::CommittorCall::cutAtTwiceN</a></div><div class="ttdeci">bool cutAtTwiceN</div><div class="ttdef"><b>Definition</b> <a href="#l00168">nucleation_pathway.hpp:168</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html">nucleation::FrameRecord</a></div><div class="ttdef"><b>Definition</b> <a href="#l00067">nucleation_pathway.hpp:67</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a0949ce58c20c8388fccaadce9738933c"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a0949ce58c20c8388fccaadce9738933c">nucleation::FrameRecord::cOvitoExt</a></div><div class="ttdeci">int cOvitoExt</div><div class="ttdef"><b>Definition</b> <a href="#l00103">nucleation_pathway.hpp:103</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a0a0a0f95f888315189a81efadd098a45"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a0a0a0f95f888315189a81efadd098a45">nucleation::FrameRecord::nSym</a></div><div class="ttdeci">int nSym</div><div class="ttdef"><b>Definition</b> <a href="#l00108">nucleation_pathway.hpp:108</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a0d74de83c8a67df58b9e16ef82e4ed09"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a0d74de83c8a67df58b9e16ef82e4ed09">nucleation::FrameRecord::hQ6</a></div><div class="ttdeci">int hQ6</div><div class="ttdef"><b>Definition</b> <a href="#l00107">nucleation_pathway.hpp:107</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a0f0c1f60bbb1a7c4d352cd82b5c093b3"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a0f0c1f60bbb1a7c4d352cd82b5c093b3">nucleation::FrameRecord::timestep</a></div><div class="ttdeci">long long timestep</div><div class="ttdef"><b>Definition</b> <a href="#l00069">nucleation_pathway.hpp:69</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a192494834dd17325ff2408532d17eb09"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a192494834dd17325ff2408532d17eb09">nucleation::FrameRecord::cOvitoCore</a></div><div class="ttdeci">int cOvitoCore</div><div class="ttdef"><b>Definition</b> <a href="#l00100">nucleation_pathway.hpp:100</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a1db5185a6e64185b71e2a9297900d781"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a1db5185a6e64185b71e2a9297900d781">nucleation::FrameRecord::cQ6</a></div><div class="ttdeci">int cQ6</div><div class="ttdef"><b>Definition</b> <a href="#l00106">nucleation_pathway.hpp:106</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a30a34109d9972284cb706d7c1288e20b"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a30a34109d9972284cb706d7c1288e20b">nucleation::FrameRecord::nChillExt</a></div><div class="ttdeci">int nChillExt</div><div class="ttdef"><b>Definition</b> <a href="#l00096">nucleation_pathway.hpp:96</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a32949cee9e6626019b6c26544550a980"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a32949cee9e6626019b6c26544550a980">nucleation::FrameRecord::chillClath</a></div><div class="ttdeci">int chillClath</div><div class="ttdef"><b>Definition</b> <a href="#l00076">nucleation_pathway.hpp:76</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a32a1add9b985d7f19e45722e3ae5b85f"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a32a1add9b985d7f19e45722e3ae5b85f">nucleation::FrameRecord::nQ6</a></div><div class="ttdeci">int nQ6</div><div class="ttdef"><b>Definition</b> <a href="#l00105">nucleation_pathway.hpp:105</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a3565bce56f8d7bf24c759b9a353f3f66"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a3565bce56f8d7bf24c759b9a353f3f66">nucleation::FrameRecord::nOvitoExt</a></div><div class="ttdeci">int nOvitoExt</div><div class="ttdef"><b>Definition</b> <a href="#l00102">nucleation_pathway.hpp:102</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a361b7fd80ffc66fd55d24fe46e2d7c8b"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a361b7fd80ffc66fd55d24fe46e2d7c8b">nucleation::FrameRecord::frame</a></div><div class="ttdeci">int frame</div><div class="ttdef"><b>Definition</b> <a href="#l00068">nucleation_pathway.hpp:68</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a4d92d4425cddd1f960b12252baa21fd8"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a4d92d4425cddd1f960b12252baa21fd8">nucleation::FrameRecord::ovitoHex</a></div><div class="ttdeci">int ovitoHex</div><div class="ttdef"><b>Definition</b> <a href="#l00080">nucleation_pathway.hpp:80</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a4fa7cc32a5eaacf6533293e98270045d"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a4fa7cc32a5eaacf6533293e98270045d">nucleation::FrameRecord::cQ6Solid</a></div><div class="ttdeci">int cQ6Solid</div><div class="ttdef"><b>Definition</b> <a href="#l00114">nucleation_pathway.hpp:114</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a53512557e94460cb3b60d4c94e91ab55"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a53512557e94460cb3b60d4c94e91ab55">nucleation::FrameRecord::ovitoInterClath</a></div><div class="ttdeci">int ovitoInterClath</div><div class="ttdef"><b>Definition</b> <a href="#l00083">nucleation_pathway.hpp:83</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a5360897dacffa563dc9c750db938a950"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a5360897dacffa563dc9c750db938a950">nucleation::FrameRecord::nQ6Solid</a></div><div class="ttdeci">int nQ6Solid</div><div class="ttdef"><b>Definition</b> <a href="#l00113">nucleation_pathway.hpp:113</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a549a24b459b68027343c9a29b919ae0e"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a549a24b459b68027343c9a29b919ae0e">nucleation::FrameRecord::q6barMean</a></div><div class="ttdeci">double q6barMean</div><div class="ttdef"><b>Definition</b> <a href="#l00087">nucleation_pathway.hpp:87</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a5a1ec6e925b2ac452d4a87102a23879a"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a5a1ec6e925b2ac452d4a87102a23879a">nucleation::FrameRecord::cChillCore</a></div><div class="ttdeci">int cChillCore</div><div class="ttdef"><b>Definition</b> <a href="#l00094">nucleation_pathway.hpp:94</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a5d6f75be8cd680b04b71c9b6d57bf35b"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a5d6f75be8cd680b04b71c9b6d57bf35b">nucleation::FrameRecord::hOvitoCore</a></div><div class="ttdeci">int hOvitoCore</div><div class="ttdef"><b>Definition</b> <a href="#l00101">nucleation_pathway.hpp:101</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a6aab0d669e14c872f1938966538869ff"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a6aab0d669e14c872f1938966538869ff">nucleation::FrameRecord::nOvitoCore</a></div><div class="ttdeci">int nOvitoCore</div><div class="ttdef"><b>Definition</b> <a href="#l00099">nucleation_pathway.hpp:99</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a6cd74e949e22133d8200f1ad404afffa"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a6cd74e949e22133d8200f1ad404afffa">nucleation::FrameRecord::nChillCore</a></div><div class="ttdeci">int nChillCore</div><div class="ttdef"><b>Definition</b> <a href="#l00093">nucleation_pathway.hpp:93</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a6f0ea23563bf7661b2faaa173d59ada4"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a6f0ea23563bf7661b2faaa173d59ada4">nucleation::FrameRecord::hChillCore</a></div><div class="ttdeci">int hChillCore</div><div class="ttdef"><b>Definition</b> <a href="#l00095">nucleation_pathway.hpp:95</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a726a5d69d146d7cd2558ae2c3cbf3d38"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a726a5d69d146d7cd2558ae2c3cbf3d38">nucleation::FrameRecord::nop</a></div><div class="ttdeci">int nop</div><div class="ttdef"><b>Definition</b> <a href="#l00070">nucleation_pathway.hpp:70</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a7d6b5614187992dffc4eb36cc66591e8"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a7d6b5614187992dffc4eb36cc66591e8">nucleation::FrameRecord::hSym</a></div><div class="ttdeci">int hSym</div><div class="ttdef"><b>Definition</b> <a href="#l00110">nucleation_pathway.hpp:110</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a87d28f0d62c5bccd8e422e33b494f832"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a87d28f0d62c5bccd8e422e33b494f832">nucleation::FrameRecord::ovitoCubic</a></div><div class="ttdeci">int ovitoCubic</div><div class="ttdef"><b>Definition</b> <a href="#l00079">nucleation_pathway.hpp:79</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a910d2bc380d31d978654ea3923ac67a1"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a910d2bc380d31d978654ea3923ac67a1">nucleation::FrameRecord::ovitoInter</a></div><div class="ttdeci">int ovitoInter</div><div class="ttdef"><b>Definition</b> <a href="#l00081">nucleation_pathway.hpp:81</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a9443aacb9ca52493d4ec9ad6fa9a592d"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a9443aacb9ca52493d4ec9ad6fa9a592d">nucleation::FrameRecord::symCubic</a></div><div class="ttdeci">int symCubic</div><div class="ttdef"><b>Definition</b> <a href="#l00085">nucleation_pathway.hpp:85</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_a9d95e2b0b82df4cf50e985f495511a05"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#a9d95e2b0b82df4cf50e985f495511a05">nucleation::FrameRecord::hChillExt</a></div><div class="ttdeci">int hChillExt</div><div class="ttdef"><b>Definition</b> <a href="#l00098">nucleation_pathway.hpp:98</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_aa1d3e714650ce473976dbc7553f9b82e"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#aa1d3e714650ce473976dbc7553f9b82e">nucleation::FrameRecord::symHex</a></div><div class="ttdeci">int symHex</div><div class="ttdef"><b>Definition</b> <a href="#l00086">nucleation_pathway.hpp:86</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_aa860e6255e88e382e4d32ee462e2ab39"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#aa860e6255e88e382e4d32ee462e2ab39">nucleation::FrameRecord::ringCount</a></div><div class="ttdeci">long long ringCount[8]</div><div class="ttdoc">Primitive rings of each size. Index is the ring size. 0 and 1 stay 0.</div><div class="ttdef"><b>Definition</b> <a href="#l00072">nucleation_pathway.hpp:72</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_ab6629222f4d6f0455e34e126ddfd0169"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#ab6629222f4d6f0455e34e126ddfd0169">nucleation::FrameRecord::q6barIce</a></div><div class="ttdeci">int q6barIce</div><div class="ttdef"><b>Definition</b> <a href="#l00089">nucleation_pathway.hpp:89</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_ab9e4b19bff8a79a8d54c772f92d59848"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#ab9e4b19bff8a79a8d54c772f92d59848">nucleation::FrameRecord::chillInterClath</a></div><div class="ttdeci">int chillInterClath</div><div class="ttdef"><b>Definition</b> <a href="#l00077">nucleation_pathway.hpp:77</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_abbcb93e9558d8f7cb40f28109f5d6d17"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#abbcb93e9558d8f7cb40f28109f5d6d17">nucleation::FrameRecord::hOvitoExt</a></div><div class="ttdeci">int hOvitoExt</div><div class="ttdef"><b>Definition</b> <a href="#l00104">nucleation_pathway.hpp:104</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_ac486c61b5fb9792804184d9755181a5e"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#ac486c61b5fb9792804184d9755181a5e">nucleation::FrameRecord::chillHex</a></div><div class="ttdeci">int chillHex</div><div class="ttdef"><b>Definition</b> <a href="#l00074">nucleation_pathway.hpp:74</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_ad085e3ee3ce53381bc1120181b6a4135"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#ad085e3ee3ce53381bc1120181b6a4135">nucleation::FrameRecord::chillCubic</a></div><div class="ttdeci">int chillCubic</div><div class="ttdef"><b>Definition</b> <a href="#l00073">nucleation_pathway.hpp:73</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_ad4430aad94e3425b463c229a674785d7"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#ad4430aad94e3425b463c229a674785d7">nucleation::FrameRecord::chillInter</a></div><div class="ttdeci">int chillInter</div><div class="ttdef"><b>Definition</b> <a href="#l00075">nucleation_pathway.hpp:75</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_adf4c60fa57cda08898d63d00d2d617ca"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#adf4c60fa57cda08898d63d00d2d617ca">nucleation::FrameRecord::chillWater</a></div><div class="ttdeci">int chillWater</div><div class="ttdef"><b>Definition</b> <a href="#l00078">nucleation_pathway.hpp:78</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_ae108d2ebebd6aae9425c092b2b666d60"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#ae108d2ebebd6aae9425c092b2b666d60">nucleation::FrameRecord::cChillExt</a></div><div class="ttdeci">int cChillExt</div><div class="ttdef"><b>Definition</b> <a href="#l00097">nucleation_pathway.hpp:97</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_ae8d146450ea369c4dace47717165e778"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#ae8d146450ea369c4dace47717165e778">nucleation::FrameRecord::ovitoClath</a></div><div class="ttdeci">int ovitoClath</div><div class="ttdef"><b>Definition</b> <a href="#l00082">nucleation_pathway.hpp:82</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_aea7c3129353e1888d3336b3de5ea2039"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#aea7c3129353e1888d3336b3de5ea2039">nucleation::FrameRecord::hQ6Solid</a></div><div class="ttdeci">int hQ6Solid</div><div class="ttdef"><b>Definition</b> <a href="#l00115">nucleation_pathway.hpp:115</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_af0d80e996e397ad75a5e6f136f1edf9e"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#af0d80e996e397ad75a5e6f136f1edf9e">nucleation::FrameRecord::ovitoWater</a></div><div class="ttdeci">int ovitoWater</div><div class="ttdef"><b>Definition</b> <a href="#l00084">nucleation_pathway.hpp:84</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_af154d34d36f13feb34973251968fa215"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#af154d34d36f13feb34973251968fa215">nucleation::FrameRecord::q6barP50</a></div><div class="ttdeci">double q6barP50</div><div class="ttdef"><b>Definition</b> <a href="#l00088">nucleation_pathway.hpp:88</a></div></div>
+<div class="ttc" id="astructnucleation_1_1FrameRecord_html_afa9207e9993ea6199d342cfd0507b3dd"><div class="ttname"><a href="structnucleation_1_1FrameRecord.html#afa9207e9993ea6199d342cfd0507b3dd">nucleation::FrameRecord::cSym</a></div><div class="ttdeci">int cSym</div><div class="ttdef"><b>Definition</b> <a href="#l00109">nucleation_pathway.hpp:109</a></div></div>
+<div class="ttc" id="astructnucleation_1_1GrowBasin_html"><div class="ttname"><a href="structnucleation_1_1GrowBasin.html">nucleation::GrowBasin</a></div><div class="ttdef"><b>Definition</b> <a href="#l00151">nucleation_pathway.hpp:151</a></div></div>
+<div class="ttc" id="astructnucleation_1_1GrowBasin_html_a38630802207a54fd2bb1875691afff26"><div class="ttname"><a href="structnucleation_1_1GrowBasin.html#a38630802207a54fd2bb1875691afff26">nucleation::GrowBasin::occupied</a></div><div class="ttdeci">bool occupied</div><div class="ttdef"><b>Definition</b> <a href="#l00152">nucleation_pathway.hpp:152</a></div></div>
+<div class="ttc" id="astructnucleation_1_1GrowBasin_html_a88792d60c940cd47ffe153d157c93cd1"><div class="ttname"><a href="structnucleation_1_1GrowBasin.html#a88792d60c940cd47ffe153d157c93cd1">nucleation::GrowBasin::index</a></div><div class="ttdeci">int index</div><div class="ttdef"><b>Definition</b> <a href="#l00154">nucleation_pathway.hpp:154</a></div></div>
+<div class="ttc" id="astructnucleation_1_1GrowBasin_html_aa70d2c6fd74cde88999bc3aee94d50b2"><div class="ttname"><a href="structnucleation_1_1GrowBasin.html#aa70d2c6fd74cde88999bc3aee94d50b2">nucleation::GrowBasin::barrier</a></div><div class="ttdeci">double barrier</div><div class="ttdef"><b>Definition</b> <a href="#l00153">nucleation_pathway.hpp:153</a></div></div>
+<div class="ttc" id="astructnucleation_1_1HalfRise_html"><div class="ttname"><a href="structnucleation_1_1HalfRise.html">nucleation::HalfRise</a></div><div class="ttdef"><b>Definition</b> <a href="#l00177">nucleation_pathway.hpp:177</a></div></div>
+<div class="ttc" id="astructnucleation_1_1HalfRise_html_a00828436b70c6306f53d0986d741160a"><div class="ttname"><a href="structnucleation_1_1HalfRise.html#a00828436b70c6306f53d0986d741160a">nucleation::HalfRise::maximum</a></div><div class="ttdeci">double maximum</div><div class="ttdef"><b>Definition</b> <a href="#l00182">nucleation_pathway.hpp:182</a></div></div>
+<div class="ttc" id="astructnucleation_1_1HalfRise_html_a1615ddaa62260eb138b06ba738f7a558"><div class="ttname"><a href="structnucleation_1_1HalfRise.html#a1615ddaa62260eb138b06ba738f7a558">nucleation::HalfRise::ok</a></div><div class="ttdeci">bool ok</div><div class="ttdef"><b>Definition</b> <a href="#l00178">nucleation_pathway.hpp:178</a></div></div>
+<div class="ttc" id="astructnucleation_1_1HalfRise_html_ab537094a68e4c90ecc642967e5c94535"><div class="ttname"><a href="structnucleation_1_1HalfRise.html#ab537094a68e4c90ecc642967e5c94535">nucleation::HalfRise::level</a></div><div class="ttdeci">double level</div><div class="ttdef"><b>Definition</b> <a href="#l00181">nucleation_pathway.hpp:181</a></div></div>
+<div class="ttc" id="astructnucleation_1_1HalfRise_html_acf7d0863f46e8f0b00cfd6064043e49f"><div class="ttname"><a href="structnucleation_1_1HalfRise.html#acf7d0863f46e8f0b00cfd6064043e49f">nucleation::HalfRise::index</a></div><div class="ttdeci">int index</div><div class="ttdef"><b>Definition</b> <a href="#l00179">nucleation_pathway.hpp:179</a></div></div>
+<div class="ttc" id="astructnucleation_1_1HalfRise_html_adfca7258b76c1b185fa1c00c76773973"><div class="ttname"><a href="structnucleation_1_1HalfRise.html#adfca7258b76c1b185fa1c00c76773973">nucleation::HalfRise::start</a></div><div class="ttdeci">double start</div><div class="ttdef"><b>Definition</b> <a href="#l00180">nucleation_pathway.hpp:180</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Lead_html"><div class="ttname"><a href="structnucleation_1_1Lead.html">nucleation::Lead</a></div><div class="ttdef"><b>Definition</b> <a href="#l00189">nucleation_pathway.hpp:189</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Lead_html_a04b19b8c2019025d462f8d711491ca28"><div class="ttname"><a href="structnucleation_1_1Lead.html#a04b19b8c2019025d462f8d711491ca28">nucleation::Lead::ok</a></div><div class="ttdeci">bool ok</div><div class="ttdef"><b>Definition</b> <a href="#l00190">nucleation_pathway.hpp:190</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Lead_html_a8d6b8e15917279b4158b644a16c8b0d8"><div class="ttname"><a href="structnucleation_1_1Lead.html#a8d6b8e15917279b4158b644a16c8b0d8">nucleation::Lead::halfFrames</a></div><div class="ttdeci">int halfFrames</div><div class="ttdef"><b>Definition</b> <a href="#l00192">nucleation_pathway.hpp:192</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Lead_html_ab74ff2b4d9a6d17ba87b45f46b92eb27"><div class="ttname"><a href="structnucleation_1_1Lead.html#ab74ff2b4d9a6d17ba87b45f46b92eb27">nucleation::Lead::ascentFrames</a></div><div class="ttdeci">int ascentFrames</div><div class="ttdef"><b>Definition</b> <a href="#l00191">nucleation_pathway.hpp:191</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Lead_html_acb43858c82a90b9acf24275cbbca9e78"><div class="ttname"><a href="structnucleation_1_1Lead.html#acb43858c82a90b9acf24275cbbca9e78">nucleation::Lead::corr</a></div><div class="ttdeci">double corr</div><div class="ttdef"><b>Definition</b> <a href="#l00194">nucleation_pathway.hpp:194</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Lead_html_ad7e0c99fb6f338f03b07bcdb25f842c9"><div class="ttname"><a href="structnucleation_1_1Lead.html#ad7e0c99fb6f338f03b07bcdb25f842c9">nucleation::Lead::corrLag</a></div><div class="ttdeci">int corrLag</div><div class="ttdef"><b>Definition</b> <a href="#l00193">nucleation_pathway.hpp:193</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Shift_html"><div class="ttname"><a href="structnucleation_1_1Shift.html">nucleation::Shift</a></div><div class="ttdef"><b>Definition</b> <a href="#l00202">nucleation_pathway.hpp:202</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Shift_html_a1e8b191c1a9a48d90b3c548220c5b81f"><div class="ttname"><a href="structnucleation_1_1Shift.html#a1e8b191c1a9a48d90b3c548220c5b81f">nucleation::Shift::dSize</a></div><div class="ttdeci">int dSize</div><div class="ttdef"><b>Definition</b> <a href="#l00203">nucleation_pathway.hpp:203</a></div></div>
+<div class="ttc" id="astructnucleation_1_1Shift_html_a43e2bc9f99230f24ed434557dea6728a"><div class="ttname"><a href="structnucleation_1_1Shift.html#a43e2bc9f99230f24ed434557dea6728a">nucleation::Shift::dFrame</a></div><div class="ttdeci">int dFrame</div><div class="ttdef"><b>Definition</b> <a href="#l00204">nucleation_pathway.hpp:204</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="nucleation__pathway_8hpp.html">nucleation_pathway.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

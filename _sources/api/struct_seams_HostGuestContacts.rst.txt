@@ -1,0 +1,102 @@
+.. index:: pair: struct; seams::HostGuestContacts
+.. _doxid-structseams_1_1_host_guest_contacts:
+
+struct seams::HostGuestContacts
+===============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Nearest framework site and contact counts. :ref:`More...<details-structseams_1_1_host_guest_contacts>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct HostGuestContacts {
+		// fields
+	
+		std::vector<int> :ref:`guest_index<doxid-structseams_1_1_host_guest_contacts_1ac9256cb9406701acb2f917e8a72d437e>`;
+		std::vector<int> :ref:`nearest_index<doxid-structseams_1_1_host_guest_contacts_1a9fdf146213df06601a2fbc42af48904b>`;
+		std::vector<int> :ref:`nearest_type<doxid-structseams_1_1_host_guest_contacts_1a974069d6e11e90936ca8b94329bee5fa>`;
+		std::vector<double> :ref:`nearest_distance<doxid-structseams_1_1_host_guest_contacts_1ae38c6b674827b81e6e9acf025dc9bcb7>`;
+		std::vector<int> :ref:`framework_types<doxid-structseams_1_1_host_guest_contacts_1ad6142b71b307efe3e8f243b3b1f947f4>`;
+		std::vector<int> :ref:`contacts<doxid-structseams_1_1_host_guest_contacts_1a6c095ff41ed5dc46cbe1d686fc09a802>`;
+	};
+.. _details-structseams_1_1_host_guest_contacts:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Nearest framework site and contact counts.
+
+Fields
+------
+
+.. index:: pair: variable; guest_index
+.. _doxid-structseams_1_1_host_guest_contacts_1ac9256cb9406701acb2f917e8a72d437e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> guest_index
+
+Guest atom indices.
+
+.. index:: pair: variable; nearest_index
+.. _doxid-structseams_1_1_host_guest_contacts_1a9fdf146213df06601a2fbc42af48904b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> nearest_index
+
+Nearest framework index, or -1.
+
+.. index:: pair: variable; nearest_type
+.. _doxid-structseams_1_1_host_guest_contacts_1a974069d6e11e90936ca8b94329bee5fa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> nearest_type
+
+Type of that site.
+
+.. index:: pair: variable; nearest_distance
+.. _doxid-structseams_1_1_host_guest_contacts_1ae38c6b674827b81e6e9acf025dc9bcb7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> nearest_distance
+
+Distance, Angstrom.
+
+Negative when no site exists.
+
+.. index:: pair: variable; framework_types
+.. _doxid-structseams_1_1_host_guest_contacts_1ad6142b71b307efe3e8f243b3b1f947f4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> framework_types
+
+Framework types, sorted.
+
+.. index:: pair: variable; contacts
+.. _doxid-structseams_1_1_host_guest_contacts_1a6c095ff41ed5dc46cbe1d686fc09a802:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> contacts
+
+Row-major counts, one row per guest.
+

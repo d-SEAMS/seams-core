@@ -1,0 +1,102 @@
+.. index:: pair: struct; seams::PoreFrameOptions
+.. _doxid-structseams_1_1_pore_frame_options:
+
+struct seams::PoreFrameOptions
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for detecting a pore axis and centre. :ref:`More...<details-structseams_1_1_pore_frame_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct PoreFrameOptions {
+		// fields
+	
+		int :ref:`framework<doxid-structseams_1_1_pore_frame_options_1a9687587eb522fcd83596562692c7f12e>` = 0;
+		int :ref:`axis<doxid-structseams_1_1_pore_frame_options_1ab5a9b69f1ecf5f9412a775a14e8370b6>` = -1;
+		bool :ref:`use_direction<doxid-structseams_1_1_pore_frame_options_1adda5f4d0cf865a53ff0e302b6e2486e5>` = false;
+		std::array<double, 3> :ref:`direction<doxid-structseams_1_1_pore_frame_options_1affb5438979ca23c546e62ecdab654d6a>` {{0, 0, 1}};
+		bool :ref:`use_centre<doxid-structseams_1_1_pore_frame_options_1ac54df506824fadbff419a446c2b08b30>` = false;
+		std::array<double, 3> :ref:`centre_fractional<doxid-structseams_1_1_pore_frame_options_1a1d8877aebe7f33246fe0cbf5e8d0e738>` {{0, 0, 0}};
+	};
+.. _details-structseams_1_1_pore_frame_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for detecting a pore axis and centre.
+
+Fields
+------
+
+.. index:: pair: variable; framework
+.. _doxid-structseams_1_1_pore_frame_options_1a9687587eb522fcd83596562692c7f12e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int framework = 0
+
+Species for an automatic centre.
+
+Zero keeps every atom.
+
+.. index:: pair: variable; axis
+.. _doxid-structseams_1_1_pore_frame_options_1ab5a9b69f1ecf5f9412a775a14e8370b6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int axis = -1
+
+0, 1, 2, or -1 for the longest edge.
+
+.. index:: pair: variable; use_direction
+.. _doxid-structseams_1_1_pore_frame_options_1adda5f4d0cf865a53ff0e302b6e2486e5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool use_direction = false
+
+Direction replaces axis and must be a cell edge.
+
+.. index:: pair: variable; direction
+.. _doxid-structseams_1_1_pore_frame_options_1affb5438979ca23c546e62ecdab654d6a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> direction {{0, 0, 1}}
+
+Cartesian direction.
+
+.. index:: pair: variable; use_centre
+.. _doxid-structseams_1_1_pore_frame_options_1ac54df506824fadbff419a446c2b08b30:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool use_centre = false
+
+Use centre_fractional instead of the framework centroid.
+
+.. index:: pair: variable; centre_fractional
+.. _doxid-structseams_1_1_pore_frame_options_1a1d8877aebe7f33246fe0cbf5e8d0e738:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> centre_fractional {{0, 0, 0}}
+
+Fractional centre.
+

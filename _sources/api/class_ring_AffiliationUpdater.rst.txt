@@ -1,0 +1,79 @@
+.. index:: pair: class; ring::AffiliationUpdater
+.. _doxid-classring_1_1_affiliation_updater:
+
+class ring::AffiliationUpdater
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Exact incremental affiliation across frames. :ref:`More...<details-classring_1_1_affiliation_updater>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/cage_affiliation.hpp>
+	
+	class AffiliationUpdater {
+	public:
+		// construction
+	
+		:target:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`();
+		:target:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1ab795552cc7849343921675e218436e0e>`(AffiliationUpdater&&);
+		:target:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a3b367cd61501bd7dd3ab210c3cb1f7e0>`(const AffiliationUpdater&);
+		:target:`~AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1ac317156058b74bd411d74ba94dbbe3fb>`();
+
+		// methods
+	
+		:ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`& :target:`operator=<doxid-classring_1_1_affiliation_updater_1a98bb2d078981e70d618bff065d9da032>`(:ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`&&);
+		:ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`& :target:`operator=<doxid-classring_1_1_affiliation_updater_1ac47012ce53ab8f6c62f8c869b3a0ac62>`(const :ref:`AffiliationUpdater<doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28>`&);
+		const :ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>`& :ref:`update<doxid-classring_1_1_affiliation_updater_1a36779e1a3a2a86b85d51e8f7c6e2939c>`(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList);
+		int :ref:`lastReclassified<doxid-classring_1_1_affiliation_updater_1a41f180d179f3702cb423c6d87a110ddd>`() const;
+		void :ref:`setBatchFraction<doxid-classring_1_1_affiliation_updater_1ab5599551dae9aa4986772d45bd3e8bc3>`(double fraction);
+	};
+.. _details-classring_1_1_affiliation_updater:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Exact incremental affiliation across frames.
+
+Stores, per six-ring, its passing basal pairs with their prismatic rings and its equatorial result. On a new frame it matches the rings to the previous frame's and evaluates again only the pairs of rings that are new, hold an atom whose neighbour row changed, or hold or bond an atom of an added or removed ring, and the equatorial test of rings that are new or hold an atom of an added or removed ring. The flags are the unions over the stored answers, identical to cageAffiliation on the new frame.
+
+Methods
+-------
+
+.. index:: pair: function; update
+.. _doxid-classring_1_1_affiliation_updater_1a36779e1a3a2a86b85d51e8f7c6e2939c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	const :ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>`& update(const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList)
+
+Classify the frame, reusing the previous frame's answers outside the locality closure of what changed. The reference stays valid until the next update call.
+
+.. index:: pair: function; lastReclassified
+.. _doxid-classring_1_1_affiliation_updater_1a41f180d179f3702cb423c6d87a110ddd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int lastReclassified() const
+
+Rings whose pairs or equatorial test the last update evaluated again; the first call reports every ring.
+
+.. index:: pair: function; setBatchFraction
+.. _doxid-classring_1_1_affiliation_updater_1ab5599551dae9aa4986772d45bd3e8bc3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void setBatchFraction(double fraction)
+
+Above this fraction of dirty rings, update runs one sweep instead of remapping stored pairs. The default is 1, so a transition keeps every ring outside the changed region. A smaller fraction opts into the sweep. An unchanged graph returns the stored flags.
+

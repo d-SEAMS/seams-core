@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/shell_hot.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/shell__hot_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/shell_hot.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/shell__hot_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/shell_hot.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('shell__hot_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">shell_hot.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="shell__hot_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SEAMS_SHELL_HOT_H_</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SEAMS_SHELL_HOT_H_</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Hot path of the ice classifier. No Eigen types: this header is safe to</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// compile with AVX2, which faults when it is mixed with Eigen&#39;s allocators.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">//</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// Copyright (c) d-SEAMS developers</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// SPDX-License-Identifier: MIT</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacesymm.html">symm</a> {</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// One ideal shell, three templates. first[k][a] is the a-th tetrahedron</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">// vertex of template k, relative to the center. arm[k][a] is the three</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// second-shell atoms on that bond, ordered by azimuth.</span></div>
+<div class="foldopen" id="foldopen00015" data-start="{" data-end="};">
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="structsymm_1_1CanonShell.html">   15</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structsymm_1_1CanonShell.html">CanonShell</a> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="structsymm_1_1CanonShell.html#a59f7799a99b1a6933580bd988fd02893">   16</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structsymm_1_1CanonShell.html#a59f7799a99b1a6933580bd988fd02893">first</a>[3][4][3];</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="structsymm_1_1CanonShell.html#af768d87038b1758f502510e5f6fc5c31">   17</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structsymm_1_1CanonShell.html#af768d87038b1758f502510e5f6fc5c31">second</a>[3][12][3];</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="structsymm_1_1CanonShell.html#ab41a5bb9f757264b66713ad41c1bf856">   18</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structsymm_1_1CanonShell.html#ab41a5bb9f757264b66713ad41c1bf856">parent</a>[3][12];</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="structsymm_1_1CanonShell.html#ad8414fda44b7c7de2cdf674a425aa263">   19</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structsymm_1_1CanonShell.html#ad8414fda44b7c7de2cdf674a425aa263">arm</a>[3][4][3];</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="structsymm_1_1CanonShell.html#a38f519a50d1de7621e99ef35c807e176">   20</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structsymm_1_1CanonShell.html#a38f519a50d1de7621e99ef35c807e176">nArm</a>[3][4];</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="structsymm_1_1CanonShell.html#a032f948c27bc4568632f2cdbbddcd8d2">   21</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structsymm_1_1CanonShell.html#a032f948c27bc4568632f2cdbbddcd8d2">pts</a>[3][17][3];</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>};</div>
+</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// Seventeen oxygens: the center, the tetrahedron, and the twelve outer atoms.</span></div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="structsymm_1_1Shell17.html">   25</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structsymm_1_1Shell17.html">Shell17</a> {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="structsymm_1_1Shell17.html#aa910190d1d52667cd8e096dc7e48981d">   26</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structsymm_1_1Shell17.html#aa910190d1d52667cd8e096dc7e48981d">p</a>[17][3];</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>};</div>
+</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// First-shell prefilter. It is not the crystal decision: that is the</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// second-shell fingerprint and the scale-free fit. On TIP4P/2005 at its</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">// melting point a quench-majority crystal has tetrahedral-order 5th</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">// percentile 0.87 and the liquid median is 0.80, so 0.85 lets the thermal</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">// crystal reach the second shell and still sits above the liquid median.</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">// 0.94 is the floor of a quenched mW crystal and cuts that thermal body.</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="namespacesymm.html#a2ff84fc4b3aa66d032b694e9228aa59a">   35</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">double</span> <a class="code hl_variable" href="namespacesymm.html#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a> = 0.85;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">// Ratio of the longest to the shortest of the four nearest bonds. The</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">// same crystal&#39;s 95th percentile is 1.17.</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="namespacesymm.html#a498288d747baf3e7673fcfb9c8060422">   38</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="keywordtype">double</span> <a class="code hl_variable" href="namespacesymm.html#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a> = 1.20;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// xyz is n by 3, row major. lat rows are the cell edges. kind[i] is written</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">// as ice Ih (0), ice Ic (1), ice Isd (2), or -1.</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// x, y, z are length n. Column-major coordinates, no interleaving copy.</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// openFace completes a short second shell on a bonded neighbour that has</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// fewer than four bonds. A full coordination shell is never padded. Off</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">// by default, which keeps the labels the shell match gave before.</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="namespacesymm.html#a3b5774dafdae3a0c18d9837dadc12671">   46</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacesymm.html#a3b5774dafdae3a0c18d9837dadc12671">classifyPrepared</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keyword">const</span> <span class="keywordtype">double</span> *y, <span class="keyword">const</span> <span class="keywordtype">double</span> *z, <span class="keywordtype">int</span> n,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>                      <span class="keyword">const</span> <span class="keywordtype">double</span> lat[3][3], <span class="keyword">const</span> <a class="code hl_struct" href="structsymm_1_1CanonShell.html">CanonShell</a> &amp;canon, <span class="keywordtype">double</span> gate, <span class="keywordtype">int</span> *kind,</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>                      <span class="keywordtype">double</span> thermalQ = <a class="code hl_variable" href="namespacesymm.html#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a>, <span class="keywordtype">double</span> bondRatio = <a class="code hl_variable" href="namespacesymm.html#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a>,</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>                      <span class="keywordtype">bool</span> openFace = <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">// Common-neighbour signatures of one atom&#39;s twelve second neighbours, given</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">// relative to the atom: 1 for twelve (4,2,1), 0 for six (4,2,1) and six</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">// (4,2,2), 3 or 4 for a mostly cubic or mostly hexagonal shell with eight</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">// good signatures, -2 for at least `ambiguous` good ones, -1 otherwise.</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="namespacesymm.html#aa92a0bdaa68a6b24e5de15494a40c731">   55</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="namespacesymm.html#aa92a0bdaa68a6b24e5de15494a40c731">diamondCna</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *sx, <span class="keyword">const</span> <span class="keywordtype">double</span> *sy, <span class="keyword">const</span> <span class="keywordtype">double</span> *sz, <span class="keywordtype">int</span> ambiguous,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>               <span class="keywordtype">int</span> *n421 = <span class="keyword">nullptr</span>, <span class="keywordtype">int</span> *n422 = <span class="keyword">nullptr</span>, <span class="keywordtype">int</span> *nGood = <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">// True when the AVX2 build of shell_classify.cpp is linked in, the CPU</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// reports AVX2 and FMA, and seams::cpu::allowSimdKernels has not turned it</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">// off. classifyPrepared and diamondCna call symm::avx2 only then, and</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">// symm::generic otherwise.</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="namespacesymm.html#a4c144bb9fe1a2e1fe40be391f0768659">   62</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacesymm.html#a4c144bb9fe1a2e1fe40be391f0768659">avx2Kernels</a>();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="comment">// The two builds of shell_classify.cpp. Call them through the functions</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="comment">// above; symm::avx2 exists only where avx2Kernels() can be true.</span></div>
+<div class="foldopen" id="foldopen00066" data-start="{" data-end="}">
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="namespacesymm_1_1generic.html">   66</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacesymm_1_1generic.html">generic</a> {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="namespacesymm_1_1generic.html#a38e6a9e2a00776dcfb188e2a32959100">   67</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacesymm_1_1generic.html#a38e6a9e2a00776dcfb188e2a32959100">classifyPrepared</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keyword">const</span> <span class="keywordtype">double</span> *y, <span class="keyword">const</span> <span class="keywordtype">double</span> *z, <span class="keywordtype">int</span> n,</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>                      <span class="keyword">const</span> <span class="keywordtype">double</span> lat[3][3], <span class="keyword">const</span> <a class="code hl_struct" href="structsymm_1_1CanonShell.html">CanonShell</a> &amp;canon, <span class="keywordtype">double</span> gate, <span class="keywordtype">int</span> *kind,</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                      <span class="keywordtype">double</span> thermalQ, <span class="keywordtype">double</span> bondRatio, <span class="keywordtype">bool</span> openFace);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="namespacesymm_1_1generic.html#a5585f406605ef334b8af2605b96478ba">   70</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="namespacesymm_1_1generic.html#a5585f406605ef334b8af2605b96478ba">diamondCna</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *sx, <span class="keyword">const</span> <span class="keywordtype">double</span> *sy, <span class="keyword">const</span> <span class="keywordtype">double</span> *sz, <span class="keywordtype">int</span> ambiguous, <span class="keywordtype">int</span> *n421,</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>               <span class="keywordtype">int</span> *n422, <span class="keywordtype">int</span> *nGood);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>} <span class="comment">// namespace generic</span></div>
+</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="foldopen" id="foldopen00074" data-start="{" data-end="}">
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="namespacesymm_1_1avx2.html">   74</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacesymm_1_1avx2.html">avx2</a> {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="namespacesymm_1_1avx2.html#afead2370bcc49b889bedf2cdeea18886">   75</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacesymm_1_1avx2.html#afead2370bcc49b889bedf2cdeea18886">classifyPrepared</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keyword">const</span> <span class="keywordtype">double</span> *y, <span class="keyword">const</span> <span class="keywordtype">double</span> *z, <span class="keywordtype">int</span> n,</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>                      <span class="keyword">const</span> <span class="keywordtype">double</span> lat[3][3], <span class="keyword">const</span> <a class="code hl_struct" href="structsymm_1_1CanonShell.html">CanonShell</a> &amp;canon, <span class="keywordtype">double</span> gate, <span class="keywordtype">int</span> *kind,</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>                      <span class="keywordtype">double</span> thermalQ, <span class="keywordtype">double</span> bondRatio, <span class="keywordtype">bool</span> openFace);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="namespacesymm_1_1avx2.html#a70ad08c7e1e9569c61faabf4a914530f">   78</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="namespacesymm_1_1avx2.html#a70ad08c7e1e9569c61faabf4a914530f">diamondCna</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *sx, <span class="keyword">const</span> <span class="keywordtype">double</span> *sy, <span class="keyword">const</span> <span class="keywordtype">double</span> *sz, <span class="keywordtype">int</span> ambiguous, <span class="keywordtype">int</span> *n421,</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>               <span class="keywordtype">int</span> *n422, <span class="keywordtype">int</span> *nGood);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>} <span class="comment">// namespace avx2</span></div>
+</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>} <span class="comment">// namespace symm</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="anamespacesymm_1_1avx2_html"><div class="ttname"><a href="namespacesymm_1_1avx2.html">symm::avx2</a></div><div class="ttdef"><b>Definition</b> <a href="#l00074">shell_hot.hpp:74</a></div></div>
+<div class="ttc" id="anamespacesymm_1_1avx2_html_a70ad08c7e1e9569c61faabf4a914530f"><div class="ttname"><a href="namespacesymm_1_1avx2.html#a70ad08c7e1e9569c61faabf4a914530f">symm::avx2::diamondCna</a></div><div class="ttdeci">int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421, int *n422, int *nGood)</div></div>
+<div class="ttc" id="anamespacesymm_1_1avx2_html_afead2370bcc49b889bedf2cdeea18886"><div class="ttname"><a href="namespacesymm_1_1avx2.html#afead2370bcc49b889bedf2cdeea18886">symm::avx2::classifyPrepared</a></div><div class="ttdeci">void classifyPrepared(const double *x, const double *y, const double *z, int n, const double lat[3][3], const CanonShell &amp;canon, double gate, int *kind, double thermalQ, double bondRatio, bool openFace)</div></div>
+<div class="ttc" id="anamespacesymm_1_1generic_html"><div class="ttname"><a href="namespacesymm_1_1generic.html">symm::generic</a></div><div class="ttdef"><b>Definition</b> <a href="#l00066">shell_hot.hpp:66</a></div></div>
+<div class="ttc" id="anamespacesymm_1_1generic_html_a38e6a9e2a00776dcfb188e2a32959100"><div class="ttname"><a href="namespacesymm_1_1generic.html#a38e6a9e2a00776dcfb188e2a32959100">symm::generic::classifyPrepared</a></div><div class="ttdeci">void classifyPrepared(const double *x, const double *y, const double *z, int n, const double lat[3][3], const CanonShell &amp;canon, double gate, int *kind, double thermalQ, double bondRatio, bool openFace)</div></div>
+<div class="ttc" id="anamespacesymm_1_1generic_html_a5585f406605ef334b8af2605b96478ba"><div class="ttname"><a href="namespacesymm_1_1generic.html#a5585f406605ef334b8af2605b96478ba">symm::generic::diamondCna</a></div><div class="ttdeci">int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421, int *n422, int *nGood)</div></div>
+<div class="ttc" id="anamespacesymm_html"><div class="ttname"><a href="namespacesymm.html">symm</a></div><div class="ttdef"><b>Definition</b> <a href="diamond__cna_8hpp_source.html#l00016">diamond_cna.hpp:16</a></div></div>
+<div class="ttc" id="anamespacesymm_html_a2ff84fc4b3aa66d032b694e9228aa59a"><div class="ttname"><a href="namespacesymm.html#a2ff84fc4b3aa66d032b694e9228aa59a">symm::kThermalQ</a></div><div class="ttdeci">constexpr double kThermalQ</div><div class="ttdef"><b>Definition</b> <a href="#l00035">shell_hot.hpp:35</a></div></div>
+<div class="ttc" id="anamespacesymm_html_a3b5774dafdae3a0c18d9837dadc12671"><div class="ttname"><a href="namespacesymm.html#a3b5774dafdae3a0c18d9837dadc12671">symm::classifyPrepared</a></div><div class="ttdeci">void classifyPrepared(const double *x, const double *y, const double *z, int n, const double lat[3][3], const CanonShell &amp;canon, double gate, int *kind, double thermalQ=kThermalQ, double bondRatio=kThermalBondRatio, bool openFace=false)</div></div>
+<div class="ttc" id="anamespacesymm_html_a498288d747baf3e7673fcfb9c8060422"><div class="ttname"><a href="namespacesymm.html#a498288d747baf3e7673fcfb9c8060422">symm::kThermalBondRatio</a></div><div class="ttdeci">constexpr double kThermalBondRatio</div><div class="ttdef"><b>Definition</b> <a href="#l00038">shell_hot.hpp:38</a></div></div>
+<div class="ttc" id="anamespacesymm_html_a4c144bb9fe1a2e1fe40be391f0768659"><div class="ttname"><a href="namespacesymm.html#a4c144bb9fe1a2e1fe40be391f0768659">symm::avx2Kernels</a></div><div class="ttdeci">bool avx2Kernels()</div></div>
+<div class="ttc" id="anamespacesymm_html_aa92a0bdaa68a6b24e5de15494a40c731"><div class="ttname"><a href="namespacesymm.html#aa92a0bdaa68a6b24e5de15494a40c731">symm::diamondCna</a></div><div class="ttdeci">int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421=nullptr, int *n422=nullptr, int *nGood=nullptr)</div></div>
+<div class="ttc" id="astructsymm_1_1CanonShell_html"><div class="ttname"><a href="structsymm_1_1CanonShell.html">symm::CanonShell</a></div><div class="ttdef"><b>Definition</b> <a href="#l00015">shell_hot.hpp:15</a></div></div>
+<div class="ttc" id="astructsymm_1_1CanonShell_html_a032f948c27bc4568632f2cdbbddcd8d2"><div class="ttname"><a href="structsymm_1_1CanonShell.html#a032f948c27bc4568632f2cdbbddcd8d2">symm::CanonShell::pts</a></div><div class="ttdeci">double pts[3][17][3]</div><div class="ttdef"><b>Definition</b> <a href="#l00021">shell_hot.hpp:21</a></div></div>
+<div class="ttc" id="astructsymm_1_1CanonShell_html_a38f519a50d1de7621e99ef35c807e176"><div class="ttname"><a href="structsymm_1_1CanonShell.html#a38f519a50d1de7621e99ef35c807e176">symm::CanonShell::nArm</a></div><div class="ttdeci">int nArm[3][4]</div><div class="ttdef"><b>Definition</b> <a href="#l00020">shell_hot.hpp:20</a></div></div>
+<div class="ttc" id="astructsymm_1_1CanonShell_html_a59f7799a99b1a6933580bd988fd02893"><div class="ttname"><a href="structsymm_1_1CanonShell.html#a59f7799a99b1a6933580bd988fd02893">symm::CanonShell::first</a></div><div class="ttdeci">double first[3][4][3]</div><div class="ttdef"><b>Definition</b> <a href="#l00016">shell_hot.hpp:16</a></div></div>
+<div class="ttc" id="astructsymm_1_1CanonShell_html_ab41a5bb9f757264b66713ad41c1bf856"><div class="ttname"><a href="structsymm_1_1CanonShell.html#ab41a5bb9f757264b66713ad41c1bf856">symm::CanonShell::parent</a></div><div class="ttdeci">int parent[3][12]</div><div class="ttdef"><b>Definition</b> <a href="#l00018">shell_hot.hpp:18</a></div></div>
+<div class="ttc" id="astructsymm_1_1CanonShell_html_ad8414fda44b7c7de2cdf674a425aa263"><div class="ttname"><a href="structsymm_1_1CanonShell.html#ad8414fda44b7c7de2cdf674a425aa263">symm::CanonShell::arm</a></div><div class="ttdeci">int arm[3][4][3]</div><div class="ttdef"><b>Definition</b> <a href="#l00019">shell_hot.hpp:19</a></div></div>
+<div class="ttc" id="astructsymm_1_1CanonShell_html_af768d87038b1758f502510e5f6fc5c31"><div class="ttname"><a href="structsymm_1_1CanonShell.html#af768d87038b1758f502510e5f6fc5c31">symm::CanonShell::second</a></div><div class="ttdeci">double second[3][12][3]</div><div class="ttdef"><b>Definition</b> <a href="#l00017">shell_hot.hpp:17</a></div></div>
+<div class="ttc" id="astructsymm_1_1Shell17_html"><div class="ttname"><a href="structsymm_1_1Shell17.html">symm::Shell17</a></div><div class="ttdef"><b>Definition</b> <a href="#l00025">shell_hot.hpp:25</a></div></div>
+<div class="ttc" id="astructsymm_1_1Shell17_html_aa910190d1d52667cd8e096dc7e48981d"><div class="ttname"><a href="structsymm_1_1Shell17.html#aa910190d1d52667cd8e096dc7e48981d">symm::Shell17::p</a></div><div class="ttdeci">double p[17][3]</div><div class="ttdef"><b>Definition</b> <a href="#l00026">shell_hot.hpp:26</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="shell__hot_8hpp.html">shell_hot.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

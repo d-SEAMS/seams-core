@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::ReorientationCurve
+.. _doxid-structseams_1_1_reorientation_curve:
+
+struct seams::ReorientationCurve
+================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Accumulated C1 and C2 orientational correlation curves. :ref:`More...<details-structseams_1_1_reorientation_curve>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct ReorientationCurve {
+		// fields
+	
+		std::vector<double> :ref:`lag_time<doxid-structseams_1_1_reorientation_curve_1a0b363f7b58fc24f9fa12a1a74a7c6019>`;
+		std::vector<double> :ref:`c1<doxid-structseams_1_1_reorientation_curve_1aac3fde2423bde26721f5f4e0d44fe255>`;
+		std::vector<double> :ref:`c2<doxid-structseams_1_1_reorientation_curve_1a3891162dce82514d8db5b3dd86489ced>`;
+		std::vector<std::size_t> :ref:`n_origins<doxid-structseams_1_1_reorientation_curve_1a2e446327b8847da8830346200ee3cbac>`;
+	};
+.. _details-structseams_1_1_reorientation_curve:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Accumulated C1 and C2 orientational correlation curves.
+
+Fields
+------
+
+.. index:: pair: variable; lag_time
+.. _doxid-structseams_1_1_reorientation_curve_1a0b363f7b58fc24f9fa12a1a74a7c6019:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> lag_time
+
+Lag times k \* dt.
+
+.. index:: pair: variable; c1
+.. _doxid-structseams_1_1_reorientation_curve_1aac3fde2423bde26721f5f4e0d44fe255:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> c1
+
+First Legendre correlation C1.
+
+.. index:: pair: variable; c2
+.. _doxid-structseams_1_1_reorientation_curve_1a3891162dce82514d8db5b3dd86489ced:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> c2
+
+Second Legendre correlation C2.
+
+.. index:: pair: variable; n_origins
+.. _doxid-structseams_1_1_reorientation_curve_1a2e446327b8847da8830346200ee3cbac:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::size_t> n_origins
+
+Time-origin count at each lag.
+

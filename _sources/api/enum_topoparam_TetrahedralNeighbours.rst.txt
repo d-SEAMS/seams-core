@@ -1,0 +1,51 @@
+.. index:: pair: enum; TetrahedralNeighbours
+.. _doxid-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133:
+
+enum topoparam::TetrahedralNeighbours
+=====================================
+
+Overview
+~~~~~~~~
+
+Neighbour convention for the Errington-Debenedetti tetrahedral order. :ref:`More...<details-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133>`
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <order_parameter.hpp>
+
+	enum TetrahedralNeighbours {
+	    :ref:`NearestFour<doxid-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133a838cbd04ab851175fbb232b237e52585>`  = 0,
+	    :ref:`WithinCutoff<doxid-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133a79adc0b32d8fa93ffcbf22d074f3ee32>` = 1,
+	};
+
+.. _details-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Neighbour convention for the Errington-Debenedetti tetrahedral order.
+
+Enum Values
+-----------
+
+.. index:: pair: enumvalue; NearestFour
+.. _doxid-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133a838cbd04ab851175fbb232b237e52585:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	NearestFour
+
+The four nearest selected partners, with no radial cutoff.
+
+.. index:: pair: enumvalue; WithinCutoff
+.. _doxid-namespacetopoparam_1a3b806052c9432d3c00eb4bb91e1d3133a79adc0b32d8fa93ffcbf22d074f3ee32:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	WithinCutoff
+
+Every selected partner at or inside the supplied cutoff. For N neighbours the standard 3/8 factor is generalized to 9/(2 N (N-1)), which keeps the ideal-gas mean at zero.
+

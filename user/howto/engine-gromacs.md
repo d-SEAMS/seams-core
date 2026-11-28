@@ -1,0 +1,45 @@
+<!-- https://docs.dseams.info/user/howto/engine-gromacs.md -->
+
+# GROMACS {#gromacs}
+
+Build `gmx-seams` against conda-forge GROMACS 2026.3, or a later 2026
+release. Eigen and a C++ compiler need to be on the path. The exports
+are the include and library paths of that prefix, including the AVX
+directories conda-forge uses.
+
+```bash
+pixi init -c conda-forge dseams-gromacs
+pixi add --manifest-path dseams-gromacs/pixi.toml "gromacs>=2026.3,<2027"
+eval "$(pixi shell-hook --manifest-path dseams-gromacs/pixi.toml)"
+export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig:$CONDA_PREFIX/lib.AVX_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+meson setup build -Dwith_gromacs=enabled
+meson compile -C build
+```
+
+`gmx-seams` reads a trajectory in nanometers, multiplies the coordinates
+and the box by 10, and classifies the frame. Convert
+`input/traj/ice1h.lammpstrj` to a one-frame `.gro` and run:
+
+```bash
+gmx-seams -f ice1h.gro -cutoff 3.5
+```
+
+The tool prints two lines. `ice` on the first is the cubic total over
+every frame. `hexagonal`, `six-rings`, and `q6` are the last frame.
+`overhead_s` is on the frames line and depends on the machine. This
+cell has 128 molecules, all hexagonal, so the cubic total is 0 and the
+last frame is:
+
+```text
+gromacs hexagonal 128 six-rings 256 q6 0.625855
+```
+
+`engines/gromacs/run_mdrun.sh` is a second path. It keeps the first
+frame of `engines/gromacs/ice.gro` (the file has two), writes a frozen
+`.tpr` with `nsteps` 4, runs `gmx mdrun`, and then runs `gmx-seams` on
+the `.xtc` mdrun wrote. `gmx-seams` is a separate process after mdrun.
+That first frame, converted from nanometers to angstroms, is 64 cubic
+atoms, 128 primitive six-rings, and mean local q6 0.628539. The frames
+line sums the cubic count over the frames in the `.xtc`.

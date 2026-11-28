@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::ReorientationFit
+.. _doxid-structseams_1_1_reorientation_fit:
+
+struct seams::ReorientationFit
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Integrated and single-exponential reorientation times. :ref:`More...<details-structseams_1_1_reorientation_fit>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct ReorientationFit {
+		// fields
+	
+		double :ref:`tau1_int<doxid-structseams_1_1_reorientation_fit_1a61d4db6f23a17c55fb05969737edfe34>` = 0;
+		double :ref:`tau1_exp<doxid-structseams_1_1_reorientation_fit_1af2bd4d1e38df5ef28cbb54ad94f01800>` = 0;
+		double :ref:`tau2_int<doxid-structseams_1_1_reorientation_fit_1a2e65bdd6f61245ebc1f7a8e1827b0e18>` = 0;
+		double :ref:`tau2_exp<doxid-structseams_1_1_reorientation_fit_1a2d019305602055d8b2fdb59153c81fa4>` = 0;
+	};
+.. _details-structseams_1_1_reorientation_fit:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Integrated and single-exponential reorientation times.
+
+Fields
+------
+
+.. index:: pair: variable; tau1_int
+.. _doxid-structseams_1_1_reorientation_fit_1a61d4db6f23a17c55fb05969737edfe34:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double tau1_int = 0
+
+Trapezoidal integral of C1.
+
+.. index:: pair: variable; tau1_exp
+.. _doxid-structseams_1_1_reorientation_fit_1af2bd4d1e38df5ef28cbb54ad94f01800:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double tau1_exp = 0
+
+Exponential decay time of C1.
+
+.. index:: pair: variable; tau2_int
+.. _doxid-structseams_1_1_reorientation_fit_1a2e65bdd6f61245ebc1f7a8e1827b0e18:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double tau2_int = 0
+
+Trapezoidal integral of C2.
+
+.. index:: pair: variable; tau2_exp
+.. _doxid-structseams_1_1_reorientation_fit_1a2d019305602055d8b2fdb59153c81fa4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double tau2_exp = 0
+
+Exponential decay time of C2.
+

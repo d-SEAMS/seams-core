@@ -1,0 +1,24 @@
+.. index:: pair: struct; symm::Group
+.. _doxid-structsymm_1_1_group:
+
+struct symm::Group
+==================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/local_symmetry.hpp>
+	
+	struct Group {
+		// fields
+	
+		int :target:`status<doxid-structsymm_1_1_group_1aa862430858d38b8f1e522356023371b5>` = 1;
+		std::string :target:`symbol<doxid-structsymm_1_1_group_1afc99b3a48ef32ff44a78d6790559a762>`;
+		int :target:`nOperations<doxid-structsymm_1_1_group_1aed2c48ccebad545fe229f7d81ee16649>` = 0;
+	};

@@ -1,0 +1,22 @@
+.. index:: pair: struct; traj::MsdAccumulator::OriginSlot
+.. _doxid-structtraj_1_1_msd_accumulator_1_1_origin_slot:
+
+struct traj::MsdAccumulator::OriginSlot
+=======================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	struct OriginSlot {
+		// fields
+	
+		std::size_t :target:`frameIndex<doxid-structtraj_1_1_msd_accumulator_1_1_origin_slot_1a09e686ea42f86a2e026df7be402d380e>` = 0;
+		std::vector<double> :target:`coords<doxid-structtraj_1_1_msd_accumulator_1_1_origin_slot_1a0025ec6a1d5f1acaa1b049c90421aeac>`;
+	};

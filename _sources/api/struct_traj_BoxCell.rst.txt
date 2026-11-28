@@ -1,0 +1,78 @@
+.. index:: pair: struct; traj::BoxCell
+.. _doxid-structtraj_1_1_box_cell:
+
+struct traj::BoxCell
+====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Restricted-triclinic periodic simulation cell. :ref:`More...<details-structtraj_1_1_box_cell>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	struct BoxCell {
+		// fields
+	
+		double :target:`ox<doxid-structtraj_1_1_box_cell_1afa0771c838b8f08d6bdb5c289d0f2386>` = 0.0;
+		double :target:`oy<doxid-structtraj_1_1_box_cell_1a0dc15813a1118d0717a1d46b022f5ced>` = 0.0;
+		double :target:`oz<doxid-structtraj_1_1_box_cell_1a667ecdf67176e2311a5978974de3b6bc>` = 0.0;
+		double :target:`lx<doxid-structtraj_1_1_box_cell_1adf642e32959f135e5ea5865bea50aa5a>` = 0.0;
+		double :target:`ly<doxid-structtraj_1_1_box_cell_1af5139a525713a288feb50eed84ace415>` = 0.0;
+		double :target:`lz<doxid-structtraj_1_1_box_cell_1a399975f6dd25e0d6de95bfe48fb17d05>` = 0.0;
+		double :target:`xy<doxid-structtraj_1_1_box_cell_1a2efd9230aa9d4656ababac9bb047d4ab>` = 0.0;
+		double :target:`xz<doxid-structtraj_1_1_box_cell_1abf6bda0a5056f3d6c63f5728135cc451>` = 0.0;
+		double :target:`yz<doxid-structtraj_1_1_box_cell_1af0e31851d77363f3abeaf63736122ba6>` = 0.0;
+		double :target:`halfMin<doxid-structtraj_1_1_box_cell_1a85a8ff98fc5e363f14b99d4af0205375>` = 0.0;
+		bool :target:`triclinic<doxid-structtraj_1_1_box_cell_1a613f84d44ef5aa497617766238bf019e>` = false;
+		bool :target:`ok<doxid-structtraj_1_1_box_cell_1abcdd87d473e7ff7b865fd7cda7761b9a>` = false;
+
+		// methods
+	
+		static BoxCell :target:`fromBox9<doxid-structtraj_1_1_box_cell_1a7631be5e76026ccf8289d0308e195e35>`(const double box9[9]);
+		static BoxCell :target:`fromCloud<doxid-structtraj_1_1_box_cell_1a421740d57c42e55bd8c0639c430cadd1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud);
+		void :target:`toBox9<doxid-structtraj_1_1_box_cell_1abf35e83f5bebc5df9dd043606972d9c8>`(double out[9]) const;
+		std::array<double, 3> :ref:`micDelta<doxid-structtraj_1_1_box_cell_1a076c0ec0a5761e51edba9cf12065fdc9>`(double dx, double dy, double dz) const;
+		std::array<double, 3> :ref:`micDeltaSearch<doxid-structtraj_1_1_box_cell_1aa80be0076a7033e8bfd2fd99015bacc4>`(double dx, double dy, double dz) const;
+	};
+.. _details-structtraj_1_1_box_cell:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Restricted-triclinic periodic simulation cell.
+
+Edge matrix H has columns a = (lx, 0, 0), b = (xy, ly, 0), c = (xz, yz, lz) and origin (ox, oy, oz).
+
+Methods
+-------
+
+.. index:: pair: function; micDelta
+.. _doxid-structtraj_1_1_box_cell_1a076c0ec0a5761e51edba9cf12065fdc9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> micDelta(double dx, double dy, double dz) const
+
+Euclidean minimum-image Cartesian displacement for raw delta (dx, dy, dz).
+
+The fractional image inside the Smith ball, otherwise micDeltaSearch. Independent rounding of fractional coordinates is not the minimum image on a tilted cell.
+
+.. index:: pair: function; micDeltaSearch
+.. _doxid-structtraj_1_1_box_cell_1aa80be0076a7033e8bfd2fd99015bacc4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> micDeltaSearch(double dx, double dy, double dz) const
+
+Euclidean minimum image by exhaustive search over the lattice shifts that can beat the fractional image.
+

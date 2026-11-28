@@ -1,0 +1,71 @@
+.. index:: pair: struct; seams::HostGuestOptions
+.. _doxid-structseams_1_1_host_guest_options:
+
+struct seams::HostGuestOptions
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for host-guest contacts. :ref:`More...<details-structseams_1_1_host_guest_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct HostGuestOptions {
+		// fields
+	
+		int :ref:`guest<doxid-structseams_1_1_host_guest_options_1a7e4268fda8d6a4d4dbc2a853a6be5bf7>` = 1;
+		int :ref:`framework<doxid-structseams_1_1_host_guest_options_1a35d32e18a340fc95059c6e4c17cddf65>` = 0;
+		double :ref:`cutoff<doxid-structseams_1_1_host_guest_options_1a026fbf72242fc17f9dd7f55c07827865>` = 0;
+	};
+.. _details-structseams_1_1_host_guest_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for host-guest contacts.
+
+Fields
+------
+
+.. index:: pair: variable; guest
+.. _doxid-structseams_1_1_host_guest_options_1a7e4268fda8d6a4d4dbc2a853a6be5bf7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int guest = 1
+
+Positive guest species.
+
+.. index:: pair: variable; framework
+.. _doxid-structseams_1_1_host_guest_options_1a35d32e18a340fc95059c6e4c17cddf65:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int framework = 0
+
+Framework species.
+
+Zero keeps every other type. Equal to guest is rejected.
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_host_guest_options_1a026fbf72242fc17f9dd7f55c07827865:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 0
+
+Contact distance, Angstrom.
+
+Zero counts a coincident site.
+

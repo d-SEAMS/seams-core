@@ -1,0 +1,45 @@
+<!-- https://docs.dseams.info/explanation/linkcell-scaling.md -->
+
+# Linkcell strong scaling {#linkcell-strong-scaling}
+
+The linkcell manual is [linkcell.dseams.info](https://linkcell.dseams.info/).
+This page is how d-SEAMS uses that library.
+
+An orthorhombic frame is cut across ranks by linkcell’s weighted
+recursive coordinate bisection of the periodic cell grid. d-SEAMS
+passes that bisection. linkcell’s default method follows the bisection
+with a Fiduccia-Mattheyses pass, and this cut does not request that
+pass. A balance of zero selects `1 + parts * w_max / total`. `w_max`
+is the heaviest cell weight and `total` is the sum of the cell
+weights. That is the tightest bound a cell-aligned cut can promise.
+
+Across those ranks, the first call weights each cell by how many
+points it holds. A later call of CHILL+, of Steinhardt q6, or of the
+primitive-ring census weights each cell by the work measured on the
+first call. The cut is kept for a later call of that analysis with the
+same atom count, box, halo, and rank count.
+
+The halo is painted in the walk that visits the cells a rank owns. A
+point in an owned cell stays owned. A point in a painted cell is a
+ghost, and the rank that owns the cell owns the point.
+
+A frame whose box is not three orthorhombic lengths keeps the slab,
+pencil, or block cut. An orthorhombic frame whose mesh cannot be built
+keeps that cut as well. A point inside the halo of the owned block is
+a ghost.
+
+## Inside one process {#inside-one-process}
+
+One thread builds the cutoff list with linkcell’s fused kernel. From
+outside a running team, two or more threads build an orthorhombic list
+on one shared cell grid. Each thread takes a contiguous run of
+columns, and the runs split the atoms evenly. A pair whose columns
+both lie in one run is tested once and written into both rows. A pair
+that crosses a run is tested from each side, and each side writes its
+own row. The cell counts and the row storage stay allocated and are
+rewritten on the next call. Below 2048 atoms in the list, this builder
+runs on one thread.
+
+With two or more threads, a restricted triclinic box uses the tilted
+cell list. CHILL+, Steinhardt q6, and the primitive-ring census read
+these rows. The pair set does not depend on the thread count.

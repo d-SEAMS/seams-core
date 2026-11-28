@@ -1,0 +1,52 @@
+.. index:: pair: struct; site::ConcentrationBin
+.. _doxid-structsite_1_1_concentration_bin:
+
+struct site::ConcentrationBin
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct ConcentrationBin {
+		// fields
+	
+		double :target:`zLo<doxid-structsite_1_1_concentration_bin_1ab4b7ef63fdc44566ca358603d7ea4463>` = 0;
+		double :target:`zHi<doxid-structsite_1_1_concentration_bin_1ad74975c492ed351971c21968a36c9023>` = 0;
+		double :target:`zMid<doxid-structsite_1_1_concentration_bin_1ae4adc0d2210e9857e7705262a38388dc>` = 0;
+		int :target:`nWater<doxid-structsite_1_1_concentration_bin_1a0eddb3ec5707352cfa251095dfa5bbf4>` = 0;
+		int :target:`nIceWater<doxid-structsite_1_1_concentration_bin_1aa99e5f2ee3e0693c7e3b5ce160c64790>` = 0;
+		int :target:`nIon<doxid-structsite_1_1_concentration_bin_1a6b1341ab8b3f29aaaf91ef8ddb973518>` = 0;
+		double :target:`iceFraction<doxid-structsite_1_1_concentration_bin_1adbb9aefd42afe3457fc0f6e01a751f31>` = 0;
+		double :ref:`molality<doxid-structsite_1_1_concentration_bin_1a34b1531529113c3a0194e9bbc9740719>` = 0;
+	};
+.. _details-structsite_1_1_concentration_bin:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; molality
+.. _doxid-structsite_1_1_concentration_bin_1a34b1531529113c3a0194e9bbc9740719:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double molality = 0
+
+formula units per kg of water in the bin
+

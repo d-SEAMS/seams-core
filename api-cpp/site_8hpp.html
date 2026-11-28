@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/site.hpp File Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/site_8hpp.html">
+<meta property="og:title" content="seams-core: src/include/internal/site.hpp File Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/site_8hpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/site.hpp File Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('site_8hpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">site.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Per-atom site chemistry, separate from CHILL ice labels.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+</div>
+<p><a href="site_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:site_3A_3ATable" id="r_site_3A_3ATable"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1Table.html">site::Table</a></td></tr>
+<tr class="memitem:site_3A_3AIonEnvironment" id="r_site_3A_3AIonEnvironment"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IonEnvironment.html">site::IonEnvironment</a></td></tr>
+<tr class="memitem:site_3A_3AGuestOccupancy" id="r_site_3A_3AGuestOccupancy"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1GuestOccupancy.html">site::GuestOccupancy</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Guests read against enumerated cages.  <a href="structsite_1_1GuestOccupancy.html#details">More...</a><br /></td></tr>
+<tr class="memitem:site_3A_3AInsideTrace" id="r_site_3A_3AInsideTrace"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1InsideTrace.html">site::InsideTrace</a></td></tr>
+<tr class="memitem:site_3A_3AIceClusterIons" id="r_site_3A_3AIceClusterIons"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IceClusterIons.html">site::IceClusterIons</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connected components of ice atoms on the water graph, and the ion count per component: each ion is assigned to the cluster of the nearest ice atom within <span class="tt">cutoff</span>.  <a href="structsite_1_1IceClusterIons.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:site" id="r_site"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html">site</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:adda3a91ca98e5b5e1ffb889ae6440c90" id="r_adda3a91ca98e5b5e1ffb889ae6440c90"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">site::Kind</a> { <br />
+&#160;&#160;<a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90ad415f0e30c471dfdd9bc4f827329ef48">site::unspecified</a>
+, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a0b8e52e34535b887af98225a7587dd63">site::cationHead</a>
+, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a507e935a0f2208b571dfc60bf56d38a6">site::anion</a>
+, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a7aea2552dfe7eb84b9443b6fc9ba6e01">site::tail</a>
+, <br />
+&#160;&#160;<a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a484dd7cb8c261bbc7e46da795767797e">site::donorH</a>
+, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a2ac2f053dd34646d6bb6b76e1170630d">site::acceptor</a>
+, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90afa5caf54a500bad246188a8769cb9947">site::polar</a>
+, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90ae5e437761e40c78a4c0929be07a3ab04">site::apolar</a>
+, <br />
+&#160;&#160;<a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a12d4612b078096f98216afac0e984ce8">site::waterO</a>
+, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab">site::waterH</a>
+, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f">site::solvent</a>
+<br />
+ }</td></tr>
+<tr class="memitem:aa3661d15289b4b8576f48217ed337ca3" id="r_aa3661d15289b4b8576f48217ed337ca3"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3">site::Family</a> { <br />
+&#160;&#160;<a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">site::waterIce</a>
+, <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3abd8c0f0db6e9f7ff0bf08fdebd75899d">site::ionicLiquid</a>
+, <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a19ce1fb8a2c8fc923e07f1a4d3ba4c88">site::moltenSalt</a>
+, <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a0ecee728bf87a4c1a02883004044dcd5">site::des</a>
+, <br />
+&#160;&#160;<a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a0cac509065346a8209c8676a1ea3ed41">site::electrolyte</a>
+, <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a7113d84245536a99eb7886ad378cf879">site::confinedIL</a>
+, <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a10650fc2fc72044750176bdf86ff52b9">site::confinedWater</a>
+, <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3ae996e10174633eb116ed8f0b265bbd64">site::networkFormer</a>
+<br />
+ }</td></tr>
+<tr class="memitem:a7cdb003964d40a8454361db4b34b4791" id="r_a7cdb003964d40a8454361db4b34b4791"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791">site::IonState</a> { <a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c">site::liquid</a> = 0
+, <a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791ae6ec529ba185279aa0adcf93e645c7cd">site::front</a> = 1
+, <a class="el" href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791a7bdff76536f12a7c5ffde207e72cfe3a">site::ice</a> = 2
+ }</td></tr>
+<tr class="memdesc:a7cdb003964d40a8454361db4b34b4791"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ions read against a per-atom ice assignment.  <a href="namespacesite.html#a7cdb003964d40a8454361db4b34b4791">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a651f87e7aaca786cffd536a4d2b286c4" id="r_a651f87e7aaca786cffd536a4d2b286c4"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a651f87e7aaca786cffd536a4d2b286c4">site::indicesOf</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> kind)</td></tr>
+<tr class="memitem:a1dd96ee4ccc36bc86f348ec029859b53" id="r_a1dd96ee4ccc36bc86f348ec029859b53"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a1dd96ee4ccc36bc86f348ec029859b53">site::lammpsTypeOfKind</a> (const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table, <a class="el" href="namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90">Kind</a> kind)</td></tr>
+<tr class="memitem:a55a0dd31fcceddabfa6cda601eeb807c" id="r_a55a0dd31fcceddabfa6cda601eeb807c"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c">site::ionCloud</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;src, const <a class="el" href="structsite_1_1Table.html">Table</a> &amp;table)</td></tr>
+<tr class="memitem:ab556d24c5f6d7d7be9ba2e4d975259be" id="r_ab556d24c5f6d7d7be9ba2e4d975259be"><td class="memItemLeft"><a class="el" href="structsite_1_1Table.html">Table</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be">site::parseSiteSpec</a> (std::string_view spec)</td></tr>
+<tr class="memitem:aff6bc7a17064a71c1ca2e4b210b72d3f" id="r_aff6bc7a17064a71c1ca2e4b210b72d3f"><td class="memItemLeft"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#aff6bc7a17064a71c1ca2e4b210b72d3f">site::ionEnvironment</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;ionIndices, const std::vector&lt; int &gt; &amp;waterTypes, double cutoff)</td></tr>
+<tr class="memdesc:aff6bc7a17064a71c1ca2e4b210b72d3f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">iceFlag</span> is indexed like <span class="tt">yCloud.pts</span>.  <br /></td></tr>
+<tr class="memitem:a59c0f056c026caebb259d8c8e0d032e1" id="r_a59c0f056c026caebb259d8c8e0d032e1"><td class="memItemLeft"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a59c0f056c026caebb259d8c8e0d032e1">site::ionEnvironment</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;iceFlag, const std::vector&lt; int &gt; &amp;ionIndices, int waterType, double cutoff)</td></tr>
+<tr class="memdesc:a59c0f056c026caebb259d8c8e0d032e1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">waterType</span> 0 accepts every non-ion. Any other value is that one type.  <br /></td></tr>
+<tr class="memitem:a3327b0f82b57a80d113b241dec0eb711" id="r_a3327b0f82b57a80d113b241dec0eb711"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a3327b0f82b57a80d113b241dec0eb711">site::shellRingCensus</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
+<tr class="memdesc:a3327b0f82b57a80d113b241dec0eb711"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rings of the water network that pass through a first shell: the census by size of every ring with at least one vertex in <span class="tt">shell</span>.  <br /></td></tr>
+<tr class="memitem:a99a4e8b8fb177f7fea900ac24f145d45" id="r_a99a4e8b8fb177f7fea900ac24f145d45"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a99a4e8b8fb177f7fea900ac24f145d45">site::cappedRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
+<tr class="memdesc:a99a4e8b8fb177f7fea900ac24f145d45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capped rings: the water-only primitive rings of <span class="tt">rings</span> (the ring network of the water graph, ions not vertices) of at most <span class="tt">maxRingSize</span> members, every member of which lies in <span class="tt">shell</span>.  <br /></td></tr>
+<tr class="memitem:a1e366213de1b2f4f04c86f8364b609f6" id="r_a1e366213de1b2f4f04c86f8364b609f6"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a1e366213de1b2f4f04c86f8364b609f6">site::brokenRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
+<tr class="memdesc:a1e366213de1b2f4f04c86f8364b609f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Broken rings: the primitive rings, of at most <span class="tt">maxRingSize</span> members, of the water graph <span class="tt">nList</span> (by index, leading self entry, ions not bonded) plus one virtual ion vertex bonded to every water of <span class="tt">shell</span>, that contain the ion.  <br /></td></tr>
+<tr class="memitem:adf97b42407e86bc9d067855b19397ac8" id="r_adf97b42407e86bc9d067855b19397ac8"><td class="memItemLeft"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#adf97b42407e86bc9d067855b19397ac8">site::guestOccupancy</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;cages, const std::vector&lt; int &gt; &amp;guestIndices, double radius)</td></tr>
+<tr class="memdesc:adf97b42407e86bc9d067855b19397ac8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">cages</span> are vertex index lists into <span class="tt">yCloud.pts</span>; <span class="tt">radius</span> in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).  <br /></td></tr>
+<tr class="memitem:a208c6e1f8e6106530d6c75bb16dccaad" id="r_a208c6e1f8e6106530d6c75bb16dccaad"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a208c6e1f8e6106530d6c75bb16dccaad">site::periodicCentroid</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;atoms)</td></tr>
+<tr class="memdesc:a208c6e1f8e6106530d6c75bb16dccaad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there.  <br /></td></tr>
+<tr class="memitem:a9231f841816296c279bcf08186f332de" id="r_a9231f841816296c279bcf08186f332de"><td class="memItemLeft">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a9231f841816296c279bcf08186f332de">site::insideRayDirections</a> ()</td></tr>
+<tr class="memdesc:a9231f841816296c279bcf08186f332de"><td class="mdescLeft">&#160;</td><td class="mdescRight">The fixed, ordered unit directions the inside test casts rays along.  <br /></td></tr>
+<tr class="memitem:aeeb8b9fec48dcc2b70f40cafe705a0c2" id="r_aeeb8b9fec48dcc2b70f40cafe705a0c2"><td class="memItemLeft"><a class="el" href="structsite_1_1InsideTrace.html">InsideTrace</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#aeeb8b9fec48dcc2b70f40cafe705a0c2">site::pointInFacesTrace</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces, const std::array&lt; double, 3 &gt; &amp;guest, const std::array&lt; double, 3 &gt; *center=nullptr)</td></tr>
+<tr class="memdesc:aeeb8b9fec48dcc2b70f40cafe705a0c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The inside predicate for one cage.  <br /></td></tr>
+<tr class="memitem:a5e215d2d1aaa78e5e54c511d3617ea1d" id="r_a5e215d2d1aaa78e5e54c511d3617ea1d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a5e215d2d1aaa78e5e54c511d3617ea1d">site::pointInFaces</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces, const std::array&lt; double, 3 &gt; &amp;guest, const std::array&lt; double, 3 &gt; *center=nullptr)</td></tr>
+<tr class="memitem:a84113178c851924869bd3fee27af749b" id="r_a84113178c851924869bd3fee27af749b"><td class="memItemLeft"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a84113178c851924869bd3fee27af749b">site::guestOccupancyInside</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;cageFaces, const std::vector&lt; int &gt; &amp;guestIndices)</td></tr>
+<tr class="memdesc:a84113178c851924869bd3fee27af749b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Occupancy by the inside predicate (<span class="tt"><a class="el" href="namespacesite.html#a5e215d2d1aaa78e5e54c511d3617ea1d">pointInFaces</a></span>) on every cage.  <br /></td></tr>
+<tr class="memitem:a2c1ad7bff89d54bbb4c2a22f93e3eeaf" id="r_a2c1ad7bff89d54bbb4c2a22f93e3eeaf"><td class="memItemLeft"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a2c1ad7bff89d54bbb4c2a22f93e3eeaf">site::iceClusterIonCensus</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;ice, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nListByIndex, const std::vector&lt; int &gt; &amp;ionIndices, double cutoff)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a17c7ad054eafa92f5e5238e14109b97a" id="r_a17c7ad054eafa92f5e5238e14109b97a"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="namespacesite.html#a17c7ad054eafa92f5e5238e14109b97a">site::kInsideRelTol</a> = 1e-9</td></tr>
+<tr class="memdesc:a17c7ad054eafa92f5e5238e14109b97a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance of the inside test, in units of the largest distance from c_F to a cage vertex.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Per-atom site chemistry, separate from CHILL ice labels. </p>
+<p>LAMMPS type IDs are not chemistry. A Table maps type (and optional atom-ID override) to Kind. Family is an input, not an inference. Table::of does not write polar or apolar back onto the table; indicesOf applies those two derived unions. </p>
+
+<p class="definition">Definition in file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="site_8hpp.html">site.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

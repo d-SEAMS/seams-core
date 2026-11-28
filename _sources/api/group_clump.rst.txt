@@ -1,0 +1,22 @@
+.. index:: pair: group; Clump
+.. _doxid-group__clump:
+
+Clump
+=====
+
+.. toctree::
+	:hidden:
+
+	namespace_clump.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`clump<doxid-namespaceclump>`;
+

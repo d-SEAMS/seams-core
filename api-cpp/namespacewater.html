@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: water Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacewater.html">
+<meta property="og:title" content="seams-core: water Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacewater.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: water Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacewater.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">water Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Water-oxygen selection for a mixed frame.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:Request" id="r_Request"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structwater_1_1Request.html">Request</a></td></tr>
+<tr class="memitem:Selection" id="r_Selection"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structwater_1_1Selection.html">Selection</a></td></tr>
+<tr class="memitem:IonSite" id="r_IonSite"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structwater_1_1IonSite.html">IonSite</a></td></tr>
+<tr class="memitem:IonReport" id="r_IonReport"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structwater_1_1IonReport.html">IonReport</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a81f5dd0c1d071693a18e6ceb202925b0" id="r_a81f5dd0c1d071693a18e6ceb202925b0"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#a81f5dd0c1d071693a18e6ceb202925b0">MolMode</a> { <a class="el" href="#a81f5dd0c1d071693a18e6ceb202925b0a6adf97f83acf6453d4a6a4b1070f3754">None</a>
+, <a class="el" href="#a81f5dd0c1d071693a18e6ceb202925b0afbec588d53da0b45c4f22c033dc12db1">Ids</a>
+, <a class="el" href="#a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18">Water</a>
+ }</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a7f462298e12eda6ff5d74d58c39f294e" id="r_a7f462298e12eda6ff5d74d58c39f294e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a7f462298e12eda6ff5d74d58c39f294e">hasMultiAtomMolecule</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud)</td></tr>
+<tr class="memitem:ad8f1372ae986788085f488dc1191c300" id="r_ad8f1372ae986788085f488dc1191c300"><td class="memItemLeft"><a class="el" href="structwater_1_1Selection.html">Selection</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad8f1372ae986788085f488dc1191c300">selectOxygens</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const <a class="el" href="structwater_1_1Request.html">Request</a> &amp;request)</td></tr>
+<tr class="memitem:af1e8dd08f17d67b93da6688e508209cd" id="r_af1e8dd08f17d67b93da6688e508209cd"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af1e8dd08f17d67b93da6688e508209cd">subsetCloud</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const <a class="el" href="structwater_1_1Selection.html">Selection</a> &amp;selection)</td></tr>
+<tr class="memitem:a96d8a115335adeddf742b5009a4f3798" id="r_a96d8a115335adeddf742b5009a4f3798"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a96d8a115335adeddf742b5009a4f3798">keepHistoricalOxygen</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud)</td></tr>
+<tr class="memdesc:a96d8a115335adeddf742b5009a4f3798"><td class="mdescLeft">&#160;</td><td class="mdescRight">Historical dump guess: type 2 when any atom has it, otherwise type 1.  <br /></td></tr>
+<tr class="memitem:a69cdb97f6034ebb799c46973a75a05fd" id="r_a69cdb97f6034ebb799c46973a75a05fd"><td class="memItemLeft">std::vector&lt; <a class="el" href="structwater_1_1IonSite.html">IonSite</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a69cdb97f6034ebb799c46973a75a05fd">collectIons</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const <a class="el" href="structwater_1_1Selection.html">Selection</a> &amp;selection)</td></tr>
+<tr class="memitem:a39efb9161b577ad0caf0a174d06d4799" id="r_a39efb9161b577ad0caf0a174d06d4799"><td class="memItemLeft"><a class="el" href="structwater_1_1IonReport.html">IonReport</a>&#160;</td><td class="memItemRight"><a class="el" href="#a39efb9161b577ad0caf0a174d06d4799">ionFront</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;oxygen, const std::vector&lt; <a class="el" href="structwater_1_1IonSite.html">IonSite</a> &gt; &amp;ions)</td></tr>
+<tr class="memdesc:a39efb9161b577ad0caf0a174d06d4799"><td class="mdescLeft">&#160;</td><td class="mdescRight">oxygen is the labeled water subset.  <br /></td></tr>
+<tr class="memitem:a553fec1f945055306f2f96fd32250b2a" id="r_a553fec1f945055306f2f96fd32250b2a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a553fec1f945055306f2f96fd32250b2a">iceLabel</a> (<a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> label)</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Water-oxygen selection for a mixed frame. </p>
+<p>Neighbours, CHILL, CHILL+, rings and cages run on the oxygen atoms. Ions and hydrogens stay out of that graph. A requested type or molecule that is not in the frame is an error, as is a selection that keeps nothing. The messages are the strings the tests match. </p>
+</div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="a81f5dd0c1d071693a18e6ceb202925b0" name="a81f5dd0c1d071693a18e6ceb202925b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81f5dd0c1d071693a18e6ceb202925b0">&#9670;&#160;</a></span>MolMode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#a81f5dd0c1d071693a18e6ceb202925b0">water::MolMode</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a81f5dd0c1d071693a18e6ceb202925b0a6adf97f83acf6453d4a6a4b1070f3754" name="a81f5dd0c1d071693a18e6ceb202925b0a6adf97f83acf6453d4a6a4b1070f3754"></a>None&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a81f5dd0c1d071693a18e6ceb202925b0afbec588d53da0b45c4f22c033dc12db1" name="a81f5dd0c1d071693a18e6ceb202925b0afbec588d53da0b45c4f22c033dc12db1"></a>Ids&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18" name="a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18"></a>Water&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="water__select_8hpp_source.html#l00021">21</a> of file <a class="el" href="water__select_8hpp_source.html">water_select.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   21</span>{ <a class="code hl_enumvalue" href="#a81f5dd0c1d071693a18e6ceb202925b0a6adf97f83acf6453d4a6a4b1070f3754">None</a>, <a class="code hl_enumvalue" href="#a81f5dd0c1d071693a18e6ceb202925b0afbec588d53da0b45c4f22c033dc12db1">Ids</a>, <a class="code hl_enumvalue" href="#a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18">Water</a> };</div>
+<div class="ttc" id="anamespacewater_html_a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18"><div class="ttname"><a href="#a81f5dd0c1d071693a18e6ceb202925b0a27634ff8002b12e75d98e07ccd005d18">water::MolMode::Water</a></div><div class="ttdeci">@ Water</div><div class="ttdef"><b>Definition</b> <a href="water__select_8hpp_source.html#l00021">water_select.hpp:21</a></div></div>
+<div class="ttc" id="anamespacewater_html_a81f5dd0c1d071693a18e6ceb202925b0a6adf97f83acf6453d4a6a4b1070f3754"><div class="ttname"><a href="#a81f5dd0c1d071693a18e6ceb202925b0a6adf97f83acf6453d4a6a4b1070f3754">water::MolMode::None</a></div><div class="ttdeci">@ None</div><div class="ttdef"><b>Definition</b> <a href="water__select_8hpp_source.html#l00021">water_select.hpp:21</a></div></div>
+<div class="ttc" id="anamespacewater_html_a81f5dd0c1d071693a18e6ceb202925b0afbec588d53da0b45c4f22c033dc12db1"><div class="ttname"><a href="#a81f5dd0c1d071693a18e6ceb202925b0afbec588d53da0b45c4f22c033dc12db1">water::MolMode::Ids</a></div><div class="ttdeci">@ Ids</div><div class="ttdef"><b>Definition</b> <a href="water__select_8hpp_source.html#l00021">water_select.hpp:21</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a69cdb97f6034ebb799c46973a75a05fd" name="a69cdb97f6034ebb799c46973a75a05fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69cdb97f6034ebb799c46973a75a05fd">&#9670;&#160;</a></span>collectIons()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structwater_1_1IonSite.html">IonSite</a> &gt; water::collectIons </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structwater_1_1Selection.html">Selection</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>selection</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7f462298e12eda6ff5d74d58c39f294e" name="a7f462298e12eda6ff5d74d58c39f294e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f462298e12eda6ff5d74d58c39f294e">&#9670;&#160;</a></span>hasMultiAtomMolecule()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool water::hasMultiAtomMolecule </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a553fec1f945055306f2f96fd32250b2a" name="a553fec1f945055306f2f96fd32250b2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a553fec1f945055306f2f96fd32250b2a">&#9670;&#160;</a></span>iceLabel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool water::iceLabel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a></td>          <td class="paramname"><span class="paramname"><em>label</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a39efb9161b577ad0caf0a174d06d4799" name="a39efb9161b577ad0caf0a174d06d4799"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39efb9161b577ad0caf0a174d06d4799">&#9670;&#160;</a></span>ionFront()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structwater_1_1IonReport.html">IonReport</a> water::ionFront </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>oxygen</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structwater_1_1IonSite.html">IonSite</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ions</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>oxygen is the labeled water subset. </p>
+<p>front is the nearest ice oxygen, in the box units, or -1 when no ion sits next to ice. </p>
+
+</div>
+</div>
+<a id="a96d8a115335adeddf742b5009a4f3798" name="a96d8a115335adeddf742b5009a4f3798"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96d8a115335adeddf742b5009a4f3798">&#9670;&#160;</a></span>keepHistoricalOxygen()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; water::keepHistoricalOxygen </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Historical dump guess: type 2 when any atom has it, otherwise type 1. </p>
+<p>A miss leaves an empty cloud and keeps the box. </p>
+
+</div>
+</div>
+<a id="ad8f1372ae986788085f488dc1191c300" name="ad8f1372ae986788085f488dc1191c300"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8f1372ae986788085f488dc1191c300">&#9670;&#160;</a></span>selectOxygens()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structwater_1_1Selection.html">Selection</a> water::selectOxygens </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structwater_1_1Request.html">Request</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>request</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af1e8dd08f17d67b93da6688e508209cd" name="af1e8dd08f17d67b93da6688e508209cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1e8dd08f17d67b93da6688e508209cd">&#9670;&#160;</a></span>subsetCloud()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; water::subsetCloud </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structwater_1_1Selection.html">Selection</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>selection</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacewater.html">water</a></li>
+  </ul>
+</div>
+</body>
+</html>

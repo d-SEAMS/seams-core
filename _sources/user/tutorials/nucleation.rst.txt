@@ -1,0 +1,78 @@
+==========
+Nucleation
+==========
+
+
+.. include:: ../../videos/embeds/nucleation.rst
+
+The recording reports mean q6-bar on the 148-frame mW trajectory.
+The first of those frames has q6-bar 0.26063, the value printed below.
+
+The full file is figshare
+`10.6084/m9.figshare.11448702.v1 <https://doi.org/10.6084/m9.figshare.11448702.v1>`_.
+``input/traj/nucleation_three.lammpstrj`` is its first three frames,
+timesteps 15677000, 15678000, and 15679000. Each frame has 4096
+molecules of type 1.
+
+Labels
+------
+
+Crystal labels are cubic, hexagonal, reCubic, and reHex. These three
+frames print cubic and hexagonal only.
+
+.. code:: bash
+
+    seams chill-plus input/traj/nucleation_three.lammpstrj --type 1 --cutoff 3.5 --frame 1 --last 3
+
+::
+
+    nop 4096 clathrate 20 cubic 47 hexagonal 62 interClathrate 138 interfacial 240 water 3589
+    nop 4096 clathrate 16 cubic 50 hexagonal 60 interClathrate 145 interfacial 227 water 3598
+    nop 4096 clathrate 16 cubic 44 hexagonal 69 interClathrate 147 interfacial 228 water 3592
+
+The lines are frames 1, 2, and 3, in that order.
+
+Mean q6-bar
+-----------
+
+.. code:: bash
+
+    seams steinhardt input/traj/nucleation_three.lammpstrj --type 1 --cutoff 3.5 --l 6 --frame 1 --last 3
+
+::
+
+    nop 4096 q6 0.493523 q6bar 0.26063
+    nop 4096 q6 0.493773 q6bar 0.260923
+    nop 4096 q6 0.495485 q6bar 0.261047
+
+q6-bar is one number per molecule. On the first frame it does not
+separate the 47 cubic molecules from the 62 hexagonal ones. The CHILL+
+line above does.
+
+Largest crystal cluster
+-----------------------
+
+Two crystal molecules share a cluster when the 3.5 Å cutoff list joins
+them. The largest cluster is smaller than the cubic-plus-hexagonal
+count. The other crystal molecules sit in other components.
+
+.. table::
+
+    +-------+-------+-----------+-----------------+
+    | frame | cubic | hexagonal | largest cluster |
+    +=======+=======+===========+=================+
+    |     1 |    47 |        62 |              59 |
+    +-------+-------+-----------+-----------------+
+    |     2 |    50 |        60 |              64 |
+    +-------+-------+-----------+-----------------+
+    |     3 |    44 |        69 |              70 |
+    +-------+-------+-----------+-----------------+
+
+On the first frame the cubic and hexagonal counts sum to 109, and the
+largest component holds 59 of them.
+
+.. figure:: molecules/nucleation/overlay-web.png
+   :width: 480px
+   :alt: First nucleation frame, colored by published CHILL+.
+
+   First nucleation frame, colored by published CHILL+.

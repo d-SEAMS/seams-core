@@ -1,0 +1,212 @@
+=======================================
+Classify ice on the mixed TIP4P example
+=======================================
+
+
+You classify one in-tree frame two ways: CHILL+ (a staggered or eclipsed star on each oxygen) and cage membership (hexagonal cage or double-diamond cage).
+The result is a labeled oxygen set and a reason the two scores disagree.
+
+Prerequisites
+-------------
+
+- A seams-core checkout.
+  Work from the repository root so ``input/traj/`` is a child.
+
+- ``seams`` on ``PATH``. ``pixi run build`` writes ``./bbdir/seams``. ``nix build`` writes ``./result/bin/seams``.
+
+- The dump ``input/traj/exampleTraj.lammpstrj`` (one frame, 750 atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
+
+Learning Objectives
+-------------------
+
+By the end of this tutorial you will be able to:
+
+1. Read a LAMMPS dump with ``seams read`` and name the oxygen type.
+
+2. Run CHILL+ and read the four-neighbour star histogram.
+
+3. Run cages on the same oxygens and read HC / DDC membership.
+
+4. State why the two scores disagree on this mixed frame.
+
+Step 1: Read the frame
+----------------------
+
+.. code:: bash
+
+    seams read input/traj/exampleTraj.lammpstrj
+
+::
+
+    nop 250 frame 1 box 40 40 180.203
+
+With no ``--type``, a dump is read as oxygen: type 2 when that type is present, otherwise type 1.
+Pass ``--type 2`` on the classifiers so the type is explicit.
+
+Step 2: CHILL+ from the CLI
+---------------------------
+
+CHILL+ labels each oxygen from the staggered and eclipsed bonds in its neighbour shell.
+A bond is staggered or eclipsed from the pair correlation ``c_ij``.
+``--graph cutoff`` (the default) bonds every pair closer than ``--cutoff`` (default 3.5 Å).
+``--graph mutual`` keeps a bond only when each oxygen lists the other among its four nearest.
+The candidate search for that list uses ``--cutoff + 1.5`` as the cell-size hint.
+
+The label needs a shell of exactly four neighbours. The star is then:
+
+.. table::
+
+    +----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | label          | condition                                                                                                                                                             |
+    +================+=======================================================================================================================================================================+
+    | cubic          | four staggered bonds                                                                                                                                                  |
+    +----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | hexagonal      | three staggered bonds and one eclipsed bond                                                                                                                           |
+    +----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | clathrate      | four eclipsed bonds                                                                                                                                                   |
+    +----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | interClathrate | three eclipsed bonds                                                                                                                                                  |
+    +----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | interfacial    | two staggered bonds and a neighbour with more than two staggered bonds, or three staggered bonds, no eclipsed bond, and a neighbour with more than one staggered bond |
+    +----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+    | water          | any other star, including a shell that is not four neighbours                                                                                                         |
+    +----------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+``interClathrate`` is the interfacial-clathrate label.
+
+.. code:: bash
+
+    seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+
+::
+
+    nop 250 interClathrate 9 water 241
+
+.. code:: bash
+
+    seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2 --graph mutual
+
+::
+
+    nop 250 clathrate 1 interClathrate 7 water 242
+
+On the cutoff list, nine oxygens have three eclipsed bonds and the rest are water.
+On the mutual list, one oxygen has four eclipsed bonds, seven have three, and the rest are water.
+Neither list labels a cubic or hexagonal oxygen.
+
+Original CHILL uses a narrower eclipsed window.
+
+.. code:: bash
+
+    seams chill input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+
+::
+
+    nop 250 water 250
+
+Step 3: Cages from the CLI
+--------------------------
+
+Cages ask a different question: does this oxygen belong to a complete hexagonal cage (HC, ice Ih, 12 waters) or a complete double-diamond cage (DDC, ice Ic, 14 waters)?
+The search walks primitive six-rings.
+The default graph is ``--graph seeded``: mutual four-nearest seeds, then union completions.
+An oxygen in both cage types is counted as ``both``, not as hexagonal and not as cubic.
+The four counts sum to ``nop``.
+
+.. code:: bash
+
+    seams cages input/traj/exampleTraj.lammpstrj --type 2
+
+::
+
+    nop 250 graph seeded hexagonal 0 cubic 0 both 0 water 250
+
+This mixed frame has no complete HC or DDC.
+
+Step 4: Why the two scores differ
+---------------------------------
+
+CHILL+ is a four-neighbour star.
+An oxygen is cubic or hexagonal when its four bonds look like ice, even when those neighbours do not close a cage.
+
+Cages are topological unit matching.
+An oxygen is ice Ih when it belongs to a hexagonal cage, and ice Ic when it belongs to a double-diamond cage.
+Anything else is water, including a three-eclipsed star.
+
+On this frame the cutoff list labels 9 oxygens ``interClathrate``, and the mutual list labels 1 ``clathrate`` and 7 ``interClathrate``.
+The seeded cage score is 250 water.
+
+The longer argument is `CHILL+ versus cages <../../explanation/chill-plus-vs-cages.rst>`_.
+
+Step 5: A cubic crystal
+-----------------------
+
+``input/traj/mW_cubic.lammpstrj`` holds 11 frames of 4096 mW sites, type 1.
+With no ``--last``, the commands read frame 1.
+Every site is cubic under CHILL+, and every site sits in a double-diamond cage.
+
+.. code:: bash
+
+    seams cages input/traj/mW_cubic.lammpstrj --type 1
+    seams chill-plus input/traj/mW_cubic.lammpstrj --type 1
+
+::
+
+    nop 4096 graph seeded hexagonal 0 cubic 4096 both 0 water 0
+    nop 4096 cubic 4096
+
+``--graph cutoff``, ``--graph knn``, and ``--graph knn-union`` print the same cage counts, with that graph name on the line.
+``seams chill-plus --graph mutual --type 1`` also prints ``nop 4096 cubic 4096``.
+The mixed TIP4P frame is the one that separates the two scores.
+
+Step 6: Python
+--------------
+
+Install ``pydseamslib`` with ``pip install pydseamslib`` and import ``from dseams import userframe``, the Frame over ``libseams_lang``.
+
+.. code:: python
+
+    from dseams import userframe as ds
+
+    frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
+    print(frame.chill_plus())
+    print(frame.chill_plus(graph="mutual"))
+    print(frame.cages())
+    assert str(frame.chill_plus()) == "IceCounts(interClathrate=9, water=241)"
+    assert str(frame.chill_plus(graph="mutual")) == "IceCounts(clathrate=1, interClathrate=7, water=242)"
+    assert str(frame.cages()) == "CageScore(n_ih=0, n_ic=0, n_water=250)"
+
+Those three lines are the cutoff histogram, the mutual histogram, and the seeded cage score from Steps 2 and 3.
+The Frame walkthrough is the `Python Frame <../../reference/python-frame.rst>`_ page.
+
+Troubleshooting
+---------------
+
+- ``nop 0`` or an empty histogram: wrong ``--type``.
+  Mixed TIP4P in this tree is type 2.
+  mW is type 1.
+
+- Unknown command, exit 2: the binary is ``seams``.
+  The ice commands used here are ``read``, ``chill``, ``chill-plus``, and ``cages``.
+
+- ``ModuleNotFoundError: dseams``: install the binding with ``pip install pydseamslib``.
+
+Next steps
+----------
+
+- `Classify a dump you already have <../howto/classify-cli.rst>`_ (frame ranges, ``--graph``, ``--jobs``)
+
+- `CHILL+ versus cages <../../explanation/chill-plus-vs-cages.rst>`_
+
+- `Python Frame <../../reference/python-frame.rst>`_
+
+- `The other language bindings <../howto/bindings.rst>`_
+
+Summary
+-------
+
+You read one mixed TIP4P frame.
+Cutoff CHILL+ printed 9 ``interClathrate`` and 241 water.
+Mutual CHILL+ printed 1 ``clathrate``, 7 ``interClathrate``, and 242 water.
+Seeded cages printed zero hexagonal, zero cubic, zero both, and 250 water.
+A three-eclipsed star is not cage membership.

@@ -1,0 +1,142 @@
+.. index:: pair: class; seams::Msd
+.. _doxid-classseams_1_1_msd:
+
+class seams::Msd
+================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Owned streaming MSD accumulator. :ref:`More...<details-classseams_1_1_msd>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	class Msd: public :ref:`seams::detail::Handle<doxid-classseams_1_1detail_1_1_handle>` {
+	public:
+		// construction
+	
+		:ref:`Msd<doxid-classseams_1_1_msd_1a3d72f6474b2b6f1c285a171120c2595e>`(std::size_t natoms, std::size_t max_lag, std::size_t origin_stride, double dt, std::span<const double, 3> axis);
+
+		// methods
+	
+		void :ref:`push<doxid-classseams_1_1_msd_1a23ed7df86e0711c3035439e7c0fa6943>`(std::span<const double> xyz);
+		void :ref:`push<doxid-classseams_1_1_msd_1ad7874fa7cdc88ecd8770f3f5a7f1489a>`(std::span<const double> xyz, std::span<const double, 9> box9);
+		:ref:`MsdCurve<doxid-structseams_1_1_msd_curve>` :ref:`curve<doxid-classseams_1_1_msd_1a139e5c90b1abe9305e1d30c103c3a462>`() const;
+		:ref:`DiffusionFit<doxid-structseams_1_1_diffusion_fit>` :ref:`fit<doxid-classseams_1_1_msd_1a5dabd330e39f009122c46b78137225b6>`(double t_start = 0.0, double t_end = 0.0) const;
+	};
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-inherited-code-block
+
+	public:
+		// methods
+	
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1a0dd2050fdf4ea17474fcfd3297824dab>`(const :ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&);
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1aca8fcb7f880767384894fc88094d262f>`(:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&& other);
+		:ref:`operator bool<doxid-classseams_1_1detail_1_1_handle_1ae58d780619badcc49127f4b5e6e78d4e>`() const;
+
+.. _details-classseams_1_1_msd:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Owned streaming MSD accumulator.
+
+Construction
+------------
+
+.. index:: pair: function; Msd
+.. _doxid-classseams_1_1_msd_1a3d72f6474b2b6f1c285a171120c2595e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	Msd(std::size_t natoms, std::size_t max_lag, std::size_t origin_stride, double dt, std::span<const double, 3> axis)
+
+Allocate a streaming MSD accumulator.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- natoms
+
+		- Particle count per frame.
+
+	*
+		- max_lag
+
+		- Maximum lag in frames, or 0 for all lags.
+
+	*
+		- origin_stride
+
+		- Frame stride between origins.
+
+	*
+		- dt
+
+		- Frame spacing in physical time units.
+
+	*
+		- axis
+
+		- Axial direction 3-vector.
+
+Methods
+-------
+
+.. index:: pair: function; push
+.. _doxid-classseams_1_1_msd_1a23ed7df86e0711c3035439e7c0fa6943:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void push(std::span<const double> xyz)
+
+Push one unwrapped coordinate frame.
+
+.. index:: pair: function; push
+.. _doxid-classseams_1_1_msd_1ad7874fa7cdc88ecd8770f3f5a7f1489a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void push(std::span<const double> xyz, std::span<const double, 9> box9)
+
+Push one periodic coordinate frame and unwrap incrementally.
+
+.. index:: pair: function; curve
+.. _doxid-classseams_1_1_msd_1a139e5c90b1abe9305e1d30c103c3a462:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`MsdCurve<doxid-structseams_1_1_msd_curve>` curve() const
+
+Copy out accumulated total, axial, and lateral MSD curves.
+
+.. index:: pair: function; fit
+.. _doxid-classseams_1_1_msd_1a5dabd330e39f009122c46b78137225b6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`DiffusionFit<doxid-structseams_1_1_diffusion_fit>` fit(double t_start = 0.0, double t_end = 0.0) const
+
+Fit Einstein diffusion coefficients over ``[t_start, t_end]``.
+

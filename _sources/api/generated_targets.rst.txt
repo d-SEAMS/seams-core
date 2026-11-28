@@ -1,0 +1,137 @@
+Generated anchors
+=================
+
+Targets for Doxygen ids that the group pages do not anchor.
+
+.. _doxid-group__capi__frame_1ga483ad3783a7f233611be4b7d367a750f:
+
+seams_system_set_atoms
+======================
+
+::
+
+   Store points and a general cell.
+
+.. _doxid-group__capi__frame__io_1ga6d1b3f2819220c5e4081789d7612b572:
+
+seams_system_set_positions
+==========================
+
+::
+
+   Overwrite the coordinates, and optionally the cell, of the stored frame.
+
+.. _doxid-group__capi__meta_1ga53c7d5d16b336c47ed94f5ea9a3f689f:
+
+seams_handle_error
+==================
+
+::
+
+   Detail string stored on a handle.
+
+.. _doxid-group__capi__types_1gac77ff4b4eced39c40520bb71495b0b0d:
+
+seams_status
+============
+
+::
+
+   Status codes.
+
+.. _doxid-group__capi__types_1gaf3cef135f90d3f656144f0f819e8f831:
+
+seams_system
+============
+
+::
+
+   One frame.
+
+.. _doxid-group__seams__cpp_1ga20668948221c270d139f207595f2953c:
+
+seams::CageLabel
+================
+
+::
+
+   Per-atom cage membership.
+
+.. _doxid-group__seams__cpp_1ga66e498496a8ac061410534a9f0171779:
+
+seams::Status
+=============
+
+::
+
+   Status codes.
+
+.. _doxid-group__seams__cpp_1ga67eb3c576e152683e1fb0b0092e753c0:
+
+seams::ChillRule
+================
+
+::
+
+   CHILL+ threshold table.
+
+.. _doxid-group__seams__cpp_1gaa26c5e09631ed2e863d7ba9069e64683:
+
+seams::DomainSubset
+===================
+
+::
+
+   Domain subset.
+
+.. _doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab:
+
+seams::Graph
+============
+
+::
+
+   Neighbour graph.
+
+.. _doxid-group__seams__cpp_1gab0a343eee2fee14066d1e497e54cfb82:
+
+seams::Axis
+===========
+
+::
+
+   Cell axis.
+
+.. _doxid-group__seams__cpp_1gade81b9f566b717d94390a5499824893f:
+
+seams::set_num_threads
+======================
+
+::
+
+   Set the OpenMP width for the next call.
+
+.. _doxid-group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5:
+
+group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5
+=======================================================================================
+
+.. _doxid-group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d:
+
+group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d
+=======================================================================================
+
+.. _doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0:
+
+group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0
+=======================================================================================
+
+.. _doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084:
+
+group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084
+=======================================================================================
+
+.. _doxid-group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5:
+
+group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5
+=======================================================================================

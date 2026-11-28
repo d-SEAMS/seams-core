@@ -1,0 +1,11 @@
+.. index:: pair: group; Rings
+.. _doxid-group__capi__ring:
+
+Rings
+=====
+
+.. toctree::
+	:hidden:
+
+Primitive rings (Franzblau) and their labels.
+

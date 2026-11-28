@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: topoparam Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacetopoparam.html">
+<meta property="og:title" content="seams-core: topoparam Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacetopoparam.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: topoparam Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacetopoparam.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">topoparam Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:LayerStack" id="r_LayerStack"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopoparam_1_1LayerStack.html">LayerStack</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a3b806052c9432d3c00eb4bb91e1d3133" id="r_a3b806052c9432d3c00eb4bb91e1d3133"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#a3b806052c9432d3c00eb4bb91e1d3133">TetrahedralNeighbours</a> { <a class="el" href="#a3b806052c9432d3c00eb4bb91e1d3133a838cbd04ab851175fbb232b237e52585">NearestFour</a> = 0
+, <a class="el" href="#a3b806052c9432d3c00eb4bb91e1d3133a79adc0b32d8fa93ffcbf22d074f3ee32">WithinCutoff</a> = 1
+ }</td></tr>
+<tr class="memdesc:a3b806052c9432d3c00eb4bb91e1d3133"><td class="mdescLeft">&#160;</td><td class="mdescRight">Neighbour convention for the Errington-Debenedetti tetrahedral order.  <a href="#a3b806052c9432d3c00eb4bb91e1d3133">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ac48323590268a0d651161a5b3bd4486f" id="r_ac48323590268a0d651161a5b3bd4486f"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac48323590268a0d651161a5b3bd4486f">tetrahedralOrder</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; int &gt; &amp;centres, const std::vector&lt; int &gt; &amp;partners, <a class="el" href="#a3b806052c9432d3c00eb4bb91e1d3133">TetrahedralNeighbours</a> convention, double cutoff)</td></tr>
+<tr class="memitem:ad0f6df73b0e817fdcb7fefc3a8e9439f" id="r_ad0f6df73b0e817fdcb7fefc3a8e9439f"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ad0f6df73b0e817fdcb7fefc3a8e9439f">localStructureIndex</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud, const std::vector&lt; int &gt; &amp;centres, const std::vector&lt; int &gt; &amp;partners, double cutoff)</td></tr>
+<tr class="memitem:a473e7ca29f517802126410c59756c974" id="r_a473e7ca29f517802126410c59756c974"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a473e7ca29f517802126410c59756c974">normHeightPercent</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int nPrisms, double avgPrismHeight)</td></tr>
+<tr class="memitem:a9c3eb2dbcb32ec7523ed28f8ad4d6b19" id="r_a9c3eb2dbcb32ec7523ed28f8ad4d6b19"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a9c3eb2dbcb32ec7523ed28f8ad4d6b19">calcCoverageArea</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, double sheetArea)</td></tr>
+<tr class="memitem:a2e190293e3c4603ddd1026e4c8f3896a" id="r_a2e190293e3c4603ddd1026e4c8f3896a"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a2e190293e3c4603ddd1026e4c8f3896a">projAreaSingleRing</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;ring)</td></tr>
+<tr class="memdesc:a2e190293e3c4603ddd1026e4c8f3896a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the projected area on the XY, YZ and XZ planes.  <br /></td></tr>
+<tr class="memitem:ac9f9075f5de0b04fb6d0431ee15a29b9" id="r_ac9f9075f5de0b04fb6d0431ee15a29b9"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac9f9075f5de0b04fb6d0431ee15a29b9">rodgerF4</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int oxygenType, int hydrogenType)</td></tr>
+<tr class="memitem:ab7cd3df2fabd16fcadfc571348e90cdf" id="r_ab7cd3df2fabd16fcadfc571348e90cdf"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ab7cd3df2fabd16fcadfc571348e90cdf">meanFinite</a> (const std::vector&lt; double &gt; &amp;values)</td></tr>
+<tr class="memdesc:ab7cd3df2fabd16fcadfc571348e90cdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mean of the finite per-atom F4 values; quiet_NaN when none are finite.  <br /></td></tr>
+<tr class="memitem:aeb9f8c9987282f283cd961250d42408e" id="r_aeb9f8c9987282f283cd961250d42408e"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#aeb9f8c9987282f283cd961250d42408e">jumpRotorTau90</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;frame0, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;frame1, double dt, int oxygenType, int hydrogenType)</td></tr>
+<tr class="memitem:aa880bc72cf1a43526aa69ff58e016014" id="r_aa880bc72cf1a43526aa69ff58e016014"><td class="memItemLeft"><a class="el" href="structtopoparam_1_1LayerStack.html">LayerStack</a>&#160;</td><td class="memItemRight"><a class="el" href="#aa880bc72cf1a43526aa69ff58e016014">layerCubicity</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int axis=2, double layerWidth=3.7)</td></tr>
+<tr class="memitem:a6fe65121ff4d4bad3f74f84037fe3e7c" id="r_a6fe65121ff4d4bad3f74f84037fe3e7c"><td class="memItemLeft"><a class="el" href="structtopoparam_1_1LayerStack.html">LayerStack</a>&#160;</td><td class="memItemRight"><a class="el" href="#a6fe65121ff4d4bad3f74f84037fe3e7c">tumLayerStack</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; bool &gt; &amp;basal, const std::vector&lt; bool &gt; &amp;equatorial, int axis=2, double layerWidth=3.7)</td></tr>
+</table>
+<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="a3b806052c9432d3c00eb4bb91e1d3133" name="a3b806052c9432d3c00eb4bb91e1d3133"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b806052c9432d3c00eb4bb91e1d3133">&#9670;&#160;</a></span>TetrahedralNeighbours</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#a3b806052c9432d3c00eb4bb91e1d3133">topoparam::TetrahedralNeighbours</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Neighbour convention for the Errington-Debenedetti tetrahedral order. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a3b806052c9432d3c00eb4bb91e1d3133a838cbd04ab851175fbb232b237e52585" name="a3b806052c9432d3c00eb4bb91e1d3133a838cbd04ab851175fbb232b237e52585"></a>NearestFour&#160;</td><td class="fielddoc"><p>The four nearest selected partners, with no radial cutoff. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a3b806052c9432d3c00eb4bb91e1d3133a79adc0b32d8fa93ffcbf22d074f3ee32" name="a3b806052c9432d3c00eb4bb91e1d3133a79adc0b32d8fa93ffcbf22d074f3ee32"></a>WithinCutoff&#160;</td><td class="fielddoc"><p>Every selected partner at or inside the supplied cutoff. For N neighbours the standard 3/8 factor is generalized to 9/(2 N (N-1)), which keeps the ideal-gas mean at zero. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="order__parameter_8hpp_source.html#l00038">38</a> of file <a class="el" href="order__parameter_8hpp_source.html">order_parameter.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   38</span>                                 {</div>
+<div class="line"><span class="lineno">   40</span>  <a class="code hl_enumvalue" href="#a3b806052c9432d3c00eb4bb91e1d3133a838cbd04ab851175fbb232b237e52585">NearestFour</a> = 0,</div>
+<div class="line"><span class="lineno">   44</span>  <a class="code hl_enumvalue" href="#a3b806052c9432d3c00eb4bb91e1d3133a79adc0b32d8fa93ffcbf22d074f3ee32">WithinCutoff</a> = 1</div>
+<div class="line"><span class="lineno">   45</span>};</div>
+<div class="ttc" id="anamespacetopoparam_html_a3b806052c9432d3c00eb4bb91e1d3133a79adc0b32d8fa93ffcbf22d074f3ee32"><div class="ttname"><a href="#a3b806052c9432d3c00eb4bb91e1d3133a79adc0b32d8fa93ffcbf22d074f3ee32">topoparam::TetrahedralNeighbours::WithinCutoff</a></div><div class="ttdeci">@ WithinCutoff</div><div class="ttdef"><b>Definition</b> <a href="order__parameter_8hpp_source.html#l00044">order_parameter.hpp:44</a></div></div>
+<div class="ttc" id="anamespacetopoparam_html_a3b806052c9432d3c00eb4bb91e1d3133a838cbd04ab851175fbb232b237e52585"><div class="ttname"><a href="#a3b806052c9432d3c00eb4bb91e1d3133a838cbd04ab851175fbb232b237e52585">topoparam::TetrahedralNeighbours::NearestFour</a></div><div class="ttdeci">@ NearestFour</div><div class="ttdoc">The four nearest selected partners, with no radial cutoff.</div><div class="ttdef"><b>Definition</b> <a href="order__parameter_8hpp_source.html#l00040">order_parameter.hpp:40</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a9c3eb2dbcb32ec7523ed28f8ad4d6b19" name="a9c3eb2dbcb32ec7523ed28f8ad4d6b19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c3eb2dbcb32ec7523ed28f8ad4d6b19">&#9670;&#160;</a></span>calcCoverageArea()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; topoparam::calcCoverageArea </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>sheetArea</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Calculates the coverage area%, an area-based measure of relative proportion of monolayer ices. </p>
+
+</div>
+</div>
+<a id="aeb9f8c9987282f283cd961250d42408e" name="aeb9f8c9987282f283cd961250d42408e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb9f8c9987282f283cd961250d42408e">&#9670;&#160;</a></span>jumpRotorTau90()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double topoparam::jumpRotorTau90 </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>frame0</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>frame1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dt</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>oxygenType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hydrogenType</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Jump-rotor tau_90 from two frames. Each water is the H-H vector of the two hydrogens that share the oxygen molID. Returns dt when any molecule rotates by at least 90 degrees, quiet_NaN otherwise. </p>
+
+</div>
+</div>
+<a id="aa880bc72cf1a43526aa69ff58e016014" name="aa880bc72cf1a43526aa69ff58e016014"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa880bc72cf1a43526aa69ff58e016014">&#9670;&#160;</a></span>layerCubicity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopoparam_1_1LayerStack.html">LayerStack</a> topoparam::layerCubicity </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>layerWidth</em></span><span class="paramdefsep"> = </span><span class="paramdefval">3.7</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad0f6df73b0e817fdcb7fefc3a8e9439f" name="ad0f6df73b0e817fdcb7fefc3a8e9439f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0f6df73b0e817fdcb7fefc3a8e9439f">&#9670;&#160;</a></span>localStructureIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; topoparam::localStructureIndex </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>centres</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>partners</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Shiratani-Sasai Local Structure Index for selected centres and partners. With sorted distances r_1 &lt; ... &lt; r_N &lt;= cutoff &lt; r_{N+1}, LSI is the population variance of the N gaps r_{i+1} - r_i. No partner inside the cutoff, or none beyond it, is quiet NaN. </p>
+
+</div>
+</div>
+<a id="ab7cd3df2fabd16fcadfc571348e90cdf" name="ab7cd3df2fabd16fcadfc571348e90cdf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7cd3df2fabd16fcadfc571348e90cdf">&#9670;&#160;</a></span>meanFinite()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double topoparam::meanFinite </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>values</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Mean of the finite per-atom F4 values; quiet_NaN when none are finite. </p>
+
+</div>
+</div>
+<a id="a473e7ca29f517802126410c59756c974" name="a473e7ca29f517802126410c59756c974"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a473e7ca29f517802126410c59756c974">&#9670;&#160;</a></span>normHeightPercent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double topoparam::normHeightPercent </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nPrisms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>avgPrismHeight</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Calculates the height%, an average measure of filled volume. The average height of a prism can be taken to be 2.75-2.85 Angstrom. (Koga et. al., 2001) </p>
+
+</div>
+</div>
+<a id="a2e190293e3c4603ddd1026e4c8f3896a" name="a2e190293e3c4603ddd1026e4c8f3896a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e190293e3c4603ddd1026e4c8f3896a">&#9670;&#160;</a></span>projAreaSingleRing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; topoparam::projAreaSingleRing </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ring</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates the projected area on the XY, YZ and XZ planes. </p>
+
+</div>
+</div>
+<a id="ac9f9075f5de0b04fb6d0431ee15a29b9" name="ac9f9075f5de0b04fb6d0431ee15a29b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9f9075f5de0b04fb6d0431ee15a29b9">&#9670;&#160;</a></span>rodgerF4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; topoparam::rodgerF4 </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>oxygenType</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hydrogenType</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Per-atom Rodger F4 = mean of cos(3 phi) over H-O...O-H dihedrals of this oxygen with its oxygen neighbours. Hydrogens share molID with their oxygen. An oxygen with no hydrogens (mW) is quiet_NaN. nList is by atom ID with the leading self entry, as neighListO. </p>
+
+</div>
+</div>
+<a id="ac48323590268a0d651161a5b3bd4486f" name="ac48323590268a0d651161a5b3bd4486f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac48323590268a0d651161a5b3bd4486f">&#9670;&#160;</a></span>tetrahedralOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; topoparam::tetrahedralOrder </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>centres</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>partners</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#a3b806052c9432d3c00eb4bb91e1d3133">TetrahedralNeighbours</a></td>          <td class="paramname"><span class="paramname"><em>convention</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Errington-Debenedetti tetrahedral order for selected centres against an independently selected partner set. Empty selections mean every atom. A centre is excluded from its own partner shell. Results follow centre order. A centre with fewer than four available neighbours is quiet NaN. </p>
+
+</div>
+</div>
+<a id="a6fe65121ff4d4bad3f74f84037fe3e7c" name="a6fe65121ff4d4bad3f74f84037fe3e7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fe65121ff4d4bad3f74f84037fe3e7c">&#9670;&#160;</a></span>tumLayerStack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopoparam_1_1LayerStack.html">LayerStack</a> topoparam::tumLayerStack </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; bool &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>equatorial</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>layerWidth</em></span><span class="paramdefsep"> = </span><span class="paramdefval">3.7</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Literature I_sd reference: CHILL+ molecules binned by coordinate. TUM/rings stacking: only HC-basal and DDC-equatorial six-rings vote. Prismatic/peripheral rings and non-plane cages (clathrate 5^12) do not write a letter. Ions stay off the ring graph the caller passes. phiC is N_equatorial / (N_basal + N_equatorial) over plane rings. </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacetopoparam.html">topoparam</a></li>
+  </ul>
+</div>
+</body>
+</html>

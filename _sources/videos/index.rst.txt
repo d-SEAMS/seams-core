@@ -1,0 +1,9 @@
+======
+Videos
+======
+
+
+Short screencasts of d-SEAMS in each language and tutorial are hosted on
+`d-SEAMS on Odysee <https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d>`_.
+
+.. include:: players.rst

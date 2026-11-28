@@ -1,0 +1,23 @@
+.. index:: pair: struct; nucleation::Shift
+.. _doxid-structnucleation_1_1_shift:
+
+struct nucleation::Shift
+========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/nucleation_pathway.hpp>
+	
+	struct Shift {
+		// fields
+	
+		int :target:`dSize<doxid-structnucleation_1_1_shift_1a1e8b191c1a9a48d90b3c548220c5b81f>` = 0;
+		int :target:`dFrame<doxid-structnucleation_1_1_shift_1a43e2bc9f99230f24ed434557dea6728a>` = 0;
+	};

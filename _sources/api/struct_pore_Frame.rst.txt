@@ -1,0 +1,25 @@
+.. index:: pair: struct; pore::Frame
+.. _doxid-structpore_1_1_frame:
+
+struct pore::Frame
+==================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/pore.hpp>
+	
+	struct Frame {
+		// fields
+	
+		double :target:`axis_unit<doxid-structpore_1_1_frame_1a90bba96c60ad2c2ebbfe531b6c82cfbd>`[3];
+		double :target:`centre<doxid-structpore_1_1_frame_1a5d5ebaec356377f7c66edf50387fec4e>`[3];
+		double :target:`centre_frac<doxid-structpore_1_1_frame_1ad285a74d86bcf49c7e0a104ca605d776>`[3];
+		int :target:`axis_index<doxid-structpore_1_1_frame_1ae6aca1125353b42b56f2572f0f178e07>`;
+	};

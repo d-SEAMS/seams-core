@@ -1,0 +1,117 @@
+.. index:: pair: struct; seams::FractionalDensityOptions
+.. _doxid-structseams_1_1_fractional_density_options:
+
+struct seams::FractionalDensityOptions
+======================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a fractional or directional density. :ref:`More...<details-structseams_1_1_fractional_density_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct FractionalDensityOptions {
+		// fields
+	
+		int :ref:`species<doxid-structseams_1_1_fractional_density_options_1aa84630532ac7130f6c9a27003b4729e3>` = 0;
+		int :ref:`bins<doxid-structseams_1_1_fractional_density_options_1a0b034b6075a3f873cf3efc5e8a28805f>` = 1;
+		:ref:`Axis<doxid-group__seams__cpp_1gab0a343eee2fee14066d1e497e54cfb82>` :ref:`axis<doxid-structseams_1_1_fractional_density_options_1a5bbfe9608359ff3814a73b0dc95c53b1>` = :ref:`Axis::Z<doxid-group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5>`;
+		bool :ref:`use_direction<doxid-structseams_1_1_fractional_density_options_1a3fadaee50251c0c89dcf4a0e8194ce1e>` = false;
+		std::array<double, 3> :ref:`direction<doxid-structseams_1_1_fractional_density_options_1afadd601db03adc24d83120d5b648b98d>` {{0, 0, 1}};
+		double :ref:`origin<doxid-structseams_1_1_fractional_density_options_1ac7e4a11b72d7d8aab68dda72cf351127>` = 0;
+		std::span<const double> :ref:`masses<doxid-structseams_1_1_fractional_density_options_1a6b39f152cc215cf9f52a0398835c9368>` {};
+	};
+.. _details-structseams_1_1_fractional_density_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a fractional or directional density.
+
+Fields
+------
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_fractional_density_options_1aa84630532ac7130f6c9a27003b4729e3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+Zero keeps every atom.
+
+.. index:: pair: variable; bins
+.. _doxid-structseams_1_1_fractional_density_options_1a0b034b6075a3f873cf3efc5e8a28805f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int bins = 1
+
+Positive bin count.
+
+.. index:: pair: variable; axis
+.. _doxid-structseams_1_1_fractional_density_options_1a5bbfe9608359ff3814a73b0dc95c53b1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Axis<doxid-group__seams__cpp_1gab0a343eee2fee14066d1e497e54cfb82>` axis = :ref:`Axis::Z<doxid-group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5>`
+
+Cell axis.
+
+Ignored when use_direction is set.
+
+.. index:: pair: variable; use_direction
+.. _doxid-structseams_1_1_fractional_density_options_1a3fadaee50251c0c89dcf4a0e8194ce1e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool use_direction = false
+
+Bin an arbitrary Cartesian direction.
+
+.. index:: pair: variable; direction
+.. _doxid-structseams_1_1_fractional_density_options_1afadd601db03adc24d83120d5b648b98d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> direction {{0, 0, 1}}
+
+Cartesian direction.
+
+.. index:: pair: variable; origin
+.. _doxid-structseams_1_1_fractional_density_options_1ac7e4a11b72d7d8aab68dda72cf351127:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double origin = 0
+
+Fractional origin, wrapped into [0, 1).
+
+.. index:: pair: variable; masses
+.. _doxid-structseams_1_1_fractional_density_options_1a6b39f152cc215cf9f52a0398835c9368:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::span<const double> masses {}
+
+One mass per stored atom.
+
+Empty means mass 1.
+

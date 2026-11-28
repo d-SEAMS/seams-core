@@ -1,0 +1,89 @@
+.. index:: pair: struct; seams::DiffusionFit
+.. _doxid-structseams_1_1_diffusion_fit:
+
+struct seams::DiffusionFit
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Linear Einstein diffusion fit coefficients. :ref:`More...<details-structseams_1_1_diffusion_fit>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct DiffusionFit {
+		// fields
+	
+		double :ref:`d_total<doxid-structseams_1_1_diffusion_fit_1add814bda3f28c8d634c9f47aea463c2e>` = 0;
+		double :ref:`d_axial<doxid-structseams_1_1_diffusion_fit_1a70626ca81cdf1f84d9834f147c9cd6df>` = 0;
+		double :ref:`d_lateral<doxid-structseams_1_1_diffusion_fit_1aad23f4809b1e998a534a3fb6199d0706>` = 0;
+		double :ref:`alpha<doxid-structseams_1_1_diffusion_fit_1ac9d13229b5250bd6029005f45c54a163>` = std::numeric_limits<double>::quiet_NaN();
+		bool :ref:`alpha_fitted<doxid-structseams_1_1_diffusion_fit_1a6b75686091ae3b5512b4ca3e3062812d>` = false;
+	};
+.. _details-structseams_1_1_diffusion_fit:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Linear Einstein diffusion fit coefficients.
+
+Fields
+------
+
+.. index:: pair: variable; d_total
+.. _doxid-structseams_1_1_diffusion_fit_1add814bda3f28c8d634c9f47aea463c2e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double d_total = 0
+
+3D diffusion coefficient (slope / 6).
+
+.. index:: pair: variable; d_axial
+.. _doxid-structseams_1_1_diffusion_fit_1a70626ca81cdf1f84d9834f147c9cd6df:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double d_axial = 0
+
+1D axial diffusion coefficient (slope / 2).
+
+.. index:: pair: variable; d_lateral
+.. _doxid-structseams_1_1_diffusion_fit_1aad23f4809b1e998a534a3fb6199d0706:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double d_lateral = 0
+
+2D lateral diffusion coefficient (slope / 4).
+
+.. index:: pair: variable; alpha
+.. _doxid-structseams_1_1_diffusion_fit_1ac9d13229b5250bd6029005f45c54a163:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double alpha = std::numeric_limits<double>::quiet_NaN()
+
+Log-log anomalous diffusion exponent, NaN when the fit was skipped.
+
+.. index:: pair: variable; alpha_fitted
+.. _doxid-structseams_1_1_diffusion_fit_1a6b75686091ae3b5512b4ca3e3062812d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool alpha_fitted = false
+
+False when the window had < 2 usable log-log lags.
+

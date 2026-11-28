@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: gen::mic Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacegen_1_1mic.html">
+<meta property="og:title" content="seams-core: gen::mic Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacegen_1_1mic.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: gen::mic Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacegen_1_1mic.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">gen::mic Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:RangeError" id="r_RangeError"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structgen_1_1mic_1_1RangeError.html">RangeError</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a33b2f2e36b868dc17c20f82bb7d6779d" id="r_a33b2f2e36b868dc17c20f82bb7d6779d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a33b2f2e36b868dc17c20f82bb7d6779d">latticeCoefficients</a> (double lx, double ly, double lz, double xy, double xz, double yz, const std::array&lt; double, 3 &gt; &amp;raw, const std::array&lt; double, 3 &gt; &amp;candidate, double(&amp;n)[3]) noexcept</td></tr>
+<tr class="memitem:a360b14340880d8c74e1f0634c624089b" id="r_a360b14340880d8c74e1f0634c624089b"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a360b14340880d8c74e1f0634c624089b">latticeImage</a> (double lx, double ly, double lz, double xy, double xz, double yz, const std::array&lt; double, 3 &gt; &amp;raw, const std::array&lt; double, 3 &gt; &amp;candidate) noexcept</td></tr>
+<tr class="memitem:a1a29504e3d6fb23c397d8523474955ce" id="r_a1a29504e3d6fb23c397d8523474955ce"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a1a29504e3d6fb23c397d8523474955ce">euclideanIfShorter</a> (double lx, double ly, double lz, double xy, double xz, double yz, const std::array&lt; double, 3 &gt; &amp;raw, const std::array&lt; double, 3 &gt; &amp;wrapped)</td></tr>
+<tr class="memitem:aaf3cb4cba94f028d7b4288205810ae40" id="r_aaf3cb4cba94f028d7b4288205810ae40"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aaf3cb4cba94f028d7b4288205810ae40">euclideanFromImage</a> (double lx, double ly, double lz, double xy, double xz, double yz, const std::array&lt; double, 3 &gt; &amp;raw, const std::array&lt; double, 3 &gt; &amp;image)</td></tr>
+</table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="aaf3cb4cba94f028d7b4288205810ae40" name="aaf3cb4cba94f028d7b4288205810ae40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf3cb4cba94f028d7b4288205810ae40">&#9670;&#160;</a></span>euclideanFromImage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; gen::mic::euclideanFromImage </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>ly</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>raw</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>image</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="euclidean__mic_8hpp_source.html#l02324">2324</a> of file <a class="el" href="euclidean__mic_8hpp_source.html">euclidean_mic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2327</span>                                                                                  {</div>
+<div class="line"><span class="lineno"> 2328</span>  <span class="keywordtype">double</span> n[3];</div>
+<div class="line"><span class="lineno"> 2329</span>  <span class="keywordtype">bool</span> finite = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno"> 2330</span>  <span class="keywordflow">for</span> (<span class="keywordtype">double</span> value : image) {</div>
+<div class="line"><span class="lineno"> 2331</span>    finite = finite &amp;&amp; std::isfinite(value);</div>
+<div class="line"><span class="lineno"> 2332</span>  }</div>
+<div class="line"><span class="lineno"> 2333</span>  <span class="keywordflow">if</span> (finite &amp;&amp; <a class="code hl_function" href="#a33b2f2e36b868dc17c20f82bb7d6779d">latticeCoefficients</a>(lx, ly, lz, xy, xz, yz, raw, image, n)) {</div>
+<div class="line"><span class="lineno"> 2334</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> ax[3] = {lx, xy, xz};</div>
+<div class="line"><span class="lineno"> 2335</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> ay[3] = {0.0, ly, yz};</div>
+<div class="line"><span class="lineno"> 2336</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> az[3] = {0.0, 0.0, lz};</div>
+<div class="line"><span class="lineno"> 2337</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="#a1a29504e3d6fb23c397d8523474955ce">euclideanIfShorter</a>(lx, ly, lz, xy, xz, yz, raw,</div>
+<div class="line"><span class="lineno"> 2338</span>                              {raw[0] - integerDot(n, ax), raw[1] - integerDot(n, ay),</div>
+<div class="line"><span class="lineno"> 2339</span>                               raw[2] - integerDot(n, az)});</div>
+<div class="line"><span class="lineno"> 2340</span>  }</div>
+<div class="line"><span class="lineno"> 2341</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#a1a29504e3d6fb23c397d8523474955ce">euclideanIfShorter</a>(lx, ly, lz, xy, xz, yz, raw, image);</div>
+<div class="line"><span class="lineno"> 2342</span>}</div>
+<div class="ttc" id="anamespacegen_1_1mic_html_a1a29504e3d6fb23c397d8523474955ce"><div class="ttname"><a href="#a1a29504e3d6fb23c397d8523474955ce">gen::mic::euclideanIfShorter</a></div><div class="ttdeci">std::array&lt; double, 3 &gt; euclideanIfShorter(double lx, double ly, double lz, double xy, double xz, double yz, const std::array&lt; double, 3 &gt; &amp;raw, const std::array&lt; double, 3 &gt; &amp;wrapped)</div><div class="ttdef"><b>Definition</b> <a href="euclidean__mic_8hpp_source.html#l02291">euclidean_mic.hpp:2291</a></div></div>
+<div class="ttc" id="anamespacegen_1_1mic_html_a33b2f2e36b868dc17c20f82bb7d6779d"><div class="ttname"><a href="#a33b2f2e36b868dc17c20f82bb7d6779d">gen::mic::latticeCoefficients</a></div><div class="ttdeci">bool latticeCoefficients(double lx, double ly, double lz, double xy, double xz, double yz, const std::array&lt; double, 3 &gt; &amp;raw, const std::array&lt; double, 3 &gt; &amp;candidate, double(&amp;n)[3]) noexcept</div><div class="ttdef"><b>Definition</b> <a href="euclidean__mic_8hpp_source.html#l02232">euclidean_mic.hpp:2232</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a1a29504e3d6fb23c397d8523474955ce" name="a1a29504e3d6fb23c397d8523474955ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a29504e3d6fb23c397d8523474955ce">&#9670;&#160;</a></span>euclideanIfShorter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; gen::mic::euclideanIfShorter </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>ly</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>raw</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>wrapped</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="euclidean__mic_8hpp_source.html#l02291">2291</a> of file <a class="el" href="euclidean__mic_8hpp_source.html">euclidean_mic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2292</span>                                                                                       {</div>
+<div class="line"><span class="lineno"> 2293</span>  <span class="keywordflow">for</span> (<span class="keywordtype">double</span> value : wrapped) {</div>
+<div class="line"><span class="lineno"> 2294</span>    <span class="keywordflow">if</span> (!std::isfinite(value)) {</div>
+<div class="line"><span class="lineno"> 2295</span>      <span class="keywordflow">throw</span> <a class="code hl_struct" href="structgen_1_1mic_1_1RangeError.html">RangeError</a>(<span class="stringliteral">&quot;minimum-image candidate is not finite&quot;</span>);</div>
+<div class="line"><span class="lineno"> 2296</span>    }</div>
+<div class="line"><span class="lineno"> 2297</span>  }</div>
+<div class="line"><span class="lineno"> 2298</span>  std::array&lt;double, 3&gt; start = wrapped;</div>
+<div class="line"><span class="lineno"> 2299</span>  <span class="keywordflow">if</span> (!<a class="code hl_function" href="#a360b14340880d8c74e1f0634c624089b">latticeImage</a>(lx, ly, lz, xy, xz, yz, raw, wrapped)) {</div>
+<div class="line"><span class="lineno"> 2300</span>    start = fractionalWrap(lx, ly, lz, xy, xz, yz, raw);</div>
+<div class="line"><span class="lineno"> 2301</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="#a360b14340880d8c74e1f0634c624089b">latticeImage</a>(lx, ly, lz, xy, xz, yz, raw, start)) {</div>
+<div class="line"><span class="lineno"> 2302</span>      <span class="keywordflow">throw</span> RangeError(</div>
+<div class="line"><span class="lineno"> 2303</span>          <span class="stringliteral">&quot;minimum-image wrap is not a lattice image of the displacement in binary64&quot;</span>);</div>
+<div class="line"><span class="lineno"> 2304</span>    }</div>
+<div class="line"><span class="lineno"> 2305</span>  }</div>
+<div class="line"><span class="lineno"> 2306</span>  <span class="keyword">const</span> Vec3 w{start[0], start[1], start[2]};</div>
+<div class="line"><span class="lineno"> 2307</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> f2 = n2(w);</div>
+<div class="line"><span class="lineno"> 2308</span>  <span class="keyword">constexpr</span> <span class="keywordtype">double</span> kRange = std::numeric_limits&lt;double&gt;::max() / 16.0;</div>
+<div class="line"><span class="lineno"> 2309</span>  <span class="keywordflow">if</span> (!(f2 &lt; kRange)) {</div>
+<div class="line"><span class="lineno"> 2310</span>    <span class="keywordflow">throw</span> <a class="code hl_struct" href="structgen_1_1mic_1_1RangeError.html">RangeError</a>(</div>
+<div class="line"><span class="lineno"> 2311</span>        <span class="stringliteral">&quot;minimum-image squared norm exceeds binary64 range&quot;</span>);</div>
+<div class="line"><span class="lineno"> 2312</span>  }</div>
+<div class="line"><span class="lineno"> 2313</span>  <span class="keyword">const</span> Cached &amp;slot = cachedBasis(lx, ly, lz, xy, xz, yz);</div>
+<div class="line"><span class="lineno"> 2314</span>  <span class="keyword">const</span> Vec3 euc = closestDisplacement(slot.s, w, f2);</div>
+<div class="line"><span class="lineno"> 2315</span>  <span class="keywordflow">return</span> {euc.x, euc.y, euc.z};</div>
+<div class="line"><span class="lineno"> 2316</span>}</div>
+<div class="ttc" id="anamespacegen_1_1mic_html_a360b14340880d8c74e1f0634c624089b"><div class="ttname"><a href="#a360b14340880d8c74e1f0634c624089b">gen::mic::latticeImage</a></div><div class="ttdeci">bool latticeImage(double lx, double ly, double lz, double xy, double xz, double yz, const std::array&lt; double, 3 &gt; &amp;raw, const std::array&lt; double, 3 &gt; &amp;candidate) noexcept</div><div class="ttdef"><b>Definition</b> <a href="euclidean__mic_8hpp_source.html#l02275">euclidean_mic.hpp:2275</a></div></div>
+<div class="ttc" id="astructgen_1_1mic_1_1RangeError_html"><div class="ttname"><a href="structgen_1_1mic_1_1RangeError.html">gen::mic::RangeError</a></div><div class="ttdef"><b>Definition</b> <a href="euclidean__mic_8hpp_source.html#l00076">euclidean_mic.hpp:76</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a33b2f2e36b868dc17c20f82bb7d6779d" name="a33b2f2e36b868dc17c20f82bb7d6779d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33b2f2e36b868dc17c20f82bb7d6779d">&#9670;&#160;</a></span>latticeCoefficients()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::mic::latticeCoefficients </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>ly</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>raw</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>candidate</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double(&amp;)</td>          <td class="paramname"><span class="paramname"><em>n</em></span>[3]&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="euclidean__mic_8hpp_source.html#l02232">2232</a> of file <a class="el" href="euclidean__mic_8hpp_source.html">euclidean_mic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2235</span>                                                         {</div>
+<div class="line"><span class="lineno"> 2236</span>  <span class="keywordtype">double</span> d[3];</div>
+<div class="line"><span class="lineno"> 2237</span>  <span class="keywordtype">double</span> e[3];</div>
+<div class="line"><span class="lineno"> 2238</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno"> 2239</span>    d[k] = raw[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)] - candidate[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)];</div>
+<div class="line"><span class="lineno"> 2240</span>    e[k] = sumError(raw[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)], -candidate[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)],</div>
+<div class="line"><span class="lineno"> 2241</span>                    d[k]);</div>
+<div class="line"><span class="lineno"> 2242</span>    <span class="keywordflow">if</span> (!std::isfinite(d[k])) {</div>
+<div class="line"><span class="lineno"> 2243</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno"> 2244</span>    }</div>
+<div class="line"><span class="lineno"> 2245</span>  }</div>
+<div class="line"><span class="lineno"> 2246</span>  n[2] = std::nearbyint(d[2] / lz);</div>
+<div class="line"><span class="lineno"> 2247</span>  n[1] = std::nearbyint((d[1] - n[2] * yz) / ly);</div>
+<div class="line"><span class="lineno"> 2248</span>  n[0] = std::nearbyint((d[0] - n[1] * xy - n[2] * xz) / lx);</div>
+<div class="line"><span class="lineno"> 2249</span>  <span class="keywordflow">for</span> (<span class="keywordtype">double</span> v : n) {</div>
+<div class="line"><span class="lineno"> 2250</span>    <span class="keywordflow">if</span> (!(std::abs(v) &lt; kIntegral)) {</div>
+<div class="line"><span class="lineno"> 2251</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno"> 2252</span>    }</div>
+<div class="line"><span class="lineno"> 2253</span>  }</div>
+<div class="line"><span class="lineno"> 2254</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> tz = candidate[2] / lz;</div>
+<div class="line"><span class="lineno"> 2255</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ty = (candidate[1] - tz * yz) / ly;</div>
+<div class="line"><span class="lineno"> 2256</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> tx = (candidate[0] - ty * xy - tz * xz) / lx;</div>
+<div class="line"><span class="lineno"> 2257</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> rows[3][3] = {{lx, xy, xz}, {0.0, ly, yz}, {0.0, 0.0, lz}};</div>
+<div class="line"><span class="lineno"> 2258</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> t[3] = {tx, ty, tz};</div>
+<div class="line"><span class="lineno"> 2259</span>  <span class="keyword">constexpr</span> <span class="keywordtype">double</span> kEps = std::numeric_limits&lt;double&gt;::epsilon();</div>
+<div class="line"><span class="lineno"> 2260</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; 3; k++) {</div>
+<div class="line"><span class="lineno"> 2261</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> residual = (d[k] - integerDot(n, rows[k])) + e[k];</div>
+<div class="line"><span class="lineno"> 2262</span>    <span class="keywordtype">double</span> scale = std::abs(raw[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)]) +</div>
+<div class="line"><span class="lineno"> 2263</span>                   std::abs(candidate[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k)]);</div>
+<div class="line"><span class="lineno"> 2264</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 3; i++) {</div>
+<div class="line"><span class="lineno"> 2265</span>      scale += (std::abs(n[i]) + std::abs(t[i])) * std::abs(rows[k][i]);</div>
+<div class="line"><span class="lineno"> 2266</span>    }</div>
+<div class="line"><span class="lineno"> 2267</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> tolerance = 32.0 * kEps * scale + std::numeric_limits&lt;double&gt;::min();</div>
+<div class="line"><span class="lineno"> 2268</span>    <span class="keywordflow">if</span> (!(std::abs(residual) &lt;= tolerance)) {</div>
+<div class="line"><span class="lineno"> 2269</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno"> 2270</span>    }</div>
+<div class="line"><span class="lineno"> 2271</span>  }</div>
+<div class="line"><span class="lineno"> 2272</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno"> 2273</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a360b14340880d8c74e1f0634c624089b" name="a360b14340880d8c74e1f0634c624089b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a360b14340880d8c74e1f0634c624089b">&#9670;&#160;</a></span>latticeImage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool gen::mic::latticeImage </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>ly</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>raw</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>candidate</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="euclidean__mic_8hpp_source.html#l02275">2275</a> of file <a class="el" href="euclidean__mic_8hpp_source.html">euclidean_mic.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 2277</span>                                                                        {</div>
+<div class="line"><span class="lineno"> 2278</span>  <span class="keywordtype">double</span> n[3];</div>
+<div class="line"><span class="lineno"> 2279</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#a33b2f2e36b868dc17c20f82bb7d6779d">latticeCoefficients</a>(lx, ly, lz, xy, xz, yz, raw, candidate, n);</div>
+<div class="line"><span class="lineno"> 2280</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacegen.html">gen</a></li><li class="navelem"><a href="namespacegen_1_1mic.html">mic</a></li>
+  </ul>
+</div>
+</body>
+</html>

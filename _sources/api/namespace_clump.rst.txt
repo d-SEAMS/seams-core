@@ -1,0 +1,115 @@
+.. index:: pair: namespace; clump
+.. _doxid-namespaceclump:
+
+namespace clump
+===============
+
+.. toctree::
+	:hidden:
+
+	struct_clump_Domain.rst
+
+Overview
+~~~~~~~~
+
+Clustering functions. This namespace contains functions that are used in the for clustering ice-like particles. :ref:`More...<details-namespaceclump>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace clump {
+
+	// structs
+
+	struct :ref:`Domain<doxid-structclump_1_1_domain>`;
+
+	// global functions
+
+	:ref:`Domain<doxid-structclump_1_1_domain>` :target:`largestDomain<doxid-namespaceclump_1a8c61aa1ca3f2b3dd6cbb3043f4e78fb1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<std::vector<int>>& nList, const std::vector<bool>& mask);
+	int :ref:`largestIceCluster<doxid-namespaceclump_1a6a6c0f78015e195071becf8fbc35d3f9>`(std::string path, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& iceCloud, const std::vector<std::vector<int>>& nList, std::vector<bool>& isIce, std::vector<int>& clusterID, std::vector<int>& nClusters, std::unordered_map<int, int>& indexNumber, int firstFrame);
+	int :ref:`singleClusterLinkedList<doxid-namespaceclump_1a5a123d338efac9bc40a6a553bdafda16>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& iceCloud, const std::vector<std::vector<int>>& nList, std::vector<int>& linkedList);
+	int :ref:`clusterAnalysis<doxid-namespaceclump_1adf4629412fd44dea616caf0c7098fc35>`(std::string path, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& iceCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, std::vector<std::vector<int>>& iceNeighbourList, double cutoff, int firstFrame, std::string bopAnalysis = "q6");
+	int :ref:`recenterClusterCloud<doxid-namespaceclump_1adc20f0c734d4fc6b1bc1b39990b7e78f>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& iceCloud, const std::vector<std::vector<int>>& nList);
+
+	} // namespace clump
+.. _details-namespaceclump:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Clustering functions. This namespace contains functions that are used in the for clustering ice-like particles.
+
+Particles are clustered according to Stoddard's algorithm `(Stoddard J. Comp. Phys., 27, 291, 1977) <https://www.sciencedirect.com/science/article/pii/0021999178900116>`__.
+
+The largest ice cluster determines the largest cluster of ice-like particles, using a "linked list" created by the clustering algorithm. The determination of ice-like molecules can be done using the :math:`q_6` parameter, CHILL or CHILL+ parameters.
+
+The largest ice cluster thus determined can be re-centered for ease of visualization.
+
+
+
+.. _doxid-namespaceclump_1autotoc_md4_1s1:
+
+
+
+
+
+.. _doxid-namespaceclump_1autotoc_md4_1s2:
+
+
+
+
+
+.. _doxid-namespaceclump_1autotoc_md4:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 13, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; largestIceCluster
+.. _doxid-namespaceclump_1a6a6c0f78015e195071becf8fbc35d3f9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int largestIceCluster(std::string path, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& iceCloud, const std::vector<std::vector<int>>& nList, std::vector<bool>& isIce, std::vector<int>& clusterID, std::vector<int>& nClusters, std::unordered_map<int, int>& indexNumber, int firstFrame)
+
+Finds the largest ice cluster.
+
+.. index:: pair: function; singleClusterLinkedList
+.. _doxid-namespaceclump_1a5a123d338efac9bc40a6a553bdafda16:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int singleClusterLinkedList(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& iceCloud, const std::vector<std::vector<int>>& nList, std::vector<int>& linkedList)
+
+Get the linked list of a cluster, given by iceCloud, for a single cluster. Required for cluster re-centering
+
+.. index:: pair: function; clusterAnalysis
+.. _doxid-namespaceclump_1adf4629412fd44dea616caf0c7098fc35:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int clusterAnalysis(std::string path, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& iceCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, std::vector<std::vector<int>>& iceNeighbourList, double cutoff, int firstFrame, std::string bopAnalysis = "q6")
+
+Does the cluster analysis of ice particles in the system. Returns a pointCloud of the largest ice cluster. The neighbour list returned is BY INDEX of the largest ice cluster pointCloud.
+
+.. index:: pair: function; recenterClusterCloud
+.. _doxid-namespaceclump_1adc20f0c734d4fc6b1bc1b39990b7e78f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int recenterClusterCloud(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& iceCloud, const std::vector<std::vector<int>>& nList)
+
+Recenters the coordinates of a pointCloud.
+

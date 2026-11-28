@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Formats - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="walk_compare" href="walk-compare.html" /><link rel="prev" title="seams CLI" href="cli.html" /><link rel="canonical" href="https://docs.dseams.info/reference/data-formats.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css?v=f040eaf7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-tokens.css?v=d0993c48" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-family.css?v=ab9c5117" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-shibuya.css?v=86c54dcb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-doxyrest.css?v=cb763bf8" />
+    
+    
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/reference/data-formats.html"/>
+  <meta property="og:title" content="Data Formats"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="seams and the C++ readers share one suffix table."/>
+    <meta property="og:description" content="seams and the C++ readers share one suffix table."/><meta name="twitter:card" content="summary_large_image"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="robots" content="index, follow">
+<meta name="twitter:title" content="Data Formats - d-SEAMS">
+<meta name="twitter:description" content="seams and the C++ readers share one suffix table.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/reference/data-formats.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"Data Formats - d-SEAMS","description":"seams and the C++ readers share one suffix table.","url":"https://docs.dseams.info/reference/data-formats.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
+<body><nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
+            <span>Libraries</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://linkcell.dseams.info">
+                <span>linkcell</span>
+                <small>Periodic linked-cell neighbour lists</small>
+              </a></li></ul>
+      </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../user/index.html">User guide</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="c-api.html">C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cpp-api.html">C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-api.html">Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia-api.html">Julia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="r-api.html">R</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rust-api.html">Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran-api.html">Fortran</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lua-api.html">Lua</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli-api.html">Command line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-frame.html">Python Frame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html">seams CLI</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="walk-compare.html">walk_compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cross-language.html">One task on every front</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release-2.14.html">2.14.3 release notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../capi/index.html">C API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/index.html">Stable API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/c.html">C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/cpp.html">C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/python.html">Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/fortran.html">Fortran</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/julia.html">Julia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/r.html">R</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/lua.html">Lua and Fennel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/rust.html">Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/cli.html">Command line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/science.html">Science front</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lang/index.html">Language APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_SkinNeighborList.html">class nneigh::SkinNeighborList</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_primitive_RingUpdater.html">class primitive::RingUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_AffiliationUpdater.html">class ring::AffiliationUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_NeighBond.html">class ring::NeighBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Brine.html">class seams::Brine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Cages.html">class seams::Cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Error.html">class seams::Error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_FairWidth.html">class seams::FairWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Fingerprint.html">class seams::Fingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_HbondTcf.html">class seams::HbondTcf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Msd.html">class seams::Msd</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Neighbours.html">class seams::Neighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_PinSession.html">class seams::PinSession</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_RegionErrors.html">class seams::RegionErrors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Reorientation.html">class seams::Reorientation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings.html">class seams::Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings_iterator.html">class seams::Rings::iterator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_System.html">class seams::System</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_detail_Handle.html">template class seams::detail::Handle</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_HbondLifetimeAccumulator.html">class traj::HbondLifetimeAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_MsdAccumulator.html">class traj::MsdAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_ReorientationAccumulator.html">class traj::ReorientationAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_traj_TrajectoryUnwrapper.html">class traj::TrajectoryUnwrapper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_Signature_Kind.html">enum cage::Signature::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_cageType.html">enum cage::cageType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_iceType.html">enum cage::iceType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_ChillPlusRule.html">enum chill::ChillPlusRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_CrystalKind.html">enum chill::CrystalKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Cause.html">enum iface::Cause</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Kind.html">enum iface::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_atom_state_type.html">enum molSys::atom_state_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_bond_type.html">enum molSys::bond_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nneigh_BondGraph.html">enum nneigh::BondGraph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nucleation_CommittorFate.html">enum nucleation::CommittorFate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_phase_GlassKind.html">enum phase::GlassKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_primitive_RingRows.html">enum primitive::RingRows</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_ring_strucType.html">enum ring::strucType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Int8Backend.html">enum seams::product::Int8Backend</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Mode.html">enum seams::product::Mode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Reduction.html">enum seams::product::Reduction</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Family.html">enum site::Family</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_IonState.html">enum site::IonState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Kind.html">enum site::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Crystal.html">enum symm::Crystal</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Kind.html">enum symm::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_topoparam_TetrahedralNeighbours.html">enum topoparam::TetrahedralNeighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_water_MolMode.html">enum water::MolMode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-atoms">seams_system_set_atoms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-positions">seams_system_set_positions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-handle-error">seams_handle_error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-status">seams_status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system">seams_system</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-cagelabel">seams::CageLabel</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#doxid-group-seams-cpp-1ga66e498496a8ac061410534a9f0171779">seams::Status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-chillrule">seams::ChillRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-domainsubset">seams::DomainSubset</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-graph">seams::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-axis">seams::Axis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-set-num-threads">seams::set_num_threads</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5">group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d">group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/global.html">Global Namespace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_bond.html">Bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_cage.html">Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_brine.html">Ice/brine fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_cage.html">Cages and ice shells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame.html">Frames</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame_io.html">Frame reload and read-back</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_meta.html">Library metadata and errors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_more.html">Further analyses</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_neigh.html">Neighbour lists</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_order.html">Order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_pore.html">Pore geometry</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_ring.html">Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_sized.html">Status-returning and length-checked entry points</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_traj.html">Trajectories and dynamics</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_types.html">Types</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_chill.html">Chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_clump.html">Clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_gen.html">Gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_molSys.html">MolSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_primitive.html">Primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_prism3.html">Bulk prisms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf.html">Rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_ring.html">Ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_seams_cpp.html">C++ API</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_sinp.html">Sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_absor.html">namespace absor</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_bond.html">namespace bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_cage.html">namespace cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chill.html">namespace chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chordless.html">namespace chordless</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_clump.html">namespace clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen.html">namespace gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen_mic.html">namespace gen::mic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gpu.html">namespace gpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_iface.html">namespace iface</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ira.html">namespace ira</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_match.html">namespace match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_molSys.html">namespace molSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nneigh.html">namespace nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nucleation.html">namespace nucleation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_phase.html">namespace phase</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pntToPnt.html">namespace pntToPnt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pore.html">namespace pore</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_primitive.html">namespace primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_prism3.html">namespace prism3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf.html">namespace rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf2.html">namespace rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ring.html">namespace ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_science.html">namespace science</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams.html">namespace seams</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cfg.html">namespace seams::cfg</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cpu.html">namespace seams::cpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_detail.html">namespace seams::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_domain.html">namespace seams::domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_minimax.html">namespace seams::minimax</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_product.html">namespace seams::product</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_solid.html">namespace seams::solid</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_sphericart_ylm.html">namespace seams::sphericart_ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_steinhardt.html">namespace seams::steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_team.html">namespace seams::team</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_team_detail.html">namespace seams::team::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_tsan.html">namespace seams::tsan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_wigner.html">namespace seams::wigner</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_ylm.html">namespace seams::ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sinp.html">namespace sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_site.html">namespace site</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sout.html">namespace sout</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sph.html">namespace sph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_std.html">namespace std</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm.html">namespace symm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_avx2.html">namespace symm::avx2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_generic.html">namespace symm::generic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topo.html">namespace topo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topoparam.html">namespace topoparam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_traj.html">namespace traj</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum.html">namespace tum</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum3.html">namespace tum3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum_device.html">namespace tum::device</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_water.html">namespace water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_bond_DirectedHydrogenBond.html">struct bond::DirectedHydrogenBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Cage.html">struct cage::Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_CageShape.html">struct cage::CageShape</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_EdgeWindow.html">struct cage::EdgeWindow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FormerRow.html">struct cage::FormerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FoundCage.html">struct cage::FoundCage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Signature.html">struct cage::Signature</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_AnalysisPhases.html">struct chill::AnalysisPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondClassifier.html">struct chill::BondClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondOrder.html">struct chill::BondOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_ChillPlusResult.html">struct chill::ChillPlusResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_LinearClassifier.html">struct chill::LinearClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlCutoffStages.html">struct chill::QlCutoffStages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlmAtom.html">struct chill::QlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_SteinhardtQl.html">struct chill::SteinhardtQl</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_TemplateHit.html">struct chill::TemplateHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_VoronoiWeights.html">struct chill::VoronoiWeights</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_YlmAtom.html">struct chill::YlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_clump_Domain.html">struct clump::Domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_FracBox.html">struct gen::FracBox</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_mic_RangeError.html">struct gen::mic::RangeError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_BatchResult.html">struct gpu::BatchResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_DeviceInfo.html">struct gpu::DeviceInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Footprint.html">struct gpu::Footprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Plan.html">struct gpu::Plan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Bin.html">struct iface::Bin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_BootstrapInterval.html">struct iface::BootstrapInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Front.html">struct iface::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Growth.html">struct iface::Growth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_GrowthFrame.html">struct iface::GrowthFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Profile.html">struct iface::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Study.html">struct iface::Study</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_WillardChandler.html">struct iface::WillardChandler</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_Match.html">struct ira::Match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_PointGroup.html">struct ira::PointGroup</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Point.html">template struct molSys::Point</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_PointCloud.html">template struct molSys::PointCloud</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Result.html">struct molSys::Result</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Ascent.html">struct nucleation::Ascent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_CommittorCall.html">struct nucleation::CommittorCall</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_FrameRecord.html">struct nucleation::FrameRecord</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_GrowBasin.html">struct nucleation::GrowBasin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_HalfRise.html">struct nucleation::HalfRise</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Lead.html">struct nucleation::Lead</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Shift.html">struct nucleation::Shift</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_phase_IceXXIHit.html">struct phase::IceXXIHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_BoxError.html">struct pore::BoxError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Frame.html">struct pore::Frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_HostGuest.html">struct pore::HostGuest</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Profile.html">struct pore::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_pore_Profiles.html">struct pore::Profiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Graph.html">struct primitive::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_RingSearchSplit.html">struct primitive::RingSearchSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Vertex.html">struct primitive::Vertex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_rdf_PartialRdf.html">struct rdf::PartialRdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CageAffiliation.html">struct ring::CageAffiliation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CagePlanes.html">struct ring::CagePlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_DdcSplit.html">struct ring::DdcSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_EquatorChoice.html">struct ring::EquatorChoice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackParts.html">struct ring::PackParts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackingCertificate.html">struct ring::PackingCertificate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_RingSearchIndex.html">struct ring::RingSearchIndex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_SeededAtomLabels.html">struct ring::SeededAtomLabels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_StackingPlanes.html">struct ring::StackingPlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_AtomRow.html">struct science::AtomRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_ClusterPart.html">struct science::ClusterPart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_CriticalSize.html">struct science::CriticalSize</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Front.html">struct science::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_LayerRow.html">struct science::LayerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Layers.html">struct science::Layers</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_NucleusFrame.html">struct science::NucleusFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_SlopeInterval.html">struct science::SlopeInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BondOptions.html">struct seams::BondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineFronts.html">struct seams::BrineFronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineOptions.html">struct seams::BrineOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineProfile.html">struct seams::BrineProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageCounts.html">struct seams::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageOptions.html">struct seams::CageOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChillOptions.html">struct seams::ChillOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChordlessCycles.html">struct seams::ChordlessCycles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Classification.html">struct seams::Classification</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Contacts.html">struct seams::Contacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityOptions.html">struct seams::DensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityProfile.html">struct seams::DensityProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DiffusionFit.html">struct seams::DiffusionFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DirectedBond.html">struct seams::DirectedBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DirectedBondOptions.html">struct seams::DirectedBondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Distribution.html">struct seams::Distribution</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DistributionOptions.html">struct seams::DistributionOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainOptions.html">struct seams::DomainOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainReport.html">struct seams::DomainReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_EdgeSet.html">struct seams::EdgeSet</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FairState.html">struct seams::FairState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FilledByTeam.html">template struct seams::FilledByTeam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FilledByTeam_rebind.html">template struct seams::FilledByTeam::rebind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FingerprintOptions.html">struct seams::FingerprintOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FractionalDensityOptions.html">struct seams::FractionalDensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FractionalProfile.html">struct seams::FractionalProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HbondLifetimeCurve.html">struct seams::HbondLifetimeCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HbondLifetimeFit.html">struct seams::HbondLifetimeFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HostGuestContacts.html">struct seams::HostGuestContacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_HostGuestOptions.html">struct seams::HostGuestOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_KnnOptions.html">struct seams::KnnOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MoleculeCentres.html">struct seams::MoleculeCentres</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MoleculeDipoles.html">struct seams::MoleculeDipoles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_MsdCurve.html">struct seams::MsdCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_NeighbourOptions.html">struct seams::NeighbourOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrderOptions.html">struct seams::OrderOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrientationOrder.html">struct seams::OrientationOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Pockets.html">struct seams::Pockets</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreFrame.html">struct seams::PoreFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreFrameOptions.html">struct seams::PoreFrameOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreProfileOptions.html">struct seams::PoreProfileOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PoreProfiles.html">struct seams::PoreProfiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismCensus.html">struct seams::PrismCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismOptions.html">struct seams::PrismOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q4Q6.html">struct seams::Q4Q6</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6Bar.html">struct seams::Q6Bar</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6BarOptions.html">struct seams::Q6BarOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Rejection.html">struct seams::Rejection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ReorientationCurve.html">struct seams::ReorientationCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ReorientationFit.html">struct seams::ReorientationFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RingOptions.html">struct seams::RingOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RunningCoordination.html">struct seams::RunningCoordination</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SheetOptions.html">struct seams::SheetOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureMatch.html">struct seams::SignatureMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureOptions.html">struct seams::SignatureOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Steinhardt.html">struct seams::Steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SteinhardtOptions.html">struct seams::SteinhardtOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_TeamWidth.html">struct seams::TeamWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_WaterVectors.html">struct seams::WaterVectors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cfg_Runtime.html">struct seams::cfg::Runtime</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cpu_Features.html">struct seams::cpu::Features</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_directed_hbond.html">struct seams_directed_hbond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingPhases.html">struct seams::domain::RingPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingSummary.html">struct seams::domain::RingSummary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_Share.html">struct seams::domain::Share</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_hbond_edge.html">struct seams_hbond_edge</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_Cij.html">struct seams::product::Cij</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_ComplexDot.html">struct seams::product::ComplexDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_GemmInfo.html">struct seams::product::GemmInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_RealDot.html">struct seams::product::RealDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_team_detail_Call.html">template struct seams::team::detail::Call</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_tsan_Slot.html">struct seams::tsan::Slot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_sinp_ChemfilesLoadOptions.html">struct sinp::ChemfilesLoadOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_BrinePocket.html">struct site::BrinePocket</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationBin.html">struct site::ConcentrationBin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationProfile.html">struct site::ConcentrationProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_DensityZ.html">struct site::DensityZ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontLayerReport.html">struct site::FrontLayerReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontOptions.html">struct site::FrontOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontPair.html">struct site::FrontPair</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontSnapshot.html">struct site::FrontSnapshot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_GuestOccupancy.html">struct site::GuestOccupancy</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IceClusterIons.html">struct site::IceClusterIons</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_InsideTrace.html">struct site::InsideTrace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IonEnvironment.html">struct site::IonEnvironment</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_LinearFit.html">struct site::LinearFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_PocketCensus.html">struct site::PocketCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_RejectionCoefficient.html">struct site::RejectionCoefficient</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_Table.html">struct site::Table</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_TrapEvent.html">struct site::TrapEvent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_CanonShell.html">struct symm::CanonShell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Group.html">struct symm::Group</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Lattice.html">struct symm::Lattice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Overlay.html">struct symm::Overlay</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Shell17.html">struct symm::Shell17</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Space.html">struct symm::Space</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_FrameFingerprint.html">struct topo::FrameFingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_KeyLibrary.html">struct topo::KeyLibrary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LibraryMatch.html">struct topo::LibraryMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LocalKey.html">struct topo::LocalKey</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topoparam_LayerStack.html">struct topoparam::LayerStack</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_BoxCell.html">struct traj::BoxCell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DecayFitResult.html">struct traj::DecayFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DiffusionFitResult.html">struct traj::DiffusionFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_DipoleVectorsResult.html">struct traj::DipoleVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_HbondLifetimeAccumulator_OriginSlot.html">struct traj::HbondLifetimeAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_MsdAccumulator_OriginSlot.html">struct traj::MsdAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_OrientationOrderResult.html">struct traj::OrientationOrderResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_ReorientationAccumulator_OriginSlot.html">struct traj::ReorientationAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_traj_WaterVectorsResult.html">struct traj::WaterVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_CageCounts.html">struct tum::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_SpecializedCaps.html">struct tum::SpecializedCaps</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonReport.html">struct water::IonReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/comparisons-summary-tables.html">Head-to-head summary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sqq-tables.html">SQQ</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#type-columns">Type columns</a></li>
+<li><a class="reference internal" href="#empty-frames">Empty frames</a></li>
+<li><a class="reference internal" href="#lammps-dump">LAMMPS dump</a></li>
+<li><a class="reference internal" href="#xyz">XYZ</a></li>
+<li><a class="reference internal" href="#chemfiles-pdb-gro-dcd-xtc-trr-netcdf-lammps-data-vmd-molfile">chemfiles (PDB, GRO, DCD, XTC, TRR, NetCDF, LAMMPS Data, VMD molfile)</a></li>
+<li><a class="reference internal" href="#vmd-molfile-readers">VMD molfile readers</a></li>
+<li><a class="reference internal" href="#eon-con">eOn <code class="docutils literal notranslate"><span class="pre">.con</span></code></a></li>
+</ul>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">API reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Data Formats</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="data-formats">
+<h1>Data Formats<a class="headerlink" href="#data-formats" title="Link to this heading">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span></code> and the C++ readers share one suffix table. Coordinates are
+Cartesian Angstroms. Frames are 1-based (the file’s timestep value is
+not the frame index).</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>suffix</p></th>
+<th class="head"><p>reader</p></th>
+<th class="head"><p>always compiled?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.lammpstrj</span></code>, <code class="docutils literal notranslate"><span class="pre">.dump</span></code>, <code class="docutils literal notranslate"><span class="pre">.lammps</span></code>, anything else</p></td>
+<td><p>LAMMPS dump text</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">.xyz</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sinp::readXYZ</span></code></p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">.gro</span></code>, <code class="docutils literal notranslate"><span class="pre">.dcd</span></code>, <code class="docutils literal notranslate"><span class="pre">.xtc</span></code>, <code class="docutils literal notranslate"><span class="pre">.trr</span></code>, <code class="docutils literal notranslate"><span class="pre">.nc</span></code>, <code class="docutils literal notranslate"><span class="pre">.lammpsdata</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sinp::readChemfiles</span></code></p></td>
+<td><p>only with <code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_CHEMFILES</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>the 33 VMD molfile suffixes (see <a class="reference internal" href="#vmd-molfile-readers">VMD molfile readers</a>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sinp::readChemfiles</span></code></p></td>
+<td><p>only with <code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_CHEMFILES</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.con</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sinp::readCon</span></code></p></td>
+<td><p>only with <code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_READCON</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The CLI takes the substring after the last <code class="docutils literal notranslate"><span class="pre">.</span></code> and compares it to
+<code class="docutils literal notranslate"><span class="pre">xyz</span></code>, <code class="docutils literal notranslate"><span class="pre">con</span></code>, <code class="docutils literal notranslate"><span class="pre">pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">gro</span></code>, <code class="docutils literal notranslate"><span class="pre">dcd</span></code>, <code class="docutils literal notranslate"><span class="pre">xtc</span></code>, <code class="docutils literal notranslate"><span class="pre">trr</span></code>, <code class="docutils literal notranslate"><span class="pre">nc</span></code>, and the molfile
+suffixes. The <code class="docutils literal notranslate"><span class="pre">lammpsdata</span></code> suffix is case-insensitive. The other comparisons are exact, so
+<code class="docutils literal notranslate"><span class="pre">foo.xyz/dump</span></code> is a LAMMPS dump. A path with no dot is a LAMMPS dump.
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> reports chemfiles and readcon-core. The
+Python frame is documented on <a class="reference external" href="python-frame.html">Python Frame</a>.</p>
+<section id="type-columns">
+<h2>Type columns<a class="headerlink" href="#type-columns" title="Link to this heading">#</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>reader</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">Point::type</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">0</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code> (<code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>LAMMPS</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">ATOMS</span></code> <code class="docutils literal notranslate"><span class="pre">type</span></code> column</p></td>
+<td><p>type 2 when any atom has that type, otherwise type 1. A multi-frame <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> keeps every atom</p></td>
+<td><p>keep type <code class="docutils literal notranslate"><span class="pre">I</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>XYZ</p></td>
+<td><p>first appearance of each symbol, starting at 1</p></td>
+<td><p>ignored on the read</p></td>
+<td><p>ignored on the read</p></td>
+</tr>
+<tr class="row-even"><td><p>chemfiles</p></td>
+<td><p>all-digit <code class="docutils literal notranslate"><span class="pre">type</span></code> string, else atomic number, else 8 for O/OW/OH and 1 for H/HW/HO, else 0</p></td>
+<td><p>keep every atom (<code class="docutils literal notranslate"><span class="pre">typeFilter</span> <span class="pre">=</span> <span class="pre">-1</span></code>)</p></td>
+<td><p>keep that species number</p></td>
+</tr>
+<tr class="row-odd"><td><p>readcon</p></td>
+<td><p>atomic number from the file</p></td>
+<td><p>keep every atom</p></td>
+<td><p>keep every atom (<code class="docutils literal notranslate"><span class="pre">--type</span></code> is not applied)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Point::atomID</span></code> is the file id when the format has one, else
+1-based file order. <code class="docutils literal notranslate"><span class="pre">Point::molID</span></code> is <code class="docutils literal notranslate"><span class="pre">mol</span></code> when present, else
+<code class="docutils literal notranslate"><span class="pre">atomID</span></code>. chemfiles prefers a numeric <code class="docutils literal notranslate"><span class="pre">mol</span></code> property, then the
+residue id, then <code class="docutils literal notranslate"><span class="pre">atomID</span></code>.</p>
+<p>A symbol that parses as a number is XYZ type 1. Si then N is type 1
+then type 2. A frame with no element names and no atomic numbers
+stores chemfiles species 1.</p>
+</section>
+<section id="empty-frames">
+<h2>Empty frames<a class="headerlink" href="#empty-frames" title="Link to this heading">#</a></h2>
+<p>A reader that cannot fill atoms returns a cloud with <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">==</span> <span class="pre">0</span></code>
+(<code class="docutils literal notranslate"><span class="pre">pts</span></code> empty). <code class="docutils literal notranslate"><span class="pre">currentFrame</span></code> is still the requested 1-based index
+when the reader knows it.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>situation</p></th>
+<th class="head"><p>result</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>LAMMPS path missing or unreadable</p></td>
+<td><p>empty cloud, <code class="docutils literal notranslate"><span class="pre">currentFrame</span> <span class="pre">=</span> <span class="pre">targetFrame</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>LAMMPS frame does not exist</p></td>
+<td><p>empty cloud, <code class="docutils literal notranslate"><span class="pre">currentFrame</span> <span class="pre">=</span> <span class="pre">targetFrame</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>LAMMPS type filter matches nothing</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">==</span> <span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>XYZ path missing</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;Wrong</span> <span class="pre">filepath&quot;)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>XYZ header, truncated frame, or bad coordinate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">std::runtime_error</span></code> (see XYZ)</p></td>
+</tr>
+<tr class="row-odd"><td><p>chemfiles step past the last frame</p></td>
+<td><p>empty cloud</p></td>
+</tr>
+<tr class="row-even"><td><p>chemfiles error or selection error</p></td>
+<td><p>empty cloud</p></td>
+</tr>
+<tr class="row-odd"><td><p>XYZ opened by chemfiles with zero steps</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">std::runtime_error</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>readcon path unreadable, frame missing, or frame index below 1</p></td>
+<td><p>empty cloud, <code class="docutils literal notranslate"><span class="pre">currentFrame</span></code> left at 0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code> on an empty cloud print <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code>
+and return 0. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code> without <code class="docutils literal notranslate"><span class="pre">--signature</span></code> prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">graph</span> <span class="pre">seeded</span> <span class="pre">hexagonal</span> <span class="pre">0</span> <span class="pre">cubic</span> <span class="pre">0</span> <span class="pre">both</span> <span class="pre">0</span> <span class="pre">water</span> <span class="pre">0</span></code>. <code class="docutils literal notranslate"><span class="pre">--graph</span></code> replaces
+<code class="docutils literal notranslate"><span class="pre">seeded</span></code>. With <code class="docutils literal notranslate"><span class="pre">--signature</span></code>, each signature prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">graph</span> <span class="pre">seeded</span> <span class="pre">signature</span> <span class="pre">SPEC</span> <span class="pre">cages</span> <span class="pre">0</span> <span class="pre">atoms</span> <span class="pre">0</span></code>.
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> on a missing dump prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code> and returns 0.
+A missing, empty, or unreadable <code class="docutils literal notranslate"><span class="pre">.pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">.gro</span></code>, <code class="docutils literal notranslate"><span class="pre">.dcd</span></code>, or <code class="docutils literal notranslate"><span class="pre">.con</span></code>
+path, including a directory, makes the CLI throw <code class="docutils literal notranslate"><span class="pre">cannot</span> <span class="pre">read</span> <span class="pre">PATH</span></code>
+and exit 2. A type filter that keeps no atoms does the same. A
+A chemfiles suffix (<code class="docutils literal notranslate"><span class="pre">.pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">.gro</span></code>, <code class="docutils literal notranslate"><span class="pre">.dcd</span></code>, a molfile suffix, …) on a
+build without chemfiles throws <code class="docutils literal notranslate"><span class="pre">chemfiles</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">this</span> <span class="pre">build</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">sinp::nLammpsFrames</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code> when the file cannot be read.
+<code class="docutils literal notranslate"><span class="pre">sinp::forEachLammpsFrame</span></code> is a no-op when that count is <code class="docutils literal notranslate"><span class="pre">0</span></code>, or
+when <code class="docutils literal notranslate"><span class="pre">first</span> <span class="pre">&gt;</span> <span class="pre">last</span></code>. The CLI prints the frames it ran, in the
+requested order. XYZ is one frame: a range that starts after frame 1
+prints nothing. chemfiles and readcon walk in order on one open
+file. An empty first requested frame makes the CLI throw
+<code class="docutils literal notranslate"><span class="pre">cannot</span> <span class="pre">read</span> <span class="pre">PATH</span></code>. A later empty cloud stops the walk.</p>
+</section>
+<section id="lammps-dump">
+<h2>LAMMPS dump<a class="headerlink" href="#lammps-dump" title="Link to this heading">#</a></h2>
+<p>Default reader. Text dump, frames concatenated, each starting with
+<code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">TIMESTEP</span></code>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">ITEM: TIMESTEP
+</span><span data-line="2">15000000
+</span><span data-line="3">ITEM: NUMBER OF ATOMS
+</span><span data-line="4">750
+</span><span data-line="5">ITEM: BOX BOUNDS pp pp pp
+</span><span data-line="6">-2.0000000000000000e+01 2.0000000000000000e+01
+</span><span data-line="7">-2.0000000000000000e+01 2.0000000000000000e+01
+</span><span data-line="8">7.0316731227034523e+00 1.8723432986906221e+02
+</span><span data-line="9">ITEM: ATOMS id mol type x y z c_peratom
+</span><span data-line="10">1 1 2 1.62441 -0.745636 131.621 -28.449
+</span><span data-line="11">2 1 1 2.11159 -0.763153 132.444 9.60885
+</span></pre></div>
+</div>
+<p>That block is the first snapshot of
+<code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> (750 atoms, 250 of type 2).</p>
+<p>Required <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">ATOMS</span></code> columns: <code class="docutils literal notranslate"><span class="pre">type</span></code>, and one coordinate triple.
+The coordinate names follow LAMMPS <code class="docutils literal notranslate"><span class="pre">ReaderNative</span></code>: <code class="docutils literal notranslate"><span class="pre">x</span></code> / <code class="docutils literal notranslate"><span class="pre">y</span></code> / <code class="docutils literal notranslate"><span class="pre">z</span></code>
+if present, otherwise the first of <code class="docutils literal notranslate"><span class="pre">xu</span></code> / <code class="docutils literal notranslate"><span class="pre">xs</span></code> / <code class="docutils literal notranslate"><span class="pre">xsu</span></code> (and the <code class="docutils literal notranslate"><span class="pre">y</span></code>
+and <code class="docutils literal notranslate"><span class="pre">z</span></code> analogues <code class="docutils literal notranslate"><span class="pre">yu</span></code> / <code class="docutils literal notranslate"><span class="pre">ys</span></code> / <code class="docutils literal notranslate"><span class="pre">ysu</span></code>, <code class="docutils literal notranslate"><span class="pre">zu</span></code> / <code class="docutils literal notranslate"><span class="pre">zs</span></code> / <code class="docutils literal notranslate"><span class="pre">zsu</span></code>). Extra
+columns are ignored.</p>
+<p>Optional columns: <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">mol</span></code>. A missing <code class="docutils literal notranslate"><span class="pre">mol</span></code> column copies
+<code class="docutils literal notranslate"><span class="pre">atomID</span></code> into <code class="docutils literal notranslate"><span class="pre">molID</span></code>. A missing <code class="docutils literal notranslate"><span class="pre">id</span></code> column assigns <code class="docutils literal notranslate"><span class="pre">atomID</span></code> from
+1 in file order. Column 0 is used only when the header names it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PointCloud.box</span></code> is <code class="docutils literal notranslate"><span class="pre">hi</span> <span class="pre">-</span> <span class="pre">lo</span></code> per axis (the LAMMPS bound spans, not
+the lattice edge lengths). <code class="docutils literal notranslate"><span class="pre">PointCloud.boxLow</span></code> is the lower bound.
+A third number on a box line is a triclinic tilt (<code class="docutils literal notranslate"><span class="pre">xy</span></code>, then <code class="docutils literal notranslate"><span class="pre">xz</span></code>,
+then <code class="docutils literal notranslate"><span class="pre">yz</span></code>) and is appended to <code class="docutils literal notranslate"><span class="pre">box</span></code>. When those three tilts are
+present, <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>. Pair distances go through
+<code class="docutils literal notranslate"><span class="pre">gen::periodicDistSq</span></code> / <code class="docutils literal notranslate"><span class="pre">gen::triclinicMinImage</span></code>, which recover H
+with the same mapping as <code class="docutils literal notranslate"><span class="pre">nneigh::dumpBoundsToH</span></code> /
+<code class="docutils literal notranslate"><span class="pre">nneigh::lammpsBoxToLcCell</span></code>. An independent-axis wrap on the bound
+spans is the wrong image for a sheared cell; see
+<a class="reference external" href="../user/howto/sheared-cells.html">Sheared cells</a>.
+<code class="docutils literal notranslate"><span class="pre">gen::formatDumpBox</span></code> prints the spans and, when present, the tilt.
+Dump writers emit <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">BOX</span> <span class="pre">BOUNDS</span> <span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span> <span class="pre">pp</span> <span class="pre">pp</span> <span class="pre">pp</span></code> and a third
+field on each bound line when the cloud carries tilt.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> prints the three bound spans (<code class="docutils literal notranslate"><span class="pre">box</span> <span class="pre">Lx</span> <span class="pre">Ly</span> <span class="pre">Lz</span></code>) and,
+when <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>, the tilt (<code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>).</p>
+<p>Mixed water dumps in this tree use type 2 for oxygen and type 1 for
+hydrogen. <code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> has 250 atoms of type 2.
+Single-site mW dumps in this tree use type 1.
+<code class="docutils literal notranslate"><span class="pre">input/traj/mW_cubic.lammpstrj</span></code> is 11 frames of 4096 atoms, all type 1.
+The three large example trajectories are stored in the public Hugging Face
+dataset <code class="docutils literal notranslate"><span class="pre">d-SEAMS/seams-core-inputs</span></code>. Fetch them with <code class="docutils literal notranslate"><span class="pre">input/fetch.py</span></code> before
+running examples that name them:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">python3<span class="w"> </span>input/fetch.py
+</span></pre></div>
+</div>
+<p>The helper downloads the files and verifies each SHA-256 digest. A single
+file can be selected, for example <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">input/fetch.py</span> <span class="pre">mW_cubic.lammpstrj</span></code>.
+The committed <code class="docutils literal notranslate"><span class="pre">\*.fixture.lammpstrj</span></code> files are small offline test inputs,
+not substitutes for benchmark or tutorial results.</p>
+<p>On one frame, omitted <code class="docutils literal notranslate"><span class="pre">--type</span></code> (the value 0) keeps type 2 when any
+atom has it, otherwise type 1. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> does that in
+<code class="docutils literal notranslate"><span class="pre">readDefaultOxygen</span></code> for an orthorhombic <code class="docutils literal notranslate"><span class="pre">id</span> <span class="pre">type</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></code> frame, and
+otherwise in <code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code>. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code>, <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span></code>, <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">steinhardt</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rings</span></code> load every atom and then apply the same keep
+(<code class="docutils literal notranslate"><span class="pre">water::keepHistoricalOxygen</span></code>). A frame with neither type 1 nor
+type 2 is empty after that keep. A multi-frame <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> with
+<code class="docutils literal notranslate"><span class="pre">--type</span></code> omitted loads every atom (<code class="docutils literal notranslate"><span class="pre">readLammpsTrj</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> keeps that LAMMPS type (<code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code>).
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span> <span class="pre">--pair-types</span> <span class="pre">I,J</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">!=</span> <span class="pre">J</span></code> loads every atom
+(<code class="docutils literal notranslate"><span class="pre">readLammpsTrj</span></code>). The histogram is <code class="docutils literal notranslate"><span class="pre">rdf::partialRdf</span></code>, which builds
+its pairs with <code class="docutils literal notranslate"><span class="pre">nneigh::neighListPair</span></code>. Neither is an ice score. A
+mixed-type dump that is not the water convention (ionic liquid,
+solvent plus solute) needs an explicit <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>. See
+<a class="reference external" href="../user/howto/ionic-liquid.html">Ionic-liquid dumps</a>.</p>
+<p>A live dump session caches <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">TIMESTEP</span></code> offsets. Sequential
+walks do not rescan prior snapshots. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--frame</span> <span class="pre">N</span> <span class="pre">--last</span> <span class="pre">M</span> <span class="pre">--jobs</span> <span class="pre">J</span></code> walks that table. Each worker seeks the shared offsets
+and opens its own handle when the session lock is held.
+<code class="docutils literal notranslate"><span class="pre">sinp::dropLammpsDumpIndex</span></code> drops the cached offsets for one path
+so the next read indexes the file again.</p>
+<p>The two type-filtered C++ readers take the same slice arguments
+(<code class="docutils literal notranslate"><span class="pre">isSlice</span></code>, <code class="docutils literal notranslate"><span class="pre">coordLow</span></code>, <code class="docutils literal notranslate"><span class="pre">coordHigh</span></code>) and do not keep the same atoms.
+The CLI has no slice flag. <code class="docutils literal notranslate"><span class="pre">gen::getPointCloudOneAtomType</span></code> copies
+one type out of a cloud that is already loaded, and drops atoms
+outside the slice when <code class="docutils literal notranslate"><span class="pre">isSlice</span></code> is true.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>reader</p></th>
+<th class="head"><p>keep</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code></p></td>
+<td><p>Every atom of the requested type. <code class="docutils literal notranslate"><span class="pre">isSlice</span></code> sets <code class="docutils literal notranslate"><span class="pre">inSlice</span></code> on each point and does not drop. <code class="docutils literal notranslate"><span class="pre">nop</span></code> is the type-filtered count. The <code class="docutils literal notranslate"><span class="pre">O</span></code> in the name is historical; the type argument is any LAMMPS type.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">readLammpsTrjreduced</span></code></p></td>
+<td><p>Atoms of the requested type that pass the slice, or every atom of that type when <code class="docutils literal notranslate"><span class="pre">isSlice</span></code> is false. <code class="docutils literal notranslate"><span class="pre">nop</span></code> is the kept count.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>An axis is inside the box when the coordinate lies in the closed
+interval, or when that axis has <code class="docutils literal notranslate"><span class="pre">lo</span> <span class="pre">==</span> <span class="pre">hi</span></code> (unconstrained).
+<code class="docutils literal notranslate"><span class="pre">([0,0,0],</span> <span class="pre">[50,0,0])</span></code> is <code class="docutils literal notranslate"><span class="pre">x</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">50]</span></code>, with <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code>
+unconstrained.</p>
+</section>
+<section id="xyz">
+<h2>XYZ<a class="headerlink" href="#xyz" title="Link to this heading">#</a></h2>
+<p>Always compiled. <code class="docutils literal notranslate"><span class="pre">templates/hc.xyz</span></code> and <code class="docutils literal notranslate"><span class="pre">templates/ddc.xyz</span></code> are cage
+templates. The hexagonal-cage file begins:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">12
+</span><span data-line="2">Lattice="     53.96900177       0.00000000       0.00000000       0.00000000      54.52899933       0.00000000       0.00000000       0.00000000      51.25699997" Properties=species:S:1:pos:R:3
+</span><span data-line="3">O 8.995 10.3859997 15.0939999
+</span><span data-line="4">O 6.7459998 14.2810001 15.0939999
+</span></pre></div>
+</div>
+<p>The first line is the atom count. The second line is a comment.
+<code class="docutils literal notranslate"><span class="pre">Lattice=&quot;ax</span> <span class="pre">ay</span> <span class="pre">az</span> <span class="pre">bx</span> <span class="pre">by</span> <span class="pre">bz</span> <span class="pre">cx</span> <span class="pre">cy</span> <span class="pre">cz&quot;</span></code> is stored as a LAMMPS dump
+box. An untilted cell stores the three lengths and an origin at
+zero. <code class="docutils literal notranslate"><span class="pre">templates/hc.xyz</span></code> is that case: <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> prints
+<code class="docutils literal notranslate"><span class="pre">box</span> <span class="pre">53.969</span> <span class="pre">54.529</span> <span class="pre">51.257</span></code>. A tilt stores the bound spans, then
+<code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>, and shifts <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> when a tilt is negative. The cell
+must have positive <code class="docutils literal notranslate"><span class="pre">ax</span></code>, <code class="docutils literal notranslate"><span class="pre">by</span></code>, and <code class="docutils literal notranslate"><span class="pre">cz</span></code>, and <code class="docutils literal notranslate"><span class="pre">ay</span></code>, <code class="docutils literal notranslate"><span class="pre">az</span></code>, and <code class="docutils literal notranslate"><span class="pre">bz</span></code>
+must be zero within tolerance. A bad value throws
+<code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">Lattice</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">cell.&quot;)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">Lattice</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">reduced</span> <span class="pre">cell.&quot;)</span></code>.</p>
+<p>Without <code class="docutils literal notranslate"><span class="pre">Lattice=</span></code>, the comment contributes no cell. The box is the
+axis-aligned span of the coordinates and <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> is the minimum.
+One atom and no lattice is stored as a 10 Å cube from that point.
+That span is not a periodic cell. Analyses that need the simulation
+cell should use a LAMMPS dump or a <code class="docutils literal notranslate"><span class="pre">Lattice=</span></code> line.</p>
+<p>Each data line is <code class="docutils literal notranslate"><span class="pre">symbol</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></code>, or three numbers and no symbol.
+<code class="docutils literal notranslate"><span class="pre">atomID</span></code> and <code class="docutils literal notranslate"><span class="pre">molID</span></code> are the 1-based line order. The reader stops at
+the declared count. A header that is not an atom count throws
+<code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">header</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">an</span> <span class="pre">atom</span> <span class="pre">count.&quot;)</span></code>. A short
+frame throws <code class="docutils literal notranslate"><span class="pre">std::runtime_error</span></code> naming the expected and actual
+counts. A coordinate that is not a number throws
+<code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">coordinate</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">number.&quot;)</span></code>.</p>
+<p>The CLI routes <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> here and does not apply <code class="docutils literal notranslate"><span class="pre">--type</span></code> on the read.
+Classification still receives <code class="docutils literal notranslate"><span class="pre">--type</span></code> and sees the types assigned
+above.</p>
+</section>
+<section id="chemfiles-pdb-gro-dcd-xtc-trr-netcdf-lammps-data-vmd-molfile">
+<h2>chemfiles (PDB, GRO, DCD, XTC, TRR, NetCDF, LAMMPS Data, VMD molfile)<a class="headerlink" href="#chemfiles-pdb-gro-dcd-xtc-trr-netcdf-lammps-data-vmd-molfile" title="Link to this heading">#</a></h2>
+<p>Compiled when Meson finds chemfiles (<code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_CHEMFILES</span></code>). The CLI
+opens <code class="docutils literal notranslate"><span class="pre">.pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">.gro</span></code>, <code class="docutils literal notranslate"><span class="pre">.dcd</span></code>, <code class="docutils literal notranslate"><span class="pre">.xtc</span></code>, <code class="docutils literal notranslate"><span class="pre">.trr</span></code>, <code class="docutils literal notranslate"><span class="pre">.nc</span></code> and the molfile
+suffixes below. The <code class="docutils literal notranslate"><span class="pre">.lammpsdata</span></code> suffix selects LAMMPS Data explicitly. The C++ entry <code class="docutils literal notranslate"><span class="pre">sinp::readChemfiles</span></code> and <code class="docutils literal notranslate"><span class="pre">sinp::openFrame</span></code>
+accept any path chemfiles can open. A <code class="docutils literal notranslate"><span class="pre">.dcd</span></code> beside a <code class="docutils literal notranslate"><span class="pre">.pdb</span></code> of the same
+stem uses that PDB as topology.</p>
+<p>Frame <code class="docutils literal notranslate"><span class="pre">N</span></code> is step <code class="docutils literal notranslate"><span class="pre">N-1</span></code>. <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> keeps that species
+number. <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">0</span></code> and a negative type keep every atom. Species is
+the all-digit <code class="docutils literal notranslate"><span class="pre">type</span></code> string when chemfiles has one, otherwise the
+atomic number, otherwise 8 for O/OW/OH and 1 for H/HW/HO (name or
+type), otherwise 0. A frame that names no element stores species 1
+in place of 0.</p>
+<p>An orthogonal cell is stored as its three lengths with <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> at
+the origin. A tilted cell is the dump box (spans, then <code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>)
+with <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> shifted for a negative tilt. An infinite cell clears
+<code class="docutils literal notranslate"><span class="pre">box</span></code> and <code class="docutils literal notranslate"><span class="pre">boxLow</span></code>. <code class="docutils literal notranslate"><span class="pre">atomID</span></code> is the 1-based index in the file,
+including atoms the type filter dropped.</p>
+<p>A step past the last frame, a chemfiles error, or a bad selection
+returns an empty cloud. An XYZ trajectory that chemfiles opens with
+zero steps throws <code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">read</span> <span class="pre">failed:</span> <span class="pre">the</span> <span class="pre">file</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">frames&quot;)</span></code>.</p>
+<p>A flake build leaves chemfiles off. The default pixi environment
+provides chemfiles. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> then prints <code class="docutils literal notranslate"><span class="pre">chemfiles:</span> <span class="pre">enabled</span></code>.</p>
+</section>
+<section id="vmd-molfile-readers">
+<h2>VMD molfile readers<a class="headerlink" href="#vmd-molfile-readers" title="Link to this heading">#</a></h2>
+<p>The chemfiles d-SEAMS links reads every VMD molfile format that
+chemfiles 0.10.4 can compile and that returns atoms: 33 plugins and 37
+formats. chemfiles itself enables three (TRJ, PSF, Molden).
+<code class="docutils literal notranslate"><span class="pre">cmake/patches/chemfiles-0.10.4-molfiles.patch</span></code> adds the rest, including
+the g96 reader already inside <code class="docutils literal notranslate"><span class="pre">gromacsplugin</span></code>, the DESRES <code class="docutils literal notranslate"><span class="pre">.dms</span></code> reader
+(linked to the system SQLite3) and the CPMD and Gaussian log readers.
+<code class="docutils literal notranslate"><span class="pre">cmake/patches/chemfiles-0.10.4-external-sources.sh</span></code> applies
+<code class="docutils literal notranslate"><span class="pre">chemfiles-0.10.4-molfile-sources.patch</span></code>, which adds the three QM fields
+those log plugins write and the hostile-file fixes, then repacks
+<code class="docutils literal notranslate"><span class="pre">molfiles.tar.gz</span></code>. Configure keeps an installed chemfiles only when
+<code class="docutils literal notranslate"><span class="pre">cmake/chemfiles_mmcif_probe.cpp</span></code> finds all 37 names and counts the
+frame of <code class="docutils literal notranslate"><span class="pre">cmake/molfile_water.rst7</span></code>. An unpatched 0.10.x has three, so
+configure prints, for example,</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">Message: system chemfiles has 3 of 37 VMD molfile readers; missing ABINIT, ...; building patched 0.10.4, which has all of them
+</span></pre></div>
+</div>
+<p>and builds the patched copy. No build links a chemfiles with fewer
+readers. <code class="docutils literal notranslate"><span class="pre">-Dwith_chemfiles=disabled</span></code> is the only way to have none.</p>
+<p>The format is picked from the suffix, compared exactly. A format with
+no suffix is reached through chemfiles by name (<code class="docutils literal notranslate"><span class="pre">chemfiles::Trajectory(path,</span> <span class="pre">'r',</span> <span class="pre">&quot;ABINIT&quot;)</span></code>), not through <code class="docutils literal notranslate"><span class="pre">sinp::openFrame</span></code> or the CLI. Readers
+marked topology read atoms and no coordinates; every position of such a
+frame is at the origin.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>format</p></th>
+<th class="head"><p>suffix</p></th>
+<th class="head"><p>plugin</p></th>
+<th class="head"><p>authors (plugin <code class="docutils literal notranslate"><span class="pre">author</span></code> field)</p></th>
+<th class="head"><p>copyright and licence</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>TRJ</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.trj</span></code></p></td>
+<td><p>gromacsplugin</p></td>
+<td><p>David Norris, Justin Gullingsrud (<code class="docutils literal notranslate"><span class="pre">trj_plugin.author</span></code>); <code class="docutils literal notranslate"><span class="pre">Gromacs.h</span></code> implements the 3dfcoord algorithm of Frans van Hoesel. Magnus Lundborg is <code class="docutils literal notranslate"><span class="pre">gro_plugin.author</span></code> and Axel Kohlmeyer is <code class="docutils literal notranslate"><span class="pre">trr_plugin.author</span></code>, in the same file</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>PSF (topology)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.psf</span></code></p></td>
+<td><p>psfplugin</p></td>
+<td><p>Justin Gullingsrud, John Stone</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>Molden</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.molden</span></code></p></td>
+<td><p>moldenplugin</p></td>
+<td><p>Markus Dittrich, Jan Saam, Alexey Titov</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>ABINIT</p></td>
+<td><p>none</p></td>
+<td><p>abinitplugin</p></td>
+<td><p>Rob Lahaye (Sungkyunkwan University)</p></td>
+<td><p>Rob Lahaye; only as part of an open-source project</p></td>
+</tr>
+<tr class="row-even"><td><p>MSI Biograf Format</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.bgf</span></code></p></td>
+<td><p>bgfplugin</p></td>
+<td><p>Peter Freddolino</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>Scripps Binpos</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.binpos</span></code></p></td>
+<td><p>binposplugin</p></td>
+<td><p>Brian Bennion</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>InsightII car</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.car</span></code></p></td>
+<td><p>carplugin</p></td>
+<td><p>Eamon Caddigan</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>CHARMM Coordinates</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.cor</span></code></p></td>
+<td><p>corplugin</p></td>
+<td><p>Eamon Caddigan, John Stone</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>CPMD</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.cpmd</span></code></p></td>
+<td><p>cpmdplugin</p></td>
+<td><p>Axel Kohlmeyer, John Stone</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gaussian Cube</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.cube</span></code></p></td>
+<td><p>cubeplugin</p></td>
+<td><p>Axel Kohlmeyer, John Stone</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>DL_POLY_C HISTORY</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.dlpolyhist</span></code></p></td>
+<td><p>dlpolyplugin</p></td>
+<td><p>John Stone</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>DL_POLY_4 HISTORY</p></td>
+<td><p>none</p></td>
+<td><p>dlpolyplugin</p></td>
+<td><p>John Stone</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>DL_POLY CONFIG</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.dlpolyconfig</span></code></p></td>
+<td><p>dlpolyplugin</p></td>
+<td><p>Alin M Elena</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>DESRES Trajectory</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.dtr</span></code> (a directory)</p></td>
+<td><p>dtrplugin</p></td>
+<td><ol class="upperalpha simple" start="4">
+<li><ol class="upperalpha simple" start="5">
+<li><p>Shaw Research</p></li>
+</ol>
+</li>
+</ol>
+</td>
+<td><ol class="upperalpha simple" start="4">
+<li><ol class="upperalpha simple" start="5">
+<li><p>Shaw Research, LLC, BSD-3-Clause</p></li>
+</ol>
+</li>
+</ol>
+</td>
+</tr>
+<tr class="row-even"><td><p>GAMESS</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.log</span></code></p></td>
+<td><p>gamessplugin</p></td>
+<td><p>Jan Saam, Markus Dittrich, Johan Strumpfer</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>js</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.js</span></code></p></td>
+<td><p>jsplugin</p></td>
+<td><p>John Stone</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>Maestro File</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.mae</span></code></p></td>
+<td><p>maeffplugin</p></td>
+<td><ol class="upperalpha simple" start="4">
+<li><ol class="upperalpha simple" start="5">
+<li><p>Shaw Research</p></li>
+</ol>
+</li>
+</ol>
+</td>
+<td><ol class="upperalpha simple" start="4">
+<li><ol class="upperalpha simple" start="5">
+<li><p>Shaw Research, LLC, BSD-3-Clause</p></li>
+</ol>
+</li>
+</ol>
+</td>
+</tr>
+<tr class="row-odd"><td><p>InsightII MDF (topology)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.mdf</span></code></p></td>
+<td><p>mdfplugin</p></td>
+<td><p>Eamon Caddigan, Axel Kohlmeyer</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>NAMD Binary Coordinates</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.coor</span></code></p></td>
+<td><p>namdbinplugin</p></td>
+<td><p>James Phillips, Justin Gullingsrud</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>AMBER7 Parm (topology)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.parm7</span></code></p></td>
+<td><p>parm7plugin</p></td>
+<td><p>Brian Bennion, Justin Gullingsrud, John Stone</p></td>
+<td><p>University of Illinois, NCSA; <code class="docutils literal notranslate"><span class="pre">ReadPARM7.h</span></code> Regents of the University of California (Bill Ross, UCSF), notice kept unmodified</p></td>
+</tr>
+<tr class="row-even"><td><p>AMBER Parm (topology)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.parm</span></code></p></td>
+<td><p>parmplugin</p></td>
+<td><p>Justin Gullingsrud, John Stone</p></td>
+<td><p>University of Illinois, NCSA; <code class="docutils literal notranslate"><span class="pre">ReadPARM.h</span></code> Regents of the University of California (Bill Ross, UCSF), notice kept unmodified</p></td>
+</tr>
+<tr class="row-odd"><td><p>PQR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.pqr</span></code></p></td>
+<td><p>pqrplugin</p></td>
+<td><p>Eamon Caddigan</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>AMBER7 Restart</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.rst7</span></code></p></td>
+<td><p>rst7plugin</p></td>
+<td><p>Brian Bennion, Axel Kohlmeyer</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>VMD Tinker</p></td>
+<td><p>none (<code class="docutils literal notranslate"><span class="pre">.arc</span></code> is chemfiles’ own Tinker)</p></td>
+<td><p>tinkerplugin</p></td>
+<td><p>John Stone</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>VASP_XDATCAR5</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.VASP_XDATCAR5</span></code></p></td>
+<td><p>vasp5xdatcarplugin</p></td>
+<td><p>Sung Sakong</p></td>
+<td><p>University of Illinois, NCSA (<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>VASP_OUTCAR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.OUTCAR</span></code></p></td>
+<td><p>vaspoutcarplugin</p></td>
+<td><p>Sung Sakong</p></td>
+<td><p>University of Illinois, NCSA (<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>VASP_POSCAR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.POSCAR</span></code></p></td>
+<td><p>vaspposcarplugin</p></td>
+<td><p>Sung Sakong</p></td>
+<td><p>University of Illinois, NCSA (<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>VASP_XDATCAR</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.XDATCAR</span></code></p></td>
+<td><p>vaspxdatcarplugin</p></td>
+<td><p>Sung Sakong</p></td>
+<td><p>University of Illinois, NCSA (<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>VASP_xml</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.xml</span></code></p></td>
+<td><p>vaspxmlplugin</p></td>
+<td><p>Sung Sakong</p></td>
+<td><p>University of Illinois, NCSA (<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>VTF structure format (topology)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.vsf</span></code></p></td>
+<td><p>vtfplugin</p></td>
+<td><p>Olaf Lenz, Henri Menke</p></td>
+<td><p>University of Illinois, NCSA (<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>VTF trajectory format</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.vtf</span></code></p></td>
+<td><p>vtfplugin</p></td>
+<td><p>Olaf Lenz, Henri Menke</p></td>
+<td><p>University of Illinois, NCSA (<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Internal Paratool Format</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.xbgf</span></code></p></td>
+<td><p>xbgfplugin</p></td>
+<td><p>Peter Freddolino</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>(Animated) XCrySDen Structure File</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.xsf</span></code></p></td>
+<td><p>xsfplugin</p></td>
+<td><p>Axel Kohlmeyer, John Stone</p></td>
+<td><p>University of Illinois, NCSA (<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>DESRES Molecular Structure</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.dms</span></code></p></td>
+<td><p>dmsplugin</p></td>
+<td><ol class="upperalpha simple" start="4">
+<li><ol class="upperalpha simple" start="5">
+<li><p>Shaw Research, LLC: Justin Gullingsrud</p></li>
+</ol>
+</li>
+</ol>
+</td>
+<td><ol class="upperalpha simple" start="4">
+<li><ol class="upperalpha simple" start="5">
+<li><p>Shaw Research, LLC, BSD-3-Clause; links the system SQLite3, which is not part of the vendored source</p></li>
+</ol>
+</li>
+</ol>
+</td>
+</tr>
+<tr class="row-even"><td><p>Gromacs g96</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.g96</span></code></p></td>
+<td><p>gromacsplugin</p></td>
+<td><p>David Norris, Justin Gullingsrud (<code class="docutils literal notranslate"><span class="pre">g96_plugin.author</span></code>)</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-odd"><td><p>CPMD 3.x output</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.out</span></code></p></td>
+<td><p>cpmdlogplugin</p></td>
+<td><p>Axel Kohlmeyer</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+<tr class="row-even"><td><p>Gaussian Logfile (g94,g98,g03)</p></td>
+<td><p>none (<code class="docutils literal notranslate"><span class="pre">.log</span></code> is GAMESS)</p></td>
+<td><p>gaussianplugin</p></td>
+<td><p>Axel Kohlmeyer, Markus Dittrich, Jan Saam</p></td>
+<td><p>University of Illinois, NCSA</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>“University of Illinois, NCSA” is the University of Illinois Open
+Source License of the Board of Trustees of the University of Illinois
+(Theoretical and Computational Biophysics Group, UIUC). “(<code class="docutils literal notranslate"><span class="pre">molfiles/LICENSE</span></code>)”
+marks a plugin source with no notice of its own, which that file covers.
+<code class="docutils literal notranslate"><span class="pre">LICENSE.note</span></code> gives the terms of every part of the chemfiles build and
+<code class="docutils literal notranslate"><span class="pre">AUTHORS</span></code> names its authors.</p>
+<p>Not built, with the reason. This is every remaining plugin source in
+<code class="docutils literal notranslate"><span class="pre">molfiles/src</span></code>, plus the readers inside a built plugin that are not
+registered:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>plugin</p></th>
+<th class="head"><p>reason</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cifplugin</p></td>
+<td><p>chemfiles lists it, but <code class="docutils literal notranslate"><span class="pre">molfiles.tar.gz</span></code> has no source for it</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mmcif.cxx</span></code></p></td>
+<td><p>an unfinished stub. chemfiles reads mmCIF through gemmi</p></td>
+</tr>
+<tr class="row-even"><td><p>crdplugin (<code class="docutils literal notranslate"><span class="pre">crd</span></code>, <code class="docutils literal notranslate"><span class="pre">crdbox</span></code>), and vtfplugin’s <code class="docutils literal notranslate"><span class="pre">vcf</span></code> reader</p></td>
+<td><p>the file has no atom count; VMD takes it from a topology loaded first, which <code class="docutils literal notranslate"><span class="pre">Molfile&lt;F&gt;</span></code> cannot pass</p></td>
+</tr>
+<tr class="row-odd"><td><p>babelplugin</p></td>
+<td><p>runs an external Open Babel <code class="docutils literal notranslate"><span class="pre">babel</span></code> through <code class="docutils literal notranslate"><span class="pre">system()</span></code> and reads nothing itself</p></td>
+</tr>
+<tr class="row-even"><td><p>basissetplugin</p></td>
+<td><p>basis sets only, no atoms</p></td>
+</tr>
+<tr class="row-odd"><td><p>hoomdplugin</p></td>
+<td><p>needs <code class="docutils literal notranslate"><span class="pre">expat.h</span></code>. The frozen pixi env ships <code class="docutils literal notranslate"><span class="pre">libexpat</span></code> and no header</p></td>
+</tr>
+<tr class="row-even"><td><p>webpdbplugin</p></td>
+<td><p>needs a Tcl interpreter and fetches a PDB over the network</p></td>
+</tr>
+<tr class="row-odd"><td><p>dcdplugin, lammpsplugin, mol2plugin, netcdfplugin, pdbplugin, pdbxplugin, tngplugin, xyzplugin</p></td>
+<td><p>chemfiles 0.10.4 already has its own reader and writer for each</p></td>
+</tr>
+<tr class="row-even"><td><p>gromacsplugin’s <code class="docutils literal notranslate"><span class="pre">gro</span></code>, <code class="docutils literal notranslate"><span class="pre">trr</span></code> and <code class="docutils literal notranslate"><span class="pre">xtc</span></code> readers</p></td>
+<td><p>chemfiles already reads <code class="docutils literal notranslate"><span class="pre">.gro</span></code>, <code class="docutils literal notranslate"><span class="pre">.trr</span></code> and <code class="docutils literal notranslate"><span class="pre">.xtc</span></code>. The <code class="docutils literal notranslate"><span class="pre">g96</span></code> reader in the same file is registered; chemfiles has no G96 reader</p></td>
+</tr>
+<tr class="row-odd"><td><p>amira, grasp, molemesh, msms, off, ply, raster3d, stl</p></td>
+<td><p>graphics meshes only</p></td>
+</tr>
+<tr class="row-even"><td><p>avs, biomocca, brix, ccp4, dsn6, dx, edm, fs4, grd, grid, map, pbeq, phi, plt, situs, spider, uhbd, vaspchgcar, vaspparchg, vtk</p></td>
+<td><p>volumetric data only</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Molfile&lt;F&gt;</span></code> reads atoms, so none of these could be a chemfiles
+format. Their sources still ship in the fetched <code class="docutils literal notranslate"><span class="pre">molfiles.tar.gz</span></code>.</p>
+<p>The patch also fixes crashes and hangs the plugins hit.
+In chemfiles’ <code class="docutils literal notranslate"><span class="pre">Molfile&lt;F&gt;</span></code>: counting frames passed a null timestep
+(rst7 crashed on a valid file), an empty file reached the plugin (rst7
+crashed), a plugin that found no atoms sized the frame from 0 or -1,
+and rst7 looped forever when its second line was missing or held only
+spaces and tabs. Inside the plugins, after
+<code class="docutils literal notranslate"><span class="pre">chemfiles-0.10.4-molfile-sources.patch</span></code>: an InsightII MDF truncated on
+<code class="docutils literal notranslate"><span class="pre">&#64;molecule</span></code> looped, an AMBER7 parm token longer than the scan buffer
+smashed the stack, a long VTF line or a negative or huge atom id
+overflowed the heap, a VTF token one byte longer than its field did the
+same, an AMBER7 restart whose atom count does not fit in the file
+looped, and a VMD Tinker file with that kind of count did too. A dense
+reader that reports more atoms than the file has bytes is an error too
+(VTF ids stay sparse, and that plugin caps them). A whitespace-only
+mmCIF, a LAMMPS Data file with no section, a LAMMPS atom count that
+does not fit, and an XDR record longer than the file are errors as
+well. An empty file is the chemfiles error <code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">file</span> <span class="pre">at</span> <span class="pre">'PATH'</span> <span class="pre">is</span> <span class="pre">empty</span></code>, an AMBER7 restart with no count on its second line
+is <code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">AMBER7</span> <span class="pre">restart</span> <span class="pre">at</span> <span class="pre">'PATH'</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">atom</span> <span class="pre">count</span> <span class="pre">on</span> <span class="pre">its</span> <span class="pre">second</span> <span class="pre">line</span></code>,
+and a file without atoms is <code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">FORMAT</span> <span class="pre">plugin</span> <span class="pre">found</span> <span class="pre">no</span> <span class="pre">atoms</span> <span class="pre">in</span> <span class="pre">'PATH'</span></code>. FORMAT is the C++ enum name. TRJ, PSF and MOLDEN have no
+<code class="docutils literal notranslate"><span class="pre">VMDFMT_</span></code> prefix. Every reader the patch adds is <code class="docutils literal notranslate"><span class="pre">VMDFMT_&lt;F&gt;</span></code> (for
+example <code class="docutils literal notranslate"><span class="pre">VMDFMT_RST7</span></code>). <code class="docutils literal notranslate"><span class="pre">sinp::openFrame</span></code> returns an empty cloud for
+each. A file the plugin itself refuses is <code class="docutils literal notranslate"><span class="pre">could</span> <span class="pre">not</span> <span class="pre">open</span> <span class="pre">the</span> <span class="pre">file</span> <span class="pre">at</span> <span class="pre">'PATH'</span> <span class="pre">with</span> <span class="pre">FORMAT</span> <span class="pre">plugin</span></code>, and one it opens once but not when the step
+count re-opens it is <code class="docutils literal notranslate"><span class="pre">could</span> <span class="pre">not</span> <span class="pre">re-open</span> <span class="pre">the</span> <span class="pre">file</span> <span class="pre">at</span> <span class="pre">'PATH'</span> <span class="pre">with</span> <span class="pre">FORMAT</span> <span class="pre">plugin</span></code>.</p>
+<p>Every format the build enables was also fuzzed under AddressSanitizer
+and UndefinedBehaviorSanitizer with truncated files, huge counts, NUL
+bytes and over-long lines, and each crash, hang or sanitizer report it
+found is fixed in the reader rather than by dropping the format. Each
+fix has a fixture under <code class="docutils literal notranslate"><span class="pre">input/hostile/</span></code> that <code class="docutils literal notranslate"><span class="pre">chemfiles_hostile</span></code> reads.
+A frame read now fetches the timestep and QM metadata first, so the
+GAMESS log and a valid CPMD output read instead of writing through a
+null QM timestep, and the Gaussian and Molden readers take the same
+guard. The CPMD version check, the AMBER7 parm readers (EOF and every
+<code class="docutils literal notranslate"><span class="pre">%s</span></code> scan), the Gaussian cube atom loop, the Maestro, PQR, BINPOS,
+DESRES, js, XSF, XBGF, CAR, DL_POLY, g96 and TRJ readers bound what they
+read by the buffer and the bytes left in the file. The mmCIF reader
+checks its model column and the writer prints <code class="docutils literal notranslate"><span class="pre">?</span></code> for an empty name or
+type, which it reads back as empty. In chemfiles’ own readers, the text
+file keeps the right offset after a line longer than its buffer (later
+steps of an XYZ or SMI file read from the wrong place), and XTC, TRR,
+TPR, DCD, Amber NetCDF, CSSR and GRO check their counts and indices.
+A LAMMPS dump checks its box bounds, atom count and atom ids. A TRR
+frame with atoms but no positions, velocities or forces ends the
+trajectory, an empty SMI square brace and a TPR function type outside
+the GROMACS table are errors, and the extended XYZ
+comment parser stops at an <code class="docutils literal notranslate"><span class="pre">=</span></code> with no name before it. The
+GAMESS gradient and coordinate tables, the BGF and XBGF records, the
+VASP atom counts and the js byte swap are bounded too, and the VTF
+reader parses a line the same way however many files it read before;
+it also joins a line that ends in a backslash with the next one, which
+it did not.
+A DESRES trajectory opens from its directory or from the empty
+<code class="docutils literal notranslate"><span class="pre">clickme.dtr</span></code> inside it. Before <code class="docutils literal notranslate"><span class="pre">dtrplugin</span></code> runs, the directory must
+hold a <code class="docutils literal notranslate"><span class="pre">timekeys</span></code> file with the DESRES magic number, a nonzero frame
+count per file, 24-byte key records and at least one whole record; a
+<code class="docutils literal notranslate"><span class="pre">.ddparams</span></code>, when there is one, must name 0 to 4096 directories at
+each level; a <code class="docutils literal notranslate"><span class="pre">metadata</span></code> file, when there is one, must be a DESRES
+frame; and the first frame file, in the subdirectory <code class="docutils literal notranslate"><span class="pre">.ddparams</span></code>
+hashes it to, must hold the bytes its key names and start with the
+frame magic number. A <code class="docutils literal notranslate"><span class="pre">clickme.dtr</span></code> outside such a directory is
+refused, and any other empty <code class="docutils literal notranslate"><span class="pre">.dtr</span></code> file is reported as empty.
+<code class="docutils literal notranslate"><span class="pre">chemfiles-0.10.4-tng-sources.patch</span></code> checks the block, molecule,
+mapping and data sizes of TNG, and a TNG frame whose blocks leave a
+particle without positions is an error before chemfiles allocates its
+atoms. <code class="docutils literal notranslate"><span class="pre">chemfiles-0.10.4-mmtf-sources.patch</span></code> checks the lengths and
+integer arithmetic of the MMTF binary decoder, the length of a
+transform matrix, and msgpack’s conversion of an empty array; both go
+through <code class="docutils literal notranslate"><span class="pre">chemfiles-0.10.4-external-sources.sh</span></code> like the molfiles
+patch.</p>
+</section>
+<section id="eon-con">
+<h2>eOn <code class="docutils literal notranslate"><span class="pre">.con</span></code><a class="headerlink" href="#eon-con" title="Link to this heading">#</a></h2>
+<p>Compiled when Meson finds readcon-core (<code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_READCON</span></code>).
+<code class="docutils literal notranslate"><span class="pre">input/eon/tiny_multi_cuh2.con</span></code> is a two-frame file (Cu + H,
+<code class="docutils literal notranslate"><span class="pre">con_spec_version</span></code> 2) with an orthorhombic cell
+15.3456 by 21.702 by 100 Å.</p>
+<p><code class="docutils literal notranslate"><span class="pre">type</span></code> is the atomic number. <code class="docutils literal notranslate"><span class="pre">atomID</span></code> is the file atom id.
+<code class="docutils literal notranslate"><span class="pre">molID</span></code> is <code class="docutils literal notranslate"><span class="pre">atomID</span></code>. Lengths and angles become the dump box.
+Orthorhombic angles (90 degrees) store three lengths and an origin
+at zero. A shear stores spans plus <code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>, and <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> shifts
+with a negative tilt. Frame <code class="docutils literal notranslate"><span class="pre">N</span></code> is the Nth record. An index below 1,
+a missing record, or a file readcon cannot open returns an empty
+cloud, with <code class="docutils literal notranslate"><span class="pre">currentFrame</span></code> left at 0. A single-frame <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code>
+of a missing record, or of a file that cannot be opened, throws
+<code class="docutils literal notranslate"><span class="pre">cannot</span> <span class="pre">read</span> <span class="pre">PATH</span></code> and exits 2. A range that has already read a
+frame stops at the next empty record. The CLI does not
+type-filter <code class="docutils literal notranslate"><span class="pre">.con</span></code>.</p>
+<p>A flake build leaves readcon-core off: auto features are disabled
+and the wrap is not fetched. A Meson build that can see the wrap or
+a system package, with the feature left on auto or set to enabled,
+prints <code class="docutils literal notranslate"><span class="pre">readcon-core:</span> <span class="pre">enabled</span></code> from <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code>.</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="cli.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">seams CLI</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="walk-compare.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">walk_compare</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=4c4eaf79"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

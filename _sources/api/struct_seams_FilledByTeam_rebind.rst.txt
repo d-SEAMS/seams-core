@@ -1,0 +1,23 @@
+.. index:: pair: struct; seams::FilledByTeam::rebind
+.. _doxid-structseams_1_1_filled_by_team_1_1rebind:
+
+template struct seams::FilledByTeam::rebind
+===========================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/par_team.hpp>
+	
+	template <class U>
+	struct rebind {
+		// typedefs
+	
+		typedef :ref:`FilledByTeam<doxid-structseams_1_1_filled_by_team_1a66557ca4c098935f86dd35b2239526c4>`<U> :target:`other<doxid-structseams_1_1_filled_by_team_1_1rebind_1af2b0902e6c49084f47a93f935e812add>`;
+	};

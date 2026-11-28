@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: traj::BoxCell Struct Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/structtraj_1_1BoxCell.html">
+<meta property="og:title" content="seams-core: traj::BoxCell Struct Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/structtraj_1_1BoxCell.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: traj::BoxCell Struct Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('structtraj_1_1BoxCell.html','','structtraj_1_1BoxCell-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">traj::BoxCell Struct Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Restricted-triclinic periodic simulation cell.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="trajectory_8hpp_source.html">src/include/internal/trajectory.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:abf35e83f5bebc5df9dd043606972d9c8" id="r_abf35e83f5bebc5df9dd043606972d9c8"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#abf35e83f5bebc5df9dd043606972d9c8">toBox9</a> (double out[9]) const noexcept</td></tr>
+<tr class="memitem:a076c0ec0a5761e51edba9cf12065fdc9" id="r_a076c0ec0a5761e51edba9cf12065fdc9"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a076c0ec0a5761e51edba9cf12065fdc9">micDelta</a> (double dx, double dy, double dz) const noexcept</td></tr>
+<tr class="memdesc:a076c0ec0a5761e51edba9cf12065fdc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Euclidean minimum-image Cartesian displacement for raw delta (dx, dy, dz).  <br /></td></tr>
+<tr class="memitem:aa80be0076a7033e8bfd2fd99015bacc4" id="r_aa80be0076a7033e8bfd2fd99015bacc4"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa80be0076a7033e8bfd2fd99015bacc4">micDeltaSearch</a> (double dx, double dy, double dz) const noexcept</td></tr>
+<tr class="memdesc:aa80be0076a7033e8bfd2fd99015bacc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Euclidean minimum image by exhaustive search over the lattice shifts that can beat the fractional image.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-static-methods" class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a7631be5e76026ccf8289d0308e195e35" id="r_a7631be5e76026ccf8289d0308e195e35"><td class="memItemLeft">static <a class="el" href="structtraj_1_1BoxCell.html">BoxCell</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7631be5e76026ccf8289d0308e195e35">fromBox9</a> (const double box9[9]) noexcept</td></tr>
+<tr class="memitem:a421740d57c42e55bd8c0639c430cadd1" id="r_a421740d57c42e55bd8c0639c430cadd1"><td class="memItemLeft">static <a class="el" href="structtraj_1_1BoxCell.html">BoxCell</a>&#160;</td><td class="memItemRight"><a class="el" href="#a421740d57c42e55bd8c0639c430cadd1">fromCloud</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;cloud) noexcept</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:afa0771c838b8f08d6bdb5c289d0f2386" id="r_afa0771c838b8f08d6bdb5c289d0f2386"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#afa0771c838b8f08d6bdb5c289d0f2386">ox</a> = 0.0</td></tr>
+<tr class="memitem:a0dc15813a1118d0717a1d46b022f5ced" id="r_a0dc15813a1118d0717a1d46b022f5ced"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a0dc15813a1118d0717a1d46b022f5ced">oy</a> = 0.0</td></tr>
+<tr class="memitem:a667ecdf67176e2311a5978974de3b6bc" id="r_a667ecdf67176e2311a5978974de3b6bc"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a667ecdf67176e2311a5978974de3b6bc">oz</a> = 0.0</td></tr>
+<tr class="memitem:adf642e32959f135e5ea5865bea50aa5a" id="r_adf642e32959f135e5ea5865bea50aa5a"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#adf642e32959f135e5ea5865bea50aa5a">lx</a> = 0.0</td></tr>
+<tr class="memitem:af5139a525713a288feb50eed84ace415" id="r_af5139a525713a288feb50eed84ace415"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#af5139a525713a288feb50eed84ace415">ly</a> = 0.0</td></tr>
+<tr class="memitem:a399975f6dd25e0d6de95bfe48fb17d05" id="r_a399975f6dd25e0d6de95bfe48fb17d05"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a399975f6dd25e0d6de95bfe48fb17d05">lz</a> = 0.0</td></tr>
+<tr class="memitem:a2efd9230aa9d4656ababac9bb047d4ab" id="r_a2efd9230aa9d4656ababac9bb047d4ab"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a2efd9230aa9d4656ababac9bb047d4ab">xy</a> = 0.0</td></tr>
+<tr class="memitem:abf6bda0a5056f3d6c63f5728135cc451" id="r_abf6bda0a5056f3d6c63f5728135cc451"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#abf6bda0a5056f3d6c63f5728135cc451">xz</a> = 0.0</td></tr>
+<tr class="memitem:af0e31851d77363f3abeaf63736122ba6" id="r_af0e31851d77363f3abeaf63736122ba6"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#af0e31851d77363f3abeaf63736122ba6">yz</a> = 0.0</td></tr>
+<tr class="memitem:a85a8ff98fc5e363f14b99d4af0205375" id="r_a85a8ff98fc5e363f14b99d4af0205375"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a85a8ff98fc5e363f14b99d4af0205375">halfMin</a> = 0.0</td></tr>
+<tr class="memitem:a613f84d44ef5aa497617766238bf019e" id="r_a613f84d44ef5aa497617766238bf019e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a613f84d44ef5aa497617766238bf019e">triclinic</a> = false</td></tr>
+<tr class="memitem:abcdd87d473e7ff7b865fd7cda7761b9a" id="r_abcdd87d473e7ff7b865fd7cda7761b9a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#abcdd87d473e7ff7b865fd7cda7761b9a">ok</a> = false</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Restricted-triclinic periodic simulation cell. </p>
+<p>Edge matrix H has columns a = (lx, 0, 0), b = (xy, ly, 0), c = (xz, yz, lz) and origin (ox, oy, oz). </p>
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00077">77</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a7631be5e76026ccf8289d0308e195e35" name="a7631be5e76026ccf8289d0308e195e35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7631be5e76026ccf8289d0308e195e35">&#9670;&#160;</a></span>fromBox9()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtraj_1_1BoxCell.html">BoxCell</a> traj::BoxCell::fromBox9 </td>
+          <td>(</td>
+          <td class="paramtype">const double</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>[9]</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a421740d57c42e55bd8c0639c430cadd1" name="a421740d57c42e55bd8c0639c430cadd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a421740d57c42e55bd8c0639c430cadd1">&#9670;&#160;</a></span>fromCloud()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtraj_1_1BoxCell.html">BoxCell</a> traj::BoxCell::fromCloud </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a076c0ec0a5761e51edba9cf12065fdc9" name="a076c0ec0a5761e51edba9cf12065fdc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a076c0ec0a5761e51edba9cf12065fdc9">&#9670;&#160;</a></span>micDelta()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; traj::BoxCell::micDelta </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dz</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Euclidean minimum-image Cartesian displacement for raw delta (dx, dy, dz). </p>
+<p>The fractional image inside the Smith ball, otherwise micDeltaSearch. Independent rounding of fractional coordinates is not the minimum image on a tilted cell. </p>
+
+</div>
+</div>
+<a id="aa80be0076a7033e8bfd2fd99015bacc4" name="aa80be0076a7033e8bfd2fd99015bacc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa80be0076a7033e8bfd2fd99015bacc4">&#9670;&#160;</a></span>micDeltaSearch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 3 &gt; traj::BoxCell::micDeltaSearch </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dz</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Euclidean minimum image by exhaustive search over the lattice shifts that can beat the fractional image. </p>
+
+</div>
+</div>
+<a id="abf35e83f5bebc5df9dd043606972d9c8" name="abf35e83f5bebc5df9dd043606972d9c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf35e83f5bebc5df9dd043606972d9c8">&#9670;&#160;</a></span>toBox9()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void traj::BoxCell::toBox9 </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>out</em></span>[9]</td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel noexcept">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a85a8ff98fc5e363f14b99d4af0205375" name="a85a8ff98fc5e363f14b99d4af0205375"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85a8ff98fc5e363f14b99d4af0205375">&#9670;&#160;</a></span>halfMin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::halfMin = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00087">87</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="adf642e32959f135e5ea5865bea50aa5a" name="adf642e32959f135e5ea5865bea50aa5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf642e32959f135e5ea5865bea50aa5a">&#9670;&#160;</a></span>lx</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::lx = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00081">81</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af5139a525713a288feb50eed84ace415" name="af5139a525713a288feb50eed84ace415"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5139a525713a288feb50eed84ace415">&#9670;&#160;</a></span>ly</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::ly = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00082">82</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a399975f6dd25e0d6de95bfe48fb17d05" name="a399975f6dd25e0d6de95bfe48fb17d05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a399975f6dd25e0d6de95bfe48fb17d05">&#9670;&#160;</a></span>lz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::lz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00083">83</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="abcdd87d473e7ff7b865fd7cda7761b9a" name="abcdd87d473e7ff7b865fd7cda7761b9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcdd87d473e7ff7b865fd7cda7761b9a">&#9670;&#160;</a></span>ok</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool traj::BoxCell::ok = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00089">89</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="afa0771c838b8f08d6bdb5c289d0f2386" name="afa0771c838b8f08d6bdb5c289d0f2386"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa0771c838b8f08d6bdb5c289d0f2386">&#9670;&#160;</a></span>ox</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::ox = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00078">78</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0dc15813a1118d0717a1d46b022f5ced" name="a0dc15813a1118d0717a1d46b022f5ced"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0dc15813a1118d0717a1d46b022f5ced">&#9670;&#160;</a></span>oy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::oy = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00079">79</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a667ecdf67176e2311a5978974de3b6bc" name="a667ecdf67176e2311a5978974de3b6bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a667ecdf67176e2311a5978974de3b6bc">&#9670;&#160;</a></span>oz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::oz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00080">80</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a613f84d44ef5aa497617766238bf019e" name="a613f84d44ef5aa497617766238bf019e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a613f84d44ef5aa497617766238bf019e">&#9670;&#160;</a></span>triclinic</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool traj::BoxCell::triclinic = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00088">88</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a2efd9230aa9d4656ababac9bb047d4ab" name="a2efd9230aa9d4656ababac9bb047d4ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2efd9230aa9d4656ababac9bb047d4ab">&#9670;&#160;</a></span>xy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::xy = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00084">84</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="abf6bda0a5056f3d6c63f5728135cc451" name="abf6bda0a5056f3d6c63f5728135cc451"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf6bda0a5056f3d6c63f5728135cc451">&#9670;&#160;</a></span>xz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::xz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00085">85</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af0e31851d77363f3abeaf63736122ba6" name="af0e31851d77363f3abeaf63736122ba6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0e31851d77363f3abeaf63736122ba6">&#9670;&#160;</a></span>yz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double traj::BoxCell::yz = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="trajectory_8hpp_source.html#l00086">86</a> of file <a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>src/include/internal/<a class="el" href="trajectory_8hpp_source.html">trajectory.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacetraj.html">traj</a></li><li class="navelem"><a href="structtraj_1_1BoxCell.html">BoxCell</a></li>
+  </ul>
+</div>
+</body>
+</html>

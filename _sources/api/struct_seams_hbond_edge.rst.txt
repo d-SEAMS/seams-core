@@ -1,0 +1,100 @@
+.. index:: pair: struct; seams_hbond_edge
+.. _doxid-structseams__hbond__edge:
+
+struct seams_hbond_edge
+=======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Hydrogen-bond edge record for one donor-acceptor pair. :ref:`More...<details-structseams__hbond__edge>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.h>
+	
+	struct seams_hbond_edge {
+		// fields
+	
+		uint32_t :ref:`size<doxid-structseams__hbond__edge_1adf3fd911641383d8f7a7c742b45b36cd>`;
+		uint32_t :ref:`donor<doxid-structseams__hbond__edge_1aa7614dcd6eaad089d4bb977f0e72ecf5>`;
+		uint32_t :ref:`acceptor<doxid-structseams__hbond__edge_1a822b50838872f9a8dd8896012a740ba6>`;
+		uint32_t :ref:`hydrogen<doxid-structseams__hbond__edge_1a6be7ecf4f0c152c041b25373822f14e9>`;
+		double :ref:`d_DA<doxid-structseams__hbond__edge_1ab964537bb149757b02a36be477ec6017>`;
+		double :ref:`angle<doxid-structseams__hbond__edge_1a424cdc02e83ecd2da1fdcfa41b2adb2d>`;
+	};
+.. _details-structseams__hbond__edge:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Hydrogen-bond edge record for one donor-acceptor pair.
+
+Fields
+------
+
+.. index:: pair: variable; size
+.. _doxid-structseams__hbond__edge_1adf3fd911641383d8f7a7c742b45b36cd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	uint32_t size
+
+Caller-set sizeof(seams_hbond_edge) on every element.
+
+.. index:: pair: variable; donor
+.. _doxid-structseams__hbond__edge_1aa7614dcd6eaad089d4bb977f0e72ecf5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	uint32_t donor
+
+Donor heavy-atom index in the frame.
+
+.. index:: pair: variable; acceptor
+.. _doxid-structseams__hbond__edge_1a822b50838872f9a8dd8896012a740ba6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	uint32_t acceptor
+
+Acceptor heavy-atom index in the frame.
+
+.. index:: pair: variable; hydrogen
+.. _doxid-structseams__hbond__edge_1a6be7ecf4f0c152c041b25373822f14e9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	uint32_t hydrogen
+
+Donor hydrogen index, or UINT32_MAX when omitted.
+
+.. index:: pair: variable; d_DA
+.. _doxid-structseams__hbond__edge_1ab964537bb149757b02a36be477ec6017:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double d_DA
+
+Donor-acceptor distance in Angstrom, or NaN when omitted.
+
+.. index:: pair: variable; angle
+.. _doxid-structseams__hbond__edge_1a424cdc02e83ecd2da1fdcfa41b2adb2d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double angle
+
+O-O-H angle in degrees, or NaN when omitted.
+

@@ -1,0 +1,210 @@
+.. index:: pair: namespace; sinp
+.. _doxid-namespacesinp:
+
+namespace sinp
+==============
+
+.. toctree::
+	:hidden:
+
+	struct_sinp_ChemfilesLoadOptions.rst
+
+Overview
+~~~~~~~~
+
+Functions for the d-SEAMS readers. :ref:`More...<details-namespacesinp>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace sinp {
+
+	// structs
+
+	struct :ref:`ChemfilesLoadOptions<doxid-structsinp_1_1_chemfiles_load_options>`;
+
+	// global functions
+
+	std::vector<std::string> :ref:`getInpFileList<doxid-namespacesinp_1ac551295f82cf12446912941d5f32000e>`(std::string inputFolder);
+	int :ref:`nLammpsFrames<doxid-namespacesinp_1a44da8ec94e25ebe6ffcce36128c31f89>`(const std::string& filename);
+	void :ref:`dropLammpsDumpIndex<doxid-namespacesinp_1aefac4aaf94bf39771d4c45f352f8615e>`(const std::string& filename);
+	std::string :ref:`currentExceptionText<doxid-namespacesinp_1a0899a01c97adc7103a891288b37e066f>`();
+	void :ref:`forEachLammpsFrame<doxid-namespacesinp_1a7830353a092ad93a805dea34a07e7804>`(const std::string& filename, int first, int last, int typeFilter, const std::function<void(int, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>&)>& fn, int nThreads = 0, int part = 0, int parts = 1);
+	bool :ref:`readDefaultOxygen<doxid-namespacesinp_1a56e21fa520d625329c01d6462aa3f971>`(const std::string& filename, int frame, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`readLammpsTrj<doxid-namespacesinp_1a27548bfe885e92777ee50738245e38d4>`(std::string filename, int targetFrame, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :ref:`readLammpsTrjO<doxid-namespacesinp_1ac788ef30628b292dec2a1b903dbdfe5e>`(std::string filename, int targetFrame, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeO, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :ref:`readLammpsTrjreduced<doxid-namespacesinp_1aaf3e97603a0f784f271d01efd5aa9060>`(std::string filename, int targetFrame, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :ref:`readXYZ<doxid-namespacesinp_1a9aeec41b2c3fea17e5e54fd266b71f0a>`(std::string filename);
+	std::vector<std::vector<int>> :ref:`readBonds<doxid-namespacesinp_1ada34d9d30df182a408a6b69ba7310509>`(std::string filename);
+	int :ref:`chemfilesSteps<doxid-namespacesinp_1aabe10d8377f02540f425d750aa3c0a4f>`(const std::string& filename);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :ref:`openFrame<doxid-namespacesinp_1a71a4e4dde4c9b98a385b58aee8e3be7c>`(const std::string& filename, int frame, int typeI, const std::string& selection = {}, const :ref:`ChemfilesLoadOptions<doxid-structsinp_1_1_chemfiles_load_options>`& options = {});
+	bool :ref:`atomInSlice<doxid-namespacesinp_1ad5a8c377d8ed78c413c13d80ac8261ac>`(double x, double y, double z, std::array<double, 3> coordLow, std::array<double, 3> coordHigh);
+
+	} // namespace sinp
+.. _details-namespacesinp:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Functions for the d-SEAMS readers.
+
+This namespace contains functions that are used for reading in the formats supported by d-SEAMS. LAMMPS trajectory files and XYZ files are supported. Use LAMMPS trajectory files when possible because simulation box dimensions are not normally present in XYZ files, and many analyses may fail without the correct box dimensions.
+
+
+
+.. _doxid-namespacesinp_1autotoc_md11_1s1:
+
+
+
+
+
+.. _doxid-namespacesinp_1autotoc_md11_1s2:
+
+
+
+
+
+.. _doxid-namespacesinp_1autotoc_md11:
+
+Changelog
++++++++++
+
+* Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Dec 26, 2019
+
+* Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; getInpFileList
+.. _doxid-namespacesinp_1ac551295f82cf12446912941d5f32000e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::string> getInpFileList(std::string inputFolder)
+
+Get file list inside the input folder.
+
+.. index:: pair: function; nLammpsFrames
+.. _doxid-namespacesinp_1a44da8ec94e25ebe6ffcce36128c31f89:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int nLammpsFrames(const std::string& filename)
+
+Number of ITEM: TIMESTEP frames in a LAMMPS dump, or 0 if the file cannot be read. The first full count per path walks the file once and later reads seek, matching chemfiles Trajectory::nsteps and readcon's frame-offset table. Sequential load_frame walks reuse a live read position the way LAMMPS ReaderNative does on rerun.
+
+.. index:: pair: function; dropLammpsDumpIndex
+.. _doxid-namespacesinp_1aefac4aaf94bf39771d4c45f352f8615e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void dropLammpsDumpIndex(const std::string& filename)
+
+Drop a cached dump session (tests that rewrite a path in place).
+
+.. index:: pair: function; currentExceptionText
+.. _doxid-namespacesinp_1a0899a01c97adc7103a891288b37e066f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string currentExceptionText()
+
+Text of the exception being handled. Call from a catch clause. A std::exception yields what(); anything else is unnamed.
+
+.. index:: pair: function; forEachLammpsFrame
+.. _doxid-namespacesinp_1a7830353a092ad93a805dea34a07e7804:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void forEachLammpsFrame(const std::string& filename, int first, int last, int typeFilter, const std::function<void(int, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>&)>& fn, int nThreads = 0, int part = 0, int parts = 1)
+
+Call fn(frame, cloud) for each frame from max(first, 1) to last (1-based, inclusive) that falls to part of parts. last <= 0 means every ITEM: TIMESTEP. Frames are dealt in rounds of parts, in serpentine order (part p takes slot p of even rounds and slot parts - 1 - p of odd ones), so a cost that drifts or alternates along the run reaches every part. typeFilter <= 0 keeps every atom. nThreads <= 0 uses the OpenMP default; 1 is serial. Each worker opens its own handle and seeks the shared offset table. Incremental RingUpdater / AffiliationUpdater state cannot be shared across workers: with nThreads 1 the frames arrive in order on one thread and may carry it, otherwise use the batch classifiers.
+
+.. index:: pair: function; readDefaultOxygen
+.. _doxid-namespacesinp_1a56e21fa520d625329c01d6462aa3f971:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool readDefaultOxygen(const std::string& filename, int frame, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+
+Function for reading in a specified frame (frame number and not timestep value) One id/type/x/y/z frame of the default oxygen selection: type 2 when any atom has that type, otherwise type 1. Returns false for any other column layout, leaving the cloud untouched by a successful read.
+
+.. index:: pair: function; readLammpsTrjO
+.. _doxid-namespacesinp_1ac788ef30628b292dec2a1b903dbdfe5e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> readLammpsTrjO(std::string filename, int targetFrame, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeO, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0})
+
+One LAMMPS dump frame, one atom type. The type argument is any LAMMPS type (the O in the name is historical). If isSlice is true, each kept point gets inSlice set; atoms outside the box stay in the cloud. nop is the type-filtered count.
+
+.. index:: pair: function; readLammpsTrjreduced
+.. _doxid-namespacesinp_1aaf3e97603a0f784f271d01efd5aa9060:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> readLammpsTrjreduced(std::string filename, int targetFrame, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0})
+
+One LAMMPS dump frame, one atom type, dropping atoms outside the slice when isSlice is true. nop is the kept count. An axis with lo == hi is unconstrained.
+
+.. index:: pair: function; readXYZ
+.. _doxid-namespacesinp_1a9aeec41b2c3fea17e5e54fd266b71f0a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> readXYZ(std::string filename)
+
+Function for reading in atom coordinates from an XYZ file.
+
+.. index:: pair: function; readBonds
+.. _doxid-namespacesinp_1ada34d9d30df182a408a6b69ba7310509:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> readBonds(std::string filename)
+
+Reads bonds into a vector of vectors from a file with a specific format.
+
+.. index:: pair: function; chemfilesSteps
+.. _doxid-namespacesinp_1aabe10d8377f02540f425d750aa3c0a4f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int chemfilesSteps(const std::string& filename)
+
+Number of steps chemfiles can read, or -1 when chemfiles is off or the file is not a trajectory it knows. seams_lang calls this with or without chemfiles.
+
+.. index:: pair: function; openFrame
+.. _doxid-namespacesinp_1a71a4e4dde4c9b98a385b58aee8e3be7c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> openFrame(const std::string& filename, int frame, int typeI, const std::string& selection = {}, const :ref:`ChemfilesLoadOptions<doxid-structsinp_1_1_chemfiles_load_options>`& options = {})
+
+Postprocessing entry. CON stays on readcon. Every other file goes through chemfiles when that library is linked. typeI follows the CLI: negative keeps every atom, positive keeps one species, zero guesses oxygen.
+
+.. index:: pair: function; atomInSlice
+.. _doxid-namespacesinp_1ad5a8c377d8ed78c413c13d80ac8261ac:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool atomInSlice(double x, double y, double z, std::array<double, 3> coordLow, std::array<double, 3> coordHigh)
+
+True when each component lies in [lo, hi], or that axis has lo == hi (unconstrained). ([0,0,0], [50,0,0]) is x in [0, 50], y and z open.
+

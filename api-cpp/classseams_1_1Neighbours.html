@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: seams::Neighbours Class Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/classseams_1_1Neighbours.html">
+<meta property="og:title" content="seams-core: seams::Neighbours Class Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/classseams_1_1Neighbours.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: seams::Neighbours Class Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('classseams_1_1Neighbours.html','','classseams_1_1Neighbours-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams::Neighbours Class Reference<div class="ingroups"><a class="el" href="group__seams__cpp.html">C++ API</a></div></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Owned neighbour list.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="seams_8hpp_source.html">include/seams.hpp</a>&gt;</code></p>
+<div id="dynsection-0" class="dynheader closed"><span class="dynarrow"><span class="arrowhead closed"></span></span>Inheritance diagram for seams::Neighbours:</div>
+<div id="dynsection-0-summary" class="dynsummary">
+</div>
+<div id="dynsection-0-content" class="dyncontent hidden">
+ <div class="center">
+  <img src="classseams_1_1Neighbours.png" usemap="#seams_3A_3ANeighbours_map" alt=""/>
+  <map id="seams_3A_3ANeighbours_map" name="seams_3A_3ANeighbours_map">
+<area href="classseams_1_1detail_1_1Handle.html" alt="seams::detail::Handle&lt; seams_neighbours, seams_neighbours_destroy &gt;" shape="rect" coords="0,0,421,24"/>
+  </map>
+</div></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:abd527879d1fe10c5c111a7d9bbdd9d96" id="r_abd527879d1fe10c5c111a7d9bbdd9d96"><td class="memItemLeft">std::size_t&#160;</td><td class="memItemRight"><a class="el" href="#abd527879d1fe10c5c111a7d9bbdd9d96">nnz</a> () const</td></tr>
+<tr class="memdesc:abd527879d1fe10c5c111a7d9bbdd9d96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of neighbour pairs, omitting self.  <br /></td></tr>
+<tr class="memitem:a37d5bc28acddb1f0011ff398a81cd1db" id="r_a37d5bc28acddb1f0011ff398a81cd1db"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a37d5bc28acddb1f0011ff398a81cd1db">degrees</a> () const</td></tr>
+<tr class="memdesc:a37d5bc28acddb1f0011ff398a81cd1db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Degree of each atom.  <br /></td></tr>
+<tr class="memitem:a791751da6ff0a3728f76715180b12887" id="r_a791751da6ff0a3728f76715180b12887"><td class="memItemLeft">std::vector&lt; std::pair&lt; int, int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a791751da6ff0a3728f76715180b12887">pairs</a> () const</td></tr>
+<tr class="memdesc:a791751da6ff0a3728f76715180b12887"><td class="mdescLeft">&#160;</td><td class="mdescRight">Directed pairs <span class="tt">(atom, neighbour)</span>.  <br /></td></tr>
+<tr class="memitem:a13edfc37618cf2779867c27eb72ed1fd" id="r_a13edfc37618cf2779867c27eb72ed1fd"><td class="memItemLeft"><a class="el" href="structseams_1_1ChordlessCycles.html">ChordlessCycles</a>&#160;</td><td class="memItemRight"><a class="el" href="#a13edfc37618cf2779867c27eb72ed1fd">chordless</a> (int size) const</td></tr>
+<tr class="memdesc:a13edfc37618cf2779867c27eb72ed1fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chordless cycles of one length on this graph.  <br /></td></tr>
+<tr class="inherit_header pub_methods_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Public Member Functions inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_neighbours, seams_neighbours_destroy &gt;</a></td></tr>
+<tr class="memitem:a70fca214a6d43d58a4219a108e82f91d inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_a70fca214a6d43d58a4219a108e82f91d"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> ()=default</td></tr>
+<tr class="memitem:a0dd2050fdf4ea17474fcfd3297824dab inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_a0dd2050fdf4ea17474fcfd3297824dab"><td class="memItemLeft"><a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a0dd2050fdf4ea17474fcfd3297824dab">operator=</a> (const <a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> &amp;)=delete</td></tr>
+<tr class="memitem:ac44646bcdb18568576350cd63d2e18d4 inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_ac44646bcdb18568576350cd63d2e18d4"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ac44646bcdb18568576350cd63d2e18d4">~Handle</a> ()</td></tr>
+<tr class="memitem:ae58d780619badcc49127f4b5e6e78d4e inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_ae58d780619badcc49127f4b5e6e78d4e"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ae58d780619badcc49127f4b5e6e78d4e">operator bool</a> () const noexcept</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-inherited" class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_methods_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Member Functions inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_neighbours, seams_neighbours_destroy &gt;</a></td></tr>
+<tr class="memitem:a7d9cd594be5e78ed0a9081d48f487b90 inherit pro_methods_classseams_1_1detail_1_1Handle" id="r_a7d9cd594be5e78ed0a9081d48f487b90"><td class="memItemLeft"><a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a> () const noexcept</td></tr>
+<tr class="memitem:a668c158ddc5521b409de638b725bcf5f inherit pro_methods_classseams_1_1detail_1_1Handle" id="r_a668c158ddc5521b409de638b725bcf5f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a668c158ddc5521b409de638b725bcf5f">reset</a> () noexcept</td></tr>
+<tr class="inherit_header pro_attribs_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Attributes inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_neighbours, seams_neighbours_destroy &gt;</a></td></tr>
+<tr class="memitem:ac8ec612e046a771320a5d055156447ba inherit pro_attribs_classseams_1_1detail_1_1Handle" id="r_ac8ec612e046a771320a5d055156447ba"><td class="memItemLeft"><a class="el" href="group__capi__types.html#ga7e78453f0a0d6f60ea42a12985ffbe63">seams_neighbours</a> *&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ac8ec612e046a771320a5d055156447ba">ptr_</a></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Owned neighbour list. </p>
+<p>Move-only. Destruction frees the C handle. The self entry is omitted. A neighbour list is not safe to share across threads. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00899">899</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a13edfc37618cf2779867c27eb72ed1fd" name="a13edfc37618cf2779867c27eb72ed1fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13edfc37618cf2779867c27eb72ed1fd">&#9670;&#160;</a></span>chordless()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1ChordlessCycles.html">ChordlessCycles</a> seams::Neighbours::chordless </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>size</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Chordless cycles of one length on this graph. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">size</td><td>Cycle length, from 3 through 12. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The rows and the per-atom counts of seams_rings_chordless. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00968">968</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  968</span>                                                          {</div>
+<div class="line"><span class="lineno">  969</span>    ChordlessCycles out;</div>
+<div class="line"><span class="lineno">  970</span>    out.size = size;</div>
+<div class="line"><span class="lineno">  971</span>    out.per_atom.resize(<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(<a class="code hl_function" href="group__capi__neigh.html#ga1090112947d62594e559e1af724fbd52">seams_neighbours_count</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>())));</div>
+<div class="line"><span class="lineno">  972</span>    std::size_t count = 0;</div>
+<div class="line"><span class="lineno">  973</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__ring.html#ga00b6878dc305e1c97220cb31c5503c92">seams_rings_chordless</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), size, <span class="keyword">nullptr</span>, 0, &amp;count, out.per_atom.data(),</div>
+<div class="line"><span class="lineno">  974</span>                                        out.per_atom.size()),</div>
+<div class="line"><span class="lineno">  975</span>                  <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno">  976</span>    out.atoms.resize(count * <span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(size));</div>
+<div class="line"><span class="lineno">  977</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__ring.html#ga00b6878dc305e1c97220cb31c5503c92">seams_rings_chordless</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), size, out.atoms.data(), out.atoms.size(), &amp;count,</div>
+<div class="line"><span class="lineno">  978</span>                                        <span class="keyword">nullptr</span>, 0),</div>
+<div class="line"><span class="lineno">  979</span>                  <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno">  980</span>    <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">  981</span>  }</div>
+<div class="ttc" id="aclassseams_1_1detail_1_1Handle_html_a7d9cd594be5e78ed0a9081d48f487b90"><div class="ttname"><a href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">seams::detail::Handle&lt; seams_neighbours, seams_neighbours_destroy &gt;::get</a></div><div class="ttdeci">seams_neighbours * get() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00830">seams.hpp:830</a></div></div>
+<div class="ttc" id="agroup__capi__neigh_html_ga1090112947d62594e559e1af724fbd52"><div class="ttname"><a href="group__capi__neigh.html#ga1090112947d62594e559e1af724fbd52">seams_neighbours_count</a></div><div class="ttdeci">SEAMS_API int seams_neighbours_count(const seams_neighbours *nb)</div><div class="ttdoc">Number of neighbour rows, as an int.</div></div>
+<div class="ttc" id="agroup__capi__ring_html_ga00b6878dc305e1c97220cb31c5503c92"><div class="ttname"><a href="group__capi__ring.html#ga00b6878dc305e1c97220cb31c5503c92">seams_rings_chordless</a></div><div class="ttdeci">SEAMS_API seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings, size_t rings_len, size_t *n_rings, int *per_atom, size_t per_atom_len)</div><div class="ttdoc">Chordless cycles of one size.</div></div>
+<div class="ttc" id="anamespaceseams_1_1detail_html_a2318c07d1ce9ec1e7b770df041fda676"><div class="ttname"><a href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">seams::detail::check</a></div><div class="ttdeci">void check(int status, const void *handle)</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00802">seams.hpp:802</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a37d5bc28acddb1f0011ff398a81cd1db" name="a37d5bc28acddb1f0011ff398a81cd1db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37d5bc28acddb1f0011ff398a81cd1db">&#9670;&#160;</a></span>degrees()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; seams::Neighbours::degrees </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Degree of each atom. </p>
+<dl class="section return"><dt>Returns</dt><dd>One integer per atom. The self entry is not counted. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00918">918</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  918</span>                                               {</div>
+<div class="line"><span class="lineno">  919</span>    std::size_t n_offsets = 0;</div>
+<div class="line"><span class="lineno">  920</span>    std::size_t count = 0;</div>
+<div class="line"><span class="lineno">  921</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__neigh.html#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), <span class="keyword">nullptr</span>, 0, &amp;n_offsets, <span class="keyword">nullptr</span>, 0, &amp;count), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno">  922</span>    std::vector&lt;int&gt; offsets(n_offsets);</div>
+<div class="line"><span class="lineno">  923</span>    std::vector&lt;int&gt; cols(count);</div>
+<div class="line"><span class="lineno">  924</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__neigh.html#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), offsets.data(), offsets.size(), &amp;n_offsets,</div>
+<div class="line"><span class="lineno">  925</span>                                        cols.data(), cols.size(), &amp;count),</div>
+<div class="line"><span class="lineno">  926</span>                  <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno">  927</span>    std::vector&lt;int&gt; degree;</div>
+<div class="line"><span class="lineno">  928</span>    <span class="keywordflow">if</span> (n_offsets &gt; 0) {</div>
+<div class="line"><span class="lineno">  929</span>      degree.reserve(n_offsets - 1);</div>
+<div class="line"><span class="lineno">  930</span>      <span class="keywordflow">for</span> (std::size_t i = 0; i + 1 &lt; n_offsets; ++i) {</div>
+<div class="line"><span class="lineno">  931</span>        degree.push_back(offsets[i + 1] - offsets[i]);</div>
+<div class="line"><span class="lineno">  932</span>      }</div>
+<div class="line"><span class="lineno">  933</span>    }</div>
+<div class="line"><span class="lineno">  934</span>    <span class="keywordflow">return</span> degree;</div>
+<div class="line"><span class="lineno">  935</span>  }</div>
+<div class="ttc" id="agroup__capi__neigh_html_gadd139b6a27b0a0e346abfb71eeae6e3b"><div class="ttname"><a href="group__capi__neigh.html#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a></div><div class="ttdeci">SEAMS_API seams_status seams_neighbours_copy(const seams_neighbours *nb, int *offsets, size_t offsets_cap, size_t *n_offsets, int *cols, size_t cols_cap, size_t *nnz)</div><div class="ttdoc">Copy the neighbour CSR into caller buffers.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="abd527879d1fe10c5c111a7d9bbdd9d96" name="abd527879d1fe10c5c111a7d9bbdd9d96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd527879d1fe10c5c111a7d9bbdd9d96">&#9670;&#160;</a></span>nnz()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t seams::Neighbours::nnz </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of neighbour pairs, omitting self. </p>
+<dl class="section return"><dt>Returns</dt><dd>The pair count. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00907">907</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  907</span>                                      {</div>
+<div class="line"><span class="lineno">  908</span>    std::size_t n_offsets = 0;</div>
+<div class="line"><span class="lineno">  909</span>    std::size_t count = 0;</div>
+<div class="line"><span class="lineno">  910</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__neigh.html#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), <span class="keyword">nullptr</span>, 0, &amp;n_offsets, <span class="keyword">nullptr</span>, 0, &amp;count), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno">  911</span>    <span class="keywordflow">return</span> count;</div>
+<div class="line"><span class="lineno">  912</span>  }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a791751da6ff0a3728f76715180b12887" name="a791751da6ff0a3728f76715180b12887"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a791751da6ff0a3728f76715180b12887">&#9670;&#160;</a></span>pairs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::pair&lt; int, int &gt; &gt; seams::Neighbours::pairs </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Directed pairs <span class="tt">(atom, neighbour)</span>. </p>
+<dl class="section return"><dt>Returns</dt><dd>One pair per stored column. Self is omitted. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l00941">941</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  941</span>                                                           {</div>
+<div class="line"><span class="lineno">  942</span>    std::size_t n_offsets = 0;</div>
+<div class="line"><span class="lineno">  943</span>    std::size_t count = 0;</div>
+<div class="line"><span class="lineno">  944</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__neigh.html#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), <span class="keyword">nullptr</span>, 0, &amp;n_offsets, <span class="keyword">nullptr</span>, 0, &amp;count), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno">  945</span>    std::vector&lt;int&gt; offsets(n_offsets);</div>
+<div class="line"><span class="lineno">  946</span>    std::vector&lt;int&gt; cols(count);</div>
+<div class="line"><span class="lineno">  947</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__neigh.html#gadd139b6a27b0a0e346abfb71eeae6e3b">seams_neighbours_copy</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), offsets.data(), offsets.size(), &amp;n_offsets,</div>
+<div class="line"><span class="lineno">  948</span>                                        cols.data(), cols.size(), &amp;count),</div>
+<div class="line"><span class="lineno">  949</span>                  <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno">  950</span>    std::vector&lt;std::pair&lt;int, int&gt;&gt; out;</div>
+<div class="line"><span class="lineno">  951</span>    out.reserve(count);</div>
+<div class="line"><span class="lineno">  952</span>    <span class="keywordflow">for</span> (std::size_t atom = 0; atom + 1 &lt; n_offsets; ++atom) {</div>
+<div class="line"><span class="lineno">  953</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> cursor = offsets[atom]; cursor &lt; offsets[atom + 1]; ++cursor) {</div>
+<div class="line"><span class="lineno">  954</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code hl_enumvalue" href="namespaceiface.html#a880354044e1248a351860d033c05721ba98b929ea2521b6f39fc260eea7d496af">neighbour</a> = cols[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(cursor)];</div>
+<div class="line"><span class="lineno">  955</span>        <span class="keywordflow">if</span> (neighbour != <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(atom)) {</div>
+<div class="line"><span class="lineno">  956</span>          out.emplace_back(<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(atom), neighbour);</div>
+<div class="line"><span class="lineno">  957</span>        }</div>
+<div class="line"><span class="lineno">  958</span>      }</div>
+<div class="line"><span class="lineno">  959</span>    }</div>
+<div class="line"><span class="lineno">  960</span>    <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">  961</span>  }</div>
+<div class="ttc" id="anamespaceiface_html_a880354044e1248a351860d033c05721ba98b929ea2521b6f39fc260eea7d496af"><div class="ttname"><a href="namespaceiface.html#a880354044e1248a351860d033c05721ba98b929ea2521b6f39fc260eea7d496af">iface::Cause::neighbour</a></div><div class="ttdeci">@ neighbour</div><div class="ttdef"><b>Definition</b> <a href="interface__order_8hpp_source.html#l00047">interface_order.hpp:47</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>include/<a class="el" href="seams_8hpp_source.html">seams.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceseams.html">seams</a></li><li class="navelem"><a href="classseams_1_1Neighbours.html">Neighbours</a></li>
+  </ul>
+</div>
+</body>
+</html>

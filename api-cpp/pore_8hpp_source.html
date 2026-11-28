@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/pore.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/pore_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/pore.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/pore_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/pore.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('pore_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">pore.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="pore_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">// SPDX-License-Identifier: MIT</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#ifndef SEAMS_PORE_H_</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#define SEAMS_PORE_H_</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="compiler__compat_8hpp.html">compiler_compat.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &lt;stdexcept&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="foldopen" id="foldopen00040" data-start="{" data-end="}">
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="namespacepore.html">   40</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacepore.html">pore</a> {</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// Key function in exception_typeinfo.cpp, same reason as mic::RangeError:</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// one typeinfo in libyodaLib. Default visibility on ELF. On Windows the</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// class is dllexport from libyodaLib (SEAMS_EH_EXPORT) and dllimport in</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">// every other translation unit.</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#if defined(_MSC_VER)</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#pragma warning(push)</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#pragma warning(disable : 4275) </span><span class="comment">// std::invalid_argument has no dll interface</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#endif</span></div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="};">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structpore_1_1BoxError.html">   50</a></span><span class="keyword">struct </span><a class="code hl_define" href="compiler__compat_8hpp.html#a15f882ad989e3ec281793a243cacd8f8">SEAMS_EH_API</a> <a class="code hl_struct" href="structpore_1_1BoxError.html">BoxError</a> : std::invalid_argument {</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keyword">using </span>std::invalid_argument::invalid_argument;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="structpore_1_1BoxError.html#aeec456910d5cb717a952b55904ffcc26">   52</a></span>  <a class="code hl_function" href="structpore_1_1BoxError.html#aeec456910d5cb717a952b55904ffcc26">~BoxError</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>};</div>
+</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#if defined(_MSC_VER)</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#pragma warning(pop)</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="foldopen" id="foldopen00058" data-start="{" data-end="};">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="structpore_1_1Profile.html">   58</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structpore_1_1Profile.html">Profile</a> {</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="structpore_1_1Profile.html#acc230a47a58e39085ca69b80288c5ac9">   59</a></span>  std::vector&lt;double&gt; <a class="code hl_variable" href="structpore_1_1Profile.html#acc230a47a58e39085ca69b80288c5ac9">coordinate</a>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="structpore_1_1Profile.html#af950e0dd7e5ac092109bc3a274cf5c54">   60</a></span>  std::vector&lt;double&gt; <a class="code hl_variable" href="structpore_1_1Profile.html#af950e0dd7e5ac092109bc3a274cf5c54">number_density</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="structpore_1_1Profile.html#ac06a7afcc34c1f4a892af5330243b1ee">   61</a></span>  std::vector&lt;double&gt; <a class="code hl_variable" href="structpore_1_1Profile.html#ac06a7afcc34c1f4a892af5330243b1ee">mass_density</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="structpore_1_1Profile.html#a7adac73097eee7ee368ee7359f2fbd4f">   62</a></span>  std::vector&lt;double&gt; <a class="code hl_variable" href="structpore_1_1Profile.html#a7adac73097eee7ee368ee7359f2fbd4f">volume</a>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>};</div>
+</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="};">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="structpore_1_1Frame.html">   65</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structpore_1_1Frame.html">Frame</a> {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="structpore_1_1Frame.html#a90bba96c60ad2c2ebbfe531b6c82cfbd">   66</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structpore_1_1Frame.html#a90bba96c60ad2c2ebbfe531b6c82cfbd">axis_unit</a>[3];</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="structpore_1_1Frame.html#a5d5ebaec356377f7c66edf50387fec4e">   67</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structpore_1_1Frame.html#a5d5ebaec356377f7c66edf50387fec4e">centre</a>[3];</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="structpore_1_1Frame.html#ad285a74d86bcf49c7e0a104ca605d776">   68</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structpore_1_1Frame.html#ad285a74d86bcf49c7e0a104ca605d776">centre_frac</a>[3];</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="structpore_1_1Frame.html#ae6aca1125353b42b56f2572f0f178e07">   69</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structpore_1_1Frame.html#ae6aca1125353b42b56f2572f0f178e07">axis_index</a>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>};</div>
+</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="foldopen" id="foldopen00072" data-start="{" data-end="};">
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="structpore_1_1Profiles.html">   72</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structpore_1_1Profiles.html">Profiles</a> {</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="structpore_1_1Profiles.html#ac21a56f307d600bf005a80d71c7b2fb3">   73</a></span>  <a class="code hl_struct" href="structpore_1_1Profile.html">Profile</a> <a class="code hl_variable" href="structpore_1_1Profiles.html#ac21a56f307d600bf005a80d71c7b2fb3">radial</a>;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="structpore_1_1Profiles.html#aae32b51300d48491456a07ea7e6bef66">   74</a></span>  <a class="code hl_struct" href="structpore_1_1Profile.html">Profile</a> <a class="code hl_variable" href="structpore_1_1Profiles.html#aae32b51300d48491456a07ea7e6bef66">azimuthal</a>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="structpore_1_1Profiles.html#a1c03475257f05a276682d282115d9492">   75</a></span>  <a class="code hl_struct" href="structpore_1_1Profile.html">Profile</a> <a class="code hl_variable" href="structpore_1_1Profiles.html#a1c03475257f05a276682d282115d9492">axial</a>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>};</div>
+</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="foldopen" id="foldopen00078" data-start="{" data-end="};">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="structpore_1_1HostGuest.html">   78</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structpore_1_1HostGuest.html">HostGuest</a> {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="structpore_1_1HostGuest.html#a278ea790cc703c1840d40af5869cafe2">   79</a></span>  std::vector&lt;int&gt; <a class="code hl_variable" href="structpore_1_1HostGuest.html#a278ea790cc703c1840d40af5869cafe2">guest</a>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="structpore_1_1HostGuest.html#a2a9d9572d19a509e0af85a4a8fb1fbd9">   80</a></span>  std::vector&lt;int&gt; <a class="code hl_variable" href="structpore_1_1HostGuest.html#a2a9d9572d19a509e0af85a4a8fb1fbd9">nearest</a>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="structpore_1_1HostGuest.html#ad64cc01f529a0925f4c6b3a066ae6066">   81</a></span>  std::vector&lt;int&gt; <a class="code hl_variable" href="structpore_1_1HostGuest.html#ad64cc01f529a0925f4c6b3a066ae6066">nearest_type</a>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="structpore_1_1HostGuest.html#af22f9f4cbc2a31cc40343744ca3e1010">   82</a></span>  std::vector&lt;double&gt; <a class="code hl_variable" href="structpore_1_1HostGuest.html#af22f9f4cbc2a31cc40343744ca3e1010">distance</a>;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="structpore_1_1HostGuest.html#a51b763a5717192e2502abe72c83adab7">   83</a></span>  std::vector&lt;int&gt; <a class="code hl_variable" href="structpore_1_1HostGuest.html#a51b763a5717192e2502abe72c83adab7">framework_types</a>;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="structpore_1_1HostGuest.html#a86899968c22324fdb0b211533300d633">   84</a></span>  std::vector&lt;int&gt; <a class="code hl_variable" href="structpore_1_1HostGuest.html#a86899968c22324fdb0b211533300d633">contacts</a>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>};</div>
+</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="namespacepore.html#a36332aa347c241e3821f0c335f71df9a">   87</a></span><span class="keyword">using </span><a class="code hl_typedef" href="namespacepore.html#a36332aa347c241e3821f0c335f71df9a">Cloud</a> = <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud&lt;molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt;;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="namespacepore.html#a580fd054684f7573eee94809e16e25c7">   90</a></span><a class="code hl_struct" href="structpore_1_1Profile.html">Profile</a> <a class="code hl_function" href="namespacepore.html#a580fd054684f7573eee94809e16e25c7">fractionalAxis</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacepore.html#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, <span class="keywordtype">int</span> type, <span class="keywordtype">int</span> bins, <span class="keywordtype">int</span> axis, <span class="keywordtype">double</span> origin,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>                       <span class="keyword">const</span> <span class="keywordtype">double</span> *masses);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="namespacepore.html#ac98eeffc5a506b422a107937da3cf147">   94</a></span><a class="code hl_struct" href="structpore_1_1Profile.html">Profile</a> <a class="code hl_function" href="namespacepore.html#ac98eeffc5a506b422a107937da3cf147">alongDirection</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacepore.html#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, <span class="keywordtype">int</span> type, <span class="keywordtype">int</span> bins, <span class="keyword">const</span> <span class="keywordtype">double</span> direction[3],</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                       <span class="keywordtype">double</span> origin, <span class="keyword">const</span> <span class="keywordtype">double</span> *masses);</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="namespacepore.html#a5e822438fb0fdb78d1f233928ff71c5a">  100</a></span><a class="code hl_struct" href="structpore_1_1Frame.html">Frame</a> <a class="code hl_function" href="namespacepore.html#a5e822438fb0fdb78d1f233928ff71c5a">poreFrame</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacepore.html#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, <span class="keywordtype">int</span> framework_type, <span class="keywordtype">int</span> axis, <span class="keyword">const</span> <span class="keywordtype">double</span> *direction,</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                <span class="keyword">const</span> <span class="keywordtype">double</span> *centre_frac);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="namespacepore.html#a7b24f77db6c4a365059977e33b856713">  107</a></span><a class="code hl_struct" href="structpore_1_1Profiles.html">Profiles</a> <a class="code hl_function" href="namespacepore.html#a7b24f77db6c4a365059977e33b856713">poreProfiles</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacepore.html#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, <span class="keywordtype">int</span> type, <span class="keywordtype">int</span> radial_bins, <span class="keywordtype">int</span> azimuthal_bins,</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                      <span class="keywordtype">int</span> axial_bins, <span class="keywordtype">double</span> r_max, <span class="keywordtype">int</span> axis, <span class="keyword">const</span> <span class="keywordtype">double</span> *direction,</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                      <span class="keyword">const</span> <span class="keywordtype">double</span> *centre_frac, <span class="keywordtype">int</span> framework_type, <span class="keywordtype">double</span> origin,</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                      <span class="keyword">const</span> <span class="keywordtype">double</span> *masses);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="namespacepore.html#a76edcb8049b70330f7115d460fce12ef">  116</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespacepore.html#a76edcb8049b70330f7115d460fce12ef">clippedDiskArea</a>(<span class="keyword">const</span> std::vector&lt;std::array&lt;double, 2&gt;&gt; &amp;polygon, <span class="keywordtype">double</span> radius,</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                       <span class="keywordtype">double</span> cover, <span class="keywordtype">double</span> full);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="namespacepore.html#a406f5ff58b3a290ec66df9cfb5cf7f89">  123</a></span><a class="code hl_struct" href="structpore_1_1HostGuest.html">HostGuest</a> <a class="code hl_function" href="namespacepore.html#a406f5ff58b3a290ec66df9cfb5cf7f89">hostGuest</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="namespacepore.html#a36332aa347c241e3821f0c335f71df9a">Cloud</a> &amp;cloud, <span class="keywordtype">int</span> guest_type, <span class="keywordtype">int</span> framework_type, <span class="keywordtype">double</span> cutoff);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>} <span class="comment">// namespace pore</span></div>
+</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">#endif </span><span class="comment">// SEAMS_PORE_H_</span></div>
+<div class="ttc" id="acompiler__compat_8hpp_html"><div class="ttname"><a href="compiler__compat_8hpp.html">compiler_compat.hpp</a></div></div>
+<div class="ttc" id="acompiler__compat_8hpp_html_a15f882ad989e3ec281793a243cacd8f8"><div class="ttname"><a href="compiler__compat_8hpp.html#a15f882ad989e3ec281793a243cacd8f8">SEAMS_EH_API</a></div><div class="ttdeci">#define SEAMS_EH_API</div><div class="ttdef"><b>Definition</b> <a href="compiler__compat_8hpp_source.html#l00048">compiler_compat.hpp:48</a></div></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespacepore_html"><div class="ttname"><a href="namespacepore.html">pore</a></div><div class="ttdef"><b>Definition</b> <a href="#l00040">pore.hpp:40</a></div></div>
+<div class="ttc" id="anamespacepore_html_a36332aa347c241e3821f0c335f71df9a"><div class="ttname"><a href="namespacepore.html#a36332aa347c241e3821f0c335f71df9a">pore::Cloud</a></div><div class="ttdeci">molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; Cloud</div><div class="ttdef"><b>Definition</b> <a href="#l00087">pore.hpp:87</a></div></div>
+<div class="ttc" id="anamespacepore_html_a406f5ff58b3a290ec66df9cfb5cf7f89"><div class="ttname"><a href="namespacepore.html#a406f5ff58b3a290ec66df9cfb5cf7f89">pore::hostGuest</a></div><div class="ttdeci">HostGuest hostGuest(const Cloud &amp;cloud, int guest_type, int framework_type, double cutoff)</div></div>
+<div class="ttc" id="anamespacepore_html_a580fd054684f7573eee94809e16e25c7"><div class="ttname"><a href="namespacepore.html#a580fd054684f7573eee94809e16e25c7">pore::fractionalAxis</a></div><div class="ttdeci">Profile fractionalAxis(const Cloud &amp;cloud, int type, int bins, int axis, double origin, const double *masses)</div><div class="ttdoc">Fractional density along cell axis 0, 1, or 2. Origin is in [0, 1) after wrapping.</div></div>
+<div class="ttc" id="anamespacepore_html_a5e822438fb0fdb78d1f233928ff71c5a"><div class="ttname"><a href="namespacepore.html#a5e822438fb0fdb78d1f233928ff71c5a">pore::poreFrame</a></div><div class="ttdeci">Frame poreFrame(const Cloud &amp;cloud, int framework_type, int axis, const double *direction, const double *centre_frac)</div></div>
+<div class="ttc" id="anamespacepore_html_a76edcb8049b70330f7115d460fce12ef"><div class="ttname"><a href="namespacepore.html#a76edcb8049b70330f7115d460fce12ef">pore::clippedDiskArea</a></div><div class="ttdeci">double clippedDiskArea(const std::vector&lt; std::array&lt; double, 2 &gt; &gt; &amp;polygon, double radius, double cover, double full)</div></div>
+<div class="ttc" id="anamespacepore_html_a7b24f77db6c4a365059977e33b856713"><div class="ttname"><a href="namespacepore.html#a7b24f77db6c4a365059977e33b856713">pore::poreProfiles</a></div><div class="ttdeci">Profiles poreProfiles(const Cloud &amp;cloud, int type, int radial_bins, int azimuthal_bins, int axial_bins, double r_max, int axis, const double *direction, const double *centre_frac, int framework_type, double origin, const double *masses)</div></div>
+<div class="ttc" id="anamespacepore_html_ac98eeffc5a506b422a107937da3cf147"><div class="ttname"><a href="namespacepore.html#ac98eeffc5a506b422a107937da3cf147">pore::alongDirection</a></div><div class="ttdeci">Profile alongDirection(const Cloud &amp;cloud, int type, int bins, const double direction[3], double origin, const double *masses)</div><div class="ttdoc">Density of the reduced cell projected on a Cartesian direction.</div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="astructpore_1_1BoxError_html"><div class="ttname"><a href="structpore_1_1BoxError.html">pore::BoxError</a></div><div class="ttdef"><b>Definition</b> <a href="#l00050">pore.hpp:50</a></div></div>
+<div class="ttc" id="astructpore_1_1BoxError_html_aeec456910d5cb717a952b55904ffcc26"><div class="ttname"><a href="structpore_1_1BoxError.html#aeec456910d5cb717a952b55904ffcc26">pore::BoxError::~BoxError</a></div><div class="ttdeci">~BoxError() override</div></div>
+<div class="ttc" id="astructpore_1_1Frame_html"><div class="ttname"><a href="structpore_1_1Frame.html">pore::Frame</a></div><div class="ttdef"><b>Definition</b> <a href="#l00065">pore.hpp:65</a></div></div>
+<div class="ttc" id="astructpore_1_1Frame_html_a5d5ebaec356377f7c66edf50387fec4e"><div class="ttname"><a href="structpore_1_1Frame.html#a5d5ebaec356377f7c66edf50387fec4e">pore::Frame::centre</a></div><div class="ttdeci">double centre[3]</div><div class="ttdef"><b>Definition</b> <a href="#l00067">pore.hpp:67</a></div></div>
+<div class="ttc" id="astructpore_1_1Frame_html_a90bba96c60ad2c2ebbfe531b6c82cfbd"><div class="ttname"><a href="structpore_1_1Frame.html#a90bba96c60ad2c2ebbfe531b6c82cfbd">pore::Frame::axis_unit</a></div><div class="ttdeci">double axis_unit[3]</div><div class="ttdef"><b>Definition</b> <a href="#l00066">pore.hpp:66</a></div></div>
+<div class="ttc" id="astructpore_1_1Frame_html_ad285a74d86bcf49c7e0a104ca605d776"><div class="ttname"><a href="structpore_1_1Frame.html#ad285a74d86bcf49c7e0a104ca605d776">pore::Frame::centre_frac</a></div><div class="ttdeci">double centre_frac[3]</div><div class="ttdef"><b>Definition</b> <a href="#l00068">pore.hpp:68</a></div></div>
+<div class="ttc" id="astructpore_1_1Frame_html_ae6aca1125353b42b56f2572f0f178e07"><div class="ttname"><a href="structpore_1_1Frame.html#ae6aca1125353b42b56f2572f0f178e07">pore::Frame::axis_index</a></div><div class="ttdeci">int axis_index</div><div class="ttdef"><b>Definition</b> <a href="#l00069">pore.hpp:69</a></div></div>
+<div class="ttc" id="astructpore_1_1HostGuest_html"><div class="ttname"><a href="structpore_1_1HostGuest.html">pore::HostGuest</a></div><div class="ttdef"><b>Definition</b> <a href="#l00078">pore.hpp:78</a></div></div>
+<div class="ttc" id="astructpore_1_1HostGuest_html_a278ea790cc703c1840d40af5869cafe2"><div class="ttname"><a href="structpore_1_1HostGuest.html#a278ea790cc703c1840d40af5869cafe2">pore::HostGuest::guest</a></div><div class="ttdeci">std::vector&lt; int &gt; guest</div><div class="ttdef"><b>Definition</b> <a href="#l00079">pore.hpp:79</a></div></div>
+<div class="ttc" id="astructpore_1_1HostGuest_html_a2a9d9572d19a509e0af85a4a8fb1fbd9"><div class="ttname"><a href="structpore_1_1HostGuest.html#a2a9d9572d19a509e0af85a4a8fb1fbd9">pore::HostGuest::nearest</a></div><div class="ttdeci">std::vector&lt; int &gt; nearest</div><div class="ttdef"><b>Definition</b> <a href="#l00080">pore.hpp:80</a></div></div>
+<div class="ttc" id="astructpore_1_1HostGuest_html_a51b763a5717192e2502abe72c83adab7"><div class="ttname"><a href="structpore_1_1HostGuest.html#a51b763a5717192e2502abe72c83adab7">pore::HostGuest::framework_types</a></div><div class="ttdeci">std::vector&lt; int &gt; framework_types</div><div class="ttdef"><b>Definition</b> <a href="#l00083">pore.hpp:83</a></div></div>
+<div class="ttc" id="astructpore_1_1HostGuest_html_a86899968c22324fdb0b211533300d633"><div class="ttname"><a href="structpore_1_1HostGuest.html#a86899968c22324fdb0b211533300d633">pore::HostGuest::contacts</a></div><div class="ttdeci">std::vector&lt; int &gt; contacts</div><div class="ttdef"><b>Definition</b> <a href="#l00084">pore.hpp:84</a></div></div>
+<div class="ttc" id="astructpore_1_1HostGuest_html_ad64cc01f529a0925f4c6b3a066ae6066"><div class="ttname"><a href="structpore_1_1HostGuest.html#ad64cc01f529a0925f4c6b3a066ae6066">pore::HostGuest::nearest_type</a></div><div class="ttdeci">std::vector&lt; int &gt; nearest_type</div><div class="ttdef"><b>Definition</b> <a href="#l00081">pore.hpp:81</a></div></div>
+<div class="ttc" id="astructpore_1_1HostGuest_html_af22f9f4cbc2a31cc40343744ca3e1010"><div class="ttname"><a href="structpore_1_1HostGuest.html#af22f9f4cbc2a31cc40343744ca3e1010">pore::HostGuest::distance</a></div><div class="ttdeci">std::vector&lt; double &gt; distance</div><div class="ttdef"><b>Definition</b> <a href="#l00082">pore.hpp:82</a></div></div>
+<div class="ttc" id="astructpore_1_1Profile_html"><div class="ttname"><a href="structpore_1_1Profile.html">pore::Profile</a></div><div class="ttdef"><b>Definition</b> <a href="#l00058">pore.hpp:58</a></div></div>
+<div class="ttc" id="astructpore_1_1Profile_html_a7adac73097eee7ee368ee7359f2fbd4f"><div class="ttname"><a href="structpore_1_1Profile.html#a7adac73097eee7ee368ee7359f2fbd4f">pore::Profile::volume</a></div><div class="ttdeci">std::vector&lt; double &gt; volume</div><div class="ttdef"><b>Definition</b> <a href="#l00062">pore.hpp:62</a></div></div>
+<div class="ttc" id="astructpore_1_1Profile_html_ac06a7afcc34c1f4a892af5330243b1ee"><div class="ttname"><a href="structpore_1_1Profile.html#ac06a7afcc34c1f4a892af5330243b1ee">pore::Profile::mass_density</a></div><div class="ttdeci">std::vector&lt; double &gt; mass_density</div><div class="ttdef"><b>Definition</b> <a href="#l00061">pore.hpp:61</a></div></div>
+<div class="ttc" id="astructpore_1_1Profile_html_acc230a47a58e39085ca69b80288c5ac9"><div class="ttname"><a href="structpore_1_1Profile.html#acc230a47a58e39085ca69b80288c5ac9">pore::Profile::coordinate</a></div><div class="ttdeci">std::vector&lt; double &gt; coordinate</div><div class="ttdef"><b>Definition</b> <a href="#l00059">pore.hpp:59</a></div></div>
+<div class="ttc" id="astructpore_1_1Profile_html_af950e0dd7e5ac092109bc3a274cf5c54"><div class="ttname"><a href="structpore_1_1Profile.html#af950e0dd7e5ac092109bc3a274cf5c54">pore::Profile::number_density</a></div><div class="ttdeci">std::vector&lt; double &gt; number_density</div><div class="ttdef"><b>Definition</b> <a href="#l00060">pore.hpp:60</a></div></div>
+<div class="ttc" id="astructpore_1_1Profiles_html"><div class="ttname"><a href="structpore_1_1Profiles.html">pore::Profiles</a></div><div class="ttdef"><b>Definition</b> <a href="#l00072">pore.hpp:72</a></div></div>
+<div class="ttc" id="astructpore_1_1Profiles_html_a1c03475257f05a276682d282115d9492"><div class="ttname"><a href="structpore_1_1Profiles.html#a1c03475257f05a276682d282115d9492">pore::Profiles::axial</a></div><div class="ttdeci">Profile axial</div><div class="ttdef"><b>Definition</b> <a href="#l00075">pore.hpp:75</a></div></div>
+<div class="ttc" id="astructpore_1_1Profiles_html_aae32b51300d48491456a07ea7e6bef66"><div class="ttname"><a href="structpore_1_1Profiles.html#aae32b51300d48491456a07ea7e6bef66">pore::Profiles::azimuthal</a></div><div class="ttdeci">Profile azimuthal</div><div class="ttdef"><b>Definition</b> <a href="#l00074">pore.hpp:74</a></div></div>
+<div class="ttc" id="astructpore_1_1Profiles_html_ac21a56f307d600bf005a80d71c7b2fb3"><div class="ttname"><a href="structpore_1_1Profiles.html#ac21a56f307d600bf005a80d71c7b2fb3">pore::Profiles::radial</a></div><div class="ttdeci">Profile radial</div><div class="ttdef"><b>Definition</b> <a href="#l00073">pore.hpp:73</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="pore_8hpp.html">pore.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

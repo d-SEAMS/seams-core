@@ -1,0 +1,23 @@
+.. index:: pair: group; Gen
+.. _doxid-group__gen:
+
+Gen
+===
+
+.. toctree::
+	:hidden:
+
+	namespace_gen.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`gen<doxid-namespacegen>`;
+		namespace :ref:`gen::mic<doxid-namespacegen_1_1mic>`;
+

@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::BrineFronts
+.. _doxid-structseams_1_1_brine_fronts:
+
+struct seams::BrineFronts
+=========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+The two planar crossings of an ice slab. :ref:`More...<details-structseams_1_1_brine_fronts>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct BrineFronts {
+		// fields
+	
+		double :ref:`enter<doxid-structseams_1_1_brine_fronts_1aa8f34f2c134370350cb37f7ac75a322f>` = 0;
+		double :ref:`exit<doxid-structseams_1_1_brine_fronts_1a73dd3367957c1e962a63c039eb632d1a>` = 0;
+		double :ref:`thickness<doxid-structseams_1_1_brine_fronts_1aab71c227ee118517936c5c69c73371ef>` = 0;
+		bool :ref:`found<doxid-structseams_1_1_brine_fronts_1a52002c4e7df840366e5b41234dc319e9>` = false;
+	};
+.. _details-structseams_1_1_brine_fronts:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+The two planar crossings of an ice slab.
+
+Fields
+------
+
+.. index:: pair: variable; enter
+.. _doxid-structseams_1_1_brine_fronts_1aa8f34f2c134370350cb37f7ac75a322f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double enter = 0
+
+Crossing on entering the ice, Angstrom.
+
+.. index:: pair: variable; exit
+.. _doxid-structseams_1_1_brine_fronts_1a73dd3367957c1e962a63c039eb632d1a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double exit = 0
+
+Crossing on leaving the ice, Angstrom.
+
+.. index:: pair: variable; thickness
+.. _doxid-structseams_1_1_brine_fronts_1aab71c227ee118517936c5c69c73371ef:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double thickness = 0
+
+Ice run along the axis, Angstrom.
+
+.. index:: pair: variable; found
+.. _doxid-structseams_1_1_brine_fronts_1a52002c4e7df840366e5b41234dc319e9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool found = false
+
+Both crossings exist.
+

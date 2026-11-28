@@ -1,0 +1,19 @@
+.. index:: pair: enum; Reduction
+.. _doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354d:
+
+enum seams::product::Reduction
+==============================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <ozaki.hpp>
+
+	enum Reduction {
+	    :target:`Left<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354da945d5e233cf7d6240f6b783b36a374ff>`     = 0,
+	    :target:`Pairwise<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354da327036a1ef7ccbd87697bb2a2197d9ae>` = 1,
+	    :target:`Neumaier<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354da5f9bd7eb1d224fad881861ca41579be0>` = 2,
+	};
+

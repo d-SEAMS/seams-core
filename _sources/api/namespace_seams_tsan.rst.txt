@@ -1,0 +1,29 @@
+.. index:: pair: namespace; seams::tsan
+.. _doxid-namespaceseams_1_1tsan:
+
+namespace seams::tsan
+=====================
+
+.. toctree::
+	:hidden:
+
+	struct_seams_tsan_Slot.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace tsan {
+
+	// structs
+
+	struct :ref:`Slot<doxid-structseams_1_1tsan_1_1_slot>`;
+
+	// global functions
+
+	void :target:`arrive_and_wait<doxid-namespaceseams_1_1tsan_1a49882de7714d6f526ee2bd9402e6f2cb>`(:ref:`Slot<doxid-structseams_1_1tsan_1_1_slot>`& slot, int threads);
+
+	} // namespace tsan

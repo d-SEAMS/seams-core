@@ -1,0 +1,11 @@
+.. index:: pair: group; Types
+.. _doxid-group__capi__types:
+
+Types
+=====
+
+.. toctree::
+	:hidden:
+
+Status codes, label codes, and opaque handles.
+

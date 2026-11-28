@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/topo_bulk.hpp File Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/topo__bulk_8hpp.html">
+<meta property="og:title" content="seams-core: src/include/internal/topo_bulk.hpp File Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/topo__bulk_8hpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/topo_bulk.hpp File Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('topo__bulk_8hpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">topo_bulk.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>File containing functions used specific to bulk topological network critera.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;array&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;fstream&gt;</code><br />
+<code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;iterator&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;sstream&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;<a class="el" href="cage_8hpp_source.html">cage.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="order__parameter_8hpp_source.html">order_parameter.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="par__team_8hpp_source.html">par_team.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="ring_8hpp_source.html">ring.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="seams__input_8hpp_source.html">seams_input.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="seams__output_8hpp_source.html">seams_output.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="shapeMatch_8hpp_source.html">shapeMatch.hpp</a>&gt;</code><br />
+</div>
+<p><a href="topo__bulk_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:ring_3A_3ARingSearchIndex" id="r_ring_3A_3ARingSearchIndex"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1RingSearchIndex.html">ring::RingSearchIndex</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inverted index from an atom to the rings that contain it.  <a href="structring_1_1RingSearchIndex.html#details">More...</a><br /></td></tr>
+<tr class="memitem:ring_3A_3APackingCertificate" id="r_ring_3A_3APackingCertificate"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1PackingCertificate.html">ring::PackingCertificate</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Proof that the reported number of equatorial rings is maximum.  <a href="structring_1_1PackingCertificate.html#details">More...</a><br /></td></tr>
+<tr class="memitem:ring_3A_3AEquatorChoice" id="r_ring_3A_3AEquatorChoice"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1EquatorChoice.html">ring::EquatorChoice</a></td></tr>
+<tr class="memitem:ring_3A_3ANeighBond" id="r_ring_3A_3ANeighBond"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classring_1_1NeighBond.html">ring::NeighBond</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Membership of the neighbour rows after the leading self entry.  <a href="classring_1_1NeighBond.html#details">More...</a><br /></td></tr>
+<tr class="memitem:ring_3A_3ADdcSplit" id="r_ring_3A_3ADdcSplit"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1DdcSplit.html">ring::DdcSplit</a></td></tr>
+<tr class="memitem:ring_3A_3APackParts" id="r_ring_3A_3APackParts"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1PackParts.html">ring::PackParts</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:ring" id="r_ring"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacering.html">ring</a></td></tr>
+<tr class="memdesc:namespacering"><td class="mdescLeft">&#160;</td><td class="mdescRight">Topological network criteria functions. <br /></td></tr>
+<tr class="memitem:prism3" id="r_prism3"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceprism3.html">prism3</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a46bc67e817124b0e736c493bc8e4d6ee" id="r_a46bc67e817124b0e736c493bc8e4d6ee"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a46bc67e817124b0e736c493bc8e4d6ee">ring::bulkPolygonRingAnalysis</a> (std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int maxDepth, int firstFrame)</td></tr>
+<tr class="memitem:ada5f6a19834edc41365e7f85d92e4b76" id="r_ada5f6a19834edc41365e7f85d92e4b76"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#ada5f6a19834edc41365e7f85d92e4b76">ring::topoBulkAnalysis</a> (std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int firstFrame, bool onlyTetrahedral=true)</td></tr>
+<tr class="memitem:ab661e962729134479d1caf21e688a703" id="r_ab661e962729134479d1caf21e688a703"><td class="memItemLeft"><a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#ab661e962729134479d1caf21e688a703">ring::buildRingSearchIndex</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, int numAtoms, bool withRows=true)</td></tr>
+<tr class="memitem:ae6af6b848c82b3f5bca8514ae6a31473" id="r_ae6af6b848c82b3f5bca8514ae6a31473"><td class="memItemLeft"><a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#ae6af6b848c82b3f5bca8514ae6a31473">ring::buildRingSearchIndex</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memdesc:ae6af6b848c82b3f5bca8514ae6a31473"><td class="mdescLeft">&#160;</td><td class="mdescRight">As buildRingSearchIndex, ranking the atoms by position (<a class="el" href="namespacering.html#a51764966eab7aea2d90649bb6cc607ea">ring::positionRank</a>).  <br /></td></tr>
+<tr class="memitem:a51764966eab7aea2d90649bb6cc607ea" id="r_a51764966eab7aea2d90649bb6cc607ea"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a51764966eab7aea2d90649bb6cc607ea">ring::positionRank</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a21915c7b0472e5af1e63081fa42bfd62" id="r_a21915c7b0472e5af1e63081fa42bfd62"><td class="memItemLeft">std::vector&lt; std::array&lt; int, 3 &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a21915c7b0472e5af1e63081fa42bfd62">ring::ringWindings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a2f56d182514c3a74d223a92c22136017" id="r_a2f56d182514c3a74d223a92c22136017"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a2f56d182514c3a74d223a92c22136017">ring::contractibleRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a926f17abcc69431361238b764ab25619" id="r_a926f17abcc69431361238b764ab25619"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a926f17abcc69431361238b764ab25619">ring::contractibleRings</a> (std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memdesc:a926f17abcc69431361238b764ab25619"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same rings, compacted in place, so a kept ring is moved and not copied.  <br /></td></tr>
+<tr class="memitem:a9d784052b67c693381315d0947be0881" id="r_a9d784052b67c693381315d0947be0881"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a9d784052b67c693381315d0947be0881">ring::cageRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff)</td></tr>
+<tr class="memitem:a503bfa2deec404d907645e16ed236c28" id="r_a503bfa2deec404d907645e16ed236c28"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a503bfa2deec404d907645e16ed236c28">ring::findDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; int &gt; &amp;listHC, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList)</td></tr>
+<tr class="memitem:a7e08c423e61bfe5df43c009de1b38366" id="r_a7e08c423e61bfe5df43c009de1b38366"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a7e08c423e61bfe5df43c009de1b38366">ring::equatorChoiceOverflow</a> (const struct <a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a> *self, int at)</td></tr>
+<tr class="memitem:a7e4d993e20ff5ad076f747f08c9fb780" id="r_a7e4d993e20ff5ad076f747f08c9fb780"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a7e4d993e20ff5ad076f747f08c9fb780">ring::equatorChoiceOverflowPut</a> (struct <a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a> *self, int at, int value)</td></tr>
+<tr class="memitem:a5c05b0dac9b7124e2770e04a424a3bf7" id="r_a5c05b0dac9b7124e2770e04a424a3bf7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a5c05b0dac9b7124e2770e04a424a3bf7">ring::releaseEquatorOverflow</a> ()</td></tr>
+<tr class="memitem:ae219003bad567e0125990284302d2029" id="r_ae219003bad567e0125990284302d2029"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#ae219003bad567e0125990284302d2029">ring::maximumEquators</a> (const std::vector&lt; <a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a> &gt; &amp;periph, const std::vector&lt; int &gt; &amp;order, <a class="el" href="structring_1_1PackingCertificate.html">PackingCertificate</a> *certificate)</td></tr>
+<tr class="memitem:a73600fc304e8be5145df330f5f9552fe" id="r_a73600fc304e8be5145df330f5f9552fe"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a73600fc304e8be5145df330f5f9552fe">ring::findDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; int &gt; &amp;listHC, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index, <a class="el" href="structring_1_1PackingCertificate.html">PackingCertificate</a> *certificate=nullptr)</td></tr>
+<tr class="memitem:a5e65636a113b8a778541f437f00c0f97" id="r_a5e65636a113b8a778541f437f00c0f97"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a5e65636a113b8a778541f437f00c0f97">ring::findMixedRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, std::vector&lt; int &gt; &amp;listDDC, std::vector&lt; int &gt; &amp;listHC)</td></tr>
+<tr class="memitem:af2bab9ed638ed3e3a1ed3392d7e4a576" id="r_af2bab9ed638ed3e3a1ed3392d7e4a576"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">ring::findHC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList)</td></tr>
+<tr class="memitem:a1dfa48bf23ffaf39fee585ac7634231a" id="r_a1dfa48bf23ffaf39fee585ac7634231a"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a1dfa48bf23ffaf39fee585ac7634231a">ring::findHC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index)</td></tr>
+<tr class="memdesc:a1dfa48bf23ffaf39fee585ac7634231a"><td class="mdescLeft">&#160;</td><td class="mdescRight">As findHC, reusing an index the caller has already built.  <br /></td></tr>
+<tr class="memitem:a7cc755c188267af7b9ff9ae73ca77579" id="r_a7cc755c188267af7b9ff9ae73ca77579"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">ring::conditionOneDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring)</td></tr>
+<tr class="memitem:a75c45309352d085d18f89f370dd42ab2" id="r_a75c45309352d085d18f89f370dd42ab2"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a75c45309352d085d18f89f370dd42ab2">ring::conditionOneDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index)</td></tr>
+<tr class="memdesc:a75c45309352d085d18f89f370dd42ab2"><td class="mdescLeft">&#160;</td><td class="mdescRight">As conditionOneDDC, reusing an index the caller has already built.  <br /></td></tr>
+<tr class="memitem:a01243f4581fb55b417184d98f9ac70aa" id="r_a01243f4581fb55b417184d98f9ac70aa"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a01243f4581fb55b417184d98f9ac70aa">ring::equatorialConditions</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, int iring, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index, std::vector&lt; int &gt; *peripheralUnion, std::vector&lt; int &gt; *chosen=nullptr, const std::vector&lt; int &gt; *rank=nullptr, <a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a> *raw=nullptr)</td></tr>
+<tr class="memitem:a199fe38d3152cc04d18109ddb868ab34" id="r_a199fe38d3152cc04d18109ddb868ab34"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a199fe38d3152cc04d18109ddb868ab34">ring::basalConditions</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2)</td></tr>
+<tr class="memitem:a0d5ffbd5b49f72d57d0e3e00a78ca512" id="r_a0d5ffbd5b49f72d57d0e3e00a78ca512"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a0d5ffbd5b49f72d57d0e3e00a78ca512">ring::basalConditions</a> (const <a class="el" href="classring_1_1NeighBond.html">NeighBond</a> &amp;bonds, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2)</td></tr>
+<tr class="memdesc:a0d5ffbd5b49f72d57d0e3e00a78ca512"><td class="mdescLeft">&#160;</td><td class="mdescRight">As basalConditions, answering bonds from a prebuilt <a class="el" href="classring_1_1NeighBond.html" title="Membership of the neighbour rows after the leading self entry.">NeighBond</a>.  <br /></td></tr>
+<tr class="memitem:a350f1fa3c3d5807fb720444054d6e340" id="r_a350f1fa3c3d5807fb720444054d6e340"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a350f1fa3c3d5807fb720444054d6e340">ring::basalNeighbours</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;triplet, int atomOne, int atomTwo)</td></tr>
+<tr class="memitem:a5db4898b22ebb13511cc37fae6674e5c" id="r_a5db4898b22ebb13511cc37fae6674e5c"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a5db4898b22ebb13511cc37fae6674e5c">ring::notNeighboursOfRing</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;triplet, const std::vector&lt; int &gt; &amp;ring)</td></tr>
+<tr class="memitem:a56c3c2a30736d27d9eaf3e3759e630e9" id="r_a56c3c2a30736d27d9eaf3e3759e630e9"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">ring::findPrismatic</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;listHC, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, int iring, int jring, std::vector&lt; int &gt; &amp;prismaticRings)</td></tr>
+<tr class="memdesc:a56c3c2a30736d27d9eaf3e3759e630e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the prismatic rings from basal rings iring and jring.  <br /></td></tr>
+<tr class="memitem:aaf26a6612dd314b36db80820289ab68b" id="r_aaf26a6612dd314b36db80820289ab68b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#aaf26a6612dd314b36db80820289ab68b">ring::findPrismatic</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;listHC, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, int iring, int jring, std::vector&lt; int &gt; &amp;prismaticRings, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index)</td></tr>
+<tr class="memdesc:aaf26a6612dd314b36db80820289ab68b"><td class="mdescLeft">&#160;</td><td class="mdescRight">As findPrismatic, drawing candidate rings from the inverted index.  <br /></td></tr>
+<tr class="memitem:a45c216fc97f12e29f117bbc1f6d3c7f3" id="r_a45c216fc97f12e29f117bbc1f6d3c7f3"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a45c216fc97f12e29f117bbc1f6d3c7f3">ring::getAtomTypesTopoBulk</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; &amp;ringType, std::vector&lt; <a class="el" href="namespacecage.html#aaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;atomTypes)</td></tr>
+<tr class="memitem:aac3a6fdc27f05a7ded468e955983f270" id="r_aac3a6fdc27f05a7ded468e955983f270"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#aac3a6fdc27f05a7ded468e955983f270">ring::getStrucNumbers</a> (const std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; &amp;ringType, const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, int &amp;numHC, int &amp;numDDC, int &amp;mixedRings, int &amp;prismaticRings, int &amp;basalRings)</td></tr>
+<tr class="memdesc:aac3a6fdc27f05a7ded468e955983f270"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings.  <br /></td></tr>
+<tr class="memitem:acaf1ee3249ecc074f8b8bf9761569fea" id="r_acaf1ee3249ecc074f8b8bf9761569fea"><td class="memItemLeft"><a class="el" href="structring_1_1PackParts.html">PackParts</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#acaf1ee3249ecc074f8b8bf9761569fea">ring::lastPackParts</a> ()</td></tr>
+<tr class="memdesc:acaf1ee3249ecc074f8b8bf9761569fea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conflict build, clique ids, matching and branch-and-bound from the last pack.  <br /></td></tr>
+<tr class="memitem:a67343815b56a7bf3c4fcc6109270cf53" id="r_a67343815b56a7bf3c4fcc6109270cf53"><td class="memItemLeft"><a class="el" href="structring_1_1DdcSplit.html">DdcSplit</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacering.html#a67343815b56a7bf3c4fcc6109270cf53">ring::lastDdcSplit</a> ()</td></tr>
+<tr class="memdesc:a67343815b56a7bf3c4fcc6109270cf53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Order, equatorial test and packing from the last findDDC call.  <br /></td></tr>
+<tr class="memitem:a1ba0089123227ca022acc1ce38baf7ee" id="r_a1ba0089123227ca022acc1ce38baf7ee"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespaceprism3.html#a1ba0089123227ca022acc1ce38baf7ee">prism3::findBulkPrisms</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;rmsdPerAtom, double heightCutoff=8)</td></tr>
+<tr class="memdesc:a1ba0089123227ca022acc1ce38baf7ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find out which rings are prisms.  <br /></td></tr>
+<tr class="memitem:ab03946085dcf2e67583da676ab7f869f" id="r_ab03946085dcf2e67583da676ab7f869f"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f">prism3::basalPrismConditions</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</td></tr>
+<tr class="memitem:abbcd706f2576f374e6037e9073815ee8" id="r_abbcd706f2576f374e6037e9073815ee8"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8">prism3::relaxedPrismConditions</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</td></tr>
+<tr class="memitem:ad85e1c83d20a91d7e8678f5facc7cb7a" id="r_ad85e1c83d20a91d7e8678f5facc7cb7a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a">prism3::basalRingsSeparation</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2, double heightCutoff=8)</td></tr>
+<tr class="memdesc:ad85e1c83d20a91d7e8678f5facc7cb7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check to see that candidate basal prisms are not really far from each other.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>File containing functions used specific to bulk topological network critera. </p>
+
+<p class="definition">Definition in file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="topo__bulk_8hpp.html">topo_bulk.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

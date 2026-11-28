@@ -1,0 +1,64 @@
+.. index:: pair: namespace; seams::product
+.. _doxid-namespaceseams_1_1product:
+
+namespace seams::product
+========================
+
+.. toctree::
+	:hidden:
+
+	enum_seams_product_Int8Backend.rst
+	enum_seams_product_Mode.rst
+	enum_seams_product_Reduction.rst
+	struct_seams_product_Cij.rst
+	struct_seams_product_ComplexDot.rst
+	struct_seams_product_GemmInfo.rst
+	struct_seams_product_RealDot.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace product {
+
+	// enums
+
+	enum :ref:`Int8Backend<doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8>`;
+	enum :ref:`Mode<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69>`;
+	enum :ref:`Reduction<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354d>`;
+
+	// structs
+
+	struct :ref:`Cij<doxid-structseams_1_1product_1_1_cij>`;
+	struct :ref:`ComplexDot<doxid-structseams_1_1product_1_1_complex_dot>`;
+	struct :ref:`GemmInfo<doxid-structseams_1_1product_1_1_gemm_info>`;
+	struct :ref:`RealDot<doxid-structseams_1_1product_1_1_real_dot>`;
+
+	// global functions
+
+	:ref:`Mode<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69>` :target:`mode<doxid-namespaceseams_1_1product_1a4f480de28c1ceac46c4297f4f6766650>`();
+	void :target:`setMode<doxid-namespaceseams_1_1product_1acbca62f54637a86bcfc18f10fcdf5926>`(:ref:`Mode<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69>` m);
+	const char* :target:`modeName<doxid-namespaceseams_1_1product_1ac474bce9a90d2ddedbe613731fde239b>`(:ref:`Mode<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69>` m);
+	:ref:`Reduction<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354d>` :target:`reduction<doxid-namespaceseams_1_1product_1a7bd291c2c3f15b242c1406a3cf5fcc3c>`();
+	void :target:`setReduction<doxid-namespaceseams_1_1product_1a3b3fc8031879e5515251ea7cb61d2522>`(:ref:`Reduction<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354d>` r);
+	const char* :target:`reductionName<doxid-namespaceseams_1_1product_1a9d5ce001681251855a29c04303fbf402>`(:ref:`Reduction<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354d>` r);
+	bool :target:`amxAvailable<doxid-namespaceseams_1_1product_1a695f556d936855ecae9952acc337ca28>`();
+	bool :target:`vnniAvailable<doxid-namespaceseams_1_1product_1aff92d3adb921e5b30fd79cf9c129d287>`();
+	void :target:`twoSum<doxid-namespaceseams_1_1product_1ab9db9fbc435ff6f8211bcfd3fd1c3ac7>`(double a, double b, double& s, double& e);
+	void :target:`twoProd<doxid-namespaceseams_1_1product_1ae882b153eb1e1db91709144736bc41a1>`(double a, double b, double& hi, double& lo);
+	double :target:`pairwiseSum<doxid-namespaceseams_1_1product_1a2fc3521f88d306430aa6aa8976b1a346>`(const double* x, int n);
+	double :target:`neumaierSum<doxid-namespaceseams_1_1product_1a95ff5708558ec68212ebdad8fd50f591>`(const double* x, int n);
+	double :target:`leftSum<doxid-namespaceseams_1_1product_1a51d1f6b5e7fe1eb93e25fcd3d421c165>`(const double* x, int n);
+	double :target:`reduce<doxid-namespaceseams_1_1product_1a5157a24dfffb0fe26e26eca4aa808028>`(const double* x, int n, :ref:`Reduction<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354d>` r);
+	double :target:`pairwiseBound<doxid-namespaceseams_1_1product_1a3b7920afec76d1434e306d566a610dd4>`(int n, long double absSum);
+	:ref:`RealDot<doxid-structseams_1_1product_1_1_real_dot>` :target:`realDot<doxid-namespaceseams_1_1product_1a16a59cd631b7750babd993434ab89743>`(const double* x, const double* y, int n, :ref:`Mode<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69>` m);
+	:ref:`ComplexDot<doxid-structseams_1_1product_1_1_complex_dot>` :target:`complexDot<doxid-namespaceseams_1_1product_1a0e177c92a7f7d2b6f64ab9ba3f430cd7>`(const std::complex<double>* a, const std::complex<double>* b, int n, :ref:`Mode<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69>` m);
+	:ref:`Cij<doxid-structseams_1_1product_1_1_cij>` :target:`bondCorrelation<doxid-namespaceseams_1_1product_1aec3f1a01623db86baf55bd314a896104>`(const std::complex<double>* a, const std::complex<double>* b, int n, :ref:`Mode<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69>` m);
+	double :target:`meanOfFinite<doxid-namespaceseams_1_1product_1a034897976e290392140be6ca3d054fb4>`(const double* x, int n, :ref:`Reduction<doxid-namespaceseams_1_1product_1a41d6db9da7369504f08bf87d37ab354d>` r);
+	:ref:`GemmInfo<doxid-structseams_1_1product_1_1_gemm_info>` :target:`gemm<doxid-namespaceseams_1_1product_1ae21f804c2a172386021c150f5bc0f1ff>`(int m, int n, int k, const double* A, int lda, const double* B, int ldb, double* C, int ldc, :ref:`Mode<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69>` mode, double* bounds, :ref:`Int8Backend<doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8>` backend = :ref:`Int8Backend::Auto<doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8a06b9281e396db002010bde1de57262eb>`);
+	bool :target:`int8Gemm<doxid-namespaceseams_1_1product_1a738385ecf7dcef405bbd4ab54d424212>`(int m, int n, int k, const signed char* A, int lda, const signed char* B, int ldb, int* C, int ldc, :ref:`Int8Backend<doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8>` backend);
+
+	} // namespace product

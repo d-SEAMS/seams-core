@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['ice_0',['ice',['../structwater_1_1IonReport.html#adbed025d7275cad335206afab70263d8',1,'water::IonReport::ice'],['../structseams_1_1Rejection.html#a616a04e2500b7a68d856c8404d2247e8',1,'seams::Rejection::ice']]],
+  ['ice_5fcut_1',['ice_cut',['../structseams_1_1Q6BarOptions.html#a31901c76b92ebb973c6955f8f599f782',1,'seams::Q6BarOptions']]],
+  ['ice_5ffraction_2',['ice_fraction',['../structseams_1_1BrineProfile.html#a2a11d68d0fa81121bc65983c32ff7550',1,'seams::BrineProfile']]],
+  ['icefraction_3',['iceFraction',['../structsite_1_1ConcentrationBin.html#adbb9aefd42afe3457fc0f6e01a751f31',1,'site::ConcentrationBin::iceFraction'],['../structsite_1_1IonEnvironment.html#ab8c73ad7e47ebef7f210b178707e735d',1,'site::IonEnvironment::iceFraction']]],
+  ['icetype_4',['iceType',['../structchill_1_1ChillPlusResult.html#a893a70db579cee2a93d727c7abfc309e',1,'chill::ChillPlusResult::iceType'],['../structmolSys_1_1Point.html#a3b139c528b716173634931897dd13f73',1,'molSys::Point::iceType']]],
+  ['id_5',['id',['../structscience_1_1AtomRow.html#a655790e1c85b8c43a650371ff50949db',1,'science::AtomRow']]],
+  ['idindexmap_6',['idIndexMap',['../structmolSys_1_1PointCloud.html#a8e48a0ae066c2585e7320cdaa0cbc8db',1,'molSys::PointCloud']]],
+  ['im_7',['im',['../structseams_1_1product_1_1ComplexDot.html#aba2931a5cf0edce218d4058e56ad263b',1,'seams::product::ComplexDot']]],
+  ['imperfect_8',['imperfect',['../structseams_1_1PrismCensus.html#a7e83d2b3d1fc860fca877c7a906c1fb8',1,'seams::PrismCensus']]],
+  ['index_9',['index',['../structcage_1_1FormerRow.html#add9c789d79abd4898b8d9d05bd7c7378',1,'cage::FormerRow::index'],['../structnucleation_1_1Ascent.html#a3c22e7749621bc6b9403194f413cd305',1,'nucleation::Ascent::index'],['../structnucleation_1_1GrowBasin.html#a88792d60c940cd47ffe153d157c93cd1',1,'nucleation::GrowBasin::index'],['../structnucleation_1_1HalfRise.html#acf7d0863f46e8f0b00cfd6064043e49f',1,'nucleation::HalfRise::index'],['../structwater_1_1Selection.html#a9c69d41794e1951f7f10b97dcc763c91',1,'water::Selection::index']]],
+  ['inextended_10',['inExtended',['../structscience_1_1AtomRow.html#a561f052d10c3738fc0e13e9c6abbdd1a',1,'science::AtomRow']]],
+  ['ingraph_11',['inGraph',['../structprimitive_1_1Vertex.html#a932b6ae4efc838d407deed5ee11b8afe',1,'primitive::Vertex']]],
+  ['inside_12',['inside',['../structsite_1_1InsideTrace.html#a17a084da96d1f72f73c60ef608839b26',1,'site::InsideTrace']]],
+  ['inslice_13',['inSlice',['../structmolSys_1_1Point.html#a825e22e4d171aea51998d585c925c897',1,'molSys::Point']]],
+  ['intercept_14',['intercept',['../structsite_1_1LinearFit.html#ac326f633a141b97007523db7c0b5aa11',1,'site::LinearFit']]],
+  ['interfacial_15',['interfacial',['../structiface_1_1Profile.html#a19d1a698a13b9070e8d473ac846babc0',1,'iface::Profile::interfacial'],['../structscience_1_1LayerRow.html#a7399d56f6ef938b0f8c7e000f5cdd2eb',1,'science::LayerRow::interfacial'],['../structscience_1_1ClusterPart.html#a81bb51f3382c509a224f0653c618dee1',1,'science::ClusterPart::interfacial']]],
+  ['ion_16',['ion',['../structsite_1_1TrapEvent.html#ad81200671099239500463e887953538f',1,'site::TrapEvent::ion'],['../structsite_1_1IonEnvironment.html#a02bd5a73c0cc445e9f466ed3add1835a',1,'site::IonEnvironment::ion']]],
+  ['ion_5ftype_17',['ion_type',['../structseams_1_1BrineOptions.html#a98ad1095b5623c558cc6e7b3a2222ba0',1,'seams::BrineOptions']]],
+  ['ion_5ftypes_18',['ion_types',['../structwater_1_1Request.html#a2a1fb4b1bf1106925f31032a27a82e2e',1,'water::Request']]],
+  ['ions_19',['ions',['../structsite_1_1FrontSnapshot.html#a8c13b41520c3d10aa8d4acf009c87159',1,'site::FrontSnapshot']]],
+  ['ionsincluster_20',['ionsInCluster',['../structsite_1_1IceClusterIons.html#ad5061f8b24f2e8b999b4c8c18b93e666',1,'site::IceClusterIons']]],
+  ['ionsperformula_21',['ionsPerFormula',['../structsite_1_1FrontOptions.html#aad8324c08451340200a8f561c9da18db',1,'site::FrontOptions']]],
+  ['isolates_22',['isolates',['../structring_1_1PackingCertificate.html#a844abd7b84996099ed002777525cd0c5',1,'ring::PackingCertificate']]]
+];

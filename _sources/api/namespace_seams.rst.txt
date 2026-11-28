@@ -1,0 +1,182 @@
+.. index:: pair: namespace; seams
+.. _doxid-namespaceseams:
+
+namespace seams
+===============
+
+.. toctree::
+	:hidden:
+
+	namespace_seams_cfg.rst
+	namespace_seams_cpu.rst
+	namespace_seams_detail.rst
+	namespace_seams_domain.rst
+	namespace_seams_minimax.rst
+	namespace_seams_product.rst
+	namespace_seams_solid.rst
+	namespace_seams_sphericart_ylm.rst
+	namespace_seams_steinhardt.rst
+	namespace_seams_team.rst
+	namespace_seams_tsan.rst
+	namespace_seams_wigner.rst
+	namespace_seams_ylm.rst
+	struct_seams_EdgeSet.rst
+	struct_seams_FairState.rst
+	struct_seams_FilledByTeam.rst
+	struct_seams_TeamWidth.rst
+	class_seams_FairWidth.rst
+	class_seams_PinSession.rst
+	class_seams_RegionErrors.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace seams {
+
+	// namespaces
+
+	namespace :ref:`seams::cfg<doxid-namespaceseams_1_1cfg>`;
+	namespace :ref:`seams::cpu<doxid-namespaceseams_1_1cpu>`;
+	namespace :ref:`seams::detail<doxid-namespaceseams_1_1detail>`;
+	namespace :ref:`seams::domain<doxid-namespaceseams_1_1domain>`;
+	namespace :ref:`seams::minimax<doxid-namespaceseams_1_1minimax>`;
+	namespace :ref:`seams::product<doxid-namespaceseams_1_1product>`;
+	namespace :ref:`seams::solid<doxid-namespaceseams_1_1solid>`;
+	namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
+	namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
+	namespace :ref:`seams::team<doxid-namespaceseams_1_1team>`;
+		namespace :ref:`seams::team::detail<doxid-namespaceseams_1_1team_1_1detail>`;
+	namespace :ref:`seams::tsan<doxid-namespaceseams_1_1tsan>`;
+	namespace :ref:`seams::wigner<doxid-namespaceseams_1_1wigner>`;
+	namespace :ref:`seams::ylm<doxid-namespaceseams_1_1ylm>`;
+
+	// structs
+
+	struct :ref:`BondOptions<doxid-structseams_1_1_bond_options>`;
+	struct :ref:`BrineFronts<doxid-structseams_1_1_brine_fronts>`;
+	struct :ref:`BrineOptions<doxid-structseams_1_1_brine_options>`;
+	struct :ref:`BrineProfile<doxid-structseams_1_1_brine_profile>`;
+	struct :ref:`CageCounts<doxid-structseams_1_1_cage_counts>`;
+	struct :ref:`CageOptions<doxid-structseams_1_1_cage_options>`;
+	struct :ref:`ChillOptions<doxid-structseams_1_1_chill_options>`;
+	struct :ref:`ChordlessCycles<doxid-structseams_1_1_chordless_cycles>`;
+	struct :ref:`Classification<doxid-structseams_1_1_classification>`;
+	struct :ref:`Contacts<doxid-structseams_1_1_contacts>`;
+	struct :ref:`DensityOptions<doxid-structseams_1_1_density_options>`;
+	struct :ref:`DensityProfile<doxid-structseams_1_1_density_profile>`;
+	struct :ref:`DiffusionFit<doxid-structseams_1_1_diffusion_fit>`;
+	struct :ref:`DirectedBond<doxid-structseams_1_1_directed_bond>`;
+	struct :ref:`DirectedBondOptions<doxid-structseams_1_1_directed_bond_options>`;
+	struct :ref:`Distribution<doxid-structseams_1_1_distribution>`;
+	struct :ref:`DistributionOptions<doxid-structseams_1_1_distribution_options>`;
+	struct :ref:`DomainOptions<doxid-structseams_1_1_domain_options>`;
+	struct :ref:`DomainReport<doxid-structseams_1_1_domain_report>`;
+	struct :ref:`EdgeSet<doxid-structseams_1_1_edge_set>`;
+	struct :ref:`FairState<doxid-structseams_1_1_fair_state>`;
+
+	template <class T>
+	struct :ref:`FilledByTeam<doxid-structseams_1_1_filled_by_team>`;
+
+	struct :ref:`FingerprintOptions<doxid-structseams_1_1_fingerprint_options>`;
+	struct :ref:`FractionalDensityOptions<doxid-structseams_1_1_fractional_density_options>`;
+	struct :ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>`;
+	struct :ref:`HbondLifetimeCurve<doxid-structseams_1_1_hbond_lifetime_curve>`;
+	struct :ref:`HbondLifetimeFit<doxid-structseams_1_1_hbond_lifetime_fit>`;
+	struct :ref:`HostGuestContacts<doxid-structseams_1_1_host_guest_contacts>`;
+	struct :ref:`HostGuestOptions<doxid-structseams_1_1_host_guest_options>`;
+	struct :ref:`KnnOptions<doxid-structseams_1_1_knn_options>`;
+	struct :ref:`MoleculeCentres<doxid-structseams_1_1_molecule_centres>`;
+	struct :ref:`MoleculeDipoles<doxid-structseams_1_1_molecule_dipoles>`;
+	struct :ref:`MsdCurve<doxid-structseams_1_1_msd_curve>`;
+	struct :ref:`NeighbourOptions<doxid-structseams_1_1_neighbour_options>`;
+	struct :ref:`OrderOptions<doxid-structseams_1_1_order_options>`;
+	struct :ref:`OrientationOrder<doxid-structseams_1_1_orientation_order>`;
+	struct :ref:`Pockets<doxid-structseams_1_1_pockets>`;
+	struct :ref:`PoreFrame<doxid-structseams_1_1_pore_frame>`;
+	struct :ref:`PoreFrameOptions<doxid-structseams_1_1_pore_frame_options>`;
+	struct :ref:`PoreProfileOptions<doxid-structseams_1_1_pore_profile_options>`;
+	struct :ref:`PoreProfiles<doxid-structseams_1_1_pore_profiles>`;
+	struct :ref:`PrismCensus<doxid-structseams_1_1_prism_census>`;
+	struct :ref:`PrismOptions<doxid-structseams_1_1_prism_options>`;
+	struct :ref:`Q4Q6<doxid-structseams_1_1_q4_q6>`;
+	struct :ref:`Q6Bar<doxid-structseams_1_1_q6_bar>`;
+	struct :ref:`Q6BarOptions<doxid-structseams_1_1_q6_bar_options>`;
+	struct :ref:`Rejection<doxid-structseams_1_1_rejection>`;
+	struct :ref:`ReorientationCurve<doxid-structseams_1_1_reorientation_curve>`;
+	struct :ref:`ReorientationFit<doxid-structseams_1_1_reorientation_fit>`;
+	struct :ref:`RingOptions<doxid-structseams_1_1_ring_options>`;
+	struct :ref:`RunningCoordination<doxid-structseams_1_1_running_coordination>`;
+	struct :ref:`SheetOptions<doxid-structseams_1_1_sheet_options>`;
+	struct :ref:`SignatureMatch<doxid-structseams_1_1_signature_match>`;
+	struct :ref:`SignatureOptions<doxid-structseams_1_1_signature_options>`;
+	struct :ref:`Steinhardt<doxid-structseams_1_1_steinhardt>`;
+	struct :ref:`SteinhardtOptions<doxid-structseams_1_1_steinhardt_options>`;
+	struct :ref:`TeamWidth<doxid-structseams_1_1_team_width>`;
+	struct :ref:`WaterVectors<doxid-structseams_1_1_water_vectors>`;
+
+	// classes
+
+	class :ref:`Brine<doxid-classseams_1_1_brine>`;
+	class :ref:`Cages<doxid-classseams_1_1_cages>`;
+	class :ref:`Error<doxid-classseams_1_1_error>`;
+	class :ref:`FairWidth<doxid-classseams_1_1_fair_width>`;
+	class :ref:`Fingerprint<doxid-classseams_1_1_fingerprint>`;
+	class :ref:`HbondTcf<doxid-classseams_1_1_hbond_tcf>`;
+	class :ref:`Msd<doxid-classseams_1_1_msd>`;
+	class :ref:`Neighbours<doxid-classseams_1_1_neighbours>`;
+	class :ref:`PinSession<doxid-classseams_1_1_pin_session>`;
+	class :ref:`RegionErrors<doxid-classseams_1_1_region_errors>`;
+	class :ref:`Reorientation<doxid-classseams_1_1_reorientation>`;
+	class :ref:`Rings<doxid-classseams_1_1_rings>`;
+	class :ref:`System<doxid-classseams_1_1_system>`;
+
+	// global functions
+
+	:ref:`EdgeSet<doxid-structseams_1_1_edge_set>` :target:`edgeSetOf<doxid-namespaceseams_1a18253b5fae99ed10e40bde67a6ccd3ce>`(const std::vector<std::vector<int>>& rows);
+	bool :target:`provenEqual<doxid-namespaceseams_1aeac06060e7e630f44e6ba07eb3c481bb>`(const :ref:`EdgeSet<doxid-structseams_1_1_edge_set>`& a, const :ref:`EdgeSet<doxid-structseams_1_1_edge_set>`& b);
+
+	template <std::integral To, std::integral From>
+	To :target:`checkedCast<doxid-namespaceseams_1abc3eab320370485923f4563cbaa7704b>`(From value);
+
+	template <std::integral From>
+	std::size_t :target:`toIndex<doxid-namespaceseams_1a4120954b65e6c38909bd1d45b64b8ce2>`(From value);
+
+	bool :target:`gridFits<doxid-namespaceseams_1ac40237cc8c0d361ee5094a5a940064bc>`(int nx, int ny, int nz, int& cells);
+	void :target:`coarsenUntilFits<doxid-namespaceseams_1a5283041349f6d7de1bcd50bfcd1808f5>`(int& nx, int& ny, int& nz, int floorDim, int maxCells = 1<<22);
+	bool :target:`prefixCounts<doxid-namespaceseams_1ab7402e2b9669c2b14fc4a7d74139a746>`(const int* counts, int n, std::vector<int>& offsets);
+	bool :target:`parseExactDouble<doxid-namespaceseams_1ae8356c14dff3260b771759a58fb18246>`(std::string_view text, double& out);
+	int :target:`teamThreads<doxid-namespaceseams_1ab6823a52a8fc7a28ba1de174caa5190f>`();
+
+	template <class T>
+	void :target:`exclusiveScan<doxid-namespaceseams_1ade36ab0f3594a27f4b1d229706d9443b>`(std::vector<T>& values);
+
+	template <class T, class Less>
+	void :target:`parallelStableSort<doxid-namespaceseams_1ae8cf4ad5f2bb66332e94fb7f531c3194>`(std::vector<T>& values, Less less);
+
+	void :target:`BatchPeriodicDistSq<doxid-namespaceseams_1a7b2dc4f3d8257cc99b099ffbebd1a5ab>`(const double* dx, const double* dy, const double* dz, double bx, double by, double bz, double* out, size_t n);
+	void :target:`widenAffinity<doxid-namespaceseams_1a01eeaf2b0308959da8fbd353b1251c3f>`();
+	void :target:`tuneHeap<doxid-namespaceseams_1aded3399a4ee3ed873ee94fd1ef5742fc>`();
+	int :target:`teamWidth<doxid-namespaceseams_1a002966520b0a58eaf667caa881bd7e55>`();
+	int& :target:`askedWidth<doxid-namespaceseams_1a127a17333aadfa16f68e0b22f5945b52>`();
+	int :target:`poolWidth<doxid-namespaceseams_1a0e09266ed0b34d8d11f1f5b1abc794ff>`(int team);
+
+	template <class Search>
+	void :target:`withTeamAsleep<doxid-namespaceseams_1a87185432abc82c538a9973ba052cd2c6>`(int width, Search&& search);
+
+	void :target:`releaseTeam<doxid-namespaceseams_1ac0a24516fc1a602071c7a6b3c6dae07c>`();
+	bool :target:`placementHeld<doxid-namespaceseams_1a654eae6b67f5303f11ff73b0f75d126b>`();
+	int :target:`loadWidth<doxid-namespaceseams_1a951bd24510378d38e4d11c0bae33ee81>`(int base);
+	bool :target:`othersHoldHalf<doxid-namespaceseams_1a289b38633efc51b3e8c2304583b96676>`();
+	void :target:`prepareCompute<doxid-namespaceseams_1a66f2a31973e169d4693552c47f760b66>`();
+	void :target:`adoptThreads<doxid-namespaceseams_1afd71d1c59950dc2eabbff5aa9362a16c>`();
+	int :target:`teamFor<doxid-namespaceseams_1a98257c92796cbd41fc8cc5f0382c7dd0>`(int n);
+	int :target:`poolFor<doxid-namespaceseams_1a11e5439574d89b21e21c449ae1697cc8>`(int n);
+	:ref:`FairState<doxid-structseams_1_1_fair_state>`& :target:`fairState<doxid-namespaceseams_1a341d5d8e4742b978662f482a2e86b7ee>`();
+	int& :target:`fairDepth<doxid-namespaceseams_1a47c86a850c14cd9da23ce1fec36be95b>`();
+	bool :target:`fairEnabled<doxid-namespaceseams_1adf03c6a9af70b7c8e5a7a322828ae8ac>`();
+
+	} // namespace seams

@@ -1,0 +1,84 @@
+.. index:: pair: struct; seams::DistributionOptions
+.. _doxid-structseams_1_1_distribution_options:
+
+struct seams::DistributionOptions
+=================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a partial RDF, its running coordination, or the integral. :ref:`More...<details-structseams_1_1_distribution_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct DistributionOptions {
+		// fields
+	
+		double :ref:`rmax<doxid-structseams_1_1_distribution_options_1a1d087343152feeae185aece4dbcc7d4f>` = 6;
+		int :ref:`bins<doxid-structseams_1_1_distribution_options_1a7236b4c07255214cdfa41e652ab4e32b>` = 0;
+		int :ref:`type_i<doxid-structseams_1_1_distribution_options_1a2d39479933b726c4068dfb6bd2af394b>` = 0;
+		int :ref:`type_j<doxid-structseams_1_1_distribution_options_1a7e7570284a2b1026d1e58169595f03f0>` = 0;
+	};
+.. _details-structseams_1_1_distribution_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a partial RDF, its running coordination, or the integral.
+
+Fields
+------
+
+.. index:: pair: variable; rmax
+.. _doxid-structseams_1_1_distribution_options_1a1d087343152feeae185aece4dbcc7d4f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double rmax = 6
+
+Outer limit, Angstrom.
+
+.. index:: pair: variable; bins
+.. _doxid-structseams_1_1_distribution_options_1a7236b4c07255214cdfa41e652ab4e32b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int bins = 0
+
+Bin count.
+
+Zero selects about rmax / 0.1.
+
+.. index:: pair: variable; type_i
+.. _doxid-structseams_1_1_distribution_options_1a2d39479933b726c4068dfb6bd2af394b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int type_i = 0
+
+First species.
+
+Zero keeps every atom.
+
+.. index:: pair: variable; type_j
+.. _doxid-structseams_1_1_distribution_options_1a7e7570284a2b1026d1e58169595f03f0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int type_j = 0
+
+Second species.
+
+Zero keeps every atom.
+

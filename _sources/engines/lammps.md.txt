@@ -1,0 +1,37 @@
+# LAMMPS
+
+Meson builds `run_hook`, the in-run hook. It links `liblammps` and registers a
+`fix external` callback. Every step the callback calls the same C API as
+`seams chill-plus`. `engines/lammps/compute_dseams.cpp` is a per-atom style.
+When `compute.h`, `atom.h`, and `lammpsplugin.h` are installed, Meson builds
+it as `dseamsplugin.so` for `plugin load`. conda-forge LAMMPS installs
+`library.h` only; `scripts/fetch_lammps_headers.sh DEST` checks out `src` of
+the release that `lmp` reports and prints its path, and `-Dlammps_src_include=`
+that path builds the plugin. Otherwise copy the file into a LAMMPS source tree. On several MPI ranks the compute gathers every
+atom to rank 0, classifies the whole cell once, and returns each rank its
+own labels, so the result does not depend on the domain decomposition.
+
+`compute dseams` takes `cutoff` (angstrom), `graph` (`cutoff` or `mutual`),
+`rule` (`published` or `ovito`), `type I` and `mol water`. `type I` scores the
+group atoms of LAMMPS type I as water oxygens. `mol water` scores the type
+that appears once in each multi-atom molecule and needs an atom style with
+molecule IDs. The other group atoms read 6 (unclassified) and atoms outside
+the group read -1. A group of several types that sets neither is an error,
+so hydrogens and ions stay out of the CHILL+ graph. The deck's `fix ext` line
+is `external pf/callback`.
+
+```{literalinclude} ../../../engines/lammps/in.mw.lmp
+```
+
+```{literalinclude} ../../../engines/lammps/in.dseams
+:lines: 1-15
+```
+
+```{literalinclude} ../../../extras/lammps/in.dseams
+:lines: 11-13
+```
+
+```{literalinclude} ../../../engines/lammps/run_hook.cpp
+:language: cpp
+:lines: 44-49
+```

@@ -1,0 +1,43 @@
+.. index:: pair: struct; site::FrontLayerReport
+.. _doxid-structsite_1_1_front_layer_report:
+
+struct site::FrontLayerReport
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Waters within ``halfWidth`` of either front, their primitive-ring census, and the coordination defects (a water whose oxygen neighbour count is not 4). :ref:`More...<details-structsite_1_1_front_layer_report>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct FrontLayerReport {
+		// fields
+	
+		std::vector<int> :target:`waters<doxid-structsite_1_1_front_layer_report_1a686f47786d4d5db06b87e553af03650a>`;
+		std::vector<int> :target:`ringCensus<doxid-structsite_1_1_front_layer_report_1abdc4631419ba1a2fe7c9ceeb3d8cc545>`;
+		std::vector<int> :target:`coordination<doxid-structsite_1_1_front_layer_report_1ab05b6b54c5649c1ab5d92d56fcc5d113>`;
+		int :target:`nDefect<doxid-structsite_1_1_front_layer_report_1a0b13a85e08525e2a3cd42b4c443741e2>` = 0;
+		int :target:`nFour<doxid-structsite_1_1_front_layer_report_1aeb6d19e0b90fbe094f1187b04a0dc142>` = 0;
+		int :target:`nHexagonal<doxid-structsite_1_1_front_layer_report_1ab34310122d321b12909ed058e578f1ad>` = 0;
+		int :target:`nCubic<doxid-structsite_1_1_front_layer_report_1a7968439ef3c81e49520aa5b3eacb6cc2>` = 0;
+		int :target:`nInterfacial<doxid-structsite_1_1_front_layer_report_1a7f37fedeb2733761f731646e288d6548>` = 0;
+		int :target:`nClathrate<doxid-structsite_1_1_front_layer_report_1acc95c74670d1c9018ee1d79e68bdd7d9>` = 0;
+		int :target:`nLiquidLabel<doxid-structsite_1_1_front_layer_report_1aac8322a872d6751dd1fa90847503ba6c>` = 0;
+	};
+.. _details-structsite_1_1_front_layer_report:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Waters within ``halfWidth`` of either front, their primitive-ring census, and the coordination defects (a water whose oxygen neighbour count is not 4).
+
+``:ref:`ringCensus <doxid-structsite_1_1_front_layer_report_1abdc4631419ba1a2fe7c9ceeb3d8cc545>`[s]`` is the number of primitive rings of size s that lie entirely in the layer. ``:ref:`coordination <doxid-structsite_1_1_front_layer_report_1ab05b6b54c5649c1ab5d92d56fcc5d113>`[c]`` counts waters with c neighbours, and the last bin also holds every larger count.
+

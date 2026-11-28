@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/topo_bulk.hpp Source File</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/topo__bulk_8hpp_source.html">
+<meta property="og:title" content="seams-core: src/include/internal/topo_bulk.hpp Source File">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/topo__bulk_8hpp_source.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/topo_bulk.hpp Source File">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('topo__bulk_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">topo_bulk.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="topo__bulk_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">//</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Copyright (c) 2018--present d-SEAMS core team</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// This program is free software: you can redistribute it and/or modify</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// it under the terms of the MIT License as published by</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// the Open Source Initiative.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// A copy of the MIT License is included in the LICENSE file of this repository.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// You should have received a copy of the MIT License along with this program.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// If not, see &lt;https://opensource.org/licenses/MIT&gt;.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//-----------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef SEAMS_TOPO_BULK_H_</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define SEAMS_TOPO_BULK_H_</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;array&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;fstream&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;iterator&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;sstream&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;<a class="code" href="cage_8hpp.html">cage.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;<a class="code" href="mol__sys_8hpp.html">mol_sys.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;<a class="code" href="order__parameter_8hpp.html">order_parameter.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;<a class="code" href="par__team_8hpp.html">par_team.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;<a class="code" href="ring_8hpp.html">ring.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;<a class="code" href="seams__input_8hpp.html">seams_input.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;<a class="code" href="seams__output_8hpp.html">seams_output.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &lt;<a class="code" href="shapeMatch_8hpp.html">shapeMatch.hpp</a>&gt;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacering.html">ring</a> {</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="namespacering.html#a46bc67e817124b0e736c493bc8e4d6ee">   53</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a46bc67e817124b0e736c493bc8e4d6ee">bulkPolygonRingAnalysis</a>(</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    std::string path, <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud, <span class="keywordtype">int</span> maxDepth,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">int</span> firstFrame);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// DDC HC Ring functions</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespacering.html#ada5f6a19834edc41365e7f85d92e4b76">   64</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#ada5f6a19834edc41365e7f85d92e4b76">topoBulkAnalysis</a>(std::string path, <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>                     <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>                     <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>                     <span class="keywordtype">int</span> firstFrame, <span class="keywordtype">bool</span> onlyTetrahedral = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span></div>
+<div class="foldopen" id="foldopen00083" data-start="{" data-end="};">
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html">   83</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> {</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb">   84</a></span>  std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_variable" href="structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb">ringsContainingAtom</a>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html#af441edebdda78d7968c7b8dca76b6667">   87</a></span>  std::vector&lt;int, seams::FilledByTeam&lt;int&gt;&gt; <a class="code hl_variable" href="structring_1_1RingSearchIndex.html#af441edebdda78d7968c7b8dca76b6667">ringOff</a>;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html#a31274484c56595c0a3fdf01a9157fd78">   88</a></span>  std::vector&lt;int, seams::FilledByTeam&lt;int&gt;&gt; <a class="code hl_variable" href="structring_1_1RingSearchIndex.html#a31274484c56595c0a3fdf01a9157fd78">ringCol</a>;</div>
+<div class="foldopen" id="foldopen00090" data-start="{" data-end="}">
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html#a4a3b1bad0b060ee2e5aa4d8a268f41c5">   90</a></span>  [[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="structring_1_1RingSearchIndex.html#a4a3b1bad0b060ee2e5aa4d8a268f41c5">atomCount</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="structring_1_1RingSearchIndex.html#af441edebdda78d7968c7b8dca76b6667">ringOff</a>.empty() ? 0 : <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="structring_1_1RingSearchIndex.html#af441edebdda78d7968c7b8dca76b6667">ringOff</a>.size()) - 1;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  }</div>
+</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html#a891fe48d2dccc51ea7f043b562a42cbd">   93</a></span>  std::vector&lt;int&gt; <a class="code hl_variable" href="structring_1_1RingSearchIndex.html#a891fe48d2dccc51ea7f043b562a42cbd">atomRank</a>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="structring_1_1RingSearchIndex.html#a756c5dfcd0a8e96744dfff6775c1e31b">   96</a></span>  std::vector&lt;std::array&lt;int, 3&gt;&gt; <a class="code hl_variable" href="structring_1_1RingSearchIndex.html#a756c5dfcd0a8e96744dfff6775c1e31b">ringShift</a>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>};</div>
+</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>[[nodiscard]] <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="namespacering.html#ab661e962729134479d1caf21e688a703">  103</a></span><a class="code hl_function" href="namespacering.html#ab661e962729134479d1caf21e688a703">buildRingSearchIndex</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings, <span class="keywordtype">int</span> numAtoms,</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                     <span class="keywordtype">bool</span> withRows = <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="namespacering.html#ae6af6b848c82b3f5bca8514ae6a31473">  107</a></span>[[nodiscard]] <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> <a class="code hl_function" href="namespacering.html#ab661e962729134479d1caf21e688a703">buildRingSearchIndex</a>(</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>[[nodiscard]] std::vector&lt;int&gt;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="namespacering.html#a51764966eab7aea2d90649bb6cc607ea">  115</a></span><a class="code hl_function" href="namespacering.html#a51764966eab7aea2d90649bb6cc607ea">positionRank</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="namespacering.html#a21915c7b0472e5af1e63081fa42bfd62">  122</a></span>[[nodiscard]] std::vector&lt;std::array&lt;int, 3&gt;&gt; <a class="code hl_function" href="namespacering.html#a21915c7b0472e5af1e63081fa42bfd62">ringWindings</a>(</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="namespacering.html#a2f56d182514c3a74d223a92c22136017">  130</a></span>[[nodiscard]] std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacering.html#a2f56d182514c3a74d223a92c22136017">contractibleRings</a>(</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="namespacering.html#a926f17abcc69431361238b764ab25619">  135</a></span>[[nodiscard]] std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacering.html#a2f56d182514c3a74d223a92c22136017">contractibleRings</a>(</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    std::vector&lt;std::vector&lt;int&gt;&gt; &amp;&amp;rings,</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="namespacering.html#a9d784052b67c693381315d0947be0881">  144</a></span>[[nodiscard]] std::vector&lt;std::vector&lt;int&gt;&gt; <a class="code hl_function" href="namespacering.html#a9d784052b67c693381315d0947be0881">cageRings</a>(</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="keywordtype">double</span> cutoff);</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="namespacering.html#a503bfa2deec404d907645e16ed236c28">  151</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#a503bfa2deec404d907645e16ed236c28">findDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>                         std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>                         <span class="keyword">const</span> std::vector&lt;int&gt; &amp;listHC,</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>                         std::vector&lt;cage::Cage&gt; &amp;cageList);</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span></div>
+<div class="foldopen" id="foldopen00163" data-start="{" data-end="};">
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html">  163</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structring_1_1PackingCertificate.html">PackingCertificate</a> {</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#afc56b3e0d1e930ae377136450861e784">  164</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#afc56b3e0d1e930ae377136450861e784">cages</a> = 0;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#a3c8919476309e146efc52597b040d85b">  165</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#a3c8919476309e146efc52597b040d85b">upper</a> = -1;</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#ab3cbb3ce409a45e7993ef3f3e3a84ea9">  166</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#ab3cbb3ce409a45e7993ef3f3e3a84ea9">matching</a> = 0;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#a471aee5b4e6b862bd5f0566672a7ca04">  167</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#a471aee5b4e6b862bd5f0566672a7ca04">cover</a> = 0;</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#a844abd7b84996099ed002777525cd0c5">  168</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#a844abd7b84996099ed002777525cd0c5">isolates</a> = 0;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#a11e76b07b9438cb43062376306aa18cf">  169</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#a11e76b07b9438cb43062376306aa18cf">vertices</a> = 0;</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#abbf443bef13f22d686775e4dfb466017">  170</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#abbf443bef13f22d686775e4dfb466017">edges</a> = 0;</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#a2a752e3f4b9325cc4abc66dced3635df">  171</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#a2a752e3f4b9325cc4abc66dced3635df">components</a> = 0;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#ac3e6f1ef04d0a930e45f12a6b155f77f">  172</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#ac3e6f1ef04d0a930e45f12a6b155f77f">dropped</a> = 0;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#a0559d109273cc42d5552b3b401ab516a">  173</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#a0559d109273cc42d5552b3b401ab516a">method</a> = 0;</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#a00bbe1dcc9a09aac1fadc53835c566d6">  174</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#a00bbe1dcc9a09aac1fadc53835c566d6">tight</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno"><a class="line" href="structring_1_1PackingCertificate.html#a5f6246660f18db3ebb2806d3ff4e34fa">  175</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1PackingCertificate.html#a5f6246660f18db3ebb2806d3ff4e34fa">milliseconds</a> = 0;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>};</div>
+</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="namespacering.html#a7e08c423e61bfe5df43c009de1b38366">  182</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a7e08c423e61bfe5df43c009de1b38366">equatorChoiceOverflow</a>(<span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="structring_1_1EquatorChoice.html">EquatorChoice</a> *self, <span class="keywordtype">int</span> at);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="namespacering.html#a7e4d993e20ff5ad076f747f08c9fb780">  183</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacering.html#a7e4d993e20ff5ad076f747f08c9fb780">equatorChoiceOverflowPut</a>(<span class="keyword">struct</span> <a class="code hl_struct" href="structring_1_1EquatorChoice.html">EquatorChoice</a> *self, <span class="keywordtype">int</span> at, <span class="keywordtype">int</span> value);</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="foldopen" id="foldopen00185" data-start="{" data-end="};">
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="structring_1_1EquatorChoice.html">  185</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structring_1_1EquatorChoice.html">EquatorChoice</a> {</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno"><a class="line" href="structring_1_1EquatorChoice.html#ab89f64fa075b360c70306c6b46747d34">  186</a></span>  <span class="keywordtype">int</span> <a class="code hl_namespace" href="namespacering.html">ring</a>[6]{};</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="structring_1_1EquatorChoice.html#a51db6155bcb66059917161200ed20b2c">  187</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structring_1_1EquatorChoice.html#a51db6155bcb66059917161200ed20b2c">n</a> = 0;</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="foldopen" id="foldopen00189" data-start="{" data-end="}">
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="structring_1_1EquatorChoice.html#a419dd14bc198b919ca7e93522faf39b5">  189</a></span>  [[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="structring_1_1EquatorChoice.html#a419dd14bc198b919ca7e93522faf39b5">idAt</a>(<span class="keywordtype">int</span> k)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="keywordflow">return</span> k &lt; 6 ? <a class="code hl_namespace" href="namespacering.html">ring</a>[k] : <a class="code hl_function" href="namespacering.html#a7e08c423e61bfe5df43c009de1b38366">equatorChoiceOverflow</a>(<span class="keyword">this</span>, k - 6);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>  }</div>
+</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
+<div class="foldopen" id="foldopen00193" data-start="{" data-end="}">
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="structring_1_1EquatorChoice.html#ad5fea7aca33bd26edb46c5ba9600db21">  193</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="structring_1_1EquatorChoice.html#ad5fea7aca33bd26edb46c5ba9600db21">put</a>(<span class="keywordtype">int</span> k, <span class="keywordtype">int</span> value) {</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keywordflow">if</span> (k &lt; 6) {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>      <a class="code hl_namespace" href="namespacering.html">ring</a>[k] = value;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    }</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <a class="code hl_function" href="namespacering.html#a7e4d993e20ff5ad076f747f08c9fb780">equatorChoiceOverflowPut</a>(<span class="keyword">this</span>, k - 6, value);</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>  }</div>
+</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>};</div>
+</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="namespacering.html#a5c05b0dac9b7124e2770e04a424a3bf7">  202</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacering.html#a5c05b0dac9b7124e2770e04a424a3bf7">releaseEquatorOverflow</a>();</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span></div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>[[nodiscard]] std::vector&lt;int&gt;</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno"><a class="line" href="namespacering.html#ae219003bad567e0125990284302d2029">  208</a></span><a class="code hl_function" href="namespacering.html#ae219003bad567e0125990284302d2029">maximumEquators</a>(<span class="keyword">const</span> std::vector&lt;EquatorChoice&gt; &amp;periph,</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>                <span class="keyword">const</span> std::vector&lt;int&gt; &amp;order, <a class="code hl_struct" href="structring_1_1PackingCertificate.html">PackingCertificate</a> *certificate);</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="namespacering.html#a73600fc304e8be5145df330f5f9552fe">  213</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#a503bfa2deec404d907645e16ed236c28">findDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>                         std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>                         <span class="keyword">const</span> std::vector&lt;int&gt; &amp;listHC,</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>                         std::vector&lt;cage::Cage&gt; &amp;cageList,</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>                         <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index,</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>                         <a class="code hl_struct" href="structring_1_1PackingCertificate.html">PackingCertificate</a> *certificate = <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno"><a class="line" href="namespacering.html#a5e65636a113b8a778541f437f00c0f97">  223</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#a5e65636a113b8a778541f437f00c0f97">findMixedRings</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>                                std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>                                std::vector&lt;int&gt; &amp;listDDC,</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>                                std::vector&lt;int&gt; &amp;listHC);</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno"><a class="line" href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">  230</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">findHC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>                        std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>                        <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>                        std::vector&lt;cage::Cage&gt; &amp;cageList);</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span></div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="namespacering.html#a1dfa48bf23ffaf39fee585ac7634231a">  236</a></span>std::vector&lt;int&gt; <a class="code hl_function" href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">findHC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>                        std::vector&lt;strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>                        <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>                        std::vector&lt;cage::Cage&gt; &amp;cageList,</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>                        <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno"><a class="line" href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">  244</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">conditionOneDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>                     std::vector&lt;int&gt; &amp;peripheralRings, <span class="keywordtype">int</span> iring);</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span></div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="namespacering.html#a75c45309352d085d18f89f370dd42ab2">  248</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">conditionOneDDC</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>                     std::vector&lt;int&gt; &amp;peripheralRings, <span class="keywordtype">int</span> iring,</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>                     <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index);</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span></div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno"><a class="line" href="namespacering.html#a01243f4581fb55b417184d98f9ac70aa">  260</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a01243f4581fb55b417184d98f9ac70aa">equatorialConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>                          <span class="keywordtype">int</span> iring, <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index,</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>                          std::vector&lt;int&gt; *peripheralUnion,</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>                          std::vector&lt;int&gt; *chosen = <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>                          <span class="keyword">const</span> std::vector&lt;int&gt; *rank = <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>                          <a class="code hl_struct" href="structring_1_1EquatorChoice.html">EquatorChoice</a> *raw = <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span></div>
+<div class="foldopen" id="foldopen00268" data-start="{" data-end="};">
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno"><a class="line" href="classring_1_1NeighBond.html">  268</a></span><span class="keyword">class </span><a class="code hl_class" href="classring_1_1NeighBond.html">NeighBond</a> {</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno"><a class="line" href="classring_1_1NeighBond.html#adede93d18467191b18db5a9960a3dcfa">  270</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classring_1_1NeighBond.html#adede93d18467191b18db5a9960a3dcfa">build</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList);</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>  <span class="comment">// Row i, sorted and unique. Empty when i is outside the cloud.</span></div>
+<div class="foldopen" id="foldopen00273" data-start="{" data-end="}">
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno"><a class="line" href="classring_1_1NeighBond.html#a7a76d39976a7d0b0c1248aa26e7ea486">  273</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="classring_1_1NeighBond.html#a7a76d39976a7d0b0c1248aa26e7ea486">row</a>(<span class="keywordtype">int</span> i, <span class="keyword">const</span> <span class="keywordtype">int</span> *&amp;begin, <span class="keyword">const</span> <span class="keywordtype">int</span> *&amp;end)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(i) &gt;= <span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(n_) || off_.empty()) {</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>      begin = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>      end = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    }</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    begin = cols_.data() + off_[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)];</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    end = cols_.data() + off_[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i + 1)];</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>  }</div>
+</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="foldopen" id="foldopen00283" data-start="{" data-end="}">
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="classring_1_1NeighBond.html#ae05df58a91640cf5f7e93a70e45563f5">  283</a></span>  [[nodiscard]] <span class="keywordtype">bool</span> <a class="code hl_function" href="classring_1_1NeighBond.html#ae05df58a91640cf5f7e93a70e45563f5">operator()</a>(<span class="keywordtype">int</span> i, <span class="keywordtype">int</span> j)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *begin = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *end = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    <a class="code hl_function" href="classring_1_1NeighBond.html#a7a76d39976a7d0b0c1248aa26e7ea486">row</a>(i, begin, end);</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>    <span class="keywordflow">if</span> (begin == <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    }</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    <span class="keywordflow">return</span> std::binary_search(begin, end, j);</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>  }</div>
+</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span> </div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>  <span class="keywordtype">int</span> n_ = 0;</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>  <span class="comment">// Row i is cols_[off_[i] .. off_[i + 1]], sorted and unique.</span></div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>  std::vector&lt;int&gt; off_;</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>  std::vector&lt;int&gt; cols_;</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>};</div>
+</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span></div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno"><a class="line" href="namespacering.html#a199fe38d3152cc04d18109ddb868ab34">  304</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a199fe38d3152cc04d18109ddb868ab34">basalConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>                     <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal1,</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>                     <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno"><a class="line" href="namespacering.html#a0d5ffbd5b49f72d57d0e3e00a78ca512">  309</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a199fe38d3152cc04d18109ddb868ab34">basalConditions</a>(<span class="keyword">const</span> <a class="code hl_class" href="classring_1_1NeighBond.html">NeighBond</a> &amp;bonds, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal1,</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>                     <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span></div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno"><a class="line" href="namespacering.html#a350f1fa3c3d5807fb720444054d6e340">  314</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a350f1fa3c3d5807fb720444054d6e340">basalNeighbours</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>                     std::vector&lt;int&gt; &amp;triplet, <span class="keywordtype">int</span> atomOne, <span class="keywordtype">int</span> atomTwo);</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno"><a class="line" href="namespacering.html#a5db4898b22ebb13511cc37fae6674e5c">  319</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespacering.html#a5db4898b22ebb13511cc37fae6674e5c">notNeighboursOfRing</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>                         std::vector&lt;int&gt; &amp;triplet,</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>                         <span class="keyword">const</span> std::vector&lt;int&gt; &amp;<a class="code hl_namespace" href="namespacering.html">ring</a>);</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span></div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno"><a class="line" href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">  324</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">findPrismatic</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings, std::vector&lt;int&gt; &amp;listHC,</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>                  std::vector&lt;strucType&gt; &amp;ringType, <span class="keywordtype">int</span> iring, <span class="keywordtype">int</span> jring,</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>                  std::vector&lt;int&gt; &amp;prismaticRings);</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span></div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno"><a class="line" href="namespacering.html#aaf26a6612dd314b36db80820289ab68b">  329</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">findPrismatic</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>                                std::vector&lt;int&gt; &amp;listHC,</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>                                std::vector&lt;strucType&gt; &amp;ringType, <span class="keywordtype">int</span> iring,</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>                                <span class="keywordtype">int</span> jring, std::vector&lt;int&gt; &amp;prismaticRings,</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>                                <span class="keyword">const</span> <a class="code hl_struct" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index);</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span></div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno"><a class="line" href="namespacering.html#a45c216fc97f12e29f117bbc1f6d3c7f3">  337</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#a45c216fc97f12e29f117bbc1f6d3c7f3">getAtomTypesTopoBulk</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>                         <span class="keyword">const</span> std::vector&lt;ring::strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>                         std::vector&lt;cage::iceType&gt; &amp;atomTypes);</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span></div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno"><a class="line" href="namespacering.html#aac3a6fdc27f05a7ded468e955983f270">  342</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespacering.html#aac3a6fdc27f05a7ded468e955983f270">getStrucNumbers</a>(<span class="keyword">const</span> std::vector&lt;ring::strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>                    <span class="keyword">const</span> std::vector&lt;cage::Cage&gt; &amp;cageList, <span class="keywordtype">int</span> &amp;numHC, <span class="keywordtype">int</span> &amp;numDDC,</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>                    <span class="keywordtype">int</span> &amp;mixedRings, <span class="keywordtype">int</span> &amp;prismaticRings, <span class="keywordtype">int</span> &amp;basalRings);</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span> </div>
+<div class="foldopen" id="foldopen00346" data-start="{" data-end="};">
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html">  346</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structring_1_1DdcSplit.html">DdcSplit</a> {</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#a530a3a77e57577975fb234a434f8e0a0">  347</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#a530a3a77e57577975fb234a434f8e0a0">order_ms</a> = 0;</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#a31133496ae68fe985806fe457db2da5c">  348</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#a31133496ae68fe985806fe457db2da5c">equator_ms</a> = 0;</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#a3f74ded6b1b79617901c8d15a58fb6da">  349</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#a3f74ded6b1b79617901c8d15a58fb6da">pack_ms</a> = 0;</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#a244492ecca2113edb275d44be1020b60">  350</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#a244492ecca2113edb275d44be1020b60">conf_ms</a> = 0;</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#aa72c211b9d8dfb4e5518bd5400d7fea2">  351</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#aa72c211b9d8dfb4e5518bd5400d7fea2">split_ms</a> = 0;</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#a3d994ad1b24334e2dc09d671b9710592">  352</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#a3d994ad1b24334e2dc09d671b9710592">clique_ms</a> = 0;</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#a4079d61ecb002863dfa8ec6c0c17acb4">  353</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#a4079d61ecb002863dfa8ec6c0c17acb4">match_ms</a> = 0;</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#afc2418f108d7222363633cdf3b53033c">  354</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#afc2418f108d7222363633cdf3b53033c">search_ms</a> = 0;</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno"><a class="line" href="structring_1_1DdcSplit.html#ad79d964f4d1aabb7349c4d4c012e15e0">  355</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1DdcSplit.html#ad79d964f4d1aabb7349c4d4c012e15e0">write_ms</a> = 0;</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>};</div>
+</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> </div>
+<div class="foldopen" id="foldopen00358" data-start="{" data-end="};">
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno"><a class="line" href="structring_1_1PackParts.html">  358</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structring_1_1PackParts.html">PackParts</a> {</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno"><a class="line" href="structring_1_1PackParts.html#ab7573b7f86568905338ee347724a7b7f">  359</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1PackParts.html#ab7573b7f86568905338ee347724a7b7f">conf_ms</a> = 0;</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno"><a class="line" href="structring_1_1PackParts.html#a9762ed8bcde4ef1c244c9ce6fa101b3d">  360</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1PackParts.html#a9762ed8bcde4ef1c244c9ce6fa101b3d">split_ms</a> = 0;</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno"><a class="line" href="structring_1_1PackParts.html#a894d7dbd8a29c7aefa18e3d49b5068b6">  361</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1PackParts.html#a894d7dbd8a29c7aefa18e3d49b5068b6">clique_ms</a> = 0;</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno"><a class="line" href="structring_1_1PackParts.html#a175ad5f05d9e2a7d003a49079e3a0868">  362</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1PackParts.html#a175ad5f05d9e2a7d003a49079e3a0868">match_ms</a> = 0;</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno"><a class="line" href="structring_1_1PackParts.html#a2c4e6c49daf51840c7e8945373209968">  363</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structring_1_1PackParts.html#a2c4e6c49daf51840c7e8945373209968">search_ms</a> = 0;</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>};</div>
+</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span></div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno"><a class="line" href="namespacering.html#acaf1ee3249ecc074f8b8bf9761569fea">  367</a></span>[[nodiscard]] <a class="code hl_struct" href="structring_1_1PackParts.html">PackParts</a> <a class="code hl_function" href="namespacering.html#acaf1ee3249ecc074f8b8bf9761569fea">lastPackParts</a>();</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span></div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno"><a class="line" href="namespacering.html#a67343815b56a7bf3c4fcc6109270cf53">  370</a></span>[[nodiscard]] <a class="code hl_struct" href="structring_1_1DdcSplit.html">DdcSplit</a> <a class="code hl_function" href="namespacering.html#a67343815b56a7bf3c4fcc6109270cf53">lastDdcSplit</a>();</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span> </div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>} <span class="comment">// namespace ring</span></div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span></div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
+<div class="foldopen" id="foldopen00380" data-start="{" data-end="}">
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno"><a class="line" href="namespaceprism3.html">  380</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceprism3.html">prism3</a> {</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span></div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno"><a class="line" href="namespaceprism3.html#a1ba0089123227ca022acc1ce38baf7ee">  383</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="namespaceprism3.html#a1ba0089123227ca022acc1ce38baf7ee">findBulkPrisms</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;rings,</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>                   std::vector&lt;ring::strucType&gt; &amp;ringType,</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>                   <span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>                   <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>                   std::vector&lt;double&gt; &amp;rmsdPerAtom, <span class="keywordtype">double</span> heightCutoff = 8);</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span></div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno"><a class="line" href="namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f">  391</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f">basalPrismConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>                          std::vector&lt;int&gt; &amp;basal1, std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span></div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno"><a class="line" href="namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8">  396</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8">relaxedPrismConditions</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;int&gt;&gt; &amp;nList,</div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>                            std::vector&lt;int&gt; &amp;basal1, std::vector&lt;int&gt; &amp;basal2);</div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span></div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno"><a class="line" href="namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a">  400</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a">basalRingsSeparation</a>(</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>    <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>    <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal1, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;basal2, <span class="keywordtype">double</span> heightCutoff = 8);</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>} <span class="comment">// namespace prism3</span></div>
+</div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span></div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span> </div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span><span class="preprocessor">#endif </span><span class="comment">// SEAMS_TOPO_BULK_H_</span></div>
+<div class="ttc" id="acage_8hpp_html"><div class="ttname"><a href="cage_8hpp.html">cage.hpp</a></div><div class="ttdoc">File for cage types for topological network criteria.</div></div>
+<div class="ttc" id="aclassring_1_1NeighBond_html"><div class="ttname"><a href="classring_1_1NeighBond.html">ring::NeighBond</a></div><div class="ttdoc">Membership of the neighbour rows after the leading self entry.</div><div class="ttdef"><b>Definition</b> <a href="#l00268">topo_bulk.hpp:268</a></div></div>
+<div class="ttc" id="aclassring_1_1NeighBond_html_a7a76d39976a7d0b0c1248aa26e7ea486"><div class="ttname"><a href="classring_1_1NeighBond.html#a7a76d39976a7d0b0c1248aa26e7ea486">ring::NeighBond::row</a></div><div class="ttdeci">void row(int i, const int *&amp;begin, const int *&amp;end) const</div><div class="ttdef"><b>Definition</b> <a href="#l00273">topo_bulk.hpp:273</a></div></div>
+<div class="ttc" id="aclassring_1_1NeighBond_html_adede93d18467191b18db5a9960a3dcfa"><div class="ttname"><a href="classring_1_1NeighBond.html#adede93d18467191b18db5a9960a3dcfa">ring::NeighBond::build</a></div><div class="ttdeci">void build(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</div></div>
+<div class="ttc" id="aclassring_1_1NeighBond_html_ae05df58a91640cf5f7e93a70e45563f5"><div class="ttname"><a href="classring_1_1NeighBond.html#ae05df58a91640cf5f7e93a70e45563f5">ring::NeighBond::operator()</a></div><div class="ttdeci">bool operator()(int i, int j) const</div><div class="ttdef"><b>Definition</b> <a href="#l00283">topo_bulk.hpp:283</a></div></div>
+<div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
+<div class="ttc" id="anamespaceprism3_html"><div class="ttname"><a href="namespaceprism3.html">prism3</a></div><div class="ttdef"><b>Definition</b> <a href="#l00380">topo_bulk.hpp:380</a></div></div>
+<div class="ttc" id="anamespaceprism3_html_a1ba0089123227ca022acc1ce38baf7ee"><div class="ttname"><a href="namespaceprism3.html#a1ba0089123227ca022acc1ce38baf7ee">prism3::findBulkPrisms</a></div><div class="ttdeci">int findBulkPrisms(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; ring::strucType &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;rmsdPerAtom, double heightCutoff=8)</div><div class="ttdoc">Find out which rings are prisms.</div></div>
+<div class="ttc" id="anamespaceprism3_html_ab03946085dcf2e67583da676ab7f869f"><div class="ttname"><a href="namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f">prism3::basalPrismConditions</a></div><div class="ttdeci">bool basalPrismConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</div></div>
+<div class="ttc" id="anamespaceprism3_html_abbcd706f2576f374e6037e9073815ee8"><div class="ttname"><a href="namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8">prism3::relaxedPrismConditions</a></div><div class="ttdeci">bool relaxedPrismConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;basal1, std::vector&lt; int &gt; &amp;basal2)</div></div>
+<div class="ttc" id="anamespaceprism3_html_ad85e1c83d20a91d7e8678f5facc7cb7a"><div class="ttname"><a href="namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a">prism3::basalRingsSeparation</a></div><div class="ttdeci">bool basalRingsSeparation(molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2, double heightCutoff=8)</div><div class="ttdoc">Check to see that candidate basal prisms are not really far from each other.</div></div>
+<div class="ttc" id="anamespacering_html"><div class="ttname"><a href="namespacering.html">ring</a></div><div class="ttdoc">Topological network criteria functions.</div><div class="ttdef"><b>Definition</b> <a href="cage__affiliation_8hpp_source.html#l00055">cage_affiliation.hpp:55</a></div></div>
+<div class="ttc" id="anamespacering_html_a01243f4581fb55b417184d98f9ac70aa"><div class="ttname"><a href="namespacering.html#a01243f4581fb55b417184d98f9ac70aa">ring::equatorialConditions</a></div><div class="ttdeci">bool equatorialConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, int iring, const RingSearchIndex &amp;index, std::vector&lt; int &gt; *peripheralUnion, std::vector&lt; int &gt; *chosen=nullptr, const std::vector&lt; int &gt; *rank=nullptr, EquatorChoice *raw=nullptr)</div></div>
+<div class="ttc" id="anamespacering_html_a199fe38d3152cc04d18109ddb868ab34"><div class="ttname"><a href="namespacering.html#a199fe38d3152cc04d18109ddb868ab34">ring::basalConditions</a></div><div class="ttdeci">bool basalConditions(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2)</div></div>
+<div class="ttc" id="anamespacering_html_a21915c7b0472e5af1e63081fa42bfd62"><div class="ttname"><a href="namespacering.html#a21915c7b0472e5af1e63081fa42bfd62">ring::ringWindings</a></div><div class="ttdeci">std::vector&lt; std::array&lt; int, 3 &gt; &gt; ringWindings(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div></div>
+<div class="ttc" id="anamespacering_html_a2f56d182514c3a74d223a92c22136017"><div class="ttname"><a href="namespacering.html#a2f56d182514c3a74d223a92c22136017">ring::contractibleRings</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; contractibleRings(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div></div>
+<div class="ttc" id="anamespacering_html_a350f1fa3c3d5807fb720444054d6e340"><div class="ttname"><a href="namespacering.html#a350f1fa3c3d5807fb720444054d6e340">ring::basalNeighbours</a></div><div class="ttdeci">bool basalNeighbours(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;triplet, int atomOne, int atomTwo)</div></div>
+<div class="ttc" id="anamespacering_html_a45c216fc97f12e29f117bbc1f6d3c7f3"><div class="ttname"><a href="namespacering.html#a45c216fc97f12e29f117bbc1f6d3c7f3">ring::getAtomTypesTopoBulk</a></div><div class="ttdeci">int getAtomTypesTopoBulk(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; ring::strucType &gt; &amp;ringType, std::vector&lt; cage::iceType &gt; &amp;atomTypes)</div></div>
+<div class="ttc" id="anamespacering_html_a46bc67e817124b0e736c493bc8e4d6ee"><div class="ttname"><a href="namespacering.html#a46bc67e817124b0e736c493bc8e4d6ee">ring::bulkPolygonRingAnalysis</a></div><div class="ttdeci">int bulkPolygonRingAnalysis(std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int maxDepth, int firstFrame)</div></div>
+<div class="ttc" id="anamespacering_html_a503bfa2deec404d907645e16ed236c28"><div class="ttname"><a href="namespacering.html#a503bfa2deec404d907645e16ed236c28">ring::findDDC</a></div><div class="ttdeci">std::vector&lt; int &gt; findDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; strucType &gt; &amp;ringType, const std::vector&lt; int &gt; &amp;listHC, std::vector&lt; cage::Cage &gt; &amp;cageList)</div></div>
+<div class="ttc" id="anamespacering_html_a51764966eab7aea2d90649bb6cc607ea"><div class="ttname"><a href="namespacering.html#a51764966eab7aea2d90649bb6cc607ea">ring::positionRank</a></div><div class="ttdeci">std::vector&lt; int &gt; positionRank(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div></div>
+<div class="ttc" id="anamespacering_html_a56c3c2a30736d27d9eaf3e3759e630e9"><div class="ttname"><a href="namespacering.html#a56c3c2a30736d27d9eaf3e3759e630e9">ring::findPrismatic</a></div><div class="ttdeci">int findPrismatic(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;listHC, std::vector&lt; strucType &gt; &amp;ringType, int iring, int jring, std::vector&lt; int &gt; &amp;prismaticRings)</div><div class="ttdoc">Finds the prismatic rings from basal rings iring and jring.</div></div>
+<div class="ttc" id="anamespacering_html_a5c05b0dac9b7124e2770e04a424a3bf7"><div class="ttname"><a href="namespacering.html#a5c05b0dac9b7124e2770e04a424a3bf7">ring::releaseEquatorOverflow</a></div><div class="ttdeci">void releaseEquatorOverflow()</div></div>
+<div class="ttc" id="anamespacering_html_a5db4898b22ebb13511cc37fae6674e5c"><div class="ttname"><a href="namespacering.html#a5db4898b22ebb13511cc37fae6674e5c">ring::notNeighboursOfRing</a></div><div class="ttdeci">bool notNeighboursOfRing(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;triplet, const std::vector&lt; int &gt; &amp;ring)</div></div>
+<div class="ttc" id="anamespacering_html_a5e65636a113b8a778541f437f00c0f97"><div class="ttname"><a href="namespacering.html#a5e65636a113b8a778541f437f00c0f97">ring::findMixedRings</a></div><div class="ttdeci">std::vector&lt; int &gt; findMixedRings(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; strucType &gt; &amp;ringType, std::vector&lt; int &gt; &amp;listDDC, std::vector&lt; int &gt; &amp;listHC)</div></div>
+<div class="ttc" id="anamespacering_html_a67343815b56a7bf3c4fcc6109270cf53"><div class="ttname"><a href="namespacering.html#a67343815b56a7bf3c4fcc6109270cf53">ring::lastDdcSplit</a></div><div class="ttdeci">DdcSplit lastDdcSplit()</div><div class="ttdoc">Order, equatorial test and packing from the last findDDC call.</div></div>
+<div class="ttc" id="anamespacering_html_a7cc755c188267af7b9ff9ae73ca77579"><div class="ttname"><a href="namespacering.html#a7cc755c188267af7b9ff9ae73ca77579">ring::conditionOneDDC</a></div><div class="ttdeci">bool conditionOneDDC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring)</div></div>
+<div class="ttc" id="anamespacering_html_a7e08c423e61bfe5df43c009de1b38366"><div class="ttname"><a href="namespacering.html#a7e08c423e61bfe5df43c009de1b38366">ring::equatorChoiceOverflow</a></div><div class="ttdeci">int equatorChoiceOverflow(const struct EquatorChoice *self, int at)</div></div>
+<div class="ttc" id="anamespacering_html_a7e4d993e20ff5ad076f747f08c9fb780"><div class="ttname"><a href="namespacering.html#a7e4d993e20ff5ad076f747f08c9fb780">ring::equatorChoiceOverflowPut</a></div><div class="ttdeci">void equatorChoiceOverflowPut(struct EquatorChoice *self, int at, int value)</div></div>
+<div class="ttc" id="anamespacering_html_a9d784052b67c693381315d0947be0881"><div class="ttname"><a href="namespacering.html#a9d784052b67c693381315d0947be0881">ring::cageRings</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; cageRings(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double cutoff)</div></div>
+<div class="ttc" id="anamespacering_html_aac3a6fdc27f05a7ded468e955983f270"><div class="ttname"><a href="namespacering.html#aac3a6fdc27f05a7ded468e955983f270">ring::getStrucNumbers</a></div><div class="ttdeci">int getStrucNumbers(const std::vector&lt; ring::strucType &gt; &amp;ringType, const std::vector&lt; cage::Cage &gt; &amp;cageList, int &amp;numHC, int &amp;numDDC, int &amp;mixedRings, int &amp;prismaticRings, int &amp;basalRings)</div><div class="ttdoc">Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings.</div></div>
+<div class="ttc" id="anamespacering_html_ab661e962729134479d1caf21e688a703"><div class="ttname"><a href="namespacering.html#ab661e962729134479d1caf21e688a703">ring::buildRingSearchIndex</a></div><div class="ttdeci">RingSearchIndex buildRingSearchIndex(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, int numAtoms, bool withRows=true)</div></div>
+<div class="ttc" id="anamespacering_html_acaf1ee3249ecc074f8b8bf9761569fea"><div class="ttname"><a href="namespacering.html#acaf1ee3249ecc074f8b8bf9761569fea">ring::lastPackParts</a></div><div class="ttdeci">PackParts lastPackParts()</div><div class="ttdoc">Conflict build, clique ids, matching and branch-and-bound from the last pack.</div></div>
+<div class="ttc" id="anamespacering_html_ada5f6a19834edc41365e7f85d92e4b76"><div class="ttname"><a href="namespacering.html#ada5f6a19834edc41365e7f85d92e4b76">ring::topoBulkAnalysis</a></div><div class="ttdeci">int topoBulkAnalysis(std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, int firstFrame, bool onlyTetrahedral=true)</div></div>
+<div class="ttc" id="anamespacering_html_ae219003bad567e0125990284302d2029"><div class="ttname"><a href="namespacering.html#ae219003bad567e0125990284302d2029">ring::maximumEquators</a></div><div class="ttdeci">std::vector&lt; int &gt; maximumEquators(const std::vector&lt; EquatorChoice &gt; &amp;periph, const std::vector&lt; int &gt; &amp;order, PackingCertificate *certificate)</div></div>
+<div class="ttc" id="anamespacering_html_af2bab9ed638ed3e3a1ed3392d7e4a576"><div class="ttname"><a href="namespacering.html#af2bab9ed638ed3e3a1ed3392d7e4a576">ring::findHC</a></div><div class="ttdeci">std::vector&lt; int &gt; findHC(const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; strucType &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; cage::Cage &gt; &amp;cageList)</div></div>
+<div class="ttc" id="aorder__parameter_8hpp_html"><div class="ttname"><a href="order__parameter_8hpp.html">order_parameter.hpp</a></div></div>
+<div class="ttc" id="apar__team_8hpp_html"><div class="ttname"><a href="par__team_8hpp.html">par_team.hpp</a></div></div>
+<div class="ttc" id="aring_8hpp_html"><div class="ttname"><a href="ring_8hpp.html">ring.hpp</a></div><div class="ttdoc">File containing common functions used by bulk and confined topological network critera.</div></div>
+<div class="ttc" id="aseams__input_8hpp_html"><div class="ttname"><a href="seams__input_8hpp.html">seams_input.hpp</a></div><div class="ttdoc">File for functions that read in files).</div></div>
+<div class="ttc" id="aseams__output_8hpp_html"><div class="ttname"><a href="seams__output_8hpp.html">seams_output.hpp</a></div></div>
+<div class="ttc" id="ashapeMatch_8hpp_html"><div class="ttname"><a href="shapeMatch_8hpp.html">shapeMatch.hpp</a></div></div>
+<div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
+<div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00152">mol_sys.hpp:152</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html"><div class="ttname"><a href="structring_1_1DdcSplit.html">ring::DdcSplit</a></div><div class="ttdef"><b>Definition</b> <a href="#l00346">topo_bulk.hpp:346</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_a244492ecca2113edb275d44be1020b60"><div class="ttname"><a href="structring_1_1DdcSplit.html#a244492ecca2113edb275d44be1020b60">ring::DdcSplit::conf_ms</a></div><div class="ttdeci">double conf_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00350">topo_bulk.hpp:350</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_a31133496ae68fe985806fe457db2da5c"><div class="ttname"><a href="structring_1_1DdcSplit.html#a31133496ae68fe985806fe457db2da5c">ring::DdcSplit::equator_ms</a></div><div class="ttdeci">double equator_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00348">topo_bulk.hpp:348</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_a3d994ad1b24334e2dc09d671b9710592"><div class="ttname"><a href="structring_1_1DdcSplit.html#a3d994ad1b24334e2dc09d671b9710592">ring::DdcSplit::clique_ms</a></div><div class="ttdeci">double clique_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00352">topo_bulk.hpp:352</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_a3f74ded6b1b79617901c8d15a58fb6da"><div class="ttname"><a href="structring_1_1DdcSplit.html#a3f74ded6b1b79617901c8d15a58fb6da">ring::DdcSplit::pack_ms</a></div><div class="ttdeci">double pack_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00349">topo_bulk.hpp:349</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_a4079d61ecb002863dfa8ec6c0c17acb4"><div class="ttname"><a href="structring_1_1DdcSplit.html#a4079d61ecb002863dfa8ec6c0c17acb4">ring::DdcSplit::match_ms</a></div><div class="ttdeci">double match_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00353">topo_bulk.hpp:353</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_a530a3a77e57577975fb234a434f8e0a0"><div class="ttname"><a href="structring_1_1DdcSplit.html#a530a3a77e57577975fb234a434f8e0a0">ring::DdcSplit::order_ms</a></div><div class="ttdeci">double order_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00347">topo_bulk.hpp:347</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_aa72c211b9d8dfb4e5518bd5400d7fea2"><div class="ttname"><a href="structring_1_1DdcSplit.html#aa72c211b9d8dfb4e5518bd5400d7fea2">ring::DdcSplit::split_ms</a></div><div class="ttdeci">double split_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00351">topo_bulk.hpp:351</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_ad79d964f4d1aabb7349c4d4c012e15e0"><div class="ttname"><a href="structring_1_1DdcSplit.html#ad79d964f4d1aabb7349c4d4c012e15e0">ring::DdcSplit::write_ms</a></div><div class="ttdeci">double write_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00355">topo_bulk.hpp:355</a></div></div>
+<div class="ttc" id="astructring_1_1DdcSplit_html_afc2418f108d7222363633cdf3b53033c"><div class="ttname"><a href="structring_1_1DdcSplit.html#afc2418f108d7222363633cdf3b53033c">ring::DdcSplit::search_ms</a></div><div class="ttdeci">double search_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00354">topo_bulk.hpp:354</a></div></div>
+<div class="ttc" id="astructring_1_1EquatorChoice_html"><div class="ttname"><a href="structring_1_1EquatorChoice.html">ring::EquatorChoice</a></div><div class="ttdef"><b>Definition</b> <a href="#l00185">topo_bulk.hpp:185</a></div></div>
+<div class="ttc" id="astructring_1_1EquatorChoice_html_a419dd14bc198b919ca7e93522faf39b5"><div class="ttname"><a href="structring_1_1EquatorChoice.html#a419dd14bc198b919ca7e93522faf39b5">ring::EquatorChoice::idAt</a></div><div class="ttdeci">int idAt(int k) const</div><div class="ttdef"><b>Definition</b> <a href="#l00189">topo_bulk.hpp:189</a></div></div>
+<div class="ttc" id="astructring_1_1EquatorChoice_html_a51db6155bcb66059917161200ed20b2c"><div class="ttname"><a href="structring_1_1EquatorChoice.html#a51db6155bcb66059917161200ed20b2c">ring::EquatorChoice::n</a></div><div class="ttdeci">int n</div><div class="ttdef"><b>Definition</b> <a href="#l00187">topo_bulk.hpp:187</a></div></div>
+<div class="ttc" id="astructring_1_1EquatorChoice_html_ad5fea7aca33bd26edb46c5ba9600db21"><div class="ttname"><a href="structring_1_1EquatorChoice.html#ad5fea7aca33bd26edb46c5ba9600db21">ring::EquatorChoice::put</a></div><div class="ttdeci">void put(int k, int value)</div><div class="ttdef"><b>Definition</b> <a href="#l00193">topo_bulk.hpp:193</a></div></div>
+<div class="ttc" id="astructring_1_1PackParts_html"><div class="ttname"><a href="structring_1_1PackParts.html">ring::PackParts</a></div><div class="ttdef"><b>Definition</b> <a href="#l00358">topo_bulk.hpp:358</a></div></div>
+<div class="ttc" id="astructring_1_1PackParts_html_a175ad5f05d9e2a7d003a49079e3a0868"><div class="ttname"><a href="structring_1_1PackParts.html#a175ad5f05d9e2a7d003a49079e3a0868">ring::PackParts::match_ms</a></div><div class="ttdeci">double match_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00362">topo_bulk.hpp:362</a></div></div>
+<div class="ttc" id="astructring_1_1PackParts_html_a2c4e6c49daf51840c7e8945373209968"><div class="ttname"><a href="structring_1_1PackParts.html#a2c4e6c49daf51840c7e8945373209968">ring::PackParts::search_ms</a></div><div class="ttdeci">double search_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00363">topo_bulk.hpp:363</a></div></div>
+<div class="ttc" id="astructring_1_1PackParts_html_a894d7dbd8a29c7aefa18e3d49b5068b6"><div class="ttname"><a href="structring_1_1PackParts.html#a894d7dbd8a29c7aefa18e3d49b5068b6">ring::PackParts::clique_ms</a></div><div class="ttdeci">double clique_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00361">topo_bulk.hpp:361</a></div></div>
+<div class="ttc" id="astructring_1_1PackParts_html_a9762ed8bcde4ef1c244c9ce6fa101b3d"><div class="ttname"><a href="structring_1_1PackParts.html#a9762ed8bcde4ef1c244c9ce6fa101b3d">ring::PackParts::split_ms</a></div><div class="ttdeci">double split_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00360">topo_bulk.hpp:360</a></div></div>
+<div class="ttc" id="astructring_1_1PackParts_html_ab7573b7f86568905338ee347724a7b7f"><div class="ttname"><a href="structring_1_1PackParts.html#ab7573b7f86568905338ee347724a7b7f">ring::PackParts::conf_ms</a></div><div class="ttdeci">double conf_ms</div><div class="ttdef"><b>Definition</b> <a href="#l00359">topo_bulk.hpp:359</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html"><div class="ttname"><a href="structring_1_1PackingCertificate.html">ring::PackingCertificate</a></div><div class="ttdoc">Proof that the reported number of equatorial rings is maximum.</div><div class="ttdef"><b>Definition</b> <a href="#l00163">topo_bulk.hpp:163</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_a00bbe1dcc9a09aac1fadc53835c566d6"><div class="ttname"><a href="structring_1_1PackingCertificate.html#a00bbe1dcc9a09aac1fadc53835c566d6">ring::PackingCertificate::tight</a></div><div class="ttdeci">bool tight</div><div class="ttdef"><b>Definition</b> <a href="#l00174">topo_bulk.hpp:174</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_a0559d109273cc42d5552b3b401ab516a"><div class="ttname"><a href="structring_1_1PackingCertificate.html#a0559d109273cc42d5552b3b401ab516a">ring::PackingCertificate::method</a></div><div class="ttdeci">int method</div><div class="ttdef"><b>Definition</b> <a href="#l00173">topo_bulk.hpp:173</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_a11e76b07b9438cb43062376306aa18cf"><div class="ttname"><a href="structring_1_1PackingCertificate.html#a11e76b07b9438cb43062376306aa18cf">ring::PackingCertificate::vertices</a></div><div class="ttdeci">int vertices</div><div class="ttdef"><b>Definition</b> <a href="#l00169">topo_bulk.hpp:169</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_a2a752e3f4b9325cc4abc66dced3635df"><div class="ttname"><a href="structring_1_1PackingCertificate.html#a2a752e3f4b9325cc4abc66dced3635df">ring::PackingCertificate::components</a></div><div class="ttdeci">int components</div><div class="ttdef"><b>Definition</b> <a href="#l00171">topo_bulk.hpp:171</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_a3c8919476309e146efc52597b040d85b"><div class="ttname"><a href="structring_1_1PackingCertificate.html#a3c8919476309e146efc52597b040d85b">ring::PackingCertificate::upper</a></div><div class="ttdeci">int upper</div><div class="ttdef"><b>Definition</b> <a href="#l00165">topo_bulk.hpp:165</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_a471aee5b4e6b862bd5f0566672a7ca04"><div class="ttname"><a href="structring_1_1PackingCertificate.html#a471aee5b4e6b862bd5f0566672a7ca04">ring::PackingCertificate::cover</a></div><div class="ttdeci">int cover</div><div class="ttdef"><b>Definition</b> <a href="#l00167">topo_bulk.hpp:167</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_a5f6246660f18db3ebb2806d3ff4e34fa"><div class="ttname"><a href="structring_1_1PackingCertificate.html#a5f6246660f18db3ebb2806d3ff4e34fa">ring::PackingCertificate::milliseconds</a></div><div class="ttdeci">double milliseconds</div><div class="ttdef"><b>Definition</b> <a href="#l00175">topo_bulk.hpp:175</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_a844abd7b84996099ed002777525cd0c5"><div class="ttname"><a href="structring_1_1PackingCertificate.html#a844abd7b84996099ed002777525cd0c5">ring::PackingCertificate::isolates</a></div><div class="ttdeci">int isolates</div><div class="ttdef"><b>Definition</b> <a href="#l00168">topo_bulk.hpp:168</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_ab3cbb3ce409a45e7993ef3f3e3a84ea9"><div class="ttname"><a href="structring_1_1PackingCertificate.html#ab3cbb3ce409a45e7993ef3f3e3a84ea9">ring::PackingCertificate::matching</a></div><div class="ttdeci">int matching</div><div class="ttdef"><b>Definition</b> <a href="#l00166">topo_bulk.hpp:166</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_abbf443bef13f22d686775e4dfb466017"><div class="ttname"><a href="structring_1_1PackingCertificate.html#abbf443bef13f22d686775e4dfb466017">ring::PackingCertificate::edges</a></div><div class="ttdeci">int edges</div><div class="ttdef"><b>Definition</b> <a href="#l00170">topo_bulk.hpp:170</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_ac3e6f1ef04d0a930e45f12a6b155f77f"><div class="ttname"><a href="structring_1_1PackingCertificate.html#ac3e6f1ef04d0a930e45f12a6b155f77f">ring::PackingCertificate::dropped</a></div><div class="ttdeci">int dropped</div><div class="ttdef"><b>Definition</b> <a href="#l00172">topo_bulk.hpp:172</a></div></div>
+<div class="ttc" id="astructring_1_1PackingCertificate_html_afc56b3e0d1e930ae377136450861e784"><div class="ttname"><a href="structring_1_1PackingCertificate.html#afc56b3e0d1e930ae377136450861e784">ring::PackingCertificate::cages</a></div><div class="ttdeci">int cages</div><div class="ttdef"><b>Definition</b> <a href="#l00164">topo_bulk.hpp:164</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html"><div class="ttname"><a href="structring_1_1RingSearchIndex.html">ring::RingSearchIndex</a></div><div class="ttdoc">Inverted index from an atom to the rings that contain it.</div><div class="ttdef"><b>Definition</b> <a href="#l00083">topo_bulk.hpp:83</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html_a31274484c56595c0a3fdf01a9157fd78"><div class="ttname"><a href="structring_1_1RingSearchIndex.html#a31274484c56595c0a3fdf01a9157fd78">ring::RingSearchIndex::ringCol</a></div><div class="ttdeci">std::vector&lt; int, seams::FilledByTeam&lt; int &gt; &gt; ringCol</div><div class="ttdef"><b>Definition</b> <a href="#l00088">topo_bulk.hpp:88</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html_a4a3b1bad0b060ee2e5aa4d8a268f41c5"><div class="ttname"><a href="structring_1_1RingSearchIndex.html#a4a3b1bad0b060ee2e5aa4d8a268f41c5">ring::RingSearchIndex::atomCount</a></div><div class="ttdeci">int atomCount() const</div><div class="ttdoc">Atoms the packed rows cover.</div><div class="ttdef"><b>Definition</b> <a href="#l00090">topo_bulk.hpp:90</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html_a756c5dfcd0a8e96744dfff6775c1e31b"><div class="ttname"><a href="structring_1_1RingSearchIndex.html#a756c5dfcd0a8e96744dfff6775c1e31b">ring::RingSearchIndex::ringShift</a></div><div class="ttdeci">std::vector&lt; std::array&lt; int, 3 &gt; &gt; ringShift</div><div class="ttdef"><b>Definition</b> <a href="#l00096">topo_bulk.hpp:96</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html_a891fe48d2dccc51ea7f043b562a42cbd"><div class="ttname"><a href="structring_1_1RingSearchIndex.html#a891fe48d2dccc51ea7f043b562a42cbd">ring::RingSearchIndex::atomRank</a></div><div class="ttdeci">std::vector&lt; int &gt; atomRank</div><div class="ttdef"><b>Definition</b> <a href="#l00093">topo_bulk.hpp:93</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html_a8e4433086bf9bec113ee61bc3c17b8bb"><div class="ttname"><a href="structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb">ring::RingSearchIndex::ringsContainingAtom</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; ringsContainingAtom</div><div class="ttdef"><b>Definition</b> <a href="#l00084">topo_bulk.hpp:84</a></div></div>
+<div class="ttc" id="astructring_1_1RingSearchIndex_html_af441edebdda78d7968c7b8dca76b6667"><div class="ttname"><a href="structring_1_1RingSearchIndex.html#af441edebdda78d7968c7b8dca76b6667">ring::RingSearchIndex::ringOff</a></div><div class="ttdeci">std::vector&lt; int, seams::FilledByTeam&lt; int &gt; &gt; ringOff</div><div class="ttdef"><b>Definition</b> <a href="#l00087">topo_bulk.hpp:87</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="topo__bulk_8hpp.html">topo_bulk.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!-- https://docs.dseams.info/reference/data-formats.md -->
+
+# Data Formats {#data-formats}
+
+`seams` and the C++ readers share one suffix table. Coordinates are
+Cartesian Angstroms. Frames are 1-based (the file’s timestep value is
+not the frame index).
+
+| suffix | reader | always compiled? |
+| --- | --- | --- |
+| .lammpstrj, .dump, .lammps, anything else | LAMMPS dump text | yes |
+| .xyz | sinp::readXYZ | yes |
+| .pdb, .gro, .dcd, .xtc, .trr, .nc, .lammpsdata | sinp::readChemfiles | only with SEAMS_HAS_CHEMFILES |
+| the 33 VMD molfile suffixes (see VMD molfile readers) | sinp::readChemfiles | only with SEAMS_HAS_CHEMFILES |
+| .con | sinp::readCon | only with SEAMS_HAS_READCON |
+
+The CLI takes the substring after the last `.` and compares it to
+`xyz`, `con`, `pdb`, `gro`, `dcd`, `xtc`, `trr`, `nc`, and the molfile
+suffixes. The `lammpsdata` suffix is case-insensitive. The other comparisons are exact, so
+`foo.xyz/dump` is a LAMMPS dump. A path with no dot is a LAMMPS dump.
+`seams --features` reports chemfiles and readcon-core. The
+Python frame is documented on [Python Frame](python-frame.md).
+
+## Type columns {#type-columns}
+
+| reader | Point::type | --type 0 | --type I (I > 0) |
+| --- | --- | --- | --- |
+| LAMMPS | ITEM: ATOMS type column | type 2 when any atom has that type, otherwise type 1. A multi-frame seams read keeps every atom | keep type I |
+| XYZ | first appearance of each symbol, starting at 1 | ignored on the read | ignored on the read |
+| chemfiles | all-digit type string, else atomic number, else 8 for O/OW/OH and 1 for H/HW/HO, else 0 | keep every atom (typeFilter = -1) | keep that species number |
+| readcon | atomic number from the file | keep every atom | keep every atom (--type is not applied) |
+
+`Point::atomID` is the file id when the format has one, else
+1-based file order. `Point::molID` is `mol` when present, else
+`atomID`. chemfiles prefers a numeric `mol` property, then the
+residue id, then `atomID`.
+
+A symbol that parses as a number is XYZ type 1. Si then N is type 1
+then type 2. A frame with no element names and no atomic numbers
+stores chemfiles species 1.
+
+## Empty frames {#empty-frames}
+
+A reader that cannot fill atoms returns a cloud with `nop == 0`
+(`pts` empty). `currentFrame` is still the requested 1-based index
+when the reader knows it.
+
+| situation | result |
+| --- | --- |
+| LAMMPS path missing or unreadable | empty cloud, currentFrame = targetFrame |
+| LAMMPS frame does not exist | empty cloud, currentFrame = targetFrame |
+| LAMMPS type filter matches nothing | nop == 0 |
+| XYZ path missing | std::runtime_error("Wrong filepath") |
+| XYZ header, truncated frame, or bad coordinate | std::runtime_error (see XYZ) |
+| chemfiles step past the last frame | empty cloud |
+| chemfiles error or selection error | empty cloud |
+| XYZ opened by chemfiles with zero steps | std::runtime_error |
+| readcon path unreadable, frame missing, or frame index below 1 | empty cloud, currentFrame left at 0 |
+
+`seams chill` / `seams chill-plus` on an empty cloud print `nop 0`
+and return 0. `seams cages` without `--signature` prints `nop 0 graph seeded hexagonal 0 cubic 0 both 0 water 0`. `--graph` replaces
+`seeded`. With `--signature`, each signature prints `nop 0 graph seeded signature SPEC cages 0 atoms 0`.
+`seams read` on a missing dump prints `nop 0` and returns 0.
+A missing, empty, or unreadable `.pdb`, `.gro`, `.dcd`, or `.con`
+path, including a directory, makes the CLI throw `cannot read PATH`
+and exit 2. A type filter that keeps no atoms does the same. A
+A chemfiles suffix (`.pdb`, `.gro`, `.dcd`, a molfile suffix, …) on a
+build without chemfiles throws `chemfiles is not in this build`.
+
+`sinp::nLammpsFrames` is `0` when the file cannot be read.
+`sinp::forEachLammpsFrame` is a no-op when that count is `0`, or
+when `first > last`. The CLI prints the frames it ran, in the
+requested order. XYZ is one frame: a range that starts after frame 1
+prints nothing. chemfiles and readcon walk in order on one open
+file. An empty first requested frame makes the CLI throw
+`cannot read PATH`. A later empty cloud stops the walk.
+
+## LAMMPS dump {#lammps-dump}
+
+Default reader. Text dump, frames concatenated, each starting with
+`ITEM: TIMESTEP`.
+
+```text
+ITEM: TIMESTEP
+15000000
+ITEM: NUMBER OF ATOMS
+750
+ITEM: BOX BOUNDS pp pp pp
+-2.0000000000000000e+01 2.0000000000000000e+01
+-2.0000000000000000e+01 2.0000000000000000e+01
+7.0316731227034523e+00 1.8723432986906221e+02
+ITEM: ATOMS id mol type x y z c_peratom
+1 1 2 1.62441 -0.745636 131.621 -28.449
+2 1 1 2.11159 -0.763153 132.444 9.60885
+```
+
+That block is the first snapshot of
+`input/traj/exampleTraj.lammpstrj` (750 atoms, 250 of type 2).
+
+Required `ITEM: ATOMS` columns: `type`, and one coordinate triple.
+The coordinate names follow LAMMPS `ReaderNative`: `x` / `y` / `z`
+if present, otherwise the first of `xu` / `xs` / `xsu` (and the `y`
+and `z` analogues `yu` / `ys` / `ysu`, `zu` / `zs` / `zsu`). Extra
+columns are ignored.
+
+Optional columns: `id`, `mol`. A missing `mol` column copies
+`atomID` into `molID`. A missing `id` column assigns `atomID` from
+1 in file order. Column 0 is used only when the header names it.
+
+`PointCloud.box` is `hi - lo` per axis (the LAMMPS bound spans, not
+the lattice edge lengths). `PointCloud.boxLow` is the lower bound.
+A third number on a box line is a triclinic tilt (`xy`, then `xz`,
+then `yz`) and is appended to `box`. When those three tilts are
+present, `box.size() >= 6`. Pair distances go through
+`gen::periodicDistSq` / `gen::triclinicMinImage`, which recover H
+with the same mapping as `nneigh::dumpBoundsToH` /
+`nneigh::lammpsBoxToLcCell`. An independent-axis wrap on the bound
+spans is the wrong image for a sheared cell; see
+[Sheared cells](../user/howto/sheared-cells.md).
+`gen::formatDumpBox` prints the spans and, when present, the tilt.
+Dump writers emit `ITEM: BOX BOUNDS xy xz yz pp pp pp` and a third
+field on each bound line when the cloud carries tilt.
+
+`seams read` prints the three bound spans (`box Lx Ly Lz`) and,
+when `box.size() >= 6`, the tilt (`xy xz yz`).
+
+Mixed water dumps in this tree use type 2 for oxygen and type 1 for
+hydrogen. `input/traj/exampleTraj.lammpstrj` has 250 atoms of type 2.
+Single-site mW dumps in this tree use type 1.
+`input/traj/mW_cubic.lammpstrj` is 11 frames of 4096 atoms, all type 1.
+The three large example trajectories are stored in the public Hugging Face
+dataset `d-SEAMS/seams-core-inputs`. Fetch them with `input/fetch.py` before
+running examples that name them:
+
+```bash
+python3 input/fetch.py
+```
+
+The helper downloads the files and verifies each SHA-256 digest. A single
+file can be selected, for example `python3 input/fetch.py mW_cubic.lammpstrj`.
+The committed `\*.fixture.lammpstrj` files are small offline test inputs,
+not substitutes for benchmark or tutorial results.
+
+On one frame, omitted `--type` (the value 0) keeps type 2 when any
+atom has it, otherwise type 1. `seams read` does that in
+`readDefaultOxygen` for an orthorhombic `id type x y z` frame, and
+otherwise in `readLammpsTrjO`. `seams chill`, `seams chill-plus`,
+`seams cages`, `seams fingerprint`, `seams steinhardt`, and
+`seams rings` load every atom and then apply the same keep
+(`water::keepHistoricalOxygen`). A frame with neither type 1 nor
+type 2 is empty after that keep. A multi-frame `seams read` with
+`--type` omitted loads every atom (`readLammpsTrj`).
+
+`--type I` with `I > 0` keeps that LAMMPS type (`readLammpsTrjO`).
+`seams rdf --pair-types I,J` with `I != J` loads every atom
+(`readLammpsTrj`). The histogram is `rdf::partialRdf`, which builds
+its pairs with `nneigh::neighListPair`. Neither is an ice score. A
+mixed-type dump that is not the water convention (ionic liquid,
+solvent plus solute) needs an explicit `--type I`. See
+[Ionic-liquid dumps](../user/howto/ionic-liquid.md).
+
+A live dump session caches `ITEM: TIMESTEP` offsets. Sequential
+walks do not rescan prior snapshots. `seams --frame N --last M --jobs J` walks that table. Each worker seeks the shared offsets
+and opens its own handle when the session lock is held.
+`sinp::dropLammpsDumpIndex` drops the cached offsets for one path
+so the next read indexes the file again.
+
+The two type-filtered C++ readers take the same slice arguments
+(`isSlice`, `coordLow`, `coordHigh`) and do not keep the same atoms.
+The CLI has no slice flag. `gen::getPointCloudOneAtomType` copies
+one type out of a cloud that is already loaded, and drops atoms
+outside the slice when `isSlice` is true.
+
+| reader | keep |
+| --- | --- |
+| readLammpsTrjO | Every atom of the requested type. isSlice sets inSlice on each point and does not drop. nop is the type-filtered count. The O in the name is historical; the type argument is any LAMMPS type. |
+| readLammpsTrjreduced | Atoms of the requested type that pass the slice, or every atom of that type when isSlice is false. nop is the kept count. |
+
+An axis is inside the box when the coordinate lies in the closed
+interval, or when that axis has `lo == hi` (unconstrained).
+`([0,0,0], [50,0,0])` is `x` in `[0, 50]`, with `y` and `z`
+unconstrained.
+
+## XYZ {#xyz}
+
+Always compiled. `templates/hc.xyz` and `templates/ddc.xyz` are cage
+templates. The hexagonal-cage file begins:
+
+```text
+12
+Lattice="     53.96900177       0.00000000       0.00000000       0.00000000      54.52899933       0.00000000       0.00000000       0.00000000      51.25699997" Properties=species:S:1:pos:R:3
+O 8.995 10.3859997 15.0939999
+O 6.7459998 14.2810001 15.0939999
+```
+
+The first line is the atom count. The second line is a comment.
+`Lattice="ax ay az bx by bz cx cy cz"` is stored as a LAMMPS dump
+box. An untilted cell stores the three lengths and an origin at
+zero. `templates/hc.xyz` is that case: `seams read` prints
+`box 53.969 54.529 51.257`. A tilt stores the bound spans, then
+`xy xz yz`, and shifts `boxLow` when a tilt is negative. The cell
+must have positive `ax`, `by`, and `cz`, and `ay`, `az`, and `bz`
+must be zero within tolerance. A bad value throws
+`std::runtime_error("XYZ Lattice is not a cell.")` or
+`std::runtime_error("XYZ Lattice is not a reduced cell.")`.
+
+Without `Lattice=`, the comment contributes no cell. The box is the
+axis-aligned span of the coordinates and `boxLow` is the minimum.
+One atom and no lattice is stored as a 10 Å cube from that point.
+That span is not a periodic cell. Analyses that need the simulation
+cell should use a LAMMPS dump or a `Lattice=` line.
+
+Each data line is `symbol x y z`, or three numbers and no symbol.
+`atomID` and `molID` are the 1-based line order. The reader stops at
+the declared count. A header that is not an atom count throws
+`std::runtime_error("XYZ header is not an atom count.")`. A short
+frame throws `std::runtime_error` naming the expected and actual
+counts. A coordinate that is not a number throws
+`std::runtime_error("XYZ coordinate is not a number.")`.
+
+The CLI routes `.xyz` here and does not apply `--type` on the read.
+Classification still receives `--type` and sees the types assigned
+above.
+
+## chemfiles (PDB, GRO, DCD, XTC, TRR, NetCDF, LAMMPS Data, VMD molfile) {#chemfiles-pdb-gro-dcd-xtc-trr-netcdf-lammps-data-vmd-molfile}
+
+Compiled when Meson finds chemfiles (`SEAMS_HAS_CHEMFILES`). The CLI
+opens `.pdb`, `.gro`, `.dcd`, `.xtc`, `.trr`, `.nc` and the molfile
+suffixes below. The `.lammpsdata` suffix selects LAMMPS Data explicitly. The C++ entry `sinp::readChemfiles` and `sinp::openFrame`
+accept any path chemfiles can open. A `.dcd` beside a `.pdb` of the same
+stem uses that PDB as topology.
+
+Frame `N` is step `N-1`. `--type I` with `I > 0` keeps that species
+number. `--type 0` and a negative type keep every atom. Species is
+the all-digit `type` string when chemfiles has one, otherwise the
+atomic number, otherwise 8 for O/OW/OH and 1 for H/HW/HO (name or
+type), otherwise 0. A frame that names no element stores species 1
+in place of 0.
+
+An orthogonal cell is stored as its three lengths with `boxLow` at
+the origin. A tilted cell is the dump box (spans, then `xy xz yz`)
+with `boxLow` shifted for a negative tilt. An infinite cell clears
+`box` and `boxLow`. `atomID` is the 1-based index in the file,
+including atoms the type filter dropped.
+
+A step past the last frame, a chemfiles error, or a bad selection
+returns an empty cloud. An XYZ trajectory that chemfiles opens with
+zero steps throws `std::runtime_error("XYZ read failed: the file has no frames")`.
+
+A flake build leaves chemfiles off. The default pixi environment
+provides chemfiles. `seams --features` then prints `chemfiles: enabled`.
+
+## VMD molfile readers {#vmd-molfile-readers}
+
+The chemfiles d-SEAMS links reads every VMD molfile format that
+chemfiles 0.10.4 can compile and that returns atoms: 33 plugins and 37
+formats. chemfiles itself enables three (TRJ, PSF, Molden).
+`cmake/patches/chemfiles-0.10.4-molfiles.patch` adds the rest, including
+the g96 reader already inside `gromacsplugin`, the DESRES `.dms` reader
+(linked to the system SQLite3) and the CPMD and Gaussian log readers.
+`cmake/patches/chemfiles-0.10.4-external-sources.sh` applies
+`chemfiles-0.10.4-molfile-sources.patch`, which adds the three QM fields
+those log plugins write and the hostile-file fixes, then repacks
+`molfiles.tar.gz`. Configure keeps an installed chemfiles only when
+`cmake/chemfiles_mmcif_probe.cpp` finds all 37 names and counts the
+frame of `cmake/molfile_water.rst7`. An unpatched 0.10.x has three, so
+configure prints, for example,
+
+```text
+Message: system chemfiles has 3 of 37 VMD molfile readers; missing ABINIT, ...; building patched 0.10.4, which has all of them
+```
+
+and builds the patched copy. No build links a chemfiles with fewer
+readers. `-Dwith_chemfiles=disabled` is the only way to have none.
+
+The format is picked from the suffix, compared exactly. A format with
+no suffix is reached through chemfiles by name (`chemfiles::Trajectory(path, 'r', "ABINIT")`), not through `sinp::openFrame` or the CLI. Readers
+marked topology read atoms and no coordinates; every position of such a
+frame is at the origin.
+
+| format | suffix | plugin | authors (plugin author field) | copyright and licence |
+| --- | --- | --- | --- | --- |
+| TRJ | .trj | gromacsplugin | David Norris, Justin Gullingsrud (trj_plugin.author); Gromacs.h implements the 3dfcoord algorithm of Frans van Hoesel. Magnus Lundborg is gro_plugin.author and Axel Kohlmeyer is trr_plugin.author, in the same file | University of Illinois, NCSA |
+| PSF (topology) | .psf | psfplugin | Justin Gullingsrud, John Stone | University of Illinois, NCSA |
+| Molden | .molden | moldenplugin | Markus Dittrich, Jan Saam, Alexey Titov | University of Illinois, NCSA |
+| ABINIT | none | abinitplugin | Rob Lahaye (Sungkyunkwan University) | Rob Lahaye; only as part of an open-source project |
+| MSI Biograf Format | .bgf | bgfplugin | Peter Freddolino | University of Illinois, NCSA |
+| Scripps Binpos | .binpos | binposplugin | Brian Bennion | University of Illinois, NCSA |
+| InsightII car | .car | carplugin | Eamon Caddigan | University of Illinois, NCSA |
+| CHARMM Coordinates | .cor | corplugin | Eamon Caddigan, John Stone | University of Illinois, NCSA |
+| CPMD | .cpmd | cpmdplugin | Axel Kohlmeyer, John Stone | University of Illinois, NCSA |
+| Gaussian Cube | .cube | cubeplugin | Axel Kohlmeyer, John Stone | University of Illinois, NCSA |
+| DL_POLY_C HISTORY | .dlpolyhist | dlpolyplugin | John Stone | University of Illinois, NCSA |
+| DL_POLY_4 HISTORY | none | dlpolyplugin | John Stone | University of Illinois, NCSA |
+| DL_POLY CONFIG | .dlpolyconfig | dlpolyplugin | Alin M Elena | University of Illinois, NCSA |
+| DESRES Trajectory | .dtr (a directory) | dtrplugin | Shaw Research | Shaw Research, LLC, BSD-3-Clause |
+| GAMESS | .log | gamessplugin | Jan Saam, Markus Dittrich, Johan Strumpfer | University of Illinois, NCSA |
+| js | .js | jsplugin | John Stone | University of Illinois, NCSA |
+| Maestro File | .mae | maeffplugin | Shaw Research | Shaw Research, LLC, BSD-3-Clause |
+| InsightII MDF (topology) | .mdf | mdfplugin | Eamon Caddigan, Axel Kohlmeyer | University of Illinois, NCSA |
+| NAMD Binary Coordinates | .coor | namdbinplugin | James Phillips, Justin Gullingsrud | University of Illinois, NCSA |
+| AMBER7 Parm (topology) | .parm7 | parm7plugin | Brian Bennion, Justin Gullingsrud, John Stone | University of Illinois, NCSA; ReadPARM7.h Regents of the University of California (Bill Ross, UCSF), notice kept unmodified |
+| AMBER Parm (topology) | .parm | parmplugin | Justin Gullingsrud, John Stone | University of Illinois, NCSA; ReadPARM.h Regents of the University of California (Bill Ross, UCSF), notice kept unmodified |
+| PQR | .pqr | pqrplugin | Eamon Caddigan | University of Illinois, NCSA |
+| AMBER7 Restart | .rst7 | rst7plugin | Brian Bennion, Axel Kohlmeyer | University of Illinois, NCSA |
+| VMD Tinker | none (.arc is chemfiles’ own Tinker) | tinkerplugin | John Stone | University of Illinois, NCSA |
+| VASP_XDATCAR5 | .VASP_XDATCAR5 | vasp5xdatcarplugin | Sung Sakong | University of Illinois, NCSA (molfiles/LICENSE) |
+| VASP_OUTCAR | .OUTCAR | vaspoutcarplugin | Sung Sakong | University of Illinois, NCSA (molfiles/LICENSE) |
+| VASP_POSCAR | .POSCAR | vaspposcarplugin | Sung Sakong | University of Illinois, NCSA (molfiles/LICENSE) |
+| VASP_XDATCAR | .XDATCAR | vaspxdatcarplugin | Sung Sakong | University of Illinois, NCSA (molfiles/LICENSE) |
+| VASP_xml | .xml | vaspxmlplugin | Sung Sakong | University of Illinois, NCSA (molfiles/LICENSE) |
+| VTF structure format (topology) | .vsf | vtfplugin | Olaf Lenz, Henri Menke | University of Illinois, NCSA (molfiles/LICENSE) |
+| VTF trajectory format | .vtf | vtfplugin | Olaf Lenz, Henri Menke | University of Illinois, NCSA (molfiles/LICENSE) |
+| Internal Paratool Format | .xbgf | xbgfplugin | Peter Freddolino | University of Illinois, NCSA |
+| (Animated) XCrySDen Structure File | .xsf | xsfplugin | Axel Kohlmeyer, John Stone | University of Illinois, NCSA (molfiles/LICENSE) |
+| DESRES Molecular Structure | .dms | dmsplugin | Shaw Research, LLC: Justin Gullingsrud | Shaw Research, LLC, BSD-3-Clause; links the system SQLite3, which is not part of the vendored source |
+| Gromacs g96 | .g96 | gromacsplugin | David Norris, Justin Gullingsrud (g96_plugin.author) | University of Illinois, NCSA |
+| CPMD 3.x output | .out | cpmdlogplugin | Axel Kohlmeyer | University of Illinois, NCSA |
+| Gaussian Logfile (g94,g98,g03) | none (.log is GAMESS) | gaussianplugin | Axel Kohlmeyer, Markus Dittrich, Jan Saam | University of Illinois, NCSA |
+
+“University of Illinois, NCSA” is the University of Illinois Open
+Source License of the Board of Trustees of the University of Illinois
+(Theoretical and Computational Biophysics Group, UIUC). “(`molfiles/LICENSE`)”
+marks a plugin source with no notice of its own, which that file covers.
+`LICENSE.note` gives the terms of every part of the chemfiles build and
+`AUTHORS` names its authors.
+
+Not built, with the reason. This is every remaining plugin source in
+`molfiles/src`, plus the readers inside a built plugin that are not
+registered:
+
+| plugin | reason |
+| --- | --- |
+| cifplugin | chemfiles lists it, but molfiles.tar.gz has no source for it |
+| mmcif.cxx | an unfinished stub. chemfiles reads mmCIF through gemmi |
+| crdplugin (crd, crdbox), and vtfplugin’s vcf reader | the file has no atom count; VMD takes it from a topology loaded first, which Molfile<F> cannot pass |
+| babelplugin | runs an external Open Babel babel through system() and reads nothing itself |
+| basissetplugin | basis sets only, no atoms |
+| hoomdplugin | needs expat.h. The frozen pixi env ships libexpat and no header |
+| webpdbplugin | needs a Tcl interpreter and fetches a PDB over the network |
+| dcdplugin, lammpsplugin, mol2plugin, netcdfplugin, pdbplugin, pdbxplugin, tngplugin, xyzplugin | chemfiles 0.10.4 already has its own reader and writer for each |
+| gromacsplugin’s gro, trr and xtc readers | chemfiles already reads .gro, .trr and .xtc. The g96 reader in the same file is registered; chemfiles has no G96 reader |
+| amira, grasp, molemesh, msms, off, ply, raster3d, stl | graphics meshes only |
+| avs, biomocca, brix, ccp4, dsn6, dx, edm, fs4, grd, grid, map, pbeq, phi, plt, situs, spider, uhbd, vaspchgcar, vaspparchg, vtk | volumetric data only |
+
+`Molfile<F>` reads atoms, so none of these could be a chemfiles
+format. Their sources still ship in the fetched `molfiles.tar.gz`.
+
+The patch also fixes crashes and hangs the plugins hit.
+In chemfiles’ `Molfile<F>`: counting frames passed a null timestep
+(rst7 crashed on a valid file), an empty file reached the plugin (rst7
+crashed), a plugin that found no atoms sized the frame from 0 or -1,
+and rst7 looped forever when its second line was missing or held only
+spaces and tabs. Inside the plugins, after
+`chemfiles-0.10.4-molfile-sources.patch`: an InsightII MDF truncated on
+`@molecule` looped, an AMBER7 parm token longer than the scan buffer
+smashed the stack, a long VTF line or a negative or huge atom id
+overflowed the heap, a VTF token one byte longer than its field did the
+same, an AMBER7 restart whose atom count does not fit in the file
+looped, and a VMD Tinker file with that kind of count did too. A dense
+reader that reports more atoms than the file has bytes is an error too
+(VTF ids stay sparse, and that plugin caps them). A whitespace-only
+mmCIF, a LAMMPS Data file with no section, a LAMMPS atom count that
+does not fit, and an XDR record longer than the file are errors as
+well. An empty file is the chemfiles error `the file at 'PATH' is empty`, an AMBER7 restart with no count on its second line
+is `the AMBER7 restart at 'PATH' has no atom count on its second line`,
+and a file without atoms is `the FORMAT plugin found no atoms in 'PATH'`. FORMAT is the C++ enum name. TRJ, PSF and MOLDEN have no
+`VMDFMT_` prefix. Every reader the patch adds is `VMDFMT_<F>` (for
+example `VMDFMT_RST7`). `sinp::openFrame` returns an empty cloud for
+each. A file the plugin itself refuses is `could not open the file at 'PATH' with FORMAT plugin`, and one it opens once but not when the step
+count re-opens it is `could not re-open the file at 'PATH' with FORMAT plugin`.
+
+Every format the build enables was also fuzzed under AddressSanitizer
+and UndefinedBehaviorSanitizer with truncated files, huge counts, NUL
+bytes and over-long lines, and each crash, hang or sanitizer report it
+found is fixed in the reader rather than by dropping the format. Each
+fix has a fixture under `input/hostile/` that `chemfiles_hostile` reads.
+A frame read now fetches the timestep and QM metadata first, so the
+GAMESS log and a valid CPMD output read instead of writing through a
+null QM timestep, and the Gaussian and Molden readers take the same
+guard. The CPMD version check, the AMBER7 parm readers (EOF and every
+`%s` scan), the Gaussian cube atom loop, the Maestro, PQR, BINPOS,
+DESRES, js, XSF, XBGF, CAR, DL_POLY, g96 and TRJ readers bound what they
+read by the buffer and the bytes left in the file. The mmCIF reader
+checks its model column and the writer prints `?` for an empty name or
+type, which it reads back as empty. In chemfiles’ own readers, the text
+file keeps the right offset after a line longer than its buffer (later
+steps of an XYZ or SMI file read from the wrong place), and XTC, TRR,
+TPR, DCD, Amber NetCDF, CSSR and GRO check their counts and indices.
+A LAMMPS dump checks its box bounds, atom count and atom ids. A TRR
+frame with atoms but no positions, velocities or forces ends the
+trajectory, an empty SMI square brace and a TPR function type outside
+the GROMACS table are errors, and the extended XYZ
+comment parser stops at an `=` with no name before it. The
+GAMESS gradient and coordinate tables, the BGF and XBGF records, the
+VASP atom counts and the js byte swap are bounded too, and the VTF
+reader parses a line the same way however many files it read before;
+it also joins a line that ends in a backslash with the next one, which
+it did not.
+A DESRES trajectory opens from its directory or from the empty
+`clickme.dtr` inside it. Before `dtrplugin` runs, the directory must
+hold a `timekeys` file with the DESRES magic number, a nonzero frame
+count per file, 24-byte key records and at least one whole record; a
+`.ddparams`, when there is one, must name 0 to 4096 directories at
+each level; a `metadata` file, when there is one, must be a DESRES
+frame; and the first frame file, in the subdirectory `.ddparams`
+hashes it to, must hold the bytes its key names and start with the
+frame magic number. A `clickme.dtr` outside such a directory is
+refused, and any other empty `.dtr` file is reported as empty.
+`chemfiles-0.10.4-tng-sources.patch` checks the block, molecule,
+mapping and data sizes of TNG, and a TNG frame whose blocks leave a
+particle without positions is an error before chemfiles allocates its
+atoms. `chemfiles-0.10.4-mmtf-sources.patch` checks the lengths and
+integer arithmetic of the MMTF binary decoder, the length of a
+transform matrix, and msgpack’s conversion of an empty array; both go
+through `chemfiles-0.10.4-external-sources.sh` like the molfiles
+patch.
+
+## eOn `.con` {#eon-con}
+
+Compiled when Meson finds readcon-core (`SEAMS_HAS_READCON`).
+`input/eon/tiny_multi_cuh2.con` is a two-frame file (Cu + H,
+`con_spec_version` 2) with an orthorhombic cell
+15.3456 by 21.702 by 100 Å.
+
+`type` is the atomic number. `atomID` is the file atom id.
+`molID` is `atomID`. Lengths and angles become the dump box.
+Orthorhombic angles (90 degrees) store three lengths and an origin
+at zero. A shear stores spans plus `xy xz yz`, and `boxLow` shifts
+with a negative tilt. Frame `N` is the Nth record. An index below 1,
+a missing record, or a file readcon cannot open returns an empty
+cloud, with `currentFrame` left at 0. A single-frame `seams read`
+of a missing record, or of a file that cannot be opened, throws
+`cannot read PATH` and exits 2. A range that has already read a
+frame stops at the next empty record. The CLI does not
+type-filter `.con`.
+
+A flake build leaves readcon-core off: auto features are disabled
+and the wrap is not fetched. A Meson build that can see the wrap or
+a system package, with the feature left on auto or set to enabled,
+prints `readcon-core: enabled` from `seams --features`.

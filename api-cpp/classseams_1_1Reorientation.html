@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: seams::Reorientation Class Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/classseams_1_1Reorientation.html">
+<meta property="og:title" content="seams-core: seams::Reorientation Class Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/classseams_1_1Reorientation.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: seams::Reorientation Class Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('classseams_1_1Reorientation.html','','classseams_1_1Reorientation-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams::Reorientation Class Reference<div class="ingroups"><a class="el" href="group__seams__cpp.html">C++ API</a></div></div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Owned streaming orientational correlation accumulator.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="seams_8hpp_source.html">include/seams.hpp</a>&gt;</code></p>
+<div id="dynsection-0" class="dynheader closed"><span class="dynarrow"><span class="arrowhead closed"></span></span>Inheritance diagram for seams::Reorientation:</div>
+<div id="dynsection-0-summary" class="dynsummary">
+</div>
+<div id="dynsection-0-content" class="dyncontent hidden">
+ <div class="center">
+  <img src="classseams_1_1Reorientation.png" usemap="#seams_3A_3AReorientation_map" alt=""/>
+  <map id="seams_3A_3AReorientation_map" name="seams_3A_3AReorientation_map">
+<area href="classseams_1_1detail_1_1Handle.html" alt="seams::detail::Handle&lt; seams_reorient, seams_reorient_destroy &gt;" shape="rect" coords="0,0,383,24"/>
+  </map>
+</div></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a3380f4693075ca79223abc1589110629" id="r_a3380f4693075ca79223abc1589110629"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a3380f4693075ca79223abc1589110629">Reorientation</a> (std::size_t n_vectors, std::size_t max_lag, std::size_t origin_stride, double dt)</td></tr>
+<tr class="memdesc:a3380f4693075ca79223abc1589110629"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate a reorientation accumulator.  <br /></td></tr>
+<tr class="memitem:a7ca0ea615fa798447933efc16f4fa8fb" id="r_a7ca0ea615fa798447933efc16f4fa8fb"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a7ca0ea615fa798447933efc16f4fa8fb">push</a> (std::span&lt; const double &gt; vectors)</td></tr>
+<tr class="memdesc:a7ca0ea615fa798447933efc16f4fa8fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push one frame of molecular 3-vectors.  <br /></td></tr>
+<tr class="memitem:ab90a6bd26b9bd389803f23b790e92c68" id="r_ab90a6bd26b9bd389803f23b790e92c68"><td class="memItemLeft"><a class="el" href="structseams_1_1ReorientationCurve.html">ReorientationCurve</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab90a6bd26b9bd389803f23b790e92c68">curve</a> () const</td></tr>
+<tr class="memdesc:ab90a6bd26b9bd389803f23b790e92c68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read C1 and C2 correlation curves.  <br /></td></tr>
+<tr class="memitem:abbaa08f285c6756aa63932fa217381e9" id="r_abbaa08f285c6756aa63932fa217381e9"><td class="memItemLeft"><a class="el" href="structseams_1_1ReorientationFit.html">ReorientationFit</a>&#160;</td><td class="memItemRight"><a class="el" href="#abbaa08f285c6756aa63932fa217381e9">fit</a> (double t_start=0.0, double t_end=0.0) const</td></tr>
+<tr class="memdesc:abbaa08f285c6756aa63932fa217381e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fit integrated and single-exponential reorientation times.  <br /></td></tr>
+<tr class="inherit_header pub_methods_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Public Member Functions inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_reorient, seams_reorient_destroy &gt;</a></td></tr>
+<tr class="memitem:a70fca214a6d43d58a4219a108e82f91d inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_a70fca214a6d43d58a4219a108e82f91d"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> ()=default</td></tr>
+<tr class="memitem:a0dd2050fdf4ea17474fcfd3297824dab inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_a0dd2050fdf4ea17474fcfd3297824dab"><td class="memItemLeft"><a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a0dd2050fdf4ea17474fcfd3297824dab">operator=</a> (const <a class="el" href="classseams_1_1detail_1_1Handle.html#a70fca214a6d43d58a4219a108e82f91d">Handle</a> &amp;)=delete</td></tr>
+<tr class="memitem:ac44646bcdb18568576350cd63d2e18d4 inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_ac44646bcdb18568576350cd63d2e18d4"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ac44646bcdb18568576350cd63d2e18d4">~Handle</a> ()</td></tr>
+<tr class="memitem:ae58d780619badcc49127f4b5e6e78d4e inherit pub_methods_classseams_1_1detail_1_1Handle" id="r_ae58d780619badcc49127f4b5e6e78d4e"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ae58d780619badcc49127f4b5e6e78d4e">operator bool</a> () const noexcept</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-inherited" class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_methods_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Member Functions inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_reorient, seams_reorient_destroy &gt;</a></td></tr>
+<tr class="memitem:a7d9cd594be5e78ed0a9081d48f487b90 inherit pro_methods_classseams_1_1detail_1_1Handle" id="r_a7d9cd594be5e78ed0a9081d48f487b90"><td class="memItemLeft"><a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a> () const noexcept</td></tr>
+<tr class="memitem:a668c158ddc5521b409de638b725bcf5f inherit pro_methods_classseams_1_1detail_1_1Handle" id="r_a668c158ddc5521b409de638b725bcf5f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#a668c158ddc5521b409de638b725bcf5f">reset</a> () noexcept</td></tr>
+<tr class="inherit_header pro_attribs_classseams_1_1detail_1_1Handle"><td colspan="2" class="dyn-inherit"><span class="dynarrow"><span class="arrowhead closed"></span></span>Protected Attributes inherited from <a class="el" href="classseams_1_1detail_1_1Handle.html">seams::detail::Handle&lt; seams_reorient, seams_reorient_destroy &gt;</a></td></tr>
+<tr class="memitem:ac8ec612e046a771320a5d055156447ba inherit pro_attribs_classseams_1_1detail_1_1Handle" id="r_ac8ec612e046a771320a5d055156447ba"><td class="memItemLeft"><a class="el" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *&#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1detail_1_1Handle.html#ac8ec612e046a771320a5d055156447ba">ptr_</a></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Owned streaming orientational correlation accumulator. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01317">1317</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a3380f4693075ca79223abc1589110629" name="a3380f4693075ca79223abc1589110629"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3380f4693075ca79223abc1589110629">&#9670;&#160;</a></span>Reorientation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">seams::Reorientation::Reorientation </td>
+          <td>(</td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>n_vectors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>max_lag</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>origin_stride</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>dt</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Allocate a reorientation accumulator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n_vectors</td><td>Molecular vector count per frame. </td></tr>
+    <tr><td class="paramname">max_lag</td><td>Maximum lag in frames, or 0 for all lags. </td></tr>
+    <tr><td class="paramname">origin_stride</td><td>Frame stride between origins. </td></tr>
+    <tr><td class="paramname">dt</td><td>Frame spacing. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01326">1326</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1326</span>                                                                                            {</div>
+<div class="line"><span class="lineno"> 1327</span>    <a class="code hl_typedef" href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a> *raw = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno"> 1328</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#gaa886ba06b8e811d05d8e63804298578b">seams_reorient_create</a>(n_vectors, max_lag, origin_stride, dt, &amp;raw), <span class="keyword">nullptr</span>);</div>
+<div class="line"><span class="lineno"> 1329</span>    *<span class="keyword">this</span> = <a class="code hl_function" href="#a3380f4693075ca79223abc1589110629">Reorientation</a>(raw);</div>
+<div class="line"><span class="lineno"> 1330</span>  }</div>
+<div class="ttc" id="aclassseams_1_1Reorientation_html_a3380f4693075ca79223abc1589110629"><div class="ttname"><a href="#a3380f4693075ca79223abc1589110629">seams::Reorientation::Reorientation</a></div><div class="ttdeci">Reorientation(std::size_t n_vectors, std::size_t max_lag, std::size_t origin_stride, double dt)</div><div class="ttdoc">Allocate a reorientation accumulator.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l01326">seams.hpp:1326</a></div></div>
+<div class="ttc" id="agroup__capi__traj_html_gaa886ba06b8e811d05d8e63804298578b"><div class="ttname"><a href="group__capi__traj.html#gaa886ba06b8e811d05d8e63804298578b">seams_reorient_create</a></div><div class="ttdeci">SEAMS_API seams_status seams_reorient_create(size_t n_vectors, size_t max_lag, size_t origin_stride, double dt, seams_reorient **out)</div><div class="ttdoc">Create a streaming orientational correlation accumulator for C1 and C2.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ga7fbd2129f52180f3b1c206e2e1686e20"><div class="ttname"><a href="group__capi__types.html#ga7fbd2129f52180f3b1c206e2e1686e20">seams_reorient</a></div><div class="ttdeci">struct seams_reorient seams_reorient</div><div class="ttdoc">Streaming orientational time-correlation accumulator.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00264">seams.h:264</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1detail_html_a2318c07d1ce9ec1e7b770df041fda676"><div class="ttname"><a href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">seams::detail::check</a></div><div class="ttdeci">void check(int status, const void *handle)</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00802">seams.hpp:802</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="ab90a6bd26b9bd389803f23b790e92c68" name="ab90a6bd26b9bd389803f23b790e92c68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab90a6bd26b9bd389803f23b790e92c68">&#9670;&#160;</a></span>curve()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1ReorientationCurve.html">ReorientationCurve</a> seams::Reorientation::curve </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read C1 and C2 correlation curves. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01343">1343</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1343</span>                                                 {</div>
+<div class="line"><span class="lineno"> 1344</span>    std::size_t nl = 0;</div>
+<div class="line"><span class="lineno"> 1345</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#ga031fc0986ed8eb8cc3ba7788d5636aad">seams_reorient_curve</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, 0, &amp;nl), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno"> 1346</span>    ReorientationCurve out;</div>
+<div class="line"><span class="lineno"> 1347</span>    out.lag_time.resize(nl);</div>
+<div class="line"><span class="lineno"> 1348</span>    out.c1.resize(nl);</div>
+<div class="line"><span class="lineno"> 1349</span>    out.c2.resize(nl);</div>
+<div class="line"><span class="lineno"> 1350</span>    out.n_origins.resize(nl);</div>
+<div class="line"><span class="lineno"> 1351</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#ga031fc0986ed8eb8cc3ba7788d5636aad">seams_reorient_curve</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), out.lag_time.data(), out.c1.data(), out.c2.data(),</div>
+<div class="line"><span class="lineno"> 1352</span>                                       out.n_origins.data(), nl, &amp;nl),</div>
+<div class="line"><span class="lineno"> 1353</span>                  <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno"> 1354</span>    <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno"> 1355</span>  }</div>
+<div class="ttc" id="aclassseams_1_1detail_1_1Handle_html_a7d9cd594be5e78ed0a9081d48f487b90"><div class="ttname"><a href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">seams::detail::Handle&lt; seams_reorient, seams_reorient_destroy &gt;::get</a></div><div class="ttdeci">seams_reorient * get() const noexcept</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00830">seams.hpp:830</a></div></div>
+<div class="ttc" id="agroup__capi__traj_html_ga031fc0986ed8eb8cc3ba7788d5636aad"><div class="ttname"><a href="group__capi__traj.html#ga031fc0986ed8eb8cc3ba7788d5636aad">seams_reorient_curve</a></div><div class="ttdeci">SEAMS_API seams_status seams_reorient_curve(const seams_reorient *reorient, double *lag_time, double *c1, double *c2, size_t *n_origins, size_t cap, size_t *n_lags)</div><div class="ttdoc">Read accumulated C1(t) = &lt;P1(u(0).u(t))&gt; and C2(t) = &lt;P2(u(0).u(t))&gt;.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="abbaa08f285c6756aa63932fa217381e9" name="abbaa08f285c6756aa63932fa217381e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbaa08f285c6756aa63932fa217381e9">&#9670;&#160;</a></span>fit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1ReorientationFit.html">ReorientationFit</a> seams::Reorientation::fit </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>t_start</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0.0</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>t_end</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0.0</span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fit integrated and single-exponential reorientation times. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01358">1358</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1358</span>                                                                                 {</div>
+<div class="line"><span class="lineno"> 1359</span>    ReorientationFit out;</div>
+<div class="line"><span class="lineno"> 1360</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#gab2c93609986098b1df15ebeab4efa973">seams_reorient_fit</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), t_start, t_end, &amp;out.tau1_int, &amp;out.tau1_exp,</div>
+<div class="line"><span class="lineno"> 1361</span>                                     &amp;out.tau2_int, &amp;out.tau2_exp),</div>
+<div class="line"><span class="lineno"> 1362</span>                  <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno"> 1363</span>    <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno"> 1364</span>  }</div>
+<div class="ttc" id="agroup__capi__traj_html_gab2c93609986098b1df15ebeab4efa973"><div class="ttname"><a href="group__capi__traj.html#gab2c93609986098b1df15ebeab4efa973">seams_reorient_fit</a></div><div class="ttdeci">SEAMS_API seams_status seams_reorient_fit(const seams_reorient *reorient, double t_start, double t_end, double *tau1_int, double *tau1_exp, double *tau2_int, double *tau2_exp)</div><div class="ttdoc">Integrated and single-exponential reorientation times tau_1 and tau_2.</div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a7ca0ea615fa798447933efc16f4fa8fb" name="a7ca0ea615fa798447933efc16f4fa8fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ca0ea615fa798447933efc16f4fa8fb">&#9670;&#160;</a></span>push()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::Reorientation::push </td>
+          <td>(</td>
+          <td class="paramtype">std::span&lt; const double &gt;</td>          <td class="paramname"><span class="paramname"><em>vectors</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Push one frame of molecular 3-vectors. </p>
+
+<p class="definition">Definition at line <a class="el" href="seams_8hpp_source.html#l01335">1335</a> of file <a class="el" href="seams_8hpp_source.html">seams.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1335</span>                                           {</div>
+<div class="line"><span class="lineno"> 1336</span>    <span class="keywordflow">if</span> (vectors.size() % 3 != 0) {</div>
+<div class="line"><span class="lineno"> 1337</span>      <span class="keywordflow">throw</span> <a class="code hl_function" href="classseams_1_1Error.html#afa1a477ab0ed901f607dccf49b67680b">Error</a>(<a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79">SEAMS_ERR_ARG</a>, <span class="stringliteral">&quot;vectors length is not a multiple of 3&quot;</span>);</div>
+<div class="line"><span class="lineno"> 1338</span>    }</div>
+<div class="line"><span class="lineno"> 1339</span>    <a class="code hl_function" href="namespaceseams_1_1detail.html#a2318c07d1ce9ec1e7b770df041fda676">detail::check</a>(<a class="code hl_function" href="group__capi__traj.html#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a>(<a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>(), vectors.data(), vectors.size() / 3), <a class="code hl_function" href="classseams_1_1detail_1_1Handle.html#a7d9cd594be5e78ed0a9081d48f487b90">get</a>());</div>
+<div class="line"><span class="lineno"> 1340</span>  }</div>
+<div class="ttc" id="aclassseams_1_1Error_html_afa1a477ab0ed901f607dccf49b67680b"><div class="ttname"><a href="classseams_1_1Error.html#afa1a477ab0ed901f607dccf49b67680b">seams::Error::Error</a></div><div class="ttdeci">Error(int status, std::string message)</div><div class="ttdoc">Build an error from a status and a message.</div><div class="ttdef"><b>Definition</b> <a href="seams_8hpp_source.html#l00186">seams.hpp:186</a></div></div>
+<div class="ttc" id="agroup__capi__traj_html_ga3aa930465b7964cc847d252027624d9f"><div class="ttname"><a href="group__capi__traj.html#ga3aa930465b7964cc847d252027624d9f">seams_reorient_push</a></div><div class="ttdeci">SEAMS_API seams_status seams_reorient_push(seams_reorient *reorient, const double *vectors, size_t n_vectors)</div><div class="ttdoc">Push one frame of molecular 3-vectors into a reorientation accumulator.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79">SEAMS_ERR_ARG</a></div><div class="ttdeci">@ SEAMS_ERR_ARG</div><div class="ttdoc">A caller argument is the wrong shape, or a coordinate is not finite.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00159">seams.h:159</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>include/<a class="el" href="seams_8hpp_source.html">seams.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceseams.html">seams</a></li><li class="navelem"><a href="classseams_1_1Reorientation.html">Reorientation</a></li>
+  </ul>
+</div>
+</body>
+</html>

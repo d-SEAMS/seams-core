@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/bop.hpp File Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/bop_8hpp.html">
+<meta property="og:title" content="seams-core: src/include/internal/bop.hpp File Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/bop_8hpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/bop.hpp File Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('bop_8hpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">bop.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>File for the bond order parameter analysis.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;array&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
+<code>#include &lt;complex&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;<a class="el" href="generic_8hpp_source.html">generic.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="seams__output_8hpp_source.html">seams_output.hpp</a>&gt;</code><br />
+</div>
+<p><a href="bop_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:chill_3A_3AYlmAtom" id="r_chill_3A_3AYlmAtom"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1YlmAtom.html">chill::YlmAtom</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This contains a complex vector of length \(2l+1\).  <a href="structchill_1_1YlmAtom.html#details">More...</a><br /></td></tr>
+<tr class="memitem:chill_3A_3AQlmAtom" id="r_chill_3A_3AQlmAtom"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1QlmAtom.html">chill::QlmAtom</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is the local orientational bond order parameter \(q_{lm}\), of length \(2l+1\).  <a href="structchill_1_1QlmAtom.html#details">More...</a><br /></td></tr>
+<tr class="memitem:chill_3A_3ABondClassifier" id="r_chill_3A_3ABondClassifier"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1BondClassifier.html">chill::BondClassifier</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One rule set for classifying bond correlations \(c_{ij}\).  <a href="structchill_1_1BondClassifier.html#details">More...</a><br /></td></tr>
+<tr class="memitem:chill_3A_3ABondOrder" id="r_chill_3A_3ABondOrder"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1BondOrder.html">chill::BondOrder</a></td></tr>
+<tr class="memitem:chill_3A_3ASteinhardtQl" id="r_chill_3A_3ASteinhardtQl"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1SteinhardtQl.html">chill::SteinhardtQl</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-particle Steinhardt order parameters of a single degree \(l\).  <a href="structchill_1_1SteinhardtQl.html#details">More...</a><br /></td></tr>
+<tr class="memitem:chill_3A_3AQlCutoffStages" id="r_chill_3A_3AQlCutoffStages"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1QlCutoffStages.html">chill::QlCutoffStages</a></td></tr>
+<tr class="memitem:chill_3A_3AAnalysisPhases" id="r_chill_3A_3AAnalysisPhases"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1AnalysisPhases.html">chill::AnalysisPhases</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuild, local kernel, halo exchange, and the write-back to the frame.  <a href="structchill_1_1AnalysisPhases.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:chill" id="r_chill"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html">chill</a></td></tr>
+<tr class="memdesc:namespacechill"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL and CHILL+ structure classification. <br /></td></tr>
+<tr class="memitem:sph" id="r_sph"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html">sph</a></td></tr>
+<tr class="memdesc:namespacesph"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions used for spherical harmonics. <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:af4ca04aace5b50713081cc6528bc771a" id="r_af4ca04aace5b50713081cc6528bc771a"><td class="memItemLeft"><a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328">molSys::bond_type</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#af4ca04aace5b50713081cc6528bc771a">chill::classifyBond</a> (double cij, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool closed=true)</td></tr>
+<tr class="memitem:a1bc0f302f0567e60061fd3f82a472b81" id="r_a1bc0f302f0567e60061fd3f82a472b81"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a1bc0f302f0567e60061fd3f82a472b81">chill::chillRule</a> ()</td></tr>
+<tr class="memitem:abb43db20557ea73beb0a103a11feb906" id="r_abb43db20557ea73beb0a103a11feb906"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#abb43db20557ea73beb0a103a11feb906">chill::chillPlusRule</a> ()</td></tr>
+<tr class="memitem:ac4ea4fda92a94c624a187858ed83de2f" id="r_ac4ea4fda92a94c624a187858ed83de2f"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#ac4ea4fda92a94c624a187858ed83de2f">chill::bondClassifier</a> (const std::string &amp;name)</td></tr>
+<tr class="memitem:afdbd8e7d77ca3e23619b0073b02a2e05" id="r_afdbd8e7d77ca3e23619b0073b02a2e05"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#afdbd8e7d77ca3e23619b0073b02a2e05">chill::registerBondClassifier</a> (const std::string &amp;name, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule)</td></tr>
+<tr class="memitem:a65e947224bbb3fd2082fe94f470e0765" id="r_a65e947224bbb3fd2082fe94f470e0765"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a65e947224bbb3fd2082fe94f470e0765">chill::bondClassifierNames</a> ()</td></tr>
+<tr class="memdesc:a65e947224bbb3fd2082fe94f470e0765"><td class="mdescLeft">&#160;</td><td class="mdescRight">Names of every registered rule set.  <br /></td></tr>
+<tr class="memitem:a685e260b6bf728585deefc814eb82be1" id="r_a685e260b6bf728585deefc814eb82be1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a685e260b6bf728585deefc814eb82be1">chill::classifyBonds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice=false)</td></tr>
+<tr class="memitem:ac0ed780ae63ea9ed490be26139f483e1" id="r_ac0ed780ae63ea9ed490be26139f483e1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#ac0ed780ae63ea9ed490be26139f483e1">chill::classifyBonds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice, bool closed)</td></tr>
+<tr class="memitem:aca144c74a1021bd03c80cd5787ca8753" id="r_aca144c74a1021bd03c80cd5787ca8753"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#aca144c74a1021bd03c80cd5787ca8753">chill::classifyBondsCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice=false)</td></tr>
+<tr class="memdesc:aca144c74a1021bd03c80cd5787ca8753"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL/CHILL+ bonds from a CSR of cloud indices.  <br /></td></tr>
+<tr class="memitem:a68da69af0ad0bff7e0c2aa3705a354cf" id="r_a68da69af0ad0bff7e0c2aa3705a354cf"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a68da69af0ad0bff7e0c2aa3705a354cf">chill::chillPlusFromCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, bool keepBonds=true)</td></tr>
+<tr class="memitem:aa4dae25c269f70f40ed2ce175b710cbf" id="r_aa4dae25c269f70f40ed2ce175b710cbf"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#aa4dae25c269f70f40ed2ce175b710cbf">chill::chillPlusOvitoFromCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memitem:a64bc4e2366a07540c89854cfde5dfeb6" id="r_a64bc4e2366a07540c89854cfde5dfeb6"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a64bc4e2366a07540c89854cfde5dfeb6">chill::chillFromCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memitem:ab26bf9461b74908aabd6e096546ef883" id="r_ab26bf9461b74908aabd6e096546ef883"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#ab26bf9461b74908aabd6e096546ef883">chill::bondOrder</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;order, const std::vector&lt; char &gt; *which, bool fresh=true)</td></tr>
+<tr class="memitem:adce994972bc6a6edaac9ac00a9410827" id="r_adce994972bc6a6edaac9ac00a9410827"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#adce994972bc6a6edaac9ac00a9410827">chill::correlFromOrder</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;order, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice, const std::vector&lt; char &gt; *which, bool closed=true)</td></tr>
+<tr class="memitem:a4017efb120fe038acfabec9175e2aef6" id="r_a4017efb120fe038acfabec9175e2aef6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a4017efb120fe038acfabec9175e2aef6">chill::getCorrel</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false, int coordinationNumber=4)</td></tr>
+<tr class="memdesc:a4017efb120fe038acfabec9175e2aef6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for getting the bond order correlations \(c_{ij}\) (or \(a_{ij}\) in some treatments) according to the CHILL algorithm.  <br /></td></tr>
+<tr class="memitem:a6636e09d09e99448ff68eb6533d2e479" id="r_a6636e09d09e99448ff68eb6533d2e479"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a6636e09d09e99448ff68eb6533d2e479">chill::getIceTypeNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
+<tr class="memdesc:a6636e09d09e99448ff68eb6533d2e479"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that classifies every particle's <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm.  <br /></td></tr>
+<tr class="memitem:a86fb1f94d087bcc2d0a55f487629ca17" id="r_a86fb1f94d087bcc2d0a55f487629ca17"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a86fb1f94d087bcc2d0a55f487629ca17">chill::getIceType</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chill.txt&quot;)</td></tr>
+<tr class="memdesc:a86fb1f94d087bcc2d0a55f487629ca17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that classifies every particle's <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm.  <br /></td></tr>
+<tr class="memitem:a00437c7dd47b3126a35b5bb410904ee2" id="r_a00437c7dd47b3126a35b5bb410904ee2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a00437c7dd47b3126a35b5bb410904ee2">chill::getCorrelPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false, int coordinationNumber=4)</td></tr>
+<tr class="memitem:a3d430e0ac5cc894ab47422cd2dad5e7f" id="r_a3d430e0ac5cc894ab47422cd2dad5e7f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a3d430e0ac5cc894ab47422cd2dad5e7f">chill::getCorrelPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice, int coordinationNumber, bool closedBounds)</td></tr>
+<tr class="memdesc:a3d430e0ac5cc894ab47422cd2dad5e7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same classification. closedBounds false uses the open OVITO edges.  <br /></td></tr>
+<tr class="memitem:aa67d698173c16604574479c7ffeccc06" id="r_aa67d698173c16604574479c7ffeccc06"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#aa67d698173c16604574479c7ffeccc06">chill::chillPlusPublishedCutoff</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI)</td></tr>
+<tr class="memitem:a0773fb7ba0d82fc8b8681e034141971b" id="r_a0773fb7ba0d82fc8b8681e034141971b"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a0773fb7ba0d82fc8b8681e034141971b">chill::q4q6ChillPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI, std::vector&lt; double &gt; &amp;q4, std::vector&lt; double &gt; &amp;q6, std::vector&lt; double &gt; &amp;q4bar, std::vector&lt; double &gt; &amp;q6bar)</td></tr>
+<tr class="memitem:a06ede063ce645e06c6ea154a52c9703a" id="r_a06ede063ce645e06c6ea154a52c9703a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a06ede063ce645e06c6ea154a52c9703a">chill::chillPlusSymbolicPrefilter</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI)</td></tr>
+<tr class="memitem:af494786ce8fdcfe596b6181ef2a9979f" id="r_af494786ce8fdcfe596b6181ef2a9979f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#af494786ce8fdcfe596b6181ef2a9979f">chill::getIceTypePlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chillPlus.txt&quot;)</td></tr>
+<tr class="memitem:ade10dbe4d8bea0ae2459cea84f63525b" id="r_ade10dbe4d8bea0ae2459cea84f63525b"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#ade10dbe4d8bea0ae2459cea84f63525b">chill::getIceTypePlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice, std::string outputFileName, bool neighbourTest)</td></tr>
+<tr class="memdesc:ade10dbe4d8bea0ae2459cea84f63525b"><td class="mdescLeft">&#160;</td><td class="mdescRight">neighbourTest false is the OVITO interfacial rule.  <br /></td></tr>
+<tr class="memitem:a02005590b436de59a09ab102fd5d78cc" id="r_a02005590b436de59a09ab102fd5d78cc"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a02005590b436de59a09ab102fd5d78cc">chill::getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
+<tr class="memitem:a439ba1c08661531c9e90cfc8818e6b22" id="r_a439ba1c08661531c9e90cfc8818e6b22"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a439ba1c08661531c9e90cfc8818e6b22">chill::getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice, bool neighbourTest)</td></tr>
+<tr class="memitem:a6c253832dc8e20f4450ed81d1edc7bf7" id="r_a6c253832dc8e20f4450ed81d1edc7bf7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a6c253832dc8e20f4450ed81d1edc7bf7">chill::clearIceTypesExcept</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;types)</td></tr>
+<tr class="memitem:aa4cd8fa09ced6b06f44bf2258304a5e3" id="r_aa4cd8fa09ced6b06f44bf2258304a5e3"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#aa4cd8fa09ced6b06f44bf2258304a5e3">chill::getq6</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
+<tr class="memitem:aaad5ad6884511e350e8b2cda1baeaea2" id="r_aaad5ad6884511e350e8b2cda1baeaea2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#aaad5ad6884511e350e8b2cda1baeaea2">chill::reclassifyWater</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;q6)</td></tr>
+<tr class="memitem:a0981b3101b04cacd525c2b5dc52f8a96" id="r_a0981b3101b04cacd525c2b5dc52f8a96"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a0981b3101b04cacd525c2b5dc52f8a96">chill::printIceType</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;superChill.txt&quot;)</td></tr>
+<tr class="memdesc:a0981b3101b04cacd525c2b5dc52f8a96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prints out the iceType for a particular frame onto the terminal.  <br /></td></tr>
+<tr class="memitem:a87291ed1a8fe073028ce4de34ff38da2" id="r_a87291ed1a8fe073028ce4de34ff38da2"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a87291ed1a8fe073028ce4de34ff38da2">chill::isInterfacial</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int iatom, int num_staggrd, int num_eclipsd, bool chillPlus=false)</td></tr>
+<tr class="memitem:aba97c889c36d860a4842f43a3f81a6b5" id="r_aba97c889c36d860a4842f43a3f81a6b5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#aba97c889c36d860a4842f43a3f81a6b5">chill::numStaggered</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int jatom)</td></tr>
+<tr class="memdesc:aba97c889c36d860a4842f43a3f81a6b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the number of staggered bonds for a given atom of index jatom.  <br /></td></tr>
+<tr class="memitem:ad60f25b03dc9b26dc62d80fd3fac53c3" id="r_ad60f25b03dc9b26dc62d80fd3fac53c3"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#ad60f25b03dc9b26dc62d80fd3fac53c3">chill::steinhardtQl</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL)</td></tr>
+<tr class="memitem:a2a25a9b94dbeb2999ffbe11d709821ff" id="r_a2a25a9b94dbeb2999ffbe11d709821ff"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a2a25a9b94dbeb2999ffbe11d709821ff">chill::steinhardtQlCutoff</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int orderL, int typeI, bool average, bool invariants=false)</td></tr>
+<tr class="memitem:a28009823939d7ea34c17394ba5f3fc43" id="r_a28009823939d7ea34c17394ba5f3fc43"><td class="memItemLeft"><a class="el" href="structchill_1_1QlCutoffStages.html">QlCutoffStages</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a28009823939d7ea34c17394ba5f3fc43">chill::lastQlCutoffStages</a> ()</td></tr>
+<tr class="memitem:a54c2a4268860a308ff4d4747aed1f639" id="r_a54c2a4268860a308ff4d4747aed1f639"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a54c2a4268860a308ff4d4747aed1f639">chill::localCutoffQ4Q6</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI, std::vector&lt; double &gt; &amp;q4, std::vector&lt; double &gt; &amp;q6)</td></tr>
+<tr class="memitem:a2edabdc2c991910b7f55ea97e3764f8d" id="r_a2edabdc2c991910b7f55ea97e3764f8d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a2edabdc2c991910b7f55ea97e3764f8d">chill::steinhardtQ4Q6Cutoff</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI, bool average, <a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> &amp;q4, <a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> &amp;q6)</td></tr>
+<tr class="memitem:abb306f05fb97b73078f1f036eb3cac36" id="r_abb306f05fb97b73078f1f036eb3cac36"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#abb306f05fb97b73078f1f036eb3cac36">chill::steinhardtQlMutual</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, int orderL)</td></tr>
+<tr class="memitem:a794193ca26ae29cc438c91471a0cb3d5" id="r_a794193ca26ae29cc438c91471a0cb3d5"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a794193ca26ae29cc438c91471a0cb3d5">chill::setSteinhardtAtomSplit</a> (bool split)</td></tr>
+<tr class="memitem:aa21221b501fe7bbf35fa664416cdc2d3" id="r_aa21221b501fe7bbf35fa664416cdc2d3"><td class="memItemLeft"><a class="el" href="structchill_1_1AnalysisPhases.html">AnalysisPhases</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#aa21221b501fe7bbf35fa664416cdc2d3">chill::lastChillPhases</a> ()</td></tr>
+<tr class="memitem:a5b07478b8a490e3c8272e23fdc3da49e" id="r_a5b07478b8a490e3c8272e23fdc3da49e"><td class="memItemLeft"><a class="el" href="structchill_1_1AnalysisPhases.html">AnalysisPhases</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a5b07478b8a490e3c8272e23fdc3da49e">chill::lastSteinhardtPhases</a> ()</td></tr>
+<tr class="memitem:acf09e172dbd2b204fb6470c65ee38257" id="r_acf09e172dbd2b204fb6470c65ee38257"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#acf09e172dbd2b204fb6470c65ee38257">chill::steinhardtQlmWidth</a> (int orderL)</td></tr>
+<tr class="memdesc:acf09e172dbd2b204fb6470c65ee38257"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of one atom's interleaved q_lm: real, imaginary, m = -l..l.  <br /></td></tr>
+<tr class="memitem:a5eb8eb075ca96976d2992150cfcfed5d" id="r_a5eb8eb075ca96976d2992150cfcfed5d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a5eb8eb075ca96976d2992150cfcfed5d">chill::writeSteinhardtQlm</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL, std::vector&lt; double &gt; &amp;qlm, const std::vector&lt; char &gt; *which)</td></tr>
+<tr class="memdesc:a5eb8eb075ca96976d2992150cfcfed5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">q_lm for atoms <em class="arg">which</em> selects. Other atoms are left zero.  <br /></td></tr>
+<tr class="memitem:a7b9094a4f11e908dcb0d0c3987bebea3" id="r_a7b9094a4f11e908dcb0d0c3987bebea3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacechill.html#a7b9094a4f11e908dcb0d0c3987bebea3">chill::readSteinhardtQl</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL, const std::vector&lt; double &gt; &amp;qlm, std::vector&lt; double &gt; &amp;ql, std::vector&lt; double &gt; &amp;qlBar, const std::vector&lt; char &gt; *which)</td></tr>
+<tr class="memdesc:a7b9094a4f11e908dcb0d0c3987bebea3"><td class="mdescLeft">&#160;</td><td class="mdescRight">ql and qlBar for atoms <em class="arg">which</em> selects, reading q_lm of their neighbours.  <br /></td></tr>
+<tr class="memitem:aa9220b76da7400c9d934fa08ceeeba7a" id="r_aa9220b76da7400c9d934fa08ceeeba7a"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#aa9220b76da7400c9d934fa08ceeeba7a">sph::spheriHarmo</a> (int orderL, std::array&lt; double, 2 &gt; radialCoord)</td></tr>
+<tr class="memitem:a54a26a87d40f9d1be9253f71ecac02c0" id="r_a54a26a87d40f9d1be9253f71ecac02c0"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#a54a26a87d40f9d1be9253f71ecac02c0">sph::spheriHarmoInto</a> (int orderL, std::array&lt; double, 2 &gt; radialCoord, std::vector&lt; std::complex&lt; double &gt; &gt; &amp;out)</td></tr>
+<tr class="memdesc:a54a26a87d40f9d1be9253f71ecac02c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill <span class="tt">out</span> with Y_lm, m = -l .. +l. Reuses <span class="tt">out</span> capacity.  <br /></td></tr>
+<tr class="memitem:a514fadfbfeabee5d144ef4102fb3004d" id="r_a514fadfbfeabee5d144ef4102fb3004d"><td class="memItemLeft">std::array&lt; double, 2 &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#a514fadfbfeabee5d144ef4102fb3004d">sph::radialCoord</a> (std::array&lt; double, 3 &gt; cartCoord)</td></tr>
+<tr class="memitem:a08491bfa3fa2f6bacdf997be433508c4" id="r_a08491bfa3fa2f6bacdf997be433508c4"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#a08491bfa3fa2f6bacdf997be433508c4">sph::lookupTableQ3Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:a08491bfa3fa2f6bacdf997be433508c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q3.  <br /></td></tr>
+<tr class="memitem:accbcfa30cf3762a55c59e7b632117af5" id="r_accbcfa30cf3762a55c59e7b632117af5"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#accbcfa30cf3762a55c59e7b632117af5">sph::lookupTableQ3</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:accbcfa30cf3762a55c59e7b632117af5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q3 (m=0 to m=6).  <br /></td></tr>
+<tr class="memitem:a453c3de59a751a26cad5e01a7cb26ed0" id="r_a453c3de59a751a26cad5e01a7cb26ed0"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#a453c3de59a751a26cad5e01a7cb26ed0">sph::lookupTableQ4Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:a453c3de59a751a26cad5e01a7cb26ed0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q4.  <br /></td></tr>
+<tr class="memitem:af85e8aaa32c95aae99c0824db59e3f6f" id="r_af85e8aaa32c95aae99c0824db59e3f6f"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#af85e8aaa32c95aae99c0824db59e3f6f">sph::lookupTableQ4</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:af85e8aaa32c95aae99c0824db59e3f6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q4 (m=0 to m=8).  <br /></td></tr>
+<tr class="memitem:a004e7b144d261654c556c7e66fdd9b2e" id="r_a004e7b144d261654c556c7e66fdd9b2e"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#a004e7b144d261654c556c7e66fdd9b2e">sph::lookupTableQ6Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:a004e7b144d261654c556c7e66fdd9b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q6.  <br /></td></tr>
+<tr class="memitem:adf0ba61f373430a782cbee2886628211" id="r_adf0ba61f373430a782cbee2886628211"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#adf0ba61f373430a782cbee2886628211">sph::lookupTableQ8Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:adf0ba61f373430a782cbee2886628211"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q8.  <br /></td></tr>
+<tr class="memitem:ac7a53e67f5244c83d541c78d7d7bf710" id="r_ac7a53e67f5244c83d541c78d7d7bf710"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#ac7a53e67f5244c83d541c78d7d7bf710">sph::lookupTableQ8</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:ac7a53e67f5244c83d541c78d7d7bf710"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q8 (m=0 to m=16).  <br /></td></tr>
+<tr class="memitem:a63be01f86931b2a45e70606f5b8f545d" id="r_a63be01f86931b2a45e70606f5b8f545d"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacesph.html#a63be01f86931b2a45e70606f5b8f545d">sph::lookupTableQ6</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:a63be01f86931b2a45e70606f5b8f545d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q6 (m=0 to m=12).  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>File for the bond order parameter analysis. </p>
+
+<p class="definition">Definition in file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="bop_8hpp.html">bop.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+.. index:: pair: struct; traj::WaterVectorsResult
+.. _doxid-structtraj_1_1_water_vectors_result:
+
+struct traj::WaterVectorsResult
+===============================
+
+.. toctree::
+	:hidden:
+
+Per-water orientation vectors (O->H midpoint and H->H).
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	struct WaterVectorsResult {
+		// fields
+	
+		std::vector<int> :target:`molIds<doxid-structtraj_1_1_water_vectors_result_1abc35095ca8cff06e20e097e419302d6a>`;
+		std::vector<int> :target:`oxygenIndices<doxid-structtraj_1_1_water_vectors_result_1a538a403352d97701184e0651c7873bc3>`;
+		std::vector<double> :target:`ohMidVectors<doxid-structtraj_1_1_water_vectors_result_1ae9809a78ebfd4f15cd31ad2dc3b068d2>`;
+		std::vector<double> :target:`bisectorUnit<doxid-structtraj_1_1_water_vectors_result_1a15ea20eae2f623b54d8610e3056f913d>`;
+		std::vector<double> :target:`hhVectors<doxid-structtraj_1_1_water_vectors_result_1adc0f7badc8989681fbfbd339f0b766b8>`;
+		std::vector<double> :target:`hhUnit<doxid-structtraj_1_1_water_vectors_result_1a92742d10092f9ec0be7843366086f6de>`;
+	};

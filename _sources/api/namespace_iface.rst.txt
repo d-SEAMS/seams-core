@@ -1,0 +1,166 @@
+.. index:: pair: namespace; iface
+.. _doxid-namespaceiface:
+
+namespace iface
+===============
+
+.. toctree::
+	:hidden:
+
+	enum_iface_Cause.rst
+	enum_iface_Kind.rst
+	struct_iface_Bin.rst
+	struct_iface_BootstrapInterval.rst
+	struct_iface_Front.rst
+	struct_iface_Growth.rst
+	struct_iface_GrowthFrame.rst
+	struct_iface_Profile.rst
+	struct_iface_Study.rst
+	struct_iface_WillardChandler.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace iface {
+
+	// enums
+
+	enum :ref:`Cause<doxid-namespaceiface_1a880354044e1248a351860d033c05721b>`;
+	enum :ref:`Kind<doxid-namespaceiface_1a3b2d1ed3ca7f783de29e8fde851b5395>`;
+
+	// structs
+
+	struct :ref:`Bin<doxid-structiface_1_1_bin>`;
+	struct :ref:`BootstrapInterval<doxid-structiface_1_1_bootstrap_interval>`;
+	struct :ref:`Front<doxid-structiface_1_1_front>`;
+	struct :ref:`Growth<doxid-structiface_1_1_growth>`;
+	struct :ref:`GrowthFrame<doxid-structiface_1_1_growth_frame>`;
+	struct :ref:`Profile<doxid-structiface_1_1_profile>`;
+	struct :ref:`Study<doxid-structiface_1_1_study>`;
+	struct :ref:`WillardChandler<doxid-structiface_1_1_willard_chandler>`;
+
+	// global functions
+
+	:ref:`Study<doxid-structiface_1_1_study>` :ref:`studyCloud<doxid-namespaceiface_1ae766328e3e793278b61ae939e2cc2dfe>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> cloud, double cutoff = 3.5, double binWidth = 1.0, bool census = true);
+	:ref:`Study<doxid-structiface_1_1_study>` :target:`studyDump<doxid-namespaceiface_1a2eaebae6d82142d09a0c4e1b0f7c4a67>`(const std::string& path, int frame, double cutoff = 3.5, double binWidth = 1.0, bool census = true);
+	std::string :target:`formatStudy<doxid-namespaceiface_1a2bf660dc8d0666212a6e2350c6494d9e>`(const :ref:`Study<doxid-structiface_1_1_study>`& study, const std::string& tag);
+	double :ref:`slope<doxid-namespaceiface_1a7615303594a4624586db8fc7dad682d0>`(const std::vector<double>& x, const std::vector<double>& y);
+	:ref:`Growth<doxid-structiface_1_1_growth>` :ref:`studyTrajectory<doxid-namespaceiface_1a4c169525df7e2f69700c7116bf18b707>`(const std::string& path, double dumpEveryPs, double cutoff = 3.5);
+	std::string :target:`formatGrowth<doxid-namespaceiface_1a5cd477867991a043b897b4e58148ff86>`(const :ref:`Growth<doxid-structiface_1_1_growth>`& growth);
+	std::string :ref:`formatQ6Growth<doxid-namespaceiface_1acc0c4800681d1d5d1397be73a0cf9f77>`(const std::string& path, double dumpEveryPs, double cutoff = 3.5);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :ref:`nanotube<doxid-namespaceiface_1a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4>`(int ring, int stacks, double bond = 2.75);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`honeycombSheet<doxid-namespaceiface_1af79131ed074f5600451e7d73408097e4>`(int nx, int ny, int layers, double bond = 2.75);
+	double :ref:`gaussianStepWidth<doxid-namespaceiface_1ac3554da1361c67160b4d59db9e1034e1>`(double xi);
+	:ref:`BootstrapInterval<doxid-structiface_1_1_bootstrap_interval>` :ref:`bootstrapMean<doxid-namespaceiface_1a0665e3f3b47a112af0e9543fd68f0d95>`(const std::vector<double>& samples, int nDraw, std::uint64_t seed);
+	:ref:`BootstrapInterval<doxid-structiface_1_1_bootstrap_interval>` :ref:`pairedDifference<doxid-namespaceiface_1a88cfd68ef2f533bc67e97ecb489f975d>`(const std::vector<double>& a, const std::vector<double>& b, int nDraw, std::uint64_t seed);
+	:ref:`WillardChandler<doxid-structiface_1_1_willard_chandler>` :ref:`willardChandler<doxid-namespaceiface_1a05f59884d0d3896c70075a635609406e>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> cloud, double xi = 2.4);
+	std::string :target:`formatWillardChandler<doxid-namespaceiface_1a1c6874fef9c0ed43cbe05451952c5e87>`(const :ref:`WillardChandler<doxid-structiface_1_1_willard_chandler>`& surface);
+
+	} // namespace iface
+.. _details-namespaceiface:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; studyCloud
+.. _doxid-namespaceiface_1ae766328e3e793278b61ae939e2cc2dfe:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Study<doxid-structiface_1_1_study>` studyCloud(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> cloud, double cutoff = 3.5, double binWidth = 1.0, bool census = true)
+
+Both rules, the ring census, and the interface or nucleus profile. Cutoff and bond thresholds stay at the published values. census false skips rings, sheets, diamond, CNA, q6 and the template. The CHILL+ labels and the thickness profile are unchanged.
+
+.. index:: pair: function; slope
+.. _doxid-namespaceiface_1a7615303594a4624586db8fc7dad682d0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double slope(const std::vector<double>& x, const std::vector<double>& y)
+
+Ordinary least squares slope. Empty or a single point returns 0.
+
+.. index:: pair: function; studyTrajectory
+.. _doxid-namespaceiface_1a4c169525df7e2f69700c7116bf18b707:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Growth<doxid-structiface_1_1_growth>` studyTrajectory(const std::string& path, double dumpEveryPs, double cutoff = 3.5)
+
+Every frame of a dump. time of frame i is (i - 1) \* dumpEveryPs.
+
+.. index:: pair: function; formatQ6Growth
+.. _doxid-namespaceiface_1acc0c4800681d1d5d1397be73a0cf9f77:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string formatQ6Growth(const std::string& path, double dumpEveryPs, double cutoff = 3.5)
+
+Lechner-Dellago q6 on the 3.5 A shell, the counting rule in Espinosa, Navarro, Sanz, Valeriani and Vega, J. Chem. Phys. 145, 211922 (2016), page 211922-3. The threshold is not fitted. The report is the fraction of molecules at or above each listed q6bar and local q6, plus the frame-1 histogram of the ice core and the liquid core.
+
+.. index:: pair: function; nanotube
+.. _doxid-namespaceiface_1a3fa4d8c0d6ee39ffdbbfdfaa4c64b0f4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> nanotube(int ring, int stacks, double bond = 2.75)
+
+Ideal oxygen frameworks at a nearest-neighbour distance of ``:ref:`bond <doxid-namespacebond>```. The box is orthorhombic and large enough that a 3.5 A shell does not see a lateral image.
+
+.. index:: pair: function; gaussianStepWidth
+.. _doxid-namespaceiface_1ac3554da1361c67160b4d59db9e1034e1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double gaussianStepWidth(double xi)
+
+10-90 width of a step smoothed by a Gaussian of standard deviation xi. The profile is the normal cdf, so the width is 2 \* 1.2815515655446004 \* xi.
+
+.. index:: pair: function; bootstrapMean
+.. _doxid-namespaceiface_1a0665e3f3b47a112af0e9543fd68f0d95:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`BootstrapInterval<doxid-structiface_1_1_bootstrap_interval>` bootstrapMean(const std::vector<double>& samples, int nDraw, std::uint64_t seed)
+
+Percentile bootstrap of the mean. nDraw samples with replacement.
+
+.. index:: pair: function; pairedDifference
+.. _doxid-namespaceiface_1a88cfd68ef2f533bc67e97ecb489f975d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`BootstrapInterval<doxid-structiface_1_1_bootstrap_interval>` pairedDifference(const std::vector<double>& a, const std::vector<double>& b, int nDraw, std::uint64_t seed)
+
+Mean of a[i] - b[i], resampled by shared index.
+
+.. index:: pair: function; willardChandler
+.. _doxid-namespaceiface_1a05f59884d0d3896c70075a635609406e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`WillardChandler<doxid-structiface_1_1_willard_chandler>` willardChandler(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> cloud, double xi = 2.4)
+
+Instantaneous interface of Willard and Chandler, J. Phys. Chem. B 114, 1954 (2010). xi is their Gaussian width. The surface is the set of rays from the crystal center of mass on which the coarse density crosses the midpoint of the core and the outer liquid.
+

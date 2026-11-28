@@ -1,0 +1,11 @@
+.. index:: pair: group; Trajectories and dynamics
+.. _doxid-group__capi__traj:
+
+Trajectories and dynamics
+=========================
+
+.. toctree::
+	:hidden:
+
+Periodic unwrapping, molecular dipoles, and streaming time correlations.
+

@@ -1,0 +1,28 @@
+.. index:: pair: struct; science::Layers
+.. _doxid-structscience_1_1_layers:
+
+struct science::Layers
+======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/science_front.hpp>
+	
+	struct Layers {
+		// fields
+	
+		int :target:`axis<doxid-structscience_1_1_layers_1ab1f05efb62ce94eab29c8ac5cb8a31c4>` = 2;
+		double :target:`length<doxid-structscience_1_1_layers_1a12ae430b9442b290c642bcc22c77d7dd>` = 0;
+		int :target:`n<doxid-structscience_1_1_layers_1a3e45e048ec336baf70c130e49f2dda83>` = 0;
+		std::vector<:ref:`LayerRow<doxid-structscience_1_1_layer_row>`> :target:`rows<doxid-structscience_1_1_layers_1a1a78be6222b4bdac1800473aed85cea0>`;
+		std::vector<:ref:`Front<doxid-structscience_1_1_front>`> :target:`fronts<doxid-structscience_1_1_layers_1a079447bace7ece4fd08c059f9f8a35c2>`;
+		double :target:`thickness<doxid-structscience_1_1_layers_1ae0d2efd95fd91f15d66b3ab4579cb7af>` = 0;
+		bool :target:`defined<doxid-structscience_1_1_layers_1a14a51a9eeacc250bb71e4b4ee40448f0>` = false;
+	};

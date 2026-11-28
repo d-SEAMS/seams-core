@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: topo Namespace Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/namespacetopo.html">
+<meta property="og:title" content="seams-core: topo Namespace Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/namespacetopo.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: topo Namespace Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacetopo.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">topo Namespace Reference</div></div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:LocalKey" id="r_LocalKey"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopo_1_1LocalKey.html">LocalKey</a></td></tr>
+<tr class="memitem:FrameFingerprint" id="r_FrameFingerprint"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a></td></tr>
+<tr class="memitem:KeyLibrary" id="r_KeyLibrary"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A dictionary from local keys to labels: the keys of reference structures (a polymorph library), so any molecule whose rooted neighbourhood matches a reference gets that reference's name.  <a href="structtopo_1_1KeyLibrary.html#details">More...</a><br /></td></tr>
+<tr class="memitem:LibraryMatch" id="r_LibraryMatch"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a770ae81afc5c8c715470d90d4e3c8e6e" id="r_a770ae81afc5c8c715470d90d4e3c8e6e"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> = std::vector&lt;std::vector&lt;int&gt;&gt;</td></tr>
+<tr class="memdesc:a770ae81afc5c8c715470d90d4e3c8e6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Neighbour rows by index, each row leading with the atom itself, as <a class="el" href="namespacenneigh.html#acf46d8c4b42f15e634ff0076ac83c012">nneigh::neighbourListByIndex</a> returns them.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ac22724ca2d62a9ecac9d20b5ab0b7182" id="r_ac22724ca2d62a9ecac9d20b5ab0b7182"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac22724ca2d62a9ecac9d20b5ab0b7182">hopNeighbourhood</a> (const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, int atom, int hops)</td></tr>
+<tr class="memdesc:ac22724ca2d62a9ecac9d20b5ab0b7182"><td class="mdescLeft">&#160;</td><td class="mdescRight">Atoms within <span class="tt">hops</span> bonds of <span class="tt">atom</span>, the atom itself first, then in breadth-first order.  <br /></td></tr>
+<tr class="memitem:a5425e76859221b9bfc0dd2b40fb5d6ab" id="r_a5425e76859221b9bfc0dd2b40fb5d6ab"><td class="memItemLeft">std::uint64_t&#160;</td><td class="memItemRight"><a class="el" href="#a5425e76859221b9bfc0dd2b40fb5d6ab">wlHash</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;adjacency, int root, int rounds, const std::vector&lt; int &gt; &amp;colors={})</td></tr>
+<tr class="memdesc:a5425e76859221b9bfc0dd2b40fb5d6ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weisfeiler-Lehman refinement hash of a graph given by local adjacency lists; <span class="tt">root</span> (or -1) starts in its own color; <span class="tt">colors</span> (empty or one integer per vertex, such as the atom type) seeds the initial colors.  <br /></td></tr>
+<tr class="memitem:a7283b1a50d2e515244c1fa44f0f08237" id="r_a7283b1a50d2e515244c1fa44f0f08237"><td class="memItemLeft"><a class="el" href="structtopo_1_1LocalKey.html">LocalKey</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7283b1a50d2e515244c1fa44f0f08237">localKey</a> (const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, int atom, int hops, const std::vector&lt; int &gt; &amp;colors={})</td></tr>
+<tr class="memdesc:a7283b1a50d2e515244c1fa44f0f08237"><td class="mdescLeft">&#160;</td><td class="mdescRight">Key of the rooted neighbourhood of <span class="tt">atom</span>.  <br /></td></tr>
+<tr class="memitem:ad643838ac4c2882d71944b9fccd06b46" id="r_ad643838ac4c2882d71944b9fccd06b46"><td class="memItemLeft"><a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad643838ac4c2882d71944b9fccd06b46">fingerprint</a> (const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, int hops=2, int maxRingSize=7, const std::vector&lt; int &gt; &amp;colors={})</td></tr>
+<tr class="memdesc:ad643838ac4c2882d71944b9fccd06b46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keys of every atom, their histogram, the ring census up to <span class="tt">maxRingSize</span>, and the frame key.  <br /></td></tr>
+<tr class="memitem:a6060c5c44262e9a9a2657f77f6f810d2" id="r_a6060c5c44262e9a9a2657f77f6f810d2"><td class="memItemLeft"><a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a>&#160;</td><td class="memItemRight"><a class="el" href="#a6060c5c44262e9a9a2657f77f6f810d2">incrementalFingerprint</a> (const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;prev, const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, const std::vector&lt; int &gt; &amp;dirtyAtoms, int hops, int maxRingSize=7, const std::vector&lt; int &gt; &amp;colors={})</td></tr>
+<tr class="memdesc:a6060c5c44262e9a9a2657f77f6f810d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recompute local keys only for the hop-ball of <span class="tt">dirtyAtoms</span> and keep the rest of <span class="tt">prev</span>.  <br /></td></tr>
+<tr class="memitem:a704a6805e4842829fa83f16081405519" id="r_a704a6805e4842829fa83f16081405519"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a704a6805e4842829fa83f16081405519">hex</a> (std::uint64_t value)</td></tr>
+<tr class="memdesc:a704a6805e4842829fa83f16081405519"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hex string of a 64-bit hash.  <br /></td></tr>
+<tr class="memitem:ab7a77ab1002ce0af5dda5656f84ae369" id="r_ab7a77ab1002ce0af5dda5656f84ae369"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ab7a77ab1002ce0af5dda5656f84ae369">addToLibrary</a> (<a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib, const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;fp, const std::string &amp;label)</td></tr>
+<tr class="memdesc:ab7a77ab1002ce0af5dda5656f84ae369"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add every distinct key of <span class="tt">fp</span> under <span class="tt">label</span>; a key already present under other labels carries all of them, sorted and joined by '|'.  <br /></td></tr>
+<tr class="memitem:a57942af5bce01d27654ba8d544195fe0" id="r_a57942af5bce01d27654ba8d544195fe0"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a57942af5bce01d27654ba8d544195fe0">writeLibrary</a> (const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib)</td></tr>
+<tr class="memdesc:a57942af5bce01d27654ba8d544195fe0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Text form: a header line <span class="tt"># method M hops H colors C</span> (C is 0 or 1; <span class="tt">colours</span> is the deprecated alias of <span class="tt">colors</span>; a header without either word means uncolored), then <span class="tt">key label</span> lines.  <br /></td></tr>
+<tr class="memitem:ad78791f54d32c853345d0cffe9dcfa0b" id="r_ad78791f54d32c853345d0cffe9dcfa0b"><td class="memItemLeft"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad78791f54d32c853345d0cffe9dcfa0b">readLibrary</a> (const std::string &amp;text)</td></tr>
+<tr class="memitem:a73c3376495bbd19d8f072ac21af98131" id="r_a73c3376495bbd19d8f072ac21af98131"><td class="memItemLeft"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a>&#160;</td><td class="memItemRight"><a class="el" href="#a73c3376495bbd19d8f072ac21af98131">matchLibrary</a> (const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;fp, const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;lib)</td></tr>
+<tr class="memdesc:a73c3376495bbd19d8f072ac21af98131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Look every atom key of <span class="tt">fp</span> up in <span class="tt">lib</span>.  <br /></td></tr>
+<tr class="memitem:ab73f19fb67b1be4132c0dea9ca09a4e6" id="r_ab73f19fb67b1be4132c0dea9ca09a4e6"><td class="memItemLeft"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab73f19fb67b1be4132c0dea9ca09a4e6">matchLibraries</a> (const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;rows, const std::vector&lt; <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &gt; &amp;libs, int maxRingSize=7, const std::vector&lt; int &gt; &amp;colors={})</td></tr>
+<tr class="memdesc:ab73f19fb67b1be4132c0dea9ca09a4e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Match against libraries at several depths: an atom takes the label of the deepest library that holds its key, and a molecule whose wide neighbourhood is disturbed (a defect two bonds away, a jittered dense polymorph) still gets named by its inner shells.  <br /></td></tr>
+</table>
+<a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
+<a id="a770ae81afc5c8c715470d90d4e3c8e6e" name="a770ae81afc5c8c715470d90d4e3c8e6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a770ae81afc5c8c715470d90d4e3c8e6e">&#9670;&#160;</a></span>Rows</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">topo::Rows</a> = std::vector&lt;std::vector&lt;int&gt;&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Neighbour rows by index, each row leading with the atom itself, as <a class="el" href="namespacenneigh.html#acf46d8c4b42f15e634ff0076ac83c012">nneigh::neighbourListByIndex</a> returns them. </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__fingerprint_8hpp_source.html#l00038">38</a> of file <a class="el" href="topo__fingerprint_8hpp_source.html">topo_fingerprint.hpp</a>.</p>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ab7a77ab1002ce0af5dda5656f84ae369" name="ab7a77ab1002ce0af5dda5656f84ae369"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7a77ab1002ce0af5dda5656f84ae369">&#9670;&#160;</a></span>addToLibrary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void topo::addToLibrary </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>lib</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>fp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>label</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add every distinct key of <span class="tt">fp</span> under <span class="tt">label</span>; a key already present under other labels carries all of them, sorted and joined by '|'. </p>
+
+</div>
+</div>
+<a id="ad643838ac4c2882d71944b9fccd06b46" name="ad643838ac4c2882d71944b9fccd06b46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad643838ac4c2882d71944b9fccd06b46">&#9670;&#160;</a></span>fingerprint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> topo::fingerprint </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hops</em></span><span class="paramdefsep"> = </span><span class="paramdefval">2</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span><span class="paramdefsep"> = </span><span class="paramdefval">7</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>colors</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Keys of every atom, their histogram, the ring census up to <span class="tt">maxRingSize</span>, and the frame key. </p>
+<p><span class="tt">colors</span> as in localKey. </p>
+
+</div>
+</div>
+<a id="a704a6805e4842829fa83f16081405519" name="a704a6805e4842829fa83f16081405519"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a704a6805e4842829fa83f16081405519">&#9670;&#160;</a></span>hex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string topo::hex </td>
+          <td>(</td>
+          <td class="paramtype">std::uint64_t</td>          <td class="paramname"><span class="paramname"><em>value</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Hex string of a 64-bit hash. </p>
+
+</div>
+</div>
+<a id="ac22724ca2d62a9ecac9d20b5ab0b7182" name="ac22724ca2d62a9ecac9d20b5ab0b7182"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac22724ca2d62a9ecac9d20b5ab0b7182">&#9670;&#160;</a></span>hopNeighbourhood()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; topo::hopNeighbourhood </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>atom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hops</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Atoms within <span class="tt">hops</span> bonds of <span class="tt">atom</span>, the atom itself first, then in breadth-first order. </p>
+
+</div>
+</div>
+<a id="a6060c5c44262e9a9a2657f77f6f810d2" name="a6060c5c44262e9a9a2657f77f6f810d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6060c5c44262e9a9a2657f77f6f810d2">&#9670;&#160;</a></span>incrementalFingerprint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> topo::incrementalFingerprint </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>prev</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>dirtyAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hops</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span><span class="paramdefsep"> = </span><span class="paramdefval">7</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>colors</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Recompute local keys only for the hop-ball of <span class="tt">dirtyAtoms</span> and keep the rest of <span class="tt">prev</span>. </p>
+<p>The ring census is taken on <span class="tt">rows</span>. A size or hop mismatch falls back to a full fingerprint. </p>
+
+</div>
+</div>
+<a id="a7283b1a50d2e515244c1fa44f0f08237" name="a7283b1a50d2e515244c1fa44f0f08237"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7283b1a50d2e515244c1fa44f0f08237">&#9670;&#160;</a></span>localKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1LocalKey.html">LocalKey</a> topo::localKey </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>atom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>hops</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>colors</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Key of the rooted neighbourhood of <span class="tt">atom</span>. </p>
+<p><span class="tt">colors</span> is empty or one class per row (atom type, species); colored vertices never match vertices of another color. </p>
+
+</div>
+</div>
+<a id="ab73f19fb67b1be4132c0dea9ca09a4e6" name="ab73f19fb67b1be4132c0dea9ca09a4e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab73f19fb67b1be4132c0dea9ca09a4e6">&#9670;&#160;</a></span>matchLibraries()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a> topo::matchLibraries </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="#a770ae81afc5c8c715470d90d4e3c8e6e">Rows</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>libs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span><span class="paramdefsep"> = </span><span class="paramdefval">7</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>colors</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Match against libraries at several depths: an atom takes the label of the deepest library that holds its key, and a molecule whose wide neighbourhood is disturbed (a defect two bonds away, a jittered dense polymorph) still gets named by its inner shells. </p>
+<p><span class="tt">depth</span> records the hops that named each atom. Every library must share the method of this build and the coloring (<span class="tt">colors</span> empty or one per row); throws std::invalid_argument otherwise, or when two libraries share a depth. </p>
+
+</div>
+</div>
+<a id="a73c3376495bbd19d8f072ac21af98131" name="a73c3376495bbd19d8f072ac21af98131"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73c3376495bbd19d8f072ac21af98131">&#9670;&#160;</a></span>matchLibrary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1LibraryMatch.html">LibraryMatch</a> topo::matchLibrary </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1FrameFingerprint.html">FrameFingerprint</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>fp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>lib</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Look every atom key of <span class="tt">fp</span> up in <span class="tt">lib</span>. </p>
+<p>Throws std::invalid_argument when the methods, hop counts or colorings differ. </p>
+
+</div>
+</div>
+<a id="ad78791f54d32c853345d0cffe9dcfa0b" name="ad78791f54d32c853345d0cffe9dcfa0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad78791f54d32c853345d0cffe9dcfa0b">&#9670;&#160;</a></span>readLibrary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> topo::readLibrary </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>text</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5425e76859221b9bfc0dd2b40fb5d6ab" name="a5425e76859221b9bfc0dd2b40fb5d6ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5425e76859221b9bfc0dd2b40fb5d6ab">&#9670;&#160;</a></span>wlHash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::uint64_t topo::wlHash </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>adjacency</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>root</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>rounds</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>colors</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Weisfeiler-Lehman refinement hash of a graph given by local adjacency lists; <span class="tt">root</span> (or -1) starts in its own color; <span class="tt">colors</span> (empty or one integer per vertex, such as the atom type) seeds the initial colors. </p>
+<p><span class="tt">rounds</span> refinements. </p>
+
+</div>
+</div>
+<a id="a57942af5bce01d27654ba8d544195fe0" name="a57942af5bce01d27654ba8d544195fe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57942af5bce01d27654ba8d544195fe0">&#9670;&#160;</a></span>writeLibrary()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string topo::writeLibrary </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structtopo_1_1KeyLibrary.html">KeyLibrary</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>lib</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Text form: a header line <span class="tt"># method M hops H colors C</span> (C is 0 or 1; <span class="tt">colours</span> is the deprecated alias of <span class="tt">colors</span>; a header without either word means uncolored), then <span class="tt">key label</span> lines. </p>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacetopo.html">topo</a></li>
+  </ul>
+</div>
+</body>
+</html>

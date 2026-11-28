@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="420" viewBox="0 0 780 420">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="390" y="24" text-anchor="middle" font-family="sans-serif" font-size="16">Ice thickness along the slab</text>
+<rect x="70" y="40" width="640" height="320" fill="none" stroke="#222"/>
+<text x="390" y="390" text-anchor="middle" font-family="sans-serif" font-size="13">time (ps)</text>
+<text x="18" y="200" text-anchor="middle" font-family="sans-serif" font-size="13" transform="rotate(-90 18 200)">thickness (A)</text>
+<line x1="66" y1="360.0" x2="70" y2="360.0" stroke="#222"/>
+<text x="62" y="364.0" text-anchor="end" font-family="sans-serif" font-size="11">13.4</text>
+<line x1="66" y1="200.0" x2="70" y2="200.0" stroke="#222"/>
+<text x="62" y="204.0" text-anchor="end" font-family="sans-serif" font-size="11">25.7</text>
+<line x1="66" y1="40.0" x2="70" y2="40.0" stroke="#222"/>
+<text x="62" y="44.0" text-anchor="end" font-family="sans-serif" font-size="11">38.0</text>
+<line x1="70.0" y1="360" x2="70.0" y2="364" stroke="#222"/>
+<text x="70.0" y="378" text-anchor="middle" font-family="sans-serif" font-size="11">0</text>
+<line x1="390.0" y1="360" x2="390.0" y2="364" stroke="#222"/>
+<text x="390.0" y="378" text-anchor="middle" font-family="sans-serif" font-size="11">325</text>
+<line x1="710.0" y1="360" x2="710.0" y2="364" stroke="#222"/>
+<text x="710.0" y="378" text-anchor="middle" font-family="sans-serif" font-size="11">650</text>
+<polyline fill="none" stroke="#5b9bd5" stroke-width="2" points="70.00,211.64 119.23,278.63 168.46,313.16 217.69,249.64 266.92,244.68 316.15,262.95 365.38,247.55 414.62,206.71 463.85,211.20 513.08,176.97 562.31,290.17 611.54,90.42 660.77,53.94 710.00,59.67"/>
+<line x1="82" y1="56" x2="104" y2="56" stroke="#5b9bd5" stroke-width="2"/>
+<text x="108" y="60" font-family="sans-serif" font-size="11">2015 solid</text>
+<polyline fill="none" stroke="#c65911" stroke-width="2" points="70.00,235.55 119.23,280.78 168.46,313.16 217.69,250.18 266.92,247.61 316.15,263.39 365.38,219.80 414.62,206.71 463.85,230.70 513.08,177.22 562.31,290.17 611.54,86.80 660.77,53.03 710.00,92.17"/>
+<line x1="232" y1="56" x2="254" y2="56" stroke="#c65911" stroke-width="2"/>
+<text x="258" y="60" font-family="sans-serif" font-size="11">OVITO solid</text>
+<polyline fill="none" stroke="#1f4e79" stroke-width="2" points="70.00,253.45 119.23,310.81 168.46,328.46 217.69,277.24 266.92,290.32 316.15,285.56 365.38,293.17 414.62,246.89 463.85,248.84 513.08,196.28 562.31,291.97 611.54,122.88 660.77,111.92 710.00,120.33"/>
+<line x1="382" y1="56" x2="404" y2="56" stroke="#1f4e79" stroke-width="2"/>
+<text x="408" y="60" font-family="sans-serif" font-size="11">2015 crystal</text>
+<polyline fill="none" stroke="#833c0c" stroke-width="2" points="70.00,258.36 119.23,314.82 168.46,346.97 217.69,277.24 266.92,291.34 316.15,285.94 365.38,254.64 414.62,245.35 463.85,252.61 513.08,195.42 562.31,291.97 611.54,122.88 660.77,111.92 710.00,120.04"/>
+<line x1="532" y1="56" x2="554" y2="56" stroke="#833c0c" stroke-width="2"/>
+<text x="558" y="60" font-family="sans-serif" font-size="11">OVITO crystal</text>
+</svg>

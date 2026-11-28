@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>class seams::System - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Cage" href="group_cage.html" /><link rel="prev" title="class seams::Rings::iterator" href="class_seams_Rings_iterator.html" /><link rel="canonical" href="https://docs.dseams.info/api/class_seams_System.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css?v=f040eaf7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-tokens.css?v=d0993c48" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-family.css?v=ab9c5117" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-shibuya.css?v=86c54dcb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-doxyrest.css?v=cb763bf8" />
+    
+    
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/api/class_seams_System.html"/>
+  <meta property="og:title" content="class seams::System"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="One frame: coordinates, a cell, and the analyses that read them. More…"/>
+    <meta property="og:description" content="One frame: coordinates, a cell, and the analyses that read them. More…"/><meta name="twitter:card" content="summary_large_image"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="robots" content="index, follow">
+<meta name="twitter:title" content="class seams::System - d-SEAMS">
+<meta name="twitter:description" content="One frame: coordinates, a cell, and the analyses that read them. More…">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/api/class_seams_System.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"class seams::System - d-SEAMS","description":"One frame: coordinates, a cell, and the analyses that read them. More\u2026","url":"https://docs.dseams.info/api/class_seams_System.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
+<body><nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
+            <span>Libraries</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://linkcell.dseams.info">
+                <span>linkcell</span>
+                <small>Periodic linked-cell neighbour lists</small>
+              </a></li></ul>
+      </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../user/index.html">User guide</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">API reference</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_nneigh_SkinNeighborList.html">class nneigh::SkinNeighborList</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_primitive_RingUpdater.html">class primitive::RingUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_ring_AffiliationUpdater.html">class ring::AffiliationUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_ring_NeighBond.html">class ring::NeighBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Brine.html">class seams::Brine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Cages.html">class seams::Cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Error.html">class seams::Error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_FairWidth.html">class seams::FairWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Fingerprint.html">class seams::Fingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_HbondTcf.html">class seams::HbondTcf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Msd.html">class seams::Msd</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Neighbours.html">class seams::Neighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_PinSession.html">class seams::PinSession</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_RegionErrors.html">class seams::RegionErrors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Reorientation.html">class seams::Reorientation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Rings.html">class seams::Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_Rings_iterator.html">class seams::Rings::iterator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">class seams::System</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_seams_detail_Handle.html">template class seams::detail::Handle</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_traj_HbondLifetimeAccumulator.html">class traj::HbondLifetimeAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_traj_MsdAccumulator.html">class traj::MsdAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_traj_ReorientationAccumulator.html">class traj::ReorientationAccumulator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="class_traj_TrajectoryUnwrapper.html">class traj::TrajectoryUnwrapper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_cage_Signature_Kind.html">enum cage::Signature::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_cage_cageType.html">enum cage::cageType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_cage_iceType.html">enum cage::iceType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_chill_ChillPlusRule.html">enum chill::ChillPlusRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_chill_CrystalKind.html">enum chill::CrystalKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_iface_Cause.html">enum iface::Cause</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_iface_Kind.html">enum iface::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_molSys_atom_state_type.html">enum molSys::atom_state_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_molSys_bond_type.html">enum molSys::bond_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_nneigh_BondGraph.html">enum nneigh::BondGraph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_nucleation_CommittorFate.html">enum nucleation::CommittorFate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_phase_GlassKind.html">enum phase::GlassKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_primitive_RingRows.html">enum primitive::RingRows</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_ring_strucType.html">enum ring::strucType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_seams_product_Int8Backend.html">enum seams::product::Int8Backend</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_seams_product_Mode.html">enum seams::product::Mode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_seams_product_Reduction.html">enum seams::product::Reduction</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_site_Family.html">enum site::Family</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_site_IonState.html">enum site::IonState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_site_Kind.html">enum site::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_symm_Crystal.html">enum symm::Crystal</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_symm_Kind.html">enum symm::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_topoparam_TetrahedralNeighbours.html">enum topoparam::TetrahedralNeighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="enum_water_MolMode.html">enum water::MolMode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-system-set-atoms">seams_system_set_atoms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-system-set-positions">seams_system_set_positions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-handle-error">seams_handle_error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-status">seams_status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-system">seams_system</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-cagelabel">seams::CageLabel</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#doxid-group-seams-cpp-1ga66e498496a8ac061410534a9f0171779">seams::Status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-chillrule">seams::ChillRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-domainsubset">seams::DomainSubset</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-graph">seams::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-axis">seams::Axis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#seams-set-num-threads">seams::set_num_threads</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#group-seams-cpp-1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5">group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#group-seams-cpp-1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d">group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="generated_targets.html#group-seams-cpp-1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="global.html">Global Namespace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_bond.html">Bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_cage.html">Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_brine.html">Ice/brine fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_cage.html">Cages and ice shells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_frame.html">Frames</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_frame_io.html">Frame reload and read-back</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_meta.html">Library metadata and errors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_more.html">Further analyses</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_neigh.html">Neighbour lists</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_order.html">Order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_pore.html">Pore geometry</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_ring.html">Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_sized.html">Status-returning and length-checked entry points</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_traj.html">Trajectories and dynamics</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_capi_types.html">Types</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_chill.html">Chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_clump.html">Clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_gen.html">Gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_molSys.html">MolSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_primitive.html">Primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_rdf.html">Rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_ring.html">Ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_seams_cpp.html">C++ API</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="group_sinp.html">Sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_absor.html">namespace absor</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_bond.html">namespace bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_cage.html">namespace cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_chill.html">namespace chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_chordless.html">namespace chordless</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_clump.html">namespace clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_gen.html">namespace gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_gen_mic.html">namespace gen::mic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_gpu.html">namespace gpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_iface.html">namespace iface</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_ira.html">namespace ira</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_match.html">namespace match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_molSys.html">namespace molSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_nneigh.html">namespace nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_nucleation.html">namespace nucleation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_phase.html">namespace phase</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_pntToPnt.html">namespace pntToPnt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_pore.html">namespace pore</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_primitive.html">namespace primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_prism3.html">namespace prism3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_rdf.html">namespace rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_rdf2.html">namespace rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_ring.html">namespace ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_science.html">namespace science</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams.html">namespace seams</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_cfg.html">namespace seams::cfg</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_cpu.html">namespace seams::cpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_detail.html">namespace seams::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_domain.html">namespace seams::domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_minimax.html">namespace seams::minimax</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_product.html">namespace seams::product</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_solid.html">namespace seams::solid</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_sphericart_ylm.html">namespace seams::sphericart_ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_steinhardt.html">namespace seams::steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_team.html">namespace seams::team</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_team_detail.html">namespace seams::team::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_tsan.html">namespace seams::tsan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_wigner.html">namespace seams::wigner</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_seams_ylm.html">namespace seams::ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_sinp.html">namespace sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_site.html">namespace site</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_sout.html">namespace sout</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_sph.html">namespace sph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_std.html">namespace std</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_symm.html">namespace symm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_symm_avx2.html">namespace symm::avx2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_symm_generic.html">namespace symm::generic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_topo.html">namespace topo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_topoparam.html">namespace topoparam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_traj.html">namespace traj</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_tum.html">namespace tum</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_tum3.html">namespace tum3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_tum_device.html">namespace tum::device</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="namespace_water.html">namespace water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_bond_DirectedHydrogenBond.html">struct bond::DirectedHydrogenBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_cage_Cage.html">struct cage::Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_cage_CageShape.html">struct cage::CageShape</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_cage_EdgeWindow.html">struct cage::EdgeWindow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_cage_FormerRow.html">struct cage::FormerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_cage_FoundCage.html">struct cage::FoundCage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_cage_Signature.html">struct cage::Signature</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_AnalysisPhases.html">struct chill::AnalysisPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_BondClassifier.html">struct chill::BondClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_BondOrder.html">struct chill::BondOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_ChillPlusResult.html">struct chill::ChillPlusResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_LinearClassifier.html">struct chill::LinearClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_QlCutoffStages.html">struct chill::QlCutoffStages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_QlmAtom.html">struct chill::QlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_SteinhardtQl.html">struct chill::SteinhardtQl</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_TemplateHit.html">struct chill::TemplateHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_VoronoiWeights.html">struct chill::VoronoiWeights</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_chill_YlmAtom.html">struct chill::YlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_clump_Domain.html">struct clump::Domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_gen_FracBox.html">struct gen::FracBox</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_gen_mic_RangeError.html">struct gen::mic::RangeError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_gpu_BatchResult.html">struct gpu::BatchResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_gpu_DeviceInfo.html">struct gpu::DeviceInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_gpu_Footprint.html">struct gpu::Footprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_gpu_Plan.html">struct gpu::Plan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_iface_Bin.html">struct iface::Bin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_iface_BootstrapInterval.html">struct iface::BootstrapInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_iface_Front.html">struct iface::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_iface_Growth.html">struct iface::Growth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_iface_GrowthFrame.html">struct iface::GrowthFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_iface_Profile.html">struct iface::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_iface_Study.html">struct iface::Study</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_iface_WillardChandler.html">struct iface::WillardChandler</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ira_Match.html">struct ira::Match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ira_PointGroup.html">struct ira::PointGroup</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_molSys_Point.html">template struct molSys::Point</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_molSys_PointCloud.html">template struct molSys::PointCloud</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_molSys_Result.html">struct molSys::Result</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_nucleation_Ascent.html">struct nucleation::Ascent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_nucleation_CommittorCall.html">struct nucleation::CommittorCall</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_nucleation_FrameRecord.html">struct nucleation::FrameRecord</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_nucleation_GrowBasin.html">struct nucleation::GrowBasin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_nucleation_HalfRise.html">struct nucleation::HalfRise</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_nucleation_Lead.html">struct nucleation::Lead</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_nucleation_Shift.html">struct nucleation::Shift</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_phase_IceXXIHit.html">struct phase::IceXXIHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_pore_BoxError.html">struct pore::BoxError</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_pore_Frame.html">struct pore::Frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_pore_HostGuest.html">struct pore::HostGuest</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_pore_Profile.html">struct pore::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_pore_Profiles.html">struct pore::Profiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_primitive_Graph.html">struct primitive::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_primitive_RingSearchSplit.html">struct primitive::RingSearchSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_primitive_Vertex.html">struct primitive::Vertex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_rdf_PartialRdf.html">struct rdf::PartialRdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_CageAffiliation.html">struct ring::CageAffiliation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_CagePlanes.html">struct ring::CagePlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_DdcSplit.html">struct ring::DdcSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_EquatorChoice.html">struct ring::EquatorChoice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_PackParts.html">struct ring::PackParts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_PackingCertificate.html">struct ring::PackingCertificate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_RingSearchIndex.html">struct ring::RingSearchIndex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_SeededAtomLabels.html">struct ring::SeededAtomLabels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_ring_StackingPlanes.html">struct ring::StackingPlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_science_AtomRow.html">struct science::AtomRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_science_ClusterPart.html">struct science::ClusterPart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_science_CriticalSize.html">struct science::CriticalSize</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_science_Front.html">struct science::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_science_LayerRow.html">struct science::LayerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_science_Layers.html">struct science::Layers</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_science_NucleusFrame.html">struct science::NucleusFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_science_SlopeInterval.html">struct science::SlopeInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_BondOptions.html">struct seams::BondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_BrineFronts.html">struct seams::BrineFronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_BrineOptions.html">struct seams::BrineOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_BrineProfile.html">struct seams::BrineProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_CageCounts.html">struct seams::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_CageOptions.html">struct seams::CageOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_ChillOptions.html">struct seams::ChillOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_ChordlessCycles.html">struct seams::ChordlessCycles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Classification.html">struct seams::Classification</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Contacts.html">struct seams::Contacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_DensityOptions.html">struct seams::DensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_DensityProfile.html">struct seams::DensityProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_DiffusionFit.html">struct seams::DiffusionFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_DirectedBond.html">struct seams::DirectedBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_DirectedBondOptions.html">struct seams::DirectedBondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Distribution.html">struct seams::Distribution</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_DistributionOptions.html">struct seams::DistributionOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_DomainOptions.html">struct seams::DomainOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_DomainReport.html">struct seams::DomainReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_EdgeSet.html">struct seams::EdgeSet</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_FairState.html">struct seams::FairState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_FilledByTeam.html">template struct seams::FilledByTeam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_FilledByTeam_rebind.html">template struct seams::FilledByTeam::rebind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_FingerprintOptions.html">struct seams::FingerprintOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_FractionalDensityOptions.html">struct seams::FractionalDensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_FractionalProfile.html">struct seams::FractionalProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_HbondLifetimeCurve.html">struct seams::HbondLifetimeCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_HbondLifetimeFit.html">struct seams::HbondLifetimeFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_HostGuestContacts.html">struct seams::HostGuestContacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_HostGuestOptions.html">struct seams::HostGuestOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_KnnOptions.html">struct seams::KnnOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_MoleculeCentres.html">struct seams::MoleculeCentres</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_MoleculeDipoles.html">struct seams::MoleculeDipoles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_MsdCurve.html">struct seams::MsdCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_NeighbourOptions.html">struct seams::NeighbourOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_OrderOptions.html">struct seams::OrderOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_OrientationOrder.html">struct seams::OrientationOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Pockets.html">struct seams::Pockets</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_PoreFrame.html">struct seams::PoreFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_PoreFrameOptions.html">struct seams::PoreFrameOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_PoreProfileOptions.html">struct seams::PoreProfileOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_PoreProfiles.html">struct seams::PoreProfiles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_PrismCensus.html">struct seams::PrismCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_PrismOptions.html">struct seams::PrismOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Q4Q6.html">struct seams::Q4Q6</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Q6Bar.html">struct seams::Q6Bar</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Q6BarOptions.html">struct seams::Q6BarOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Rejection.html">struct seams::Rejection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_ReorientationCurve.html">struct seams::ReorientationCurve</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_ReorientationFit.html">struct seams::ReorientationFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_RingOptions.html">struct seams::RingOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_RunningCoordination.html">struct seams::RunningCoordination</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_SheetOptions.html">struct seams::SheetOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_SignatureMatch.html">struct seams::SignatureMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_SignatureOptions.html">struct seams::SignatureOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_Steinhardt.html">struct seams::Steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_SteinhardtOptions.html">struct seams::SteinhardtOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_TeamWidth.html">struct seams::TeamWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_WaterVectors.html">struct seams::WaterVectors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_cfg_Runtime.html">struct seams::cfg::Runtime</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_cpu_Features.html">struct seams::cpu::Features</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_directed_hbond.html">struct seams_directed_hbond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_domain_RingPhases.html">struct seams::domain::RingPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_domain_RingSummary.html">struct seams::domain::RingSummary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_domain_Share.html">struct seams::domain::Share</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_hbond_edge.html">struct seams_hbond_edge</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_product_Cij.html">struct seams::product::Cij</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_product_ComplexDot.html">struct seams::product::ComplexDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_product_GemmInfo.html">struct seams::product::GemmInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_product_RealDot.html">struct seams::product::RealDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_team_detail_Call.html">template struct seams::team::detail::Call</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_seams_tsan_Slot.html">struct seams::tsan::Slot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_sinp_ChemfilesLoadOptions.html">struct sinp::ChemfilesLoadOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_BrinePocket.html">struct site::BrinePocket</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_ConcentrationBin.html">struct site::ConcentrationBin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_ConcentrationProfile.html">struct site::ConcentrationProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_DensityZ.html">struct site::DensityZ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_FrontLayerReport.html">struct site::FrontLayerReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_FrontOptions.html">struct site::FrontOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_FrontPair.html">struct site::FrontPair</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_FrontSnapshot.html">struct site::FrontSnapshot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_GuestOccupancy.html">struct site::GuestOccupancy</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_IceClusterIons.html">struct site::IceClusterIons</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_InsideTrace.html">struct site::InsideTrace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_IonEnvironment.html">struct site::IonEnvironment</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_LinearFit.html">struct site::LinearFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_PocketCensus.html">struct site::PocketCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_RejectionCoefficient.html">struct site::RejectionCoefficient</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_Table.html">struct site::Table</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_site_TrapEvent.html">struct site::TrapEvent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_symm_CanonShell.html">struct symm::CanonShell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_symm_Group.html">struct symm::Group</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_symm_Lattice.html">struct symm::Lattice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_symm_Overlay.html">struct symm::Overlay</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_symm_Shell17.html">struct symm::Shell17</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_symm_Space.html">struct symm::Space</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_topo_FrameFingerprint.html">struct topo::FrameFingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_topo_KeyLibrary.html">struct topo::KeyLibrary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_topo_LibraryMatch.html">struct topo::LibraryMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_topo_LocalKey.html">struct topo::LocalKey</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_topoparam_LayerStack.html">struct topoparam::LayerStack</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_BoxCell.html">struct traj::BoxCell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_DecayFitResult.html">struct traj::DecayFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_DiffusionFitResult.html">struct traj::DiffusionFitResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_DipoleVectorsResult.html">struct traj::DipoleVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_HbondLifetimeAccumulator_OriginSlot.html">struct traj::HbondLifetimeAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_MsdAccumulator_OriginSlot.html">struct traj::MsdAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_OrientationOrderResult.html">struct traj::OrientationOrderResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_ReorientationAccumulator_OriginSlot.html">struct traj::ReorientationAccumulator::OriginSlot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_traj_WaterVectorsResult.html">struct traj::WaterVectorsResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_tum_CageCounts.html">struct tum::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_tum_SpecializedCaps.html">struct tum::SpecializedCaps</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_water_IonReport.html">struct water::IonReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_water_IonSite.html">struct water::IonSite</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_water_Request.html">struct water::Request</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="struct_water_Selection.html">struct water::Selection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/comparisons-summary-tables.html">Head-to-head summary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sqq-tables.html">SQQ</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#inherited-members">Inherited Members</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#detailed-documentation">Detailed Documentation</a><ul>
+<li><a class="reference internal" href="#construction">Construction</a></li>
+<li><a class="reference internal" href="#methods">Methods</a></li>
+</ul>
+</li>
+</ul>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../reference/index.html"><span itemprop="name">API reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">API Reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="group_seams_cpp.html"><span itemprop="name">C++ API</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="4" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">class seams::System</strong>
+        <meta itemprop="position" content="5" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="class-seams-system">
+<span id="doxid-classseams-1-1-system"></span><span id="index-0"></span><h1>class seams::System<a class="headerlink" href="#class-seams-system" title="Link to this heading">#</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
+<p>One frame: coordinates, a cell, and the analyses that read them. <a class="reference internal" href="#details-classseams-1-1-system"><span class="std std-ref">More…</span></a></p>
+<div class="doxyrest-overview-code-block highlight">
+<pre><span data-line="1"><span class="cp">#include</span> <span class="cpf">&lt;include/seams.hpp&gt;</span></span>
+<span data-line="2"> </span>
+<span data-line="3"><span class="k">class</span> <span class="nl">System</span><span class="p">:</span> <span class="k">public</span> <a class="doxyrest-code-link reference internal" href="class_seams_detail_Handle.html#doxid-classseams-1-1detail-1-1-handle"><span class="std std-ref">seams::detail::Handle</span></a> <span class="p">{</span></span>
+<span data-line="4"><span class="k">public</span><span class="o">:</span></span>
+<span data-line="5">    <span class="c1">// construction</span></span>
+<span data-line="6"> </span>
+<span data-line="7">    <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a8f6a67e67ca298b5dfe9af6483ab62e5"><span class="std std-ref">System</span></a><span class="p">();</span></span>
+<span data-line="8"> </span>
+<span data-line="9">    <span class="c1">// methods</span></span>
+<span data-line="10"> </span>
+<span data-line="11">    <span class="kt">void</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ad4d74603f143fbac7bdb86497e762627"><span class="std std-ref">set_ortho</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">xyz</span><span class="p">,</span> <span class="kt">double</span> <span class="n">lx</span><span class="p">,</span> <span class="kt">double</span> <span class="n">ly</span><span class="p">,</span> <span class="kt">double</span> <span class="n">lz</span><span class="p">);</span></span>
+<span data-line="12">    <span class="kt">void</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a350bd6a7659bf0d77077e81fd97ad966"><span class="std std-ref">set_ortho</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;</span> <span class="n">origin</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">types</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">ids</span> <span class="o">=</span> <span class="p">{});</span></span>
+<span data-line="13">    <span class="kt">void</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ae61de30cae54c423c079e9b1ec02a972"><span class="std std-ref">set_frame</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="p">,</span> <span class="mi">9</span><span class="o">&gt;</span> <span class="n">box9</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">types</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">ids</span> <span class="o">=</span> <span class="p">{});</span></span>
+<span data-line="14">    <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="doxyrest-code-target target" id="doxid-classseams_1_1_system_1ad751438d8209823d2fba0fa4a17a8748"></span><span class="n">chill</span><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">graph</span><span class="p">,</span> <span class="kt">int</span> <span class="n">rule</span><span class="p">);</span></span>
+<span data-line="15">    <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span> <span class="doxyrest-code-target target" id="doxid-classseams_1_1_system_1ac1de17b0dea554a2c1264d61fa881ece"></span><span class="n">steinhardt</span><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">average</span><span class="p">);</span></span>
+<span data-line="16">    <span class="kt">void</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a9d94d3c981d95d18f61b404c5b362a46"><span class="std std-ref">read</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">path</span><span class="p">,</span> <span class="kt">int</span> <span class="n">frame</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type_filter</span><span class="p">);</span></span>
+<span data-line="17">    <span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a8c9e0e865138a0eca7d35de5cc9bdd2c"><span class="std std-ref">count</span></a><span class="p">()</span> <span class="k">const</span><span class="p">;</span></span>
+<span data-line="18">    <a class="doxyrest-code-link reference internal" href="struct_seams_Classification.html#doxid-structseams-1-1-classification"><span class="std std-ref">Classification</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ae4a6555fb25a75db01c122e65f3a2a30"><span class="std std-ref">chill</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_ChillOptions.html#doxid-structseams-1-1-chill-options"><span class="std std-ref">ChillOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="19">    <a class="doxyrest-code-link reference internal" href="struct_seams_Classification.html#doxid-structseams-1-1-classification"><span class="std std-ref">Classification</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a211926876b948d826f42520fb823b5c6"><span class="std std-ref">chill_plus</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_ChillOptions.html#doxid-structseams-1-1-chill-options"><span class="std std-ref">ChillOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="20">    <a class="doxyrest-code-link reference internal" href="struct_seams_Steinhardt.html#doxid-structseams-1-1-steinhardt"><span class="std std-ref">Steinhardt</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1aa8841ba03f0a37fe4238bd15e26756b2"><span class="std std-ref">steinhardt</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_SteinhardtOptions.html#doxid-structseams-1-1-steinhardt-options"><span class="std std-ref">SteinhardtOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="21">    <a class="doxyrest-code-link reference internal" href="struct_seams_Steinhardt.html#doxid-structseams-1-1-steinhardt"><span class="std std-ref">Steinhardt</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a6327a361caa00807236bb9a6b06baf59"><span class="std std-ref">ql</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_OrderOptions.html#doxid-structseams-1-1-order-options"><span class="std std-ref">OrderOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="22">    <a class="doxyrest-code-link reference internal" href="struct_seams_Q4Q6.html#doxid-structseams-1-1-q4-q6"><span class="std std-ref">Q4Q6</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a70a06e349cc0b7d0e40548688bdd6c78"><span class="std std-ref">q4q6</span></a><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">species</span> <span class="o">=</span> <span class="mi">0</span><span class="p">);</span></span>
+<span data-line="23">    <a class="doxyrest-code-link reference internal" href="struct_seams_Q6Bar.html#doxid-structseams-1-1-q6-bar"><span class="std std-ref">Q6Bar</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a2a2161e5b3ef753e7a30770b5ae8f9ad"><span class="std std-ref">q6bar</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_Q6BarOptions.html#doxid-structseams-1-1-q6-bar-options"><span class="std std-ref">Q6BarOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="24">    <a class="doxyrest-code-link reference internal" href="class_seams_Neighbours.html#doxid-classseams-1-1-neighbours"><span class="std std-ref">Neighbours</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a4d801a1b3769b60e6755996f259524b5"><span class="std std-ref">neighbours</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_NeighbourOptions.html#doxid-structseams-1-1-neighbour-options"><span class="std std-ref">NeighbourOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="25">    <a class="doxyrest-code-link reference internal" href="struct_seams_ChordlessCycles.html#doxid-structseams-1-1-chordless-cycles"><span class="std std-ref">ChordlessCycles</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ad15949f9fb3f4b14731ab684a5a9a64d"><span class="std std-ref">rings_chordless</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_NeighbourOptions.html#doxid-structseams-1-1-neighbour-options"><span class="std std-ref">NeighbourOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">);</span></span>
+<span data-line="26">    <a class="doxyrest-code-link reference internal" href="class_seams_Neighbours.html#doxid-classseams-1-1-neighbours"><span class="std std-ref">Neighbours</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1acf212e23e209901ccdab1e7db2e8b586"><span class="std std-ref">knn</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_KnnOptions.html#doxid-structseams-1-1-knn-options"><span class="std std-ref">KnnOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="27">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a34e5b40b8af54af8b82683cd18a0b27e"><span class="std std-ref">neighbour_degree</span></a><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">species</span> <span class="o">=</span> <span class="mi">0</span><span class="p">);</span></span>
+<span data-line="28">    <a class="doxyrest-code-link reference internal" href="class_seams_Rings.html#doxid-classseams-1-1-rings"><span class="std std-ref">Rings</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a0b8aec70940ac3656cdc8bdef4b54484"><span class="std std-ref">rings</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_RingOptions.html#doxid-structseams-1-1-ring-options"><span class="std std-ref">RingOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="29">    <a class="doxyrest-code-link reference internal" href="class_seams_Cages.html#doxid-classseams-1-1-cages"><span class="std std-ref">Cages</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ab2d09941bd77f2425f36bc10f9412a4d"><span class="std std-ref">cages</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_CageOptions.html#doxid-structseams-1-1-cage-options"><span class="std std-ref">CageOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="30">    <a class="doxyrest-code-link reference internal" href="struct_seams_SignatureMatch.html#doxid-structseams-1-1-signature-match"><span class="std std-ref">SignatureMatch</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a2725db4dfd10f187d428636af413c058"><span class="std std-ref">signature_cages</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_SignatureOptions.html#doxid-structseams-1-1-signature-options"><span class="std std-ref">SignatureOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="31">    <a class="doxyrest-code-link reference internal" href="struct_seams_Distribution.html#doxid-structseams-1-1-distribution"><span class="std std-ref">Distribution</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a3d082e8faf1bba7d2c8a21b618ff6f29"><span class="std std-ref">rdf</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DistributionOptions.html#doxid-structseams-1-1-distribution-options"><span class="std std-ref">DistributionOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="32">    <a class="doxyrest-code-link reference internal" href="struct_seams_RunningCoordination.html#doxid-structseams-1-1-running-coordination"><span class="std std-ref">RunningCoordination</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a2aa713e72bbdca8cce25839ebdfd82dc"><span class="std std-ref">running_cn</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DistributionOptions.html#doxid-structseams-1-1-distribution-options"><span class="std std-ref">DistributionOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="33">    <span class="kt">double</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a8915d6d040203915be8dbc2d1e5b9ec0"><span class="std std-ref">coordination</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DistributionOptions.html#doxid-structseams-1-1-distribution-options"><span class="std std-ref">DistributionOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="34">    <span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1acff446749dbb4303e07bf1effe76619a"><span class="std std-ref">hbonds</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_BondOptions.html#doxid-structseams-1-1-bond-options"><span class="std std-ref">BondOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="35">    <span class="kt">void</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a436cc3439e72744b4fb72cb81d77d507"><span class="std std-ref">set_hydrogen_frame</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">heavy_xyz</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">heavy_types</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">heavy_mols</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">hydrogen_xyz</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">hydrogen_types</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">hydrogen_mols</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="p">,</span> <span class="mi">9</span><span class="o">&gt;</span> <span class="n">box9</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">heavy_ids</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">hydrogen_ids</span><span class="p">);</span></span>
+<span data-line="36">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_seams_DirectedBond.html#doxid-structseams-1-1-directed-bond"><span class="std std-ref">DirectedBond</span></a><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a2973b81134dc90e4881d4245850bd386"><span class="std std-ref">directed_hbonds</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">donor_types</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">acceptor_types</span><span class="p">,</span> <span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DirectedBondOptions.html#doxid-structseams-1-1-directed-bond-options"><span class="std std-ref">DirectedBondOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="37">    <a class="doxyrest-code-link reference internal" href="struct_seams_DensityProfile.html#doxid-structseams-1-1-density-profile"><span class="std std-ref">DensityProfile</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a5f59a8c3c4fed580c66a98e55f11df49"><span class="std std-ref">density</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DensityOptions.html#doxid-structseams-1-1-density-options"><span class="std std-ref">DensityOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="38">    <a class="doxyrest-code-link reference internal" href="struct_seams_FractionalProfile.html#doxid-structseams-1-1-fractional-profile"><span class="std std-ref">FractionalProfile</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a35bdafbf662a5b7480aeadcb0130e12e"><span class="std std-ref">fractional_density</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_FractionalDensityOptions.html#doxid-structseams-1-1-fractional-density-options"><span class="std std-ref">FractionalDensityOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="39">    <a class="doxyrest-code-link reference internal" href="struct_seams_PoreFrame.html#doxid-structseams-1-1-pore-frame"><span class="std std-ref">PoreFrame</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a836e8e93c06819b13e0429432ea2b8f1"><span class="std std-ref">pore_frame</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_PoreFrameOptions.html#doxid-structseams-1-1-pore-frame-options"><span class="std std-ref">PoreFrameOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="40">    <a class="doxyrest-code-link reference internal" href="struct_seams_PoreProfiles.html#doxid-structseams-1-1-pore-profiles"><span class="std std-ref">PoreProfiles</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a2e19c474256a2d098a75620da077f51e"><span class="std std-ref">pore_profiles</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_PoreProfileOptions.html#doxid-structseams-1-1-pore-profile-options"><span class="std std-ref">PoreProfileOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="41">    <a class="doxyrest-code-link reference internal" href="struct_seams_HostGuestContacts.html#doxid-structseams-1-1-host-guest-contacts"><span class="std std-ref">HostGuestContacts</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1af1101085808c751c5aa21a7d776744f5"><span class="std std-ref">host_guest</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_HostGuestOptions.html#doxid-structseams-1-1-host-guest-options"><span class="std std-ref">HostGuestOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="42">    <a class="doxyrest-code-link reference internal" href="class_seams_Fingerprint.html#doxid-classseams-1-1-fingerprint"><span class="std std-ref">Fingerprint</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1aa710b592870f05e7333b1b306831231a"><span class="std std-ref">fingerprint</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_FingerprintOptions.html#doxid-structseams-1-1-fingerprint-options"><span class="std std-ref">FingerprintOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="43">    <a class="doxyrest-code-link reference internal" href="struct_seams_Contacts.html#doxid-structseams-1-1-contacts"><span class="std std-ref">Contacts</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a7c4b898b89200fdc381e179ad4e0a0af"><span class="std std-ref">contact_pairs</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">spec</span><span class="p">);</span></span>
+<span data-line="44">    <a class="doxyrest-code-link reference internal" href="struct_seams_DomainReport.html#doxid-structseams-1-1-domain-report"><span class="std std-ref">DomainReport</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ac5b0b9b6c2b68f42dafcb9faedf34b45"><span class="std std-ref">domains</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DomainOptions.html#doxid-structseams-1-1-domain-options"><span class="std std-ref">DomainOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="45">    <a class="doxyrest-code-link reference internal" href="struct_seams_PrismCensus.html#doxid-structseams-1-1-prism-census"><span class="std std-ref">PrismCensus</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a4038d857de37f2df4e790e418c119b7c"><span class="std std-ref">prisms</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_PrismOptions.html#doxid-structseams-1-1-prism-options"><span class="std std-ref">PrismOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="46">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ab46ee10bb9b1fe4f0ed2ef97727ac4d5"><span class="std std-ref">monolayer</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_SheetOptions.html#doxid-structseams-1-1-sheet-options"><span class="std std-ref">SheetOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="47">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a8d5f5b1be32204fe8cbb385b08bd5ea5"><span class="std std-ref">site_table</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">spec</span><span class="p">);</span></span>
+<span data-line="48">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1af7707ba5be76aa88e3f1e8e94210f61c"><span class="std std-ref">symmetry</span></a><span class="p">(</span><span class="kt">double</span> <span class="n">shell_rmsd</span><span class="p">);</span></span>
+<span data-line="49">    <a class="doxyrest-code-link reference internal" href="class_seams_Brine.html#doxid-classseams-1-1-brine"><span class="std std-ref">Brine</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a9dbdf793c6bb177ea1c4d6289d1177aa"><span class="std std-ref">brine</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">ice</span><span class="p">,</span> <span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_BrineOptions.html#doxid-structseams-1-1-brine-options"><span class="std std-ref">BrineOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">);</span></span>
+<span data-line="50">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ac7ffae175e6efbd0c5631e7136dcd4f7"><span class="std std-ref">mols</span></a><span class="p">()</span> <span class="k">const</span><span class="p">;</span></span>
+<span data-line="51">    <span class="kt">void</span> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a284ceff427a3921416afe3edc4cd7a1f"><span class="std std-ref">set_mols</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mol_ids</span><span class="p">);</span></span>
+<span data-line="52">    <a class="doxyrest-code-link reference internal" href="struct_seams_MoleculeCentres.html#doxid-structseams-1-1-molecule-centres"><span class="std std-ref">MoleculeCentres</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a59d77e7f4a64dc76eb70c9cf30468021"><span class="std std-ref">molecule_centres</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mol_ids</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">masses</span> <span class="o">=</span> <span class="p">{})</span> <span class="k">const</span><span class="p">;</span></span>
+<span data-line="53">    <a class="doxyrest-code-link reference internal" href="struct_seams_WaterVectors.html#doxid-structseams-1-1-water-vectors"><span class="std std-ref">WaterVectors</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1a7bc8e999229eed689ea3cf2c04ffc4d6"><span class="std std-ref">water_vectors</span></a><span class="p">(</span><span class="kt">int</span> <span class="n">oxygen_type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">hydrogen_type</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span></span>
+<span data-line="54">    <a class="doxyrest-code-link reference internal" href="struct_seams_MoleculeDipoles.html#doxid-structseams-1-1-molecule-dipoles"><span class="std std-ref">MoleculeDipoles</span></a> <a class="doxyrest-code-link reference internal" href="#doxid-classseams-1-1-system-1ab7e320364de89452eb5edda6f20cef31"><span class="std std-ref">molecule_dipoles</span></a><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mol_ids</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">charges</span> <span class="o">=</span> <span class="p">{})</span> <span class="k">const</span><span class="p">;</span></span>
+<span data-line="55"><span class="p">};</span></span>
+</pre></div>
+<section id="inherited-members">
+<h3>Inherited Members<a class="headerlink" href="#inherited-members" title="Link to this heading">#</a></h3>
+<div class="doxyrest-overview-inherited-code-block highlight">
+<pre><span data-line="1"><span class="k">public</span><span class="o">:</span></span>
+<span data-line="2">    <span class="c1">// methods</span></span>
+<span data-line="3"> </span>
+<span data-line="4">    <a class="doxyrest-code-link reference internal" href="class_seams_detail_Handle.html#doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d"><span class="std std-ref">Handle</span></a><span class="o">&amp;</span> <a class="doxyrest-code-link reference internal" href="class_seams_detail_Handle.html#doxid-classseams_1_1detail_1_1_handle_1a0dd2050fdf4ea17474fcfd3297824dab"><span class="std std-ref">operator=</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="class_seams_detail_Handle.html#doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d"><span class="std std-ref">Handle</span></a><span class="o">&amp;</span><span class="p">);</span></span>
+<span data-line="5">    <a class="doxyrest-code-link reference internal" href="class_seams_detail_Handle.html#doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d"><span class="std std-ref">Handle</span></a><span class="o">&amp;</span> <a class="doxyrest-code-link reference internal" href="class_seams_detail_Handle.html#doxid-classseams_1_1detail_1_1_handle_1aca8fcb7f880767384894fc88094d262f"><span class="std std-ref">operator=</span></a><span class="p">(</span><a class="doxyrest-code-link reference internal" href="class_seams_detail_Handle.html#doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d"><span class="std std-ref">Handle</span></a><span class="o">&amp;&amp;</span> <span class="n">other</span><span class="p">);</span></span>
+<span data-line="6">    <a class="doxyrest-code-link reference internal" href="class_seams_detail_Handle.html#doxid-classseams_1_1detail_1_1_handle_1ae58d780619badcc49127f4b5e6e78d4e"><span class="std std-ref">operator bool</span></a><span class="p">()</span> <span class="k">const</span><span class="p">;</span></span>
+</pre></div>
+</section>
+</section>
+<section id="detailed-documentation">
+<span id="details-classseams-1-1-system"></span><h2>Detailed Documentation<a class="headerlink" href="#detailed-documentation" title="Link to this heading">#</a></h2>
+<p>One frame: coordinates, a cell, and the analyses that read them.</p>
+<p>Move-only. The destructor frees the C handle. Methods that read the frame require exclusive use of this object. The <a class="reference internal" href="struct_seams_Steinhardt.html#doxid-structseams-1-1-steinhardt"><span class="std std-ref">Steinhardt</span></a> scratch inside the library is process-global, so two frames must not run <code class="docutils literal notranslate"><span class="pre">steinhardt</span></code>, <code class="docutils literal notranslate"><span class="pre">ql</span></code>, <code class="docutils literal notranslate"><span class="pre">q4q6</span></code>, or <code class="docutils literal notranslate"><span class="pre">q6bar</span></code> at the same time. <code class="docutils literal notranslate"><span class="pre">set_num_threads</span></code> is also process-global.</p>
+<section id="construction">
+<h3>Construction<a class="headerlink" href="#construction" title="Link to this heading">#</a></h3>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a8f6a67e67ca298b5dfe9af6483ab62e5">
+<span id="index-1"></span><pre><span data-line="1"><span class="n">System</span><span class="p">()</span></span>
+</pre></div>
+<p>Allocate an empty frame.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="class_seams_Error.html#doxid-classseams-1-1-error"><span class="std std-ref">Error</span></a></p></td>
+<td><p>with status <code class="docutils literal notranslate"><span class="pre">Memory</span></code> when the allocation fails.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading">#</a></h3>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ad4d74603f143fbac7bdb86497e762627">
+<span id="index-2"></span><pre><span data-line="1"><span class="kt">void</span> <span class="n">set_ortho</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">xyz</span><span class="p">,</span> <span class="kt">double</span> <span class="n">lx</span><span class="p">,</span> <span class="kt">double</span> <span class="n">ly</span><span class="p">,</span> <span class="kt">double</span> <span class="n">lz</span><span class="p">)</span></span>
+</pre></div>
+<p>Store points in an orthorhombic cell whose origin is zero.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>xyz</p></td>
+<td><p>Interleaved x, y, z. Length is a multiple of 3. Angstrom.</p></td>
+</tr>
+<tr class="row-even"><td><p>lx</p></td>
+<td><p>Edge length along x, Angstrom.</p></td>
+</tr>
+<tr class="row-odd"><td><p>ly</p></td>
+<td><p>Edge length along y, Angstrom.</p></td>
+</tr>
+<tr class="row-even"><td><p>lz</p></td>
+<td><p>Edge length along z, Angstrom.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a350bd6a7659bf0d77077e81fd97ad966">
+<span id="index-3"></span><pre><span data-line="1"><span class="kt">void</span> <span class="n">set_ortho</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;</span> <span class="n">origin</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;</span> <span class="n">lengths</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">types</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">ids</span> <span class="o">=</span> <span class="p">{})</span></span>
+</pre></div>
+<p>Store points in an orthorhombic cell.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>xyz</p></td>
+<td><p>Interleaved x, y, z. Length is a multiple of 3. Angstrom.</p></td>
+</tr>
+<tr class="row-even"><td><p>origin</p></td>
+<td><p>Cell origin, Angstrom.</p></td>
+</tr>
+<tr class="row-odd"><td><p>lengths</p></td>
+<td><p>Edge lengths, Angstrom. Each must be positive.</p></td>
+</tr>
+<tr class="row-even"><td><p>types</p></td>
+<td><p>One species per atom, or an empty span.</p></td>
+</tr>
+<tr class="row-odd"><td><p>ids</p></td>
+<td><p>One id per atom, or an empty span.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ae61de30cae54c423c079e9b1ec02a972">
+<span id="index-4"></span><pre><span data-line="1"><span class="kt">void</span> <span class="n">set_frame</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="p">,</span> <span class="mi">9</span><span class="o">&gt;</span> <span class="n">box9</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">types</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">ids</span> <span class="o">=</span> <span class="p">{})</span></span>
+</pre></div>
+<p>Store points and a general nine-number cell.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>xyz</p></td>
+<td><p>Interleaved coordinates, Angstrom.</p></td>
+</tr>
+<tr class="row-even"><td><p>box9</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ox,</span> <span class="pre">oy,</span> <span class="pre">oz,</span> <span class="pre">lx,</span> <span class="pre">ly,</span> <span class="pre">lz,</span> <span class="pre">xy,</span> <span class="pre">xz,</span> <span class="pre">yz</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>types</p></td>
+<td><p>One species per atom, or empty.</p></td>
+</tr>
+<tr class="row-even"><td><p>ids</p></td>
+<td><p>One id per atom, or empty.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a9d94d3c981d95d18f61b404c5b362a46">
+<span id="index-5"></span><pre><span data-line="1"><span class="kt">void</span> <span class="n">read</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">path</span><span class="p">,</span> <span class="kt">int</span> <span class="n">frame</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type_filter</span><span class="p">)</span></span>
+</pre></div>
+<p>Read one frame from a trajectory path.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>path</p></td>
+<td><p>XYZ, CON, chemfiles, or a LAMMPS dump.</p></td>
+</tr>
+<tr class="row-even"><td><p>frame</p></td>
+<td><p>1-based frame index.</p></td>
+</tr>
+<tr class="row-odd"><td><p>type_filter</p></td>
+<td><p>Species to keep. Negative keeps every atom.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a8c9e0e865138a0eca7d35de5cc9bdd2c">
+<span id="index-6"></span><pre><span data-line="1"><span class="kt">int</span> <span class="n">count</span><span class="p">()</span> <span class="k">const</span></span>
+</pre></div>
+<p>Number of points in the frame.</p>
+<p class="rubric">Returns:</p>
+<p>The atom count. An empty frame returns 0.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ae4a6555fb25a75db01c122e65f3a2a30">
+<span id="index-7"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_Classification.html#doxid-structseams-1-1-classification"><span class="std std-ref">Classification</span></a> <span class="n">chill</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_ChillOptions.html#doxid-structseams-1-1-chill-options"><span class="std std-ref">ChillOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Original CHILL labels and nine population counts.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a211926876b948d826f42520fb823b5c6">
+<span id="index-8"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_Classification.html#doxid-structseams-1-1-classification"><span class="std std-ref">Classification</span></a> <span class="n">chill_plus</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_ChillOptions.html#doxid-structseams-1-1-chill-options"><span class="std std-ref">ChillOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>CHILL+ labels and nine population counts.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1aa8841ba03f0a37fe4238bd15e26756b2">
+<span id="index-9"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_Steinhardt.html#doxid-structseams-1-1-steinhardt"><span class="std std-ref">Steinhardt</span></a> <span class="n">steinhardt</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_SteinhardtOptions.html#doxid-structseams-1-1-steinhardt-options"><span class="std std-ref">SteinhardtOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Local q_l on the cutoff shell.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p>Cutoff, species, degree, and whether to average.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a6327a361caa00807236bb9a6b06baf59">
+<span id="index-10"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_Steinhardt.html#doxid-structseams-1-1-steinhardt"><span class="std std-ref">Steinhardt</span></a> <span class="n">ql</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_OrderOptions.html#doxid-structseams-1-1-order-options"><span class="std std-ref">OrderOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Local q_l on a named graph.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a70a06e349cc0b7d0e40548688bdd6c78">
+<span id="index-11"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_Q4Q6.html#doxid-structseams-1-1-q4-q6"><span class="std std-ref">Q4Q6</span></a> <span class="n">q4q6</span><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">species</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span></span>
+</pre></div>
+<p>Local q4 and q6 on the cutoff shell.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a2a2161e5b3ef753e7a30770b5ae8f9ad">
+<span id="index-12"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_Q6Bar.html#doxid-structseams-1-1-q6-bar"><span class="std std-ref">Q6Bar</span></a> <span class="n">q6bar</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_Q6BarOptions.html#doxid-structseams-1-1-q6-bar-options"><span class="std std-ref">Q6BarOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>q6-bar, its mean and median, and the ice count above the cut.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a4d801a1b3769b60e6755996f259524b5">
+<span id="index-13"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="class_seams_Neighbours.html#doxid-classseams-1-1-neighbours"><span class="std std-ref">Neighbours</span></a> <span class="n">neighbours</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_NeighbourOptions.html#doxid-structseams-1-1-neighbour-options"><span class="std std-ref">NeighbourOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Cutoff or mutual neighbour list.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ad15949f9fb3f4b14731ab684a5a9a64d">
+<span id="index-14"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_ChordlessCycles.html#doxid-structseams-1-1-chordless-cycles"><span class="std std-ref">ChordlessCycles</span></a> <span class="n">rings_chordless</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_NeighbourOptions.html#doxid-structseams-1-1-neighbour-options"><span class="std std-ref">NeighbourOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span></span>
+</pre></div>
+<p>Chordless cycles of one length on a neighbour graph.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>options</p></td>
+<td><p><a class="reference internal" href="generated_targets.html#doxid-group-seams-cpp-1gaadb6ab84dae1fdc4c8b8c9808622abab"><span class="std std-ref">Graph</span></a> of the cycles.</p></td>
+</tr>
+<tr class="row-even"><td><p>size</p></td>
+<td><p>Cycle length, from 3 through 12.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Returns:</p>
+<p><a class="reference internal" href="class_seams_Neighbours.html#doxid-classseams-1-1-neighbours-1a13edfc37618cf2779867c27eb72ed1fd"><span class="std std-ref">Neighbours::chordless</span></a> on that graph.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1acf212e23e209901ccdab1e7db2e8b586">
+<span id="index-15"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="class_seams_Neighbours.html#doxid-classseams-1-1-neighbours"><span class="std std-ref">Neighbours</span></a> <span class="n">knn</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_KnnOptions.html#doxid-structseams-1-1-knn-options"><span class="std std-ref">KnnOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>k-nearest neighbour list.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a34e5b40b8af54af8b82683cd18a0b27e">
+<span id="index-16"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">neighbour_degree</span><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">species</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span></span>
+</pre></div>
+<p>Degree of each atom on the cutoff graph.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>cutoff</p></td>
+<td><p>Positive cutoff, Angstrom.</p></td>
+</tr>
+<tr class="row-even"><td><p>species</p></td>
+<td><p>Species filter. Zero keeps every atom.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a0b8aec70940ac3656cdc8bdef4b54484">
+<span id="index-17"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="class_seams_Rings.html#doxid-classseams-1-1-rings"><span class="std std-ref">Rings</span></a> <span class="n">rings</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_RingOptions.html#doxid-structseams-1-1-ring-options"><span class="std std-ref">RingOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Primitive rings up to a maximum size.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ab2d09941bd77f2425f36bc10f9412a4d">
+<span id="index-18"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="class_seams_Cages.html#doxid-classseams-1-1-cages"><span class="std std-ref">Cages</span></a> <span class="n">cages</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_CageOptions.html#doxid-structseams-1-1-cage-options"><span class="std std-ref">CageOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Hexagonal and double-diamond cage membership.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a2725db4dfd10f187d428636af413c058">
+<span id="index-19"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_SignatureMatch.html#doxid-structseams-1-1-signature-match"><span class="std std-ref">SignatureMatch</span></a> <span class="n">signature_cages</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_SignatureOptions.html#doxid-structseams-1-1-signature-options"><span class="std std-ref">SignatureOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Closed cages of one ring census.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a3d082e8faf1bba7d2c8a21b618ff6f29">
+<span id="index-20"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_Distribution.html#doxid-structseams-1-1-distribution"><span class="std std-ref">Distribution</span></a> <span class="n">rdf</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DistributionOptions.html#doxid-structseams-1-1-distribution-options"><span class="std std-ref">DistributionOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Partial radial distribution and the cell volume.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a2aa713e72bbdca8cce25839ebdfd82dc">
+<span id="index-21"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_RunningCoordination.html#doxid-structseams-1-1-running-coordination"><span class="std std-ref">RunningCoordination</span></a> <span class="n">running_cn</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DistributionOptions.html#doxid-structseams-1-1-distribution-options"><span class="std std-ref">DistributionOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Running coordination number along the partial RDF.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a8915d6d040203915be8dbc2d1e5b9ec0">
+<span id="index-22"></span><pre><span data-line="1"><span class="kt">double</span> <span class="n">coordination</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DistributionOptions.html#doxid-structseams-1-1-distribution-options"><span class="std std-ref">DistributionOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Coordination number integrated to rmax.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1acff446749dbb4303e07bf1effe76619a">
+<span id="index-23"></span><pre><span data-line="1"><span class="kt">int</span> <span class="n">hbonds</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_BondOptions.html#doxid-structseams-1-1-bond-options"><span class="std std-ref">BondOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Hydrogen-bond count.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a436cc3439e72744b4fb72cb81d77d507">
+<span id="index-24"></span><pre><span data-line="1"><span class="kt">void</span> <span class="n">set_hydrogen_frame</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">heavy_xyz</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">heavy_types</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">heavy_mols</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">hydrogen_xyz</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">hydrogen_types</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">hydrogen_mols</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="p">,</span> <span class="mi">9</span><span class="o">&gt;</span> <span class="n">box9</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">heavy_ids</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">hydrogen_ids</span><span class="p">)</span></span>
+</pre></div>
+<p>Store heavies and a separate hydrogen cloud.</p>
+<p>An empty id or mol span uses the C API default for that cloud.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a2973b81134dc90e4881d4245850bd386">
+<span id="index-25"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_seams_DirectedBond.html#doxid-structseams-1-1-directed-bond"><span class="std std-ref">DirectedBond</span></a><span class="o">&gt;</span> <span class="n">directed_hbonds</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">donor_types</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">acceptor_types</span><span class="p">,</span> <span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DirectedBondOptions.html#doxid-structseams-1-1-directed-bond-options"><span class="std std-ref">DirectedBondOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Directed hydrogen bonds for one donor type set and one acceptor type set.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a5f59a8c3c4fed580c66a98e55f11df49">
+<span id="index-26"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_DensityProfile.html#doxid-structseams-1-1-density-profile"><span class="std std-ref">DensityProfile</span></a> <span class="n">density</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DensityOptions.html#doxid-structseams-1-1-density-options"><span class="std std-ref">DensityOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Number density along one cell axis.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a35bdafbf662a5b7480aeadcb0130e12e">
+<span id="index-27"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_FractionalProfile.html#doxid-structseams-1-1-fractional-profile"><span class="std std-ref">FractionalProfile</span></a> <span class="n">fractional_density</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_FractionalDensityOptions.html#doxid-structseams-1-1-fractional-density-options"><span class="std std-ref">FractionalDensityOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Number and mass density along a cell axis or a Cartesian direction.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a836e8e93c06819b13e0429432ea2b8f1">
+<span id="index-28"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_PoreFrame.html#doxid-structseams-1-1-pore-frame"><span class="std std-ref">PoreFrame</span></a> <span class="n">pore_frame</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_PoreFrameOptions.html#doxid-structseams-1-1-pore-frame-options"><span class="std std-ref">PoreFrameOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Pore axis and centre, supplied or taken from the framework.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a2e19c474256a2d098a75620da077f51e">
+<span id="index-29"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_PoreProfiles.html#doxid-structseams-1-1-pore-profiles"><span class="std std-ref">PoreProfiles</span></a> <span class="n">pore_profiles</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_PoreProfileOptions.html#doxid-structseams-1-1-pore-profile-options"><span class="std std-ref">PoreProfileOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Radial, azimuthal, and axial densities about a pore axis.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1af1101085808c751c5aa21a7d776744f5">
+<span id="index-30"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_HostGuestContacts.html#doxid-structseams-1-1-host-guest-contacts"><span class="std std-ref">HostGuestContacts</span></a> <span class="n">host_guest</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_HostGuestOptions.html#doxid-structseams-1-1-host-guest-options"><span class="std std-ref">HostGuestOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Nearest framework site and contact counts for each guest.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1aa710b592870f05e7333b1b306831231a">
+<span id="index-31"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="class_seams_Fingerprint.html#doxid-classseams-1-1-fingerprint"><span class="std std-ref">Fingerprint</span></a> <span class="n">fingerprint</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_FingerprintOptions.html#doxid-structseams-1-1-fingerprint-options"><span class="std std-ref">FingerprintOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Topological fingerprint of the bonded graph.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a7c4b898b89200fdc381e179ad4e0a0af">
+<span id="index-32"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_Contacts.html#doxid-structseams-1-1-contacts"><span class="std std-ref">Contacts</span></a> <span class="n">contact_pairs</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">spec</span><span class="p">)</span></span>
+</pre></div>
+<p>Mutual nearest unlike contacts.</p>
+<p><code class="docutils literal notranslate"><span class="pre">spec</span></code> is site-table text.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ac5b0b9b6c2b68f42dafcb9faedf34b45">
+<span id="index-33"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_DomainReport.html#doxid-structseams-1-1-domain-report"><span class="std std-ref">DomainReport</span></a> <span class="n">domains</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_DomainOptions.html#doxid-structseams-1-1-domain-options"><span class="std std-ref">DomainOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Largest polar or apolar domain.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a4038d857de37f2df4e790e418c119b7c">
+<span id="index-34"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_PrismCensus.html#doxid-structseams-1-1-prism-census"><span class="std std-ref">PrismCensus</span></a> <span class="n">prisms</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_PrismOptions.html#doxid-structseams-1-1-prism-options"><span class="std std-ref">PrismOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Perfect and imperfect prism counts by ring size.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ab46ee10bb9b1fe4f0ed2ef97727ac4d5">
+<span id="index-35"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">monolayer</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_SheetOptions.html#doxid-structseams-1-1-sheet-options"><span class="std std-ref">SheetOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Primitive-ring histogram of a monolayer.</p>
+<p class="rubric">Returns:</p>
+<p><code class="docutils literal notranslate"><span class="pre">counts[k]</span></code> is the number of rings of size k.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a8d5f5b1be32204fe8cbb385b08bd5ea5">
+<span id="index-36"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">site_table</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">spec</span><span class="p">)</span></span>
+</pre></div>
+<p>Per-atom site kind.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>spec</p></td>
+<td><p>Site-table text, for example <code class="docutils literal notranslate"><span class="pre">1=waterO</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Returns:</p>
+<p>One kind code per atom.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1af7707ba5be76aa88e3f1e8e94210f61c">
+<span id="index-37"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">symmetry</span><span class="p">(</span><span class="kt">double</span> <span class="n">shell_rmsd</span><span class="p">)</span></span>
+</pre></div>
+<p>Per-atom ice-shell label.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>shell_rmsd</p></td>
+<td><p>Positive residual ceiling, or a non-positive value for the library ceiling.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Returns:</p>
+<p>0 ice Ih, 1 ice Ic, 2 stacking disorder, or -1 when the shell does not match.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a9dbdf793c6bb177ea1c4d6289d1177aa">
+<span id="index-38"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="class_seams_Brine.html#doxid-classseams-1-1-brine"><span class="std std-ref">Brine</span></a> <span class="n">brine</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">ice</span><span class="p">,</span> <span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_seams_BrineOptions.html#doxid-structseams-1-1-brine-options"><span class="std std-ref">BrineOptions</span></a><span class="o">&amp;</span> <span class="n">options</span><span class="p">)</span></span>
+</pre></div>
+<p>Planar ice front from an ice assignment.</p>
+<p class="rubric">Parameters:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>ice</p></td>
+<td><p>Non-zero when the atom is ice. Length must equal <code class="docutils literal notranslate"><span class="pre">count()</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>options</p></td>
+<td><p>Water species, ion species, bins, and axis.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ac7ffae175e6efbd0c5631e7136dcd4f7">
+<span id="index-39"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">mols</span><span class="p">()</span> <span class="k">const</span></span>
+</pre></div>
+<p>Copy the stored molecule ids out.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a284ceff427a3921416afe3edc4cd7a1f">
+<span id="index-40"></span><pre><span data-line="1"><span class="kt">void</span> <span class="n">set_mols</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mol_ids</span><span class="p">)</span></span>
+</pre></div>
+<p>Replace the stored molecule ids on a loaded frame.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a59d77e7f4a64dc76eb70c9cf30468021">
+<span id="index-41"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_MoleculeCentres.html#doxid-structseams-1-1-molecule-centres"><span class="std std-ref">MoleculeCentres</span></a> <span class="n">molecule_centres</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mol_ids</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">masses</span> <span class="o">=</span> <span class="p">{})</span> <span class="k">const</span></span>
+</pre></div>
+<p>Intact periodic centres of molecules in this frame.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1a7bc8e999229eed689ea3cf2c04ffc4d6">
+<span id="index-42"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_WaterVectors.html#doxid-structseams-1-1-water-vectors"><span class="std std-ref">WaterVectors</span></a> <span class="n">water_vectors</span><span class="p">(</span><span class="kt">int</span> <span class="n">oxygen_type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">hydrogen_type</span><span class="p">)</span> <span class="k">const</span></span>
+</pre></div>
+<p>Water O-to-H-midpoint and H-to-H vectors under minimum image.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classseams-1-1-system-1ab7e320364de89452eb5edda6f20cef31">
+<span id="index-43"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_seams_MoleculeDipoles.html#doxid-structseams-1-1-molecule-dipoles"><span class="std std-ref">MoleculeDipoles</span></a> <span class="n">molecule_dipoles</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mol_ids</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">charges</span> <span class="o">=</span> <span class="p">{})</span> <span class="k">const</span></span>
+</pre></div>
+<p>Per-molecule dipole or geometric orientation vectors.</p>
+</section>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="class_seams_Rings_iterator.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">class seams::Rings::iterator</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="group_cage.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Cage</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=4c4eaf79"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

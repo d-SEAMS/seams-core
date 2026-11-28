@@ -1,0 +1,69 @@
+.. index:: pair: struct; seams::Q6BarOptions
+.. _doxid-structseams_1_1_q6_bar_options:
+
+struct seams::Q6BarOptions
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for the q6-bar ice summary. :ref:`More...<details-structseams_1_1_q6_bar_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Q6BarOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_q6_bar_options_1a5bc8a30ad5863a255c8e446b67ed200c>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_q6_bar_options_1a3306661d8ff85f2c0477cdff16015f07>` = 0;
+		double :ref:`ice_cut<doxid-structseams_1_1_q6_bar_options_1a31901c76b92ebb973c6955f8f599f782>` = 0.36;
+	};
+.. _details-structseams_1_1_q6_bar_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for the q6-bar ice summary.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_q6_bar_options_1a5bc8a30ad5863a255c8e446b67ed200c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_q6_bar_options_1a3306661d8ff85f2c0477cdff16015f07:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+.. index:: pair: variable; ice_cut
+.. _doxid-structseams_1_1_q6_bar_options_1a31901c76b92ebb973c6955f8f599f782:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double ice_cut = 0.36
+
+Finite threshold.
+
+The nucleation census uses 0.36.
+

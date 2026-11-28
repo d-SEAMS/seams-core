@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: src/include/internal/domain.hpp File Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/domain_8hpp.html">
+<meta property="og:title" content="seams-core: src/include/internal/domain.hpp File Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/domain_8hpp.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: src/include/internal/domain.hpp File Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('domain_8hpp.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">domain.hpp File Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Spatial domain decomposition of one periodic frame across ranks.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;<a class="el" href="mol__sys_8hpp_source.html">mol_sys.hpp</a>&gt;</code><br />
+</div>
+<p><a href="domain_8hpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:seams_3A_3Adomain_3A_3AShare" id="r_seams_3A_3Adomain_3A_3AShare"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1domain_1_1Share.html">seams::domain::Share</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One rank's share of a frame.  <a href="structseams_1_1domain_1_1Share.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3Adomain_3A_3ARingSummary" id="r_seams_3A_3Adomain_3A_3ARingSummary"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1domain_1_1RingSummary.html">seams::domain::RingSummary</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">What the ring analyses read off a frame's primitive rings.  <a href="structseams_1_1domain_1_1RingSummary.html#details">More...</a><br /></td></tr>
+<tr class="memitem:seams_3A_3Adomain_3A_3ARingPhases" id="r_seams_3A_3Adomain_3A_3ARingPhases"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1domain_1_1RingPhases.html">seams::domain::RingPhases</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:seams" id="r_seams"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html">seams</a></td></tr>
+<tr class="memitem:seams_3A_3Adomain" id="r_seams_3A_3Adomain"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html">seams::domain</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:ab1bfe8a7863d4a64c57f3ea273eacfc3" id="r_ab1bfe8a7863d4a64c57f3ea273eacfc3"><td class="memItemLeft">using&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3">seams::domain::Cloud</a> = <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt;double&gt;, double&gt;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a08b7a66725169b459556ffeb9a2791de" id="r_a08b7a66725169b459556ffeb9a2791de"><td class="memItemLeft"><a class="el" href="structseams_1_1domain_1_1RingSummary.html">RingSummary</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a08b7a66725169b459556ffeb9a2791de">seams::domain::summarize</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;ringList, int nAtoms, int maxDepth)</td></tr>
+<tr class="memdesc:a08b7a66725169b459556ffeb9a2791de"><td class="mdescLeft">&#160;</td><td class="mdescRight">The summary of <em class="arg">ringList</em> over a frame of <em class="arg">nAtoms</em> atoms.  <br /></td></tr>
+<tr class="memitem:ad678cb494640b797ce08a5c07565785c" id="r_ad678cb494640b797ce08a5c07565785c"><td class="memItemLeft">std::uint64_t&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#ad678cb494640b797ce08a5c07565785c">seams::domain::hilbertKey</a> (std::uint32_t x, std::uint32_t y, std::uint32_t z, int bits)</td></tr>
+<tr class="memdesc:ad678cb494640b797ce08a5c07565785c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Position of cell (x, y, z) along the Hilbert curve over a 2^bits grid.  <br /></td></tr>
+<tr class="memitem:a0a3449f33e010e244fcd5cac2d7b0127" id="r_a0a3449f33e010e244fcd5cac2d7b0127"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a0a3449f33e010e244fcd5cac2d7b0127">seams::domain::ringHaloBonds</a> (int ringSize)</td></tr>
+<tr class="memitem:a6f6deb8c754079286665782899343096" id="r_a6f6deb8c754079286665782899343096"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a6f6deb8c754079286665782899343096">seams::domain::ringHops</a> (int maxDepth)</td></tr>
+<tr class="memitem:ae27bcdb378d3e3ff8d64c523885ba8fc" id="r_ae27bcdb378d3e3ff8d64c523885ba8fc"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#ae27bcdb378d3e3ff8d64c523885ba8fc">seams::domain::ringRowHops</a> (int maxDepth)</td></tr>
+<tr class="memitem:a98d70d81f9a7b925ff2ddefedb2be450" id="r_a98d70d81f9a7b925ff2ddefedb2be450"><td class="memItemLeft"><a class="el" href="structseams_1_1domain_1_1Share.html">Share</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a98d70d81f9a7b925ff2ddefedb2be450">seams::domain::decompose</a> (const <a class="el" href="namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;cloud, int rank, int nRanks, double halo)</td></tr>
+<tr class="memitem:ab0d8b6bbc022b7e14dbf042227f7f211" id="r_ab0d8b6bbc022b7e14dbf042227f7f211"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#ab0d8b6bbc022b7e14dbf042227f7f211">seams::domain::haloRanks</a> (const <a class="el" href="structseams_1_1domain_1_1Share.html">Share</a> &amp;share)</td></tr>
+<tr class="memitem:ad442b81299c26dea6b2393169fe36717" id="r_ad442b81299c26dea6b2393169fe36717"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#ad442b81299c26dea6b2393169fe36717">seams::domain::markSources</a> (const <a class="el" href="namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;cloud, const <a class="el" href="structseams_1_1domain_1_1Share.html">Share</a> &amp;share, double inner, std::vector&lt; char &gt; &amp;source)</td></tr>
+<tr class="memitem:a117adcb3bb1eb7b853386cdb464eded8" id="r_a117adcb3bb1eb7b853386cdb464eded8"><td class="memItemLeft"><a class="el" href="namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a117adcb3bb1eb7b853386cdb464eded8">seams::domain::subCloud</a> (const <a class="el" href="namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;cloud, const std::vector&lt; int &gt; &amp;atoms)</td></tr>
+<tr class="memdesc:a117adcb3bb1eb7b853386cdb464eded8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The listed atoms of <em class="arg">cloud</em>, in that order, in the same box.  <br /></td></tr>
+<tr class="memitem:ab982f532567f97c32b948bf06caa992b" id="r_ab982f532567f97c32b948bf06caa992b"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#ab982f532567f97c32b948bf06caa992b">seams::domain::rings</a> (const <a class="el" href="namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;cloud, double cutoff, int maxDepth, int rank, int nRanks)</td></tr>
+<tr class="memitem:a08a5acca2a0f3c2819ead054726c6ca1" id="r_a08a5acca2a0f3c2819ead054726c6ca1"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a08a5acca2a0f3c2819ead054726c6ca1">seams::domain::ownedRings</a> (const <a class="el" href="namespaceseams_1_1domain.html#ab1bfe8a7863d4a64c57f3ea273eacfc3">Cloud</a> &amp;local, double cutoff, int maxDepth, const std::vector&lt; char &gt; &amp;owned)</td></tr>
+<tr class="memitem:a46e8c2344b67a28640bfe7c9d5b4694c" id="r_a46e8c2344b67a28640bfe7c9d5b4694c"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a46e8c2344b67a28640bfe7c9d5b4694c">seams::domain::ringsFromRows</a> (const std::vector&lt; int &gt; &amp;frame, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;neigh, const std::vector&lt; int &gt; &amp;sources, int maxDepth)</td></tr>
+<tr class="memitem:a453ef082fca2ef42494d0049acf16d0f" id="r_a453ef082fca2ef42494d0049acf16d0f"><td class="memItemLeft"><a class="el" href="structseams_1_1domain_1_1RingPhases.html">RingPhases</a>&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a453ef082fca2ef42494d0049acf16d0f">seams::domain::lastRingPhases</a> ()</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a6d72aace5c44e5211dd6b56fc39a0cb9" id="r_a6d72aace5c44e5211dd6b56fc39a0cb9"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a6d72aace5c44e5211dd6b56fc39a0cb9">seams::domain::kRingHaloHalf</a> = 2</td></tr>
+<tr class="memitem:a7580f1167d570f49cc932c686891ef17" id="r_a7580f1167d570f49cc932c686891ef17"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a7580f1167d570f49cc932c686891ef17">seams::domain::kWorkNeigh</a> = 1</td></tr>
+<tr class="memdesc:a7580f1167d570f49cc932c686891ef17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tags for the measured cell weights. Zero keeps the point-count cut.  <br /></td></tr>
+<tr class="memitem:a50da7a35a542332983f5649d0a5d3362" id="r_a50da7a35a542332983f5649d0a5d3362"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a50da7a35a542332983f5649d0a5d3362">seams::domain::kWorkChill</a> = 2</td></tr>
+<tr class="memitem:a20030ac72f0d29d7e5970a0a697e774d" id="r_a20030ac72f0d29d7e5970a0a697e774d"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#a20030ac72f0d29d7e5970a0a697e774d">seams::domain::kWorkQ6</a> = 3</td></tr>
+<tr class="memitem:ad4e08f4cf2275b5c9e856cdeae452365" id="r_ad4e08f4cf2275b5c9e856cdeae452365"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1domain.html#ad4e08f4cf2275b5c9e856cdeae452365">seams::domain::kWorkRings</a> = 4</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Spatial domain decomposition of one periodic frame across ranks. </p>
+<p>An orthorhombic frame is cut by linkcell's recursive coordinate bisection of the periodic cell grid. The bound is the tightest a cell-aligned cut can promise. The first call of an analysis weights cells by how many points they hold. Later calls of that analysis weight them by the work measured on the first call. A painted cell only contributes a point that lies within the cutoff of an owned atom. The cut whose heaviest rank load plus thickest ghost fraction is smaller is the one that runs. A skewed frame keeps the slab, pencil, or block cut. </p>
+
+<p class="definition">Definition in file <a class="el" href="domain_8hpp_source.html">domain.hpp</a>.</p>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="domain_8hpp.html">domain.hpp</a></li>
+  </ul>
+</div>
+</body>
+</html>

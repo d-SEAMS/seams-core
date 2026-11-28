@@ -1,0 +1,368 @@
+/* d-SEAMS family look for Doxygen 1.18 HTML. Load after dseams-tokens.css and doxygen.css. */
+
+html,
+html.dark-mode {
+  --page-background-color: var(--ds-bg);
+  --page-foreground-color: var(--ds-text);
+  --page-link-color: var(--ds-link);
+  --page-visited-link-color: var(--ds-link);
+  --page-external-link-color: var(--ds-link);
+
+  --index-odd-item-bg-color: var(--ds-bg-subtle);
+  --index-even-item-bg-color: var(--ds-bg);
+  --index-header-color: var(--ds-ink);
+  --index-separator-color: var(--ds-border);
+
+  --header-background-color: var(--ds-bg);
+  --header-separator-color: var(--ds-border);
+  --group-header-separator-color: var(--ds-border);
+  --group-header-color: var(--ds-ink);
+
+  --footer-foreground-color: var(--ds-muted);
+  --citation-label-color: var(--ds-link);
+  --glow-color: var(--ds-accent);
+
+  --title-background-color: var(--ds-bg);
+  --title-separator-color: var(--ds-border);
+
+  --blockquote-background-color: var(--ds-note-bg);
+  --blockquote-border-color: var(--ds-note);
+
+  --scrollbar-thumb-color: var(--ds-border-strong);
+  --scrollbar-background-color: var(--ds-bg-subtle);
+
+  --icon-background-color: var(--ds-primary);
+  --icon-foreground-color: var(--ds-on-primary);
+  --icon-folder-open-fill-color: var(--ds-border-strong);
+  --icon-folder-fill-color: var(--ds-border);
+  --icon-folder-border-color: var(--ds-faint);
+  --icon-doc-fill-color: var(--ds-bg-subtle);
+  --icon-doc-border-color: var(--ds-faint);
+
+  --memdecl-background-color: var(--ds-bg-subtle);
+  --memdecl-foreground-color: var(--ds-muted);
+  --memdecl-template-color: var(--ds-accent-text);
+  --memdecl-border-color: var(--ds-border);
+
+  --memdef-border-color: var(--ds-border);
+  --memdef-title-background-color: var(--ds-bg-subtle);
+  --memdef-proto-background-color: var(--ds-primary-wash);
+  --memdef-proto-text-color: var(--ds-ink);
+  --memdef-param-name-color: var(--ds-accent-text);
+  --memdef-template-color: var(--ds-accent-text);
+
+  --table-cell-border-color: var(--ds-border);
+  --table-header-background-color: var(--ds-bg-subtle);
+  --table-header-foreground-color: var(--ds-ink);
+
+  --label-background-color: var(--ds-primary-wash);
+  --label-left-top-border-color: var(--ds-border);
+  --label-right-bottom-border-color: var(--ds-border);
+  --label-foreground-color: var(--ds-accent-text);
+
+  --nav-background-color: var(--ds-bg-subtle);
+  --nav-foreground-color: var(--ds-text);
+  --nav-border-color: var(--ds-border);
+  --nav-breadcrumb-separator-color: var(--ds-border-strong);
+  --nav-breadcrumb-active-bg: var(--ds-bg-hover);
+  --nav-breadcrumb-color: var(--ds-link);
+  --nav-splitbar-bg-color: var(--ds-border);
+  --nav-splitbar-handle-color: var(--ds-border-strong);
+  --nav-text-normal-color: var(--ds-text);
+  --nav-menu-button-color: var(--ds-text);
+  --nav-menu-background-color: var(--ds-bg-raised);
+  --nav-menu-foreground-color: var(--ds-text);
+  --nav-menu-active-bg: var(--ds-bg-hover);
+  --nav-menu-active-color: var(--ds-link);
+  --nav-arrow-color: var(--ds-faint);
+  --nav-arrow-selected-color: var(--ds-link);
+
+  --sync-icon-border-color: var(--ds-border);
+  --sync-icon-background-color: var(--ds-bg-subtle);
+  --sync-icon-selected-background-color: var(--ds-bg-hover);
+  --sync-icon-color: var(--ds-faint);
+  --sync-icon-selected-color: var(--ds-link);
+
+  --toc-background-color: var(--ds-bg-subtle);
+  --toc-border-color: var(--ds-border);
+  --toc-header-color: var(--ds-ink);
+
+  --search-background-color: var(--ds-bg);
+  --search-foreground-color: var(--ds-muted);
+  --search-active-color: var(--ds-ink);
+  --search-filter-background-color: var(--ds-bg-raised);
+  --search-filter-backdrop-filter: none;
+  --search-filter-foreground-color: var(--ds-text);
+  --search-filter-border-color: var(--ds-border);
+  --search-filter-highlight-text-color: var(--ds-on-primary);
+  --search-filter-highlight-bg-color: var(--ds-primary);
+  --search-results-foreground-color: var(--ds-link);
+  --search-results-background-color: var(--ds-bg-raised);
+  --search-results-backdrop-filter: none;
+  --search-results-border-color: var(--ds-border);
+  --search-box-border-color: var(--ds-border-strong);
+  --search-close-icon-bg-color: var(--ds-faint);
+  --search-close-icon-fg-color: var(--ds-bg);
+
+  --code-keyword-color: var(--ds-syn-keyword);
+  --code-type-keyword-color: var(--ds-syn-type);
+  --code-flow-keyword-color: var(--ds-syn-keyword);
+  --code-comment-color: var(--ds-syn-comment);
+  --code-preprocessor-color: var(--ds-syn-number);
+  --code-string-literal-color: var(--ds-syn-string);
+  --code-char-literal-color: var(--ds-syn-string);
+  --code-xml-cdata-color: var(--ds-code-text);
+  --fragment-foreground-color: var(--ds-code-text);
+  --fragment-background-color: var(--ds-code-bg);
+  --fragment-border-color: var(--ds-code-border);
+  --fragment-lineno-border-color: var(--ds-accent);
+  --fragment-lineno-background-color: var(--ds-code-bg);
+  --fragment-lineno-foreground-color: var(--ds-code-faint);
+  --fragment-lineno-link-fg-color: var(--ds-syn-function);
+  --fragment-lineno-link-bg-color: transparent;
+  --fragment-lineno-link-hover-fg-color: var(--ds-syn-type);
+  --fragment-lineno-link-hover-bg-color: transparent;
+  --fragment-copy-ok-color: var(--ds-syn-string);
+  --fold-line-color: var(--ds-code-faint);
+
+  --tooltip-foreground-color: var(--ds-text);
+  --tooltip-background-color: var(--ds-bg-raised);
+  --tooltip-arrow-background-color: var(--ds-bg-raised);
+  --tooltip-border-color: var(--ds-border-strong);
+  --tooltip-backdrop-filter: none;
+  --tooltip-doc-color: var(--ds-muted);
+  --tooltip-declaration-color: var(--ds-accent-text);
+  --tooltip-link-color: var(--ds-link);
+  --tooltip-shadow: var(--ds-shadow);
+
+  --font-family-normal: var(--ds-font-sans);
+  --font-family-monospace: var(--ds-font-mono);
+  --font-family-nav: var(--ds-font-sans);
+  --font-family-title: var(--ds-font-sans);
+  --font-family-toc: var(--ds-font-sans);
+  --font-family-search: var(--ds-font-sans);
+  --font-family-tooltip: var(--ds-font-sans);
+
+  --warning-color-bg: var(--ds-danger-bg);
+  --warning-color-hl: var(--ds-danger);
+  --warning-color-text: var(--ds-text);
+  --note-color-bg: var(--ds-warn-bg);
+  --note-color-hl: var(--ds-warn);
+  --note-color-text: var(--ds-text);
+  --todo-color-bg: var(--ds-tip-bg);
+  --todo-color-hl: var(--ds-tip);
+  --todo-color-text: var(--ds-text);
+  --test-color-bg: var(--ds-note-bg);
+  --test-color-hl: var(--ds-note);
+  --test-color-text: var(--ds-text);
+  --deprecated-color-bg: var(--ds-bg-subtle);
+  --deprecated-color-hl: var(--ds-faint);
+  --deprecated-color-text: var(--ds-text);
+  --bug-color-bg: var(--ds-danger-bg);
+  --bug-color-hl: var(--ds-danger);
+  --bug-color-text: var(--ds-text);
+  --invariant-color-bg: var(--ds-tip-bg);
+  --invariant-color-hl: var(--ds-tip);
+  --invariant-color-text: var(--ds-text);
+}
+
+body,
+table,
+div,
+p,
+dl {
+  font-family: var(--ds-font-sans);
+}
+
+body {
+  font-size: 16px;
+  line-height: var(--ds-leading);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The strip scrolls with the header area so Doxygen's height maths still holds. */
+.dseams-family {
+  position: static;
+  width: 100%;
+}
+
+#titlearea {
+  border-bottom: 1px solid var(--ds-border);
+  background: var(--ds-bg);
+}
+
+#projectname {
+  color: var(--ds-ink);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+#projectnumber,
+#projectbrief {
+  color: var(--ds-muted);
+}
+
+a,
+.contents a:visited {
+  text-decoration: none;
+}
+
+.contents a:hover,
+a:hover {
+  color: var(--ds-link-hover);
+  text-decoration: underline;
+}
+
+div.title,
+.headertitle .title {
+  font-family: var(--ds-font-sans);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ds-ink);
+}
+
+h1,
+h2,
+h3,
+h4,
+h2.groupheader {
+  font-family: var(--ds-font-sans);
+  color: var(--ds-ink);
+  letter-spacing: var(--ds-h-tracking);
+  line-height: var(--ds-h-leading);
+}
+
+div.contents {
+  max-width: 70rem;
+}
+
+div.contents p,
+div.contents li {
+  max-width: var(--ds-measure);
+}
+
+code,
+tt,
+.memname,
+.paramname,
+.memitem pre,
+div.line,
+pre.fragment,
+div.fragment,
+.memItemRight,
+.memItemLeft {
+  font-family: var(--ds-font-mono);
+}
+
+div.fragment,
+pre.fragment {
+  border-radius: var(--ds-radius);
+  font-size: 13.5px;
+}
+
+div.fragment {
+  background: var(--ds-code-bg);
+  color: var(--ds-code-text);
+}
+
+div.line {
+  font-family: var(--ds-font-mono);
+}
+
+div.fragment a,
+div.fragment a:visited {
+  color: var(--ds-syn-function);
+}
+
+span.keyword,
+span.keywordtype,
+span.keywordflow {
+  font-weight: 500;
+}
+
+.memitem,
+.memproto,
+.memdoc {
+  border-radius: var(--ds-radius-sm);
+}
+
+.memitem {
+  box-shadow: none;
+}
+
+table.doxtable th,
+table.markdownTable th {
+  font-weight: 600;
+}
+
+.sm-dox,
+#main-nav {
+  font-family: var(--ds-font-sans);
+}
+
+#projectlogo img {
+  height: 40px;
+  width: auto;
+  padding: 0 4px 0 12px;
+}
+
+#projectname {
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+#projectbrief {
+  font-size: 0.85rem;
+}
+
+#projectalign {
+  padding-left: 0.6rem;
+}
+
+.contents code,
+.contents tt,
+.contents span.tt,
+.memdoc code {
+  background: var(--ds-inline-code-bg);
+  color: var(--ds-inline-code-text);
+  padding: 0.08em 0.35em;
+  border-radius: var(--ds-radius-sm);
+  font-size: 0.9em;
+}
+
+.contents :is(div.fragment, pre.fragment) :is(code, tt, span.tt) {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+@media (max-width: 720px) {
+  #side-nav,
+  .side-nav-resizable,
+  .ui-resizable-handle {
+    display: none !important;
+  }
+
+  #doc-content {
+    margin-left: 0 !important;
+  }
+
+  div.contents {
+    padding-left: 12px;
+    padding-right: 12px;
+    overflow-x: auto;
+  }
+
+  #projectlogo img {
+    height: 32px;
+  }
+}
+
+.dseams-family summary::before {
+  content: none;
+}
+
+#projectlogo {
+  display: none;
+}

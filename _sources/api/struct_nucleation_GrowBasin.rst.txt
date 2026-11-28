@@ -1,0 +1,24 @@
+.. index:: pair: struct; nucleation::GrowBasin
+.. _doxid-structnucleation_1_1_grow_basin:
+
+struct nucleation::GrowBasin
+============================
+
+.. toctree::
+	:hidden:
+
+Grow basin of one label. The barrier is the cluster size at the foot of that label's own final strict climb to its maximum. A series that never climbs has occupied false: it never enters the basin. The barrier is not a shared multiple of the molecule count.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/nucleation_pathway.hpp>
+	
+	struct GrowBasin {
+		// fields
+	
+		bool :target:`occupied<doxid-structnucleation_1_1_grow_basin_1a38630802207a54fd2bb1875691afff26>` = false;
+		double :target:`barrier<doxid-structnucleation_1_1_grow_basin_1aa70d2c6fd74cde88999bc3aee94d50b2>` = 0;
+		int :target:`index<doxid-structnucleation_1_1_grow_basin_1a88792d60c940cd47ffe153d157c93cd1>` = -1;
+	};

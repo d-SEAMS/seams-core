@@ -1,0 +1,215 @@
+==============
+Local symmetry
+==============
+
+
+The classifier names each oxygen as ice Ih, ice Ic, stacking-disordered
+ice, or unmatched, and it can name a hydrate cage or a five- or six-ring
+when one cluster is passed in. The per-atom ice label is the production
+path. The command and the per-atom call are on
+`the symmetry classifier <../user/howto/symmetry-classifier.rst>`_.
+
+A crystal oxygen is ice Ih (0), ice Ic (1), or stacking-disordered ice
+(2). Anything else is -1. The seventeen-atom shell is the central
+oxygen, its four nearest neighbours, and the twelve neighbours of those
+four. That is the shell polyhedral template matching uses for diamond
+(Larsen, Schmidt and Schiøtz, *Modelling and Simulation in Materials Science and Engineering* 24, 055007, 2016,
+DOI 10.1088/0965-0393/24/5/055007,
+`arXiv:1603.05143 <https://arxiv.org/abs/1603.05143>`_).
+
+Neighbours
+----------
+
+The bond cutoff is 3.5 Å. A neighbour closer than 2.15 Å is dropped.
+The four nearest bonds are kept. One thread walks each pair once, using
+half of the 27-cell stencil, and writes both ends of the bond. Several
+threads scan the full stencil and write one end. When the cell is
+orthorhombic and every edge is at least three bond lengths, the atoms
+are wrapped into the box and histogrammed into cells of that cutoff.
+A skewed cell uses a wider stencil. The coordinate columns are reused
+on the next frame of the same size.
+
+A center whose four bonds do not all lie between 2.30 Å and 3.35 Å is
+left unmatched, and the second shell is not read.
+
+Tetrahedral order
+-----------------
+
+The tetrahedral order parameter :math:`q` is the Chau–Hardwick /
+Errington–Debenedetti invariant of the four bonds (Errington and
+Debenedetti, *Nature* 409, 318, 2001,
+`10.1038/35053024 <https://doi.org/10.1038/35053024>`_). With
+:math:`\theta_{jk}` the angle at the center between neighbours :math:`j` and
+:math:`k`,
+
+
+
+.. math::
+
+    q = 1 - \frac{3}{8}
+    \sum_{j=1}^{3} \sum_{k=j+1}^{4}
+    \left(\cos\theta_{jk} + \frac{1}{3}\right)^{2}.
+
+Equal bonds skip this test. An ideal crystal has equal bonds, and the
+staggered test below names it. Otherwise a center with :math:`q < 0.85` is
+left unmatched and the second shell is not read. The library constant
+is ``kThermalQ``.
+
+Common-neighbour fingerprint
+----------------------------
+
+The second shell is the adaptive-cutoff common-neighbour signature of
+Maras, Trushin, Stukowski, Albe and Nordlund, *Computer Physics Communications* 205, 13 (2016), Appendix A
+(`10.1016/j.cpc.2016.04.001 <https://doi.org/10.1016/j.cpc.2016.04.001>`_).
+The cutoff for a bond of length :math:`r` is :math:`r(1+\sqrt{2})/2`.
+
+Twelve :math:`(4,2,1)` patterns are ice Ic. Six :math:`(4,2,1)` and six
+:math:`(4,2,2)` are ice Ih. A partial cubic signature needs at least eight
+good patterns, at least as many :math:`(4,2,1)` as :math:`(4,2,2)`, at least
+eight :math:`(4,2,1)`, and :math:`q \ge 0.97`. Six or seven :math:`(4,2,1)`
+patterns are not labeled cubic. With :math:`q \ge 0.97` they are passed
+to the fit. Below that, the fit runs only when the conditions in the
+next section hold. A partial
+hexagonal signature needs at least eight good patterns, more
+:math:`(4,2,2)` than :math:`(4,2,1)`, at least four :math:`(4,2,2)`, and the same
+:math:`q \ge 0.97`.
+
+A second shell whose radii differ by more than a factor 1.45 does not
+receive this signature. It can still be fitted when :math:`q \ge 0.85`, the
+longest of the four bonds is at most 1.20 times the shortest, and the
+second-shell radii differ by at most a factor 1.6.
+
+An ideal shell, equal bonds and one second-shell radius, is named from
+the raw cosine of each second-shell bond with another first-shell bond
+and does not build this signature. The bond vectors are not projected.
+On the ideal cell that cosine is :math:`1/3` for a staggered arm and :math:`7/9`
+for an eclipsed arm. The fast path compares the squares, :math:`1/9` and
+:math:`49/81`. An arm is eclipsed when the best square is at least 0.36,
+and staggered when that square is at most 0.25. Four staggered arms are
+ice Ic. One eclipsed arm and three staggered arms are ice Ih.
+
+The fit
+-------
+
+A shell is fitted when the fingerprint did not name it, it already has
+one crystal neighbour, :math:`q \ge 0.85`, the longest bond is at most 1.20
+times the shortest, and the second-shell radius varies by at most a
+factor 1.6. Both clouds are centered. The optimal rotation is a
+quaternion (Horn, *Journal of the Optical Society of America A* 4, 629,
+1987, `10.1364/JOSAA.4.000629 <https://doi.org/10.1364/JOSAA.4.000629>`_;
+Coutsias, Seok and Dill, *Journal of Computational Chemistry* 25, 1849,
+2004, `10.1002/jcc.20110 <https://doi.org/10.1002/jcc.20110>`_). The
+residual is the root-mean-square distance after that rotation, divided
+by the template radius, the normalization Larsen, Schmidt and Schiøtz
+use. Zero is a perfect shape. The ceiling is ``kShellRmsd``, 0.15:
+
+
+
+.. math::
+
+    \frac{\mathrm{RMSD}}{R_{\mathrm{template}}} \le 0.15.
+
+``seams symmetry`` uses that ceiling. A positive ``shell_rmsd`` on
+``seams_system_symmetry`` or ``seams_symmetry_classify_tol`` replaces it.
+A non-positive value selects 0.15 again.
+
+The bond-angle fingerprint names the one template the fit tries. This
+cosine is the azimuthal one: both bonds are projected onto the plane
+perpendicular to the central bond. Ideal staggered ice lies at 60
+degrees, cosine :math:`1/2`, and ideal eclipsed ice lies at 0 degrees,
+cosine 1. An arm above 0.90 is eclipsed. Four eclipsed arms are left
+unmatched, except on the recovery pass, where that pattern is
+hexagonal. The eclipsed arm is anchored to the eclipsed arm of the
+template. The four-point orientation uses one Jacobi sweep and the
+seventeen-atom residual uses two. A shell that is still far after a few
+correspondences is left unmatched, and a shell with only one crystal
+neighbour is abandoned sooner than a shell with two.
+
+After the labels are written, a crystal atom that has no crystal
+neighbour among its four bonds is returned to unmatched. Hexagonal
+recovery is one pass over the atoms left unmatched. It tries an atom
+that already has three crystal neighbours, and on that pass four
+eclipsed arms can be ice Ih.
+
+Cages, rings, and the other codes
+---------------------------------
+
+The same in-tree matcher names a cage or a ring. It is a 3×3 SVD with
+the permutation fixed by the bond graph. The continuous shape measure
+of that overlay is the scaled residual of Pinsky and Avnir (*Inorganic Chemistry* 37, 5575, 1998,
+`10.1021/ic9804925 <https://doi.org/10.1021/ic9804925>`_) and of the
+Alvarez shape measure (*Coordination Chemistry Reviews* 249, 1693,
+2005, `10.1016/j.ccr.2005.03.031 <https://doi.org/10.1016/j.ccr.2005.03.031>`_).
+
+IRA (Gunde, Salles, Hémeryck and Martin-Samos, *Journal of Chemical Information and Modeling* 61, 5446, 2021,
+`10.1021/acs.jcim.1c00567 <https://doi.org/10.1021/acs.jcim.1c00567>`_)
+is an optional second matcher for the same templates. SOFI, from the
+same group (*Journal of Chemical Physics* 161, 062503, 2024,
+`10.1063/5.0215689 <https://doi.org/10.1063/5.0215689>`_), names the
+point group. spglib (Togo, Shinohara and Tanaka, *Science and Technology of Advanced Materials: Methods* 4, 2384822, 2024,
+`10.1080/27660400.2024.2384822 <https://doi.org/10.1080/27660400.2024.2384822>`_)
+names the space group. CHILL+ (Nguyen and Molinero, *Journal of Physical Chemistry B* 119, 9369, 2015,
+`10.1021/jp510289t <https://doi.org/10.1021/jp510289t>`_) is a different
+label. The two CHILL+ rules are on
+`CHILL+: the published rule and the OVITO rule <chill-plus-rules.rst>`_.
+
+A build uses IRA and SOFI when libira is linked, and spglib when
+libsymspg is linked. Without libira the matcher is the in-tree Kabsch
+search. ``pointGroup`` returns status 2 when SOFI is absent.
+``spaceGroup`` returns status 2 when spglib is absent, and
+``seams symmetry`` then prints ``space-group off``.
+
+What the command prints
+-----------------------
+
+``seams symmetry`` prints the matcher, a space-group line, one shell
+overlay when a crystal shell exists, and the tally. The names are
+``ice-Ih``, ``ice-Ic``, ``ice-Isd``, and ``unmatched``.
+
+.. code:: bash
+
+    seams symmetry input/traj/ice1h.lammpstrj --type 1
+    seams symmetry input/traj/mW_cubic.lammpstrj --type 1
+
+On the 128-molecule ice Ih cell the tally is ``shells ice-Ih 128 unmatched 0``. On the 4096-molecule mW cubic cell it is ``shells ice-Ic 4096 unmatched 0``. A build without libira reports ``symmetry backend kabsch``.
+
+The same call on the shipped frames, with this ceiling:
+
+.. table::
+
+    +-----------------------------+-----------+--------+--------+---------------------+-----------+
+    | frame                       | molecules | ice Ih | ice Ic | stacking-disordered | unmatched |
+    +=============================+===========+========+========+=====================+===========+
+    | ``interface_f0.lammpstrj``  |       864 |    245 |      0 |                   0 |       619 |
+    +-----------------------------+-----------+--------+--------+---------------------+-----------+
+    | ``nucleation_f1.lammpstrj`` |      4096 |      8 |     12 |                   1 |      4075 |
+    +-----------------------------+-----------+--------+--------+---------------------+-----------+
+
+Published CHILL+ on those frames is a wider crystal. The interface slab
+is hexagonal 352, cubic 1, interfacial 49, clathrate 3, interfacial
+clathrate 25 and water 434. The nucleation frame is hexagonal 62, cubic
+47, interfacial 240, clathrate 20, interfacial clathrate 138 and water
+
+1. CHILL+ cubic and hexagonal need four bond correlations in the
+
+staggered or eclipsed windows. The shell also asks for the
+common-neighbour signature or a residual at most 0.15, and for a
+crystal neighbour. CHILL+ has an interfacial label. The shell does not,
+so two or three staggered bonds stay unmatched.
+
+C++, in ``symm``, ``classifyIce`` writes one label per row. The default
+ceiling is ``kShellRmsd`` (0.15), the tetrahedral cutoff is ``kThermalQ``
+(0.85), and the bond-length ratio is ``kThermalBondRatio`` (1.20).
+``classifyIceArrays`` is the same call on three coordinate columns.
+``best``, ``matchKernel`` and ``matchAll`` name one environment. The template
+names are ``ice-Ih``, ``ice-Ic``, ``ice-Isd``, ``5^12``, ``5^12 6^2``,
+``5^12 6^4``, ``ring-5`` and ``ring-6``.
+
+C, in ``seams_c_api.h``, ``seams_symmetry_classify`` writes the same labels
+at the library ceiling. ``seams_symmetry_classify_tol`` takes an explicit
+ceiling. ``seams_symmetry_classify_gates`` also takes the tetrahedral
+cutoff and the bond-length ratio.
+
+Python is ``dseams.symmetry`` in
+`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_.
+The per-atom integers are the ones above.

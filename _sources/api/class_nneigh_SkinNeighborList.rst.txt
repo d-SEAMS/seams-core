@@ -1,0 +1,79 @@
+.. index:: pair: class; nneigh::SkinNeighborList
+.. _doxid-classnneigh_1_1_skin_neighbor_list:
+
+class nneigh::SkinNeighborList
+==============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Persistent neighbour list with a LAMMPS skin. :ref:`More...<details-classnneigh_1_1_skin_neighbor_list>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/neighbours.hpp>
+	
+	class SkinNeighborList {
+	public:
+		// construction
+	
+		:ref:`SkinNeighborList<doxid-classnneigh_1_1_skin_neighbor_list_1a80f555acadad22b5edcc4af8285006ed>`(double cutoff, double skin, int typeI, :ref:`BondGraph<doxid-namespacenneigh_1ae70187f6d039fe332d7f59be0112ff26>` graph = :ref:`BondGraph::KnnMutual<doxid-namespacenneigh_1ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604>`, int k = 4);
+
+		// methods
+	
+		:ref:`BondGraph<doxid-namespacenneigh_1ae70187f6d039fe332d7f59be0112ff26>` :target:`graph<doxid-classnneigh_1_1_skin_neighbor_list_1a97e81664c1e98dd63263c6724f5c8514>`() const;
+		const std::vector<std::vector<int>>& :ref:`update<doxid-classnneigh_1_1_skin_neighbor_list_1a81af9074f6b9311b1cba1321b64f21d7>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+		bool :target:`lastRebuilt<doxid-classnneigh_1_1_skin_neighbor_list_1aaca057f10435740a240ca275e619e16e>`() const;
+		int :ref:`lastChangedAtoms<doxid-classnneigh_1_1_skin_neighbor_list_1aadc8965e902b0b2a599c75ac338d15af>`() const;
+		const std::vector<std::vector<int>>& :target:`bonds<doxid-classnneigh_1_1_skin_neighbor_list_1ab621667477b3b610de9af803a925f574>`() const;
+	};
+.. _details-classnneigh_1_1_skin_neighbor_list:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Persistent neighbour list with a LAMMPS skin.
+
+linkcell's half rows are the candidates at cutoff+skin, which is the ghost halo: periodic images already sit in that shell. The cell list is rebuilt only when some atom has moved more than skin/2 from the last rebuild, the Verlet trigger. The bond graph for rings is the candidate pairs whose current distance is inside the analysis cutoff.
+
+Construction
+------------
+
+.. index:: pair: function; SkinNeighborList
+.. _doxid-classnneigh_1_1_skin_neighbor_list_1a80f555acadad22b5edcc4af8285006ed:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	SkinNeighborList(double cutoff, double skin, int typeI, :ref:`BondGraph<doxid-namespacenneigh_1ae70187f6d039fe332d7f59be0112ff26>` graph = :ref:`BondGraph::KnnMutual<doxid-namespacenneigh_1ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604>`, int k = 4)
+
+graph selects cutoff vs k-nearest (mutual or union). k is the neighbour count for the knn graphs (default 4).
+
+Methods
+-------
+
+.. index:: pair: function; update
+.. _doxid-classnneigh_1_1_skin_neighbor_list_1a81af9074f6b9311b1cba1321b64f21d7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	const std::vector<std::vector<int>>& update(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+
+Refresh from a new frame. The returned list is ID-keyed with a leading self entry, the same shape as neighListO.
+
+.. index:: pair: function; lastChangedAtoms
+.. _doxid-classnneigh_1_1_skin_neighbor_list_1aadc8965e902b0b2a599c75ac338d15af:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int lastChangedAtoms() const
+
+Atoms whose cutoff bond set changed on the last update.
+

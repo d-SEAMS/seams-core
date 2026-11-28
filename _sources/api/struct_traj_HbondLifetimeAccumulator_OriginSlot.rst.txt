@@ -1,0 +1,23 @@
+.. index:: pair: struct; traj::HbondLifetimeAccumulator::OriginSlot
+.. _doxid-structtraj_1_1_hbond_lifetime_accumulator_1_1_origin_slot:
+
+struct traj::HbondLifetimeAccumulator::OriginSlot
+=================================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	struct OriginSlot {
+		// fields
+	
+		std::size_t :target:`frameIndex<doxid-structtraj_1_1_hbond_lifetime_accumulator_1_1_origin_slot_1ad34ddf62b4ba457d2fb94bcba0437ae2>` = 0;
+		std::vector<std::uint64_t> :target:`initialEdges<doxid-structtraj_1_1_hbond_lifetime_accumulator_1_1_origin_slot_1ab16c6630c3a2cebee818b8826e1d41e3>`;
+		std::vector<std::uint64_t> :target:`survivingEdges<doxid-structtraj_1_1_hbond_lifetime_accumulator_1_1_origin_slot_1a1f38a43045dcf469d4f240e7d3d87688>`;
+	};

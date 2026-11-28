@@ -1,0 +1,67 @@
+.. index:: pair: struct; seams::PoreProfiles
+.. _doxid-structseams_1_1_pore_profiles:
+
+struct seams::PoreProfiles
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Radial, azimuthal, and axial pore profiles. :ref:`More...<details-structseams_1_1_pore_profiles>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct PoreProfiles {
+		// fields
+	
+		:ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>` :ref:`radial<doxid-structseams_1_1_pore_profiles_1abd6f61803019aa93ee312b4753738485>`;
+		:ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>` :ref:`azimuthal<doxid-structseams_1_1_pore_profiles_1adb06b83bdd6db883c973ce8d0951456c>`;
+		:ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>` :ref:`axial<doxid-structseams_1_1_pore_profiles_1af9fd48e3feb0ee299ff6c69f20fc1f4d>`;
+	};
+.. _details-structseams_1_1_pore_profiles:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Radial, azimuthal, and axial pore profiles.
+
+Fields
+------
+
+.. index:: pair: variable; radial
+.. _doxid-structseams_1_1_pore_profiles_1abd6f61803019aa93ee312b4753738485:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>` radial
+
+Cylindrical shells.
+
+.. index:: pair: variable; azimuthal
+.. _doxid-structseams_1_1_pore_profiles_1adb06b83bdd6db883c973ce8d0951456c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>` azimuthal
+
+Azimuthal sectors.
+
+.. index:: pair: variable; axial
+.. _doxid-structseams_1_1_pore_profiles_1af9fd48e3feb0ee299ff6c69f20fc1f4d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FractionalProfile<doxid-structseams_1_1_fractional_profile>` axial
+
+Slabs along the pore axis.
+

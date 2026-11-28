@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="generator" content="Doxygen 1.18.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>seams-core: seams::cfg::Runtime Struct Reference</title>
+<link rel="icon" href="../_static/dseams/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="../_static/dseams/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png" />
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<script type="text/javascript" src="clipboard.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="../_static/dseams/mathjax/es5/tex-chtml.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-tokens.css" rel="stylesheet" type="text/css" />
+<link href="../_static/dseams/dseams-family.css" rel="stylesheet" type="text/css" />
+<link href="dseams-doxygen.css" rel="stylesheet" type="text/css"/>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<link rel="canonical" href="https://docs.dseams.info/api-cpp/structseams_1_1cfg_1_1Runtime.html">
+<meta property="og:title" content="seams-core: seams::cfg::Runtime Struct Reference">
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:url" content="https://docs.dseams.info/api-cpp/structseams_1_1cfg_1_1Runtime.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seams-core: seams::cfg::Runtime Struct Reference">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://docs.dseams.info/#application","name":"d-SEAMS","description":"Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.","applicationCategory":"ScientificApplication","operatingSystem":"Linux, macOS","url":"https://docs.dseams.info/","softwareVersion":"2.14.3","license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"},{"@type":"SoftwareSourceCode","@id":"https://github.com/d-SEAMS/seams-core#source","name":"seams-core","codeRepository":"https://github.com/d-SEAMS/seams-core","programmingLanguage":["C++","C","Python"],"license":"https://spdx.org/licenses/GPL-3.0-or-later.html","citation":"https://doi.org/10.1021/acs.jcim.0c00031"}]}</script>
+</head>
+<body>
+<nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+        </div>
+      </details>
+    </li>
+    <li class="dseams-family__libraries">
+      <details>
+        <summary>Libraries</summary>
+        <div class="dseams-family__menu">
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">seams-core<span id="projectnumber">&#160;v2.14.3</span>
+   </div>
+   <div id="projectbrief">libyodaLib, the C++ engine of d-SEAMS</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Generated by Doxygen 1.18.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="application/json" id="doxygen-config">
+{
+  "relPath": "",
+  "generateTreeView": true,
+  "searchEngine": true,
+  "serverBasedSearch": false,
+  "disableIndex": false,
+  "dynamicMenus": true,
+  "fullSidebar": false
+}
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('structseams_1_1cfg_1_1Runtime.html','','structseams_1_1cfg_1_1Runtime-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">seams::cfg::Runtime Struct Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="seams__config_8hpp_source.html">src/include/internal/seams_config.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a7cfcb2f861268d8aa7b218f97f2b83fe" id="r_a7cfcb2f861268d8aa7b218f97f2b83fe"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a7cfcb2f861268d8aa7b218f97f2b83fe">frame</a> = 1</td></tr>
+<tr class="memitem:a5e24a5ee983e627deb1b33d54558d694" id="r_a5e24a5ee983e627deb1b33d54558d694"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5e24a5ee983e627deb1b33d54558d694">last</a> = 0</td></tr>
+<tr class="memitem:ac1465acdd497f03a97764f2febe033a2" id="r_ac1465acdd497f03a97764f2febe033a2"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac1465acdd497f03a97764f2febe033a2">jobs</a> = 1</td></tr>
+<tr class="memitem:ade67224f3460b14be18195bbd8499527" id="r_ade67224f3460b14be18195bbd8499527"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ade67224f3460b14be18195bbd8499527">type</a> = 0</td></tr>
+<tr class="memitem:a6c22ad1c8eae1acfba7a026c38391863" id="r_a6c22ad1c8eae1acfba7a026c38391863"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a6c22ad1c8eae1acfba7a026c38391863">cutoff</a> = 3.5</td></tr>
+<tr class="memitem:ae1ba53dc26a5a02b08a65b75674e023a" id="r_ae1ba53dc26a5a02b08a65b75674e023a"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ae1ba53dc26a5a02b08a65b75674e023a">cageEdge</a> = &quot;2.65,3.15&quot;</td></tr>
+<tr class="memitem:aa9d9b9bfa55fc30cecd034759b5c48c1" id="r_aa9d9b9bfa55fc30cecd034759b5c48c1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa9d9b9bfa55fc30cecd034759b5c48c1">k</a> = 4</td></tr>
+<tr class="memitem:a79be330a6b6d208c056daaf5f40682d1" id="r_a79be330a6b6d208c056daaf5f40682d1"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a79be330a6b6d208c056daaf5f40682d1">graph</a> = &quot;seeded&quot;</td></tr>
+<tr class="memitem:ab7e771317b68e4aafa46cac28b25a526" id="r_ab7e771317b68e4aafa46cac28b25a526"><td class="memItemLeft"><a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3">site::Family</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab7e771317b68e4aafa46cac28b25a526">family</a> = <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">site::Family::waterIce</a></td></tr>
+<tr class="memitem:a80e2b2794741cea5a949eab3b0813990" id="r_a80e2b2794741cea5a949eab3b0813990"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a80e2b2794741cea5a949eab3b0813990">resident</a> = 0.80</td></tr>
+<tr class="memitem:a435f96bf622cece732267afe1daddc4d" id="r_a435f96bf622cece732267afe1daddc4d"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a435f96bf622cece732267afe1daddc4d">cell</a> = 3.0</td></tr>
+<tr class="memitem:aba36d153b85a4c2d1f8c34ea40dddd18" id="r_aba36d153b85a4c2d1f8c34ea40dddd18"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aba36d153b85a4c2d1f8c34ea40dddd18">tpp</a> = 0</td></tr>
+<tr class="memitem:ad58d311025cf510daab7bf4f45e94bcf" id="r_ad58d311025cf510daab7bf4f45e94bcf"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ad58d311025cf510daab7bf4f45e94bcf">block</a> = 0</td></tr>
+<tr class="memitem:a0cab36848dbe3e0803a0c44d9a6ea14b" id="r_a0cab36848dbe3e0803a0c44d9a6ea14b"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a0cab36848dbe3e0803a0c44d9a6ea14b">offload</a> = false</td></tr>
+<tr class="memitem:ae583a58a6f7351fd2c375045501a866d" id="r_ae583a58a6f7351fd2c375045501a866d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ae583a58a6f7351fd2c375045501a866d">carry</a> = true</td></tr>
+<tr class="memitem:ad8b5f283520f2569e2b88a6425217e03" id="r_ad8b5f283520f2569e2b88a6425217e03"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ad8b5f283520f2569e2b88a6425217e03">fennel</a></td></tr>
+<tr class="memitem:af6e3d385e1bb24dd9e50157d792a0b03" id="r_af6e3d385e1bb24dd9e50157d792a0b03"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#af6e3d385e1bb24dd9e50157d792a0b03">luaPath</a></td></tr>
+<tr class="memitem:a05a989351227a5a0ab8dacb165e6d894" id="r_a05a989351227a5a0ab8dacb165e6d894"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a05a989351227a5a0ab8dacb165e6d894">source</a></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00029">29</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ad58d311025cf510daab7bf4f45e94bcf" name="ad58d311025cf510daab7bf4f45e94bcf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad58d311025cf510daab7bf4f45e94bcf">&#9670;&#160;</a></span>block</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::cfg::Runtime::block = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00042">42</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae1ba53dc26a5a02b08a65b75674e023a" name="ae1ba53dc26a5a02b08a65b75674e023a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1ba53dc26a5a02b08a65b75674e023a">&#9670;&#160;</a></span>cageEdge</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string seams::cfg::Runtime::cageEdge = &quot;2.65,3.15&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00035">35</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae583a58a6f7351fd2c375045501a866d" name="ae583a58a6f7351fd2c375045501a866d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae583a58a6f7351fd2c375045501a866d">&#9670;&#160;</a></span>carry</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool seams::cfg::Runtime::carry = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00044">44</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a435f96bf622cece732267afe1daddc4d" name="a435f96bf622cece732267afe1daddc4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a435f96bf622cece732267afe1daddc4d">&#9670;&#160;</a></span>cell</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::cfg::Runtime::cell = 3.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00040">40</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a6c22ad1c8eae1acfba7a026c38391863" name="a6c22ad1c8eae1acfba7a026c38391863"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c22ad1c8eae1acfba7a026c38391863">&#9670;&#160;</a></span>cutoff</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::cfg::Runtime::cutoff = 3.5</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00034">34</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab7e771317b68e4aafa46cac28b25a526" name="ab7e771317b68e4aafa46cac28b25a526"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7e771317b68e4aafa46cac28b25a526">&#9670;&#160;</a></span>family</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3">site::Family</a> seams::cfg::Runtime::family = <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">site::Family::waterIce</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00038">38</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ad8b5f283520f2569e2b88a6425217e03" name="ad8b5f283520f2569e2b88a6425217e03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8b5f283520f2569e2b88a6425217e03">&#9670;&#160;</a></span>fennel</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string seams::cfg::Runtime::fennel</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00045">45</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7cfcb2f861268d8aa7b218f97f2b83fe" name="a7cfcb2f861268d8aa7b218f97f2b83fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7cfcb2f861268d8aa7b218f97f2b83fe">&#9670;&#160;</a></span>frame</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::cfg::Runtime::frame = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00030">30</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a79be330a6b6d208c056daaf5f40682d1" name="a79be330a6b6d208c056daaf5f40682d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79be330a6b6d208c056daaf5f40682d1">&#9670;&#160;</a></span>graph</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string seams::cfg::Runtime::graph = &quot;seeded&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00037">37</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ac1465acdd497f03a97764f2febe033a2" name="ac1465acdd497f03a97764f2febe033a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1465acdd497f03a97764f2febe033a2">&#9670;&#160;</a></span>jobs</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::cfg::Runtime::jobs = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00032">32</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aa9d9b9bfa55fc30cecd034759b5c48c1" name="aa9d9b9bfa55fc30cecd034759b5c48c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9d9b9bfa55fc30cecd034759b5c48c1">&#9670;&#160;</a></span>k</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::cfg::Runtime::k = 4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00036">36</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a5e24a5ee983e627deb1b33d54558d694" name="a5e24a5ee983e627deb1b33d54558d694"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e24a5ee983e627deb1b33d54558d694">&#9670;&#160;</a></span>last</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::cfg::Runtime::last = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00031">31</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af6e3d385e1bb24dd9e50157d792a0b03" name="af6e3d385e1bb24dd9e50157d792a0b03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6e3d385e1bb24dd9e50157d792a0b03">&#9670;&#160;</a></span>luaPath</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string seams::cfg::Runtime::luaPath</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00046">46</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0cab36848dbe3e0803a0c44d9a6ea14b" name="a0cab36848dbe3e0803a0c44d9a6ea14b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cab36848dbe3e0803a0c44d9a6ea14b">&#9670;&#160;</a></span>offload</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool seams::cfg::Runtime::offload = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00043">43</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a80e2b2794741cea5a949eab3b0813990" name="a80e2b2794741cea5a949eab3b0813990"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80e2b2794741cea5a949eab3b0813990">&#9670;&#160;</a></span>resident</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double seams::cfg::Runtime::resident = 0.80</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00039">39</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a05a989351227a5a0ab8dacb165e6d894" name="a05a989351227a5a0ab8dacb165e6d894"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05a989351227a5a0ab8dacb165e6d894">&#9670;&#160;</a></span>source</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string seams::cfg::Runtime::source</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00047">47</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aba36d153b85a4c2d1f8c34ea40dddd18" name="aba36d153b85a4c2d1f8c34ea40dddd18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba36d153b85a4c2d1f8c34ea40dddd18">&#9670;&#160;</a></span>tpp</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::cfg::Runtime::tpp = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00041">41</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ade67224f3460b14be18195bbd8499527" name="ade67224f3460b14be18195bbd8499527"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade67224f3460b14be18195bbd8499527">&#9670;&#160;</a></span>type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::cfg::Runtime::type = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00033">33</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>src/include/internal/<a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespaceseams.html">seams</a></li><li class="navelem"><a href="namespaceseams_1_1cfg.html">cfg</a></li><li class="navelem"><a href="structseams_1_1cfg_1_1Runtime.html">Runtime</a></li>
+  </ul>
+</div>
+</body>
+</html>

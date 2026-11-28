@@ -1,0 +1,11 @@
+.. index:: pair: group; Ice/brine fronts
+.. _doxid-group__capi__brine:
+
+Ice/brine fronts
+================
+
+.. toctree::
+	:hidden:
+
+Planar front, rejection coefficient, profile, and pockets.
+

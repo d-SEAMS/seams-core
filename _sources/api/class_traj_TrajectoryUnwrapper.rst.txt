@@ -1,0 +1,53 @@
+.. index:: pair: class; traj::TrajectoryUnwrapper
+.. _doxid-classtraj_1_1_trajectory_unwrapper:
+
+class traj::TrajectoryUnwrapper
+===============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Stateful streaming unwrapper across periodic frames. :ref:`More...<details-classtraj_1_1_trajectory_unwrapper>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/trajectory.hpp>
+	
+	class TrajectoryUnwrapper {
+	public:
+		// construction
+	
+		:target:`TrajectoryUnwrapper<doxid-classtraj_1_1_trajectory_unwrapper_1acde552d4be58a5eff1d94e578168a34b>`(std::size_t nParticles = 0);
+
+		// methods
+	
+		void :ref:`reset<doxid-classtraj_1_1_trajectory_unwrapper_1a1b21b7fbbfd169f8e417edf7c8ca8d67>`(std::size_t nParticles = 0);
+		std::size_t :target:`numParticles<doxid-classtraj_1_1_trajectory_unwrapper_1a126f0263f2a64834e0fca35d02761dd4>`() const;
+		std::size_t :target:`framesSeen<doxid-classtraj_1_1_trajectory_unwrapper_1a08d40f533ad5aef39f533be86f813884>`() const;
+		bool :target:`pushFrame<doxid-classtraj_1_1_trajectory_unwrapper_1a893ca15d173049cd31f7f5f04c63d9c2>`(const double* xyz, std::size_t nParticles, const :ref:`BoxCell<doxid-structtraj_1_1_box_cell>`& cell, double* unwrappedOut);
+	};
+.. _details-classtraj_1_1_trajectory_unwrapper:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Stateful streaming unwrapper across periodic frames.
+
+Methods
+-------
+
+.. index:: pair: function; reset
+.. _doxid-classtraj_1_1_trajectory_unwrapper_1a1b21b7fbbfd169f8e417edf7c8ca8d67:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void reset(std::size_t nParticles = 0)
+
+A count above kMaxTriples leaves the unwrapper empty, and pushFrame refuses such a count.
+

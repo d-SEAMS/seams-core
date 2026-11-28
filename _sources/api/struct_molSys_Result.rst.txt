@@ -1,0 +1,52 @@
+.. index:: pair: struct; molSys::Result
+.. _doxid-structmol_sys_1_1_result:
+
+struct molSys::Result
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+This contains the bond classifier of enum class type :ref:`bond_type <doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328>`, and the bond correlation factor. :ref:`More...<details-structmol_sys_1_1_result>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/mol_sys.hpp>
+	
+	struct Result {
+		// fields
+	
+		:ref:`bond_type<doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328>` :target:`classifier<doxid-structmol_sys_1_1_result_1a6e96e75b4bca61e9e5fbb5f99263cf3e>`;
+		double :ref:`c_value<doxid-structmol_sys_1_1_result_1a8e5d024f6bc765d00dc47d65f9d3b6e8>`;
+	};
+.. _details-structmol_sys_1_1_result:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+This contains the bond classifier of enum class type :ref:`bond_type <doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328>`, and the bond correlation factor.
+
+Contains specifically the members:
+
+* Bond classifier or the type of the bond (staggered, eclipsed, out-of-range)
+
+* Bond correlation factor
+
+Fields
+------
+
+.. index:: pair: variable; c_value
+.. _doxid-structmol_sys_1_1_result_1a8e5d024f6bc765d00dc47d65f9d3b6e8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double c_value
+
+Classifier according to CHILL, CHILL+ etc.
+

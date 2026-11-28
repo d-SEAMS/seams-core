@@ -1,0 +1,22 @@
+.. index:: pair: group; Primitive
+.. _doxid-group__primitive:
+
+Primitive
+=========
+
+.. toctree::
+	:hidden:
+
+	namespace_primitive.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	// namespaces
+
+	namespace :ref:`primitive<doxid-namespaceprimitive>`;
+

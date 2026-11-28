@@ -1,0 +1,31 @@
+.. index:: pair: namespace; seams::team::detail
+.. _doxid-namespaceseams_1_1team_1_1detail:
+
+namespace seams::team::detail
+=============================
+
+.. toctree::
+	:hidden:
+
+	struct_seams_team_detail_Call.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace detail {
+
+	// structs
+
+	template <class F>
+	struct :ref:`Call<doxid-structseams_1_1team_1_1detail_1_1_call>`;
+
+	// global functions
+
+	template <class C>
+	void :target:`ompRun<doxid-namespaceseams_1_1team_1_1detail_1a9dd401c9b26db6f9e17726d615d64c78>`(const std::vector<std::size_t>& sizes, C& call);
+
+	} // namespace detail

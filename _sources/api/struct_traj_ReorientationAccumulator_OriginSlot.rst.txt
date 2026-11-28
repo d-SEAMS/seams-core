@@ -1,0 +1,23 @@
+.. index:: pair: struct; traj::ReorientationAccumulator::OriginSlot
+.. _doxid-structtraj_1_1_reorientation_accumulator_1_1_origin_slot:
+
+struct traj::ReorientationAccumulator::OriginSlot
+=================================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	struct OriginSlot {
+		// fields
+	
+		std::size_t :target:`frameIndex<doxid-structtraj_1_1_reorientation_accumulator_1_1_origin_slot_1af8a84900c55c3b652f03ffc7f5dca6da>` = 0;
+		std::vector<double> :target:`unitVectors<doxid-structtraj_1_1_reorientation_accumulator_1_1_origin_slot_1a97092e23ff900774a55b74f2986f4806>`;
+		std::vector<std::uint8_t> :target:`mask<doxid-structtraj_1_1_reorientation_accumulator_1_1_origin_slot_1abf7659bf68ca462c6d25274f99c2a8b6>`;
+	};

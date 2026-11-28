@@ -1,0 +1,122 @@
+<!-- https://docs.dseams.info/user/howto/upgrade-2.14.md -->
+
+# Upgrade from 2.13 to 2.14 {#upgrade-from-2-13-to-2-14}
+
+These notes cover the step from 2.13.0 to 2.14.0.
+The release notes are
+[2.14.3](../../reference/release-2.14.md).
+Rebuild the engine, then relink anything that calls `libseams`.
+
+## C and C++ {#c-and-c}
+
+Add `#include "seams.h"` and link `libseams`. The header is C linkage
+(`extern "C"`), so a C++ caller includes it as it stands.
+`seams_set_num_threads(0)` restores the OpenMP width captured at first
+use: `omp_get_max_threads()` when OpenMP is linked, and 1 otherwise.
+A negative width is rejected. Frame, neighbour, CHILL+, q4/q6, and ring
+calls are on that header.
+
+A program that already used the C++ classes keeps those classes.
+`BondClassifier` is still three doubles and one int, the 2.13 layout,
+so a caller that passes the struct by value is unchanged.
+`FingerprintOptions::color_types` colors fingerprint vertices by LAMMPS
+type.
+
+The language ABI is `seams_lang.h` and `libseams_lang`. Use it when
+the program reads a trajectory path or keeps a frame across calls.
+`seams_lang_version()` returns the Meson project version.
+
+## Language bindings {#language-bindings}
+
+Every language binding lives in its own repository and package,
+built against the matching seams-core `vX.Y.Z` tag and versioned
+`X.Y.Z`:
+
+| Language | 2.13 location | 2.14 repository | Package |
+| --- | --- | --- | --- |
+| Python | PydSEAMSlib (pydseams) and the supplied dseams module | PydSEAMSlib | pydseamslib: import dseams and import pydseams |
+| Lua, Fennel | yodaStruct (1.x) | yodaStruct | Git source, require("dseams") |
+| R | none | dseams-r | dseams |
+| Julia | none | Dseams.jl | Dseams and Seams |
+| Rust | none | dseams-rs | crates dseams-sys and dseams |
+| Fortran | none | dseams-fortran | fpm Git dependency dseams |
+
+`pip install -U 'pydseamslib==2.14.0'` installs the published release (or
+`pip install -U pydseamslib` for the latest), with `import dseams` and
+`import pydseams`.
+Julia reads `libseams_lang` from `SEAMS_LANG_LIB`.
+Rust reads the directory that holds `libseams` from `SEAMS_LIB_DIR`.
+R reads `SEAMS_LIBDIR` and `SEAMS_INCLUDE`.
+New calls and renamed options are in each repository’s changelog.
+This repository provides `bindings/cxx` (`seams_lang.h` and `libseams_lang`).
+
+## Engines {#engines}
+
+`-Dwith_lammps`, `-Dwith_gromacs`, `-Dwith_openmm`, and `-Dwith_plumed`
+default to `auto`. Meson builds a plugin when it finds that library.
+The build and the census for each engine are
+[LAMMPS](engine-lammps.md),
+[GROMACS](engine-gromacs.md),
+[OpenMM](engine-openmm.md), and
+[PLUMED](engine-plumed.md). The standalone PLUMED action
+(`dseams-plumed` v0.4.1) is indexed in
+[PLUMED-NEST egg 26.018](https://www.plumed-nest.org/eggs/26/018/).
+
+| engine | what to change |
+| --- | --- |
+| LAMMPS | The hook and compute dseams read angstroms, with no unit conversion. engines/lammps/in.dseams is the in-tree deck (metal units). The sources to copy into a LAMMPS tree, and their deck, are under extras/lammps. |
+| GROMACS | gmx-seams multiplies coordinates and the lower-triangular box by 10, then runs CHILL+. |
+| OpenMM | The C++ plugin reads positions in nanometers and multiplies by 10. The Python DseamsReporter asks the context for angstroms and passes them to InSitu.observe. |
+| PLUMED | The SEAMS collective variable multiplies positions and the box by 10. A q6 derivative is with respect to nanometers. Set PLUMED_NUM_THREADS before PLUMED starts. OMP_NUM_THREADS does not set the PLUMED team. |
+
+## Threads {#threads}
+
+`OMP_NUM_THREADS` is the OpenMP width.
+`seams_set_num_threads(n)` sets the width of later calls, and `n = 0`
+restores the width captured at first use.
+A per-atom walk requests that width. The library does not reduce the
+request to four threads below 8192 atoms.
+
+The orthorhombic cutoff list runs on one thread when the frame has
+fewer than 2048 atoms. A ring search that fills neighbour balls does
+the same below 2048 vertices.
+
+The library does not change `OMP_WAIT_POLICY`, and it does not shut the
+OpenMP team down between calls. `OMP_NUM_THREADS=1`, or
+`seams_set_num_threads(1)`, keeps the work on the calling thread.
+
+When other processes hold the cores, a call may narrow its team, down
+to a quarter of the requested width. `SEAMS_FAIR_WIDTH=0` keeps the
+requested width. That narrowing does not pin the calling thread for
+the rest of the process.
+
+## Deprecations and breaks {#deprecations-and-breaks}
+
+`--types` remains the deprecated alias of `--pair-types` and still
+warns.
+
+Fingerprint options use the American spelling.
+`seams fingerprint --color-types` is the name help shows.
+`--colour-types` is a hidden alias of that option: it is accepted, it
+does not appear in help, and it does not warn.
+`seams_fingerprint` takes `color_types`.
+A key library writes `colors` in its header. The reader accepts
+`colours` as a deprecated alias of that word, so a 2.13 library file
+with `colours 1` keeps its type colors. The library has no warning
+channel, so that read is silent.
+
+The stored graph name is `seeded`.
+CHILL and CHILL+ treat `seeded`, and an empty graph name, as the cutoff
+list. Pass `--graph mutual` for the four-nearest graph.
+`seams_frame_chill` and `seams_frame_chill_plus` accept `cutoff` and
+`mutual`. A null graph is `cutoff`. The string `seeded` is rejected.
+`seams cages` still treats `seeded` as its own graph.
+
+A bad flag exits 2. A missing LAMMPS dump prints
+`Fatal Error` with the path and `seams read` exits 0 with `nop 0`.
+A missing XYZ file exits 2.
+
+`seams steinhardt` prints each degree named by `--l`, and the
+Lechner-Dellago average of that degree. The default `--l` is `4,6`,
+so the default line carries q4, q4bar, q6, and q6bar. When both
+degrees are requested they share one cutoff list.

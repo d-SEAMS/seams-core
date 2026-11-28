@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::CageCounts
+.. _doxid-structseams_1_1_cage_counts:
+
+struct seams::CageCounts
+========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Disjoint cage populations. :ref:`More...<details-structseams_1_1_cage_counts>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct CageCounts {
+		// fields
+	
+		int :ref:`hexagonal<doxid-structseams_1_1_cage_counts_1aa1c627c4c452f3be7fe2cfe95b2e77bc>` = 0;
+		int :ref:`cubic<doxid-structseams_1_1_cage_counts_1a3f0d8fc4ae12a28d9c666acc0547179d>` = 0;
+		int :ref:`water<doxid-structseams_1_1_cage_counts_1a990bdcbc7dabefe804c58986e432169e>` = 0;
+		int :ref:`both<doxid-structseams_1_1_cage_counts_1a9c5a983f1a47ac3c45933b9f74a42c80>` = 0;
+	};
+.. _details-structseams_1_1_cage_counts:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Disjoint cage populations.
+
+Fields
+------
+
+.. index:: pair: variable; hexagonal
+.. _doxid-structseams_1_1_cage_counts_1aa1c627c4c452f3be7fe2cfe95b2e77bc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int hexagonal = 0
+
+Hexagonal cage only.
+
+.. index:: pair: variable; cubic
+.. _doxid-structseams_1_1_cage_counts_1a3f0d8fc4ae12a28d9c666acc0547179d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int cubic = 0
+
+Double-diamond cage only.
+
+.. index:: pair: variable; water
+.. _doxid-structseams_1_1_cage_counts_1a990bdcbc7dabefe804c58986e432169e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int water = 0
+
+Neither cage.
+
+.. index:: pair: variable; both
+.. _doxid-structseams_1_1_cage_counts_1a9c5a983f1a47ac3c45933b9f74a42c80:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int both = 0
+
+Both cages.
+

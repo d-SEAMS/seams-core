@@ -1,0 +1,27 @@
+.. index:: pair: struct; symm::CanonShell
+.. _doxid-structsymm_1_1_canon_shell:
+
+struct symm::CanonShell
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/shell_hot.hpp>
+	
+	struct CanonShell {
+		// fields
+	
+		double :target:`first<doxid-structsymm_1_1_canon_shell_1a59f7799a99b1a6933580bd988fd02893>`[3][4][3];
+		double :target:`second<doxid-structsymm_1_1_canon_shell_1af768d87038b1758f502510e5f6fc5c31>`[3][12][3];
+		int :target:`parent<doxid-structsymm_1_1_canon_shell_1ab41a5bb9f757264b66713ad41c1bf856>`[3][12];
+		int :target:`arm<doxid-structsymm_1_1_canon_shell_1ad8414fda44b7c7de2cdf674a425aa263>`[3][4][3];
+		int :target:`nArm<doxid-structsymm_1_1_canon_shell_1a38f519a50d1de7621e99ef35c807e176>`[3][4];
+		double :target:`pts<doxid-structsymm_1_1_canon_shell_1a032f948c27bc4568632f2cdbbddcd8d2>`[3][17][3];
+	};

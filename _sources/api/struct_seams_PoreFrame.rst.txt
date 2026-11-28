@@ -1,0 +1,78 @@
+.. index:: pair: struct; seams::PoreFrame
+.. _doxid-structseams_1_1_pore_frame:
+
+struct seams::PoreFrame
+=======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Pore axis and centre. :ref:`More...<details-structseams_1_1_pore_frame>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct PoreFrame {
+		// fields
+	
+		std::array<double, 3> :ref:`axis<doxid-structseams_1_1_pore_frame_1a714045b012ef62779d566a8942ea506c>` {};
+		std::array<double, 3> :ref:`centre<doxid-structseams_1_1_pore_frame_1a79fe304e38bde6089e9b454e0eb3f7f1>` {};
+		std::array<double, 3> :ref:`centre_fractional<doxid-structseams_1_1_pore_frame_1a0a2c1c042e918f35240f4f8faa7f57de>` {};
+		int :ref:`axis_index<doxid-structseams_1_1_pore_frame_1adf8dfd6811d6e6490ab785cc6504be87>` = 0;
+	};
+.. _details-structseams_1_1_pore_frame:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Pore axis and centre.
+
+Fields
+------
+
+.. index:: pair: variable; axis
+.. _doxid-structseams_1_1_pore_frame_1a714045b012ef62779d566a8942ea506c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> axis {}
+
+Unit Cartesian axis.
+
+.. index:: pair: variable; centre
+.. _doxid-structseams_1_1_pore_frame_1a79fe304e38bde6089e9b454e0eb3f7f1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> centre {}
+
+Cartesian centre, Angstrom.
+
+.. index:: pair: variable; centre_fractional
+.. _doxid-structseams_1_1_pore_frame_1a0a2c1c042e918f35240f4f8faa7f57de:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> centre_fractional {}
+
+Fractional centre.
+
+.. index:: pair: variable; axis_index
+.. _doxid-structseams_1_1_pore_frame_1adf8dfd6811d6e6490ab785cc6504be87:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int axis_index = 0
+
+0, 1, or 2.
+

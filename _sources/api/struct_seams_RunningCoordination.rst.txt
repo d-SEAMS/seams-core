@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::RunningCoordination
+.. _doxid-structseams_1_1_running_coordination:
+
+struct seams::RunningCoordination
+=================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Running coordination number along a partial RDF. :ref:`More...<details-structseams_1_1_running_coordination>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct RunningCoordination {
+		// fields
+	
+		std::vector<double> :ref:`radius<doxid-structseams_1_1_running_coordination_1aa2cb5c96b59a535b302a445ebddc777a>`;
+		std::vector<double> :ref:`coordination<doxid-structseams_1_1_running_coordination_1a2dc44e704fc030042e16521cfe2df686>`;
+	};
+.. _details-structseams_1_1_running_coordination:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Running coordination number along a partial RDF.
+
+Fields
+------
+
+.. index:: pair: variable; radius
+.. _doxid-structseams_1_1_running_coordination_1aa2cb5c96b59a535b302a445ebddc777a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> radius
+
+Bin centers, Angstrom.
+
+.. index:: pair: variable; coordination
+.. _doxid-structseams_1_1_running_coordination_1a2dc44e704fc030042e16521cfe2df686:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> coordination
+
+Running coordination, dimensionless.
+

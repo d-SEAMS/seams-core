@@ -1,0 +1,26 @@
+.. index:: pair: struct; seams::FairState
+.. _doxid-structseams_1_1_fair_state:
+
+struct seams::FairState
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/thread_team.hpp>
+	
+	struct FairState {
+		// fields
+	
+		std::mutex :target:`lock<doxid-structseams_1_1_fair_state_1adba296b90df7a5b9727d48597eeffc48>`;
+		int :target:`base<doxid-structseams_1_1_fair_state_1ae6597f9d6dfb0f55f661f97c3074054d>` = 0;
+		int :target:`granted<doxid-structseams_1_1_fair_state_1a4eb65d3fba881a7157a94e47e7d763c6>` = 0;
+		int :target:`slow<doxid-structseams_1_1_fair_state_1a305c1a3dab4cee4f711e38588ab5e9cd>` = 0;
+		double :target:`tried<doxid-structseams_1_1_fair_state_1a52a5b7a6b74478babb92add5e89a658e>` = 0.0;
+	};
