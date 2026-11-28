@@ -1198,10 +1198,6 @@ static void analysis_contract(void) {
 /* ------------------------------------------------------------------ */
 /* Result handles                                                      */
 
-/* Cell edges far shorter or longer than the cutoff once overflowed the
- * cell count and stencil reach of the cutoff search (found by
- * capi_reload_fuzzer under UBSan). Any status but an internal error passes;
- * the sanitizer builds catch the overflow itself. */
 static void neighbour_cell_contract(void) {
   const char *fn = "seams_neighbours_build";
   const double cutoffs[2] = {0.5, 3.5};
@@ -1747,6 +1743,10 @@ static void neighbour_cell_contract(void) {
   seams_system_destroy(sys);
 }
 
+/* Cell edges far shorter or longer than the cutoff once overflowed the
+ * cell count and stencil reach of the cutoff search (found by
+ * capi_reload_fuzzer under UBSan). Any status but an internal error passes;
+ * the sanitizer builds catch the overflow itself. */
 static void extreme_cells_contract(void) {
   const double xyz[12] = {0.1, 0.2, 0.3, 1.0, 1.1, 1.2, 2.0, 2.1, 2.2, 3.0, 3.1, 3.2};
   const double edges[2] = {1e-20, 1e250};
