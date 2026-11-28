@@ -734,9 +734,80 @@ SEAMS_API int seams_system_count(const seams_system *sys);
 /**
  * @brief Build a cutoff or mutual neighbour list.
  *
- * A lattice coefficient at or above 2^52, or a cell edge past the Euclidean
- * range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not
- * substituted.
+ * Type 0 on the atoms (1, 1, 1) and (2, 1.2, 1.1) in an orthorhombic
+ * cell of edge 1e160 with origin (0, 0, 0) returns ::SEAMS_OK from the
+ * cutoff graph: an empty list at cutoff 0.5 and each other at cutoff 3.5,
+ * the same rows as that pair and type on an edge of 30 with that origin.
+ * The same atoms and type with origin (5, -2, 0.25) list each other at
+ * cutoff 0.5 on the edge of 1e160 and do not on an edge of 30. Type 0 on
+ * (-0.9, 0, 0) with (0.1, 0.2, 0.1), and on (-2, -1, -4) with
+ * (-1, -0.8, -3.9), returns ::SEAMS_OK and both neighbours at cutoff 0.5
+ * on edge 1e160 with origin (0, 0, 0), and an empty list on edge 30.
+ * Type 0 on (0, 0, 0) and 0x1.6c2d4256ffcc4p+588 returns ::SEAMS_OK and
+ * both neighbours at cutoff 0.5 on that edge and origin.
+ *
+ * When the orthorhombic cutoff graph bins a coordinate, the fraction is
+ * (coordinate - origin) times the binary64 reciprocal of the edge. When
+ * that fraction is outside [0, 1) it subtracts the floor. A result that
+ * is not strictly below 1, NaN included, becomes 0. The stored coordinate
+ * is the origin plus the fraction times the edge. Type 0 on (0, 0, 0) and
+ * (1e162, 0, 0), origin (0, 0, 0), edge 1e160, cutoff 0.5, returns
+ * ::SEAMS_OK and an empty list. The product is 99.99999999999999. The
+ * floor leaves 0.9999999999999858, and the stored x coordinate is
+ * 9.999999999999858e159. Type 0 on (0, 0, 0) and (1.5e160, 0, 0), that
+ * edge and origin, cutoff 0.5, returns ::SEAMS_OK and an empty list. The
+ * product is 1.5. The floor leaves 0.5, and the stored x coordinate is
+ * 5e159. Type 0 on (3.2581295480326344e+46, 0, 0) and
+ * (3.2581295480326338e+46, 0, 0), that edge and origin, cutoff 0.5,
+ * returns ::SEAMS_OK and both neighbours. Both stored coordinates are
+ * 3.2581295480326338e+46. Type 0 on (5, 0, 0) and (4096, 0, 0), origin
+ * (5, 0, 0), edge 1e160, cutoff 4091, returns ::SEAMS_OK and both
+ * neighbours. The wrap stores x = 4096 at 4095.9999999999995. Type 0 on
+ * (-1e308, 0, 0) and (1e308, 0, 0), origin (-1e308, 0, 0), edge 30,
+ * cutoff 0.5, returns ::SEAMS_OK and both neighbours. The product for
+ * the second atom is inf, inf minus its floor is NaN, and that NaN
+ * becomes 0, so both atoms are stored at the origin. Type 0 on (0, 0, 0)
+ * and (1, 0, 0), origin (0, 0, 0), edge 2^-1070, cutoff 0.5, returns
+ * ::SEAMS_OK and both neighbours. The reciprocal of that edge is inf,
+ * both fractions become 0, and both atoms are stored at the origin.
+ *
+ * Type 0 on the mutual graph returns ::SEAMS_ERR_RANGE for the atoms
+ * (1, 1, 1) and (2, 1.2, 1.1) on the orthorhombic cell of edge 1e160 with
+ * origin (0, 0, 0), and on the triclinic cell of that edge with that
+ * origin and tilts 1, 0.5 and -0.25, at cutoffs 0.5 and 3.5. Type 99 on
+ * each of those frames returns ::SEAMS_OK and an empty list at those
+ * cutoffs. On that triclinic cell, type 0 on the cutoff graph returns
+ * ::SEAMS_OK and both neighbours for those atoms at cutoff 3.5, and
+ * ::SEAMS_ERR_RANGE at cutoff 0.5. Type 99 at that cutoff returns
+ * ::SEAMS_OK and an empty list.
+ *
+ * Type 0 on (0, 0, 0) and (10 * 2^52, 0, 0), edge 10, origin (0, 0, 0)
+ * and tilt xy = 1, returns ::SEAMS_ERR_RANGE from the cutoff graph at
+ * cutoffs 0.5 and 3.5. Type 0 on (5, 5, 5) and (45035996273704968, 5, 5)
+ * on that cell returns ::SEAMS_OK and an empty list at cutoff 0.5, and
+ * ::SEAMS_ERR_RANGE at cutoff 3.5. Type 0 on (0, 0, 0) and (2^53 - 1, 0, 0),
+ * edges 2, 2 and 2, origin (0, 0, 0) and tilt xy = 0.25, returns
+ * ::SEAMS_ERR_RANGE at cutoffs 0.5 and 1.0, with the message that the
+ * minimum-image wrap is not a lattice image, and ::SEAMS_OK with both
+ * neighbours at cutoff 3.5. Type 0 on (0, 0, 0) and
+ * (50 * 2^52, 10 * 2^51, 0), edges 10, 10 and 10, origin (0, 0, 0) and
+ * tilt xy = 100, returns ::SEAMS_OK and both neighbours at cutoffs 0.5
+ * and 3.5. Type 0 on (0, 0, 0) and (10 * 2^52, 0, 0) in an orthorhombic
+ * cell of edge 10 with origin (0, 0, 0) returns ::SEAMS_OK and both
+ * neighbours at cutoffs 0.5 and 3.5. Type 0 on (4, 0, 0) and
+ * (4 + 10 * 2^52, 0, 0) in that cell returns ::SEAMS_OK and an empty list
+ * at both cutoffs. Type 0 on (0, 0, 0) and (0.5, 0, 0) in that cell
+ * returns ::SEAMS_OK and an empty list at cutoff 0.5.
+ *
+ * For a pair the orthorhombic cutoff cell list visits, it keeps the
+ * neighbour only when the squared separation of the wrapped coordinates
+ * and a periodic cell shift is strictly below the squared cutoff, both
+ * computed in binary64. An overflowing square and a NaN square fail that
+ * test. Type 0 on (0, 0, 0) and (2e154, 0, 0), edge 1e160, origin
+ * (0, 0, 0), cutoff 3e154, returns ::SEAMS_OK and an empty list. Type 0
+ * on (0.9e308, 0, 0) and (0.901e308, 0, 0), origin (1e308, 0, 0), edge
+ * 1e308, cutoff 0.5, returns ::SEAMS_OK and an empty list. Both stored x
+ * coordinates are inf, so each squared separation is NaN.
  *
  * @param sys Frame handle that already holds a frame.
  * @param cutoff Positive finite cutoff, Angstrom. The mutual graph keeps
@@ -1555,12 +1626,23 @@ SEAMS_API seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, i
 
 /**
  * @brief Whether a frame needs seams_cv_rebuild() before the next value.
+ *
+ * It compares state only and does not bin the cell. A too-fine mesh is
+ * reported by seams_cv_rebuild() as ::SEAMS_ERR_RANGE. stale is written
+ * only on ::SEAMS_OK and left unchanged on any error. With skin 0.1, the
+ * atoms (0, 0, 0) and (1, 0, 0) in an orthorhombic cell of edge 30 with
+ * origin (0, 0, 0) rebuild, and moving the first atom to (30 * 2^52, 0, 0)
+ * on that same cell returns ::SEAMS_ERR_RANGE and leaves a pre-set stale
+ * of 7 unchanged.
  * @param cv Workspace handle.
  * @param sys Frame handle that holds a frame.
- * @param stale Receives 1 when cv was never rebuilt, the atom count, cell,
- *        or any atom type changed, or a selected atom moved more than
- *        skin / 2 since the rebuild, and 0 otherwise.
- * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE.
+ * @param stale Written only on ::SEAMS_OK. Then 1 when the workspace has
+ *        not been rebuilt, the atom count, cell, or origin differs, an
+ *        atom type differs, or a selected atom's squared minimum-image
+ *        displacement is greater than (skin / 2)^2, and 0 when none of
+ *        those holds. Left unchanged on any error.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
+ *         ::SEAMS_ERR_RANGE.
  * @par Ownership
  * The caller owns stale.
  * @par Thread safety

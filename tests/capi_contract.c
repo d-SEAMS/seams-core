@@ -1202,6 +1202,551 @@ static void analysis_contract(void) {
  * cell count and stencil reach of the cutoff search (found by
  * capi_reload_fuzzer under UBSan). Any status but an internal error passes;
  * the sanitizer builds catch the overflow itself. */
+static void neighbour_cell_contract(void) {
+  const char *fn = "seams_neighbours_build";
+  const double cutoffs[2] = {0.5, 3.5};
+  const double near[6] = {1.0, 1.0, 1.0, 2.0, 1.2, 1.1};
+  const double wide[9] = {0.0, 0.0, 0.0, 1e160, 1e160, 1e160, 0.0, 0.0, 0.0};
+  seams_system *sys = seams_system_create();
+  expect(seams_system_set_atoms(sys, near, 2, wide, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "orthorhombic edge 1e160");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 0, SEAMS_GRAPH_MUTUAL, &nb), SEAMS_ERR_RANGE,
+           fn, "mutual graph on an orthorhombic edge of 1e160");
+    const char *msg = seams_last_error_message();
+    truth(msg != NULL && strstr(msg, "singular or non-positive cell") != NULL, fn,
+          "mutual mesh message");
+    seams_neighbours_destroy(nb);
+  }
+  int wide_row[2] = {-1, -1};
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "named atoms, origin (0, 0, 0), edge 1e160");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "cutoff graph on an orthorhombic edge of 1e160");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query orthorhombic edge 1e160");
+      truth(nnz == (size_t)(i == 0 ? 0 : 2), fn,
+            i == 0 ? "(1,1,1) and (2,1.2,1.1) are empty at cutoff 0.5"
+                   : "(1,1,1) and (2,1.2,1.1) list each other at cutoff 3.5");
+      if (i == 1 && nnz == 2) {
+        int off[8], cols[8];
+        expect(seams_neighbours_copy(nb, off, n_off, &n_off, cols, nnz, &nnz), SEAMS_OK, fn,
+               "rows on edge 1e160");
+        wide_row[0] = cols[0];
+        wide_row[1] = cols[1];
+      }
+    }
+    seams_neighbours_destroy(nb);
+  }
+  const double modest[9] = {0.0, 0.0, 0.0, 30.0, 30.0, 30.0, 0.0, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, near, 2, modest, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "edge 30");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "cutoff graph on an edge of 30");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "cutoff graph on an edge of 30");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query edge 30");
+      truth(nnz == (size_t)(i == 0 ? 0 : 2), fn, "edge 30 matches the 1e160 counts");
+      if (i == 1 && nnz == 2) {
+        int off[8], cols[8];
+        expect(seams_neighbours_copy(nb, off, n_off, &n_off, cols, nnz, &nnz), SEAMS_OK, fn,
+               "rows on edge 30");
+        truth(cols[0] == wide_row[0] && cols[1] == wide_row[1], fn,
+              "edge 30 has the same rows as edge 1e160");
+      }
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* Negative coordinates that round onto the boundary wrap to one
+   * point. (-0.9, 0, 0) with (0.1, 0.2, 0.1), and (-2, -1, -4) with
+   * (-1, -0.8, -3.9), fall inside cutoff 0.5 on an edge of 1e160 and
+   * stay outside it on an edge of 30. */
+  const double moved[2][6] = {
+      {-0.9, 0.0, 0.0, 0.1, 0.2, 0.1},
+      {-2.0, -1.0, -4.0, -1.0, -0.8, -3.9},
+  };
+  for (int p = 0; p < 2; ++p) {
+    expect(seams_system_set_atoms(sys, moved[p], 2, wide, 9, NULL, NULL), SEAMS_OK,
+           "seams_system_set_atoms", "pair the huge-cell wrap moves");
+    {
+      seams_neighbours *nb = NULL;
+      expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+             "moved pair on edge 1e160 at cutoff 0.5");
+      size_t n_off = 0, nnz = 0;
+      if (nb == NULL) {
+        truth(0, fn, "moved pair on edge 1e160 at cutoff 0.5");
+      } else {
+        expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+               "query the moved pair");
+        truth(nnz == 2, fn, "wrap puts the pair inside cutoff 0.5");
+      }
+      seams_neighbours_destroy(nb);
+    }
+    expect(seams_system_set_atoms(sys, moved[p], 2, modest, 9, NULL, NULL), SEAMS_OK,
+           "seams_system_set_atoms", "same pair on edge 30");
+    {
+      seams_neighbours *nb = NULL;
+      expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+             "unmoved pair on edge 30 at cutoff 0.5");
+      size_t n_off = 0, nnz = 0;
+      if (nb == NULL) {
+        truth(0, fn, "unmoved pair on edge 30 at cutoff 0.5");
+      } else {
+        expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+               "query the unmoved pair");
+        truth(nnz == 0, fn, "edge 30 leaves the pair outside cutoff 0.5");
+      }
+      seams_neighbours_destroy(nb);
+    }
+  }
+  /* 0x1.6c2d4256ffcc4p+588 is a whole number of edges. The wrap stores
+   * the origin, and that move is more than half the spacing of the edge. */
+  const double whole[6] = {0.0, 0.0, 0.0, 0x1.6c2d4256ffcc4p+588, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, whole, 2, wide, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "coordinate past half the edge spacing");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "whole-number quotient on edge 1e160");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "whole-number quotient on edge 1e160");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the whole-number quotient");
+      truth(nnz == 2, fn, "the coordinate is stored at the origin");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* Both x coordinates lie below origin 5 and store that origin. */
+  const double shiftedBox[9] = {5.0, -2.0, 0.25, 1e160, 1e160, 1e160, 0.0, 0.0, 0.0};
+  const double shiftedSmall[9] = {5.0, -2.0, 0.25, 30.0, 30.0, 30.0, 0.0, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, near, 2, shiftedBox, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "origin (5, -2, 0.25), edge 1e160");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "named atoms at origin (5, -2, 0.25)");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "named atoms at origin (5, -2, 0.25)");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query origin (5, -2, 0.25)");
+      truth(nnz == 2, fn, "origin (5, -2, 0.25) puts the pair inside cutoff 0.5");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  expect(seams_system_set_atoms(sys, near, 2, shiftedSmall, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "origin (5, -2, 0.25), edge 30");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "named atoms at origin (5, -2, 0.25) on edge 30");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "named atoms at origin (5, -2, 0.25) on edge 30");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query origin (5, -2, 0.25) on edge 30");
+      truth(nnz == 0, fn, "edge 30 with that origin leaves the pair outside");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  const double tri160[9] = {0.0, 0.0, 0.0, 1e160, 1e160, 1e160, 1.0, 0.5, -0.25};
+  expect(seams_system_set_atoms(sys, near, 2, tri160, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "triclinic edge 1e160");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 0, SEAMS_GRAPH_MUTUAL, &nb), SEAMS_ERR_RANGE,
+           fn, "mutual graph on a triclinic edge of 1e160");
+    const char *msg = seams_last_error_message();
+    truth(msg != NULL && strstr(msg, "singular or non-positive cell") != NULL, fn,
+          "triclinic mutual mesh message");
+    seams_neighbours_destroy(nb);
+  }
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_ERR_RANGE, fn,
+           "triclinic edge 1e160 at cutoff 0.5");
+    const char *msg = seams_last_error_message();
+    truth(msg != NULL && strstr(msg, "minimum-image cell exceeds binary64 range") != NULL, fn,
+          "wrap outside the short cutoff");
+    seams_neighbours_destroy(nb);
+    nb = NULL;
+    expect(seams_neighbours_build(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "triclinic edge 1e160 at cutoff 3.5");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "triclinic edge 1e160 at cutoff 3.5");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query triclinic edge 1e160");
+      truth(nnz == 2, fn, "fractional wrap is inside cutoff 3.5");
+    }
+    seams_neighbours_destroy(nb);
+  }
+
+  /* 10 * 2^52 is exact. On a triclinic edge of 10 the unrounded
+   * quotient is 2^52, which is the throw threshold. */
+  const double coef = 10.0 * 4503599627370496.0;
+  const double ends[6] = {0.0, 0.0, 0.0, coef, 0.0, 0.0};
+  const double tilted[9] = {0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 1.0, 0.0, 0.0};
+  const double ortho[9] = {0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, ends, 2, tilted, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "triclinic coefficient at 2^52");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_ERR_RANGE,
+           fn, "triclinic lattice coefficient at 2^52");
+    const char *msg = seams_last_error_message();
+    truth(msg != NULL &&
+              strstr(msg, "minimum-image lattice coefficient exceeds binary64 integer precision") !=
+                  NULL,
+          fn, "triclinic coefficient message");
+    seams_neighbours_destroy(nb);
+  }
+  /* (2^53 - 1) / 2 = 2^52 - 0.5. Cutoff 3.5 lists the pair. Cutoffs
+   * 0.5 and 1.0 return RANGE because the wrap is not a lattice image. */
+  const double below[6] = {0.0, 0.0, 0.0, 9007199254740991.0, 0.0, 0.0};
+  const double belowBox[9] = {0.0, 0.0, 0.0, 2.0, 2.0, 2.0, 0.25, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, below, 2, belowBox, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "triclinic quotient just below 2^52");
+  {
+    const double shortCut[2] = {0.5, 1.0};
+    for (int i = 0; i < 2; ++i) {
+      seams_neighbours *nb = NULL;
+      expect(seams_neighbours_build(sys, shortCut[i], 0, SEAMS_GRAPH_CUTOFF, &nb),
+             SEAMS_ERR_RANGE, fn,
+             i == 0 ? "quotient below 2^52 at cutoff 0.5" : "quotient below 2^52 at cutoff 1.0");
+      const char *msg = seams_last_error_message();
+      truth(msg != NULL && strstr(msg, "wrap is not a lattice image") != NULL, fn,
+            i == 0 ? "lattice-image message at cutoff 0.5" : "lattice-image message at cutoff 1.0");
+      seams_neighbours_destroy(nb);
+    }
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "unrounded quotient below 2^52 at cutoff 3.5");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "unrounded quotient below 2^52 at cutoff 3.5");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the rounded image");
+      truth(nnz == 2, fn, "a quotient of 2^52 - 0.5 lists the pair at cutoff 3.5");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* dx / lx is past 2^52, and the x coefficient solved from the cell
+   * matrix is 0. */
+  const double step = 4503599627370496.0;
+  const double solved[6] = {0.0, 0.0, 0.0, 50.0 * step, 10.0 * (step / 2.0), 0.0};
+  const double skew[9] = {0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 100.0, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, solved, 2, skew, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "separation over lx past 2^52");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "solved lattice coefficient below 2^52");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "solved lattice coefficient below 2^52");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the solved coefficient");
+      truth(nnz == 2, fn, "a solved coefficient of 0 lists the pair");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  expect(seams_system_set_atoms(sys, ends, 2, ortho, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "orthorhombic image of the same pair");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "orthorhombic cutoff keeps the pair");
+    size_t n_off = 0, nnz = 0;
+    if (nb != NULL) {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn, "query");
+      truth(nnz == 2, fn, "both atoms are neighbours");
+    } else {
+      truth(0, fn, "orthorhombic cutoff keeps the pair");
+    }
+    seams_neighbours_destroy(nb);
+  }
+
+  /* Cutoff 0.5 does not visit this pair. Cutoff 3.5 does, and the wrap's
+   * coefficient is at least 2^52. */
+  const double skipped[6] = {5.0, 5.0, 5.0, 45035996273704968.0, 5.0, 5.0};
+  expect(seams_system_set_atoms(sys, skipped, 2, tilted, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "triclinic pair the short stencil skips");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "stencil skips the coefficient pair");
+    size_t n_off = 0, nnz = 0;
+    if (nb != NULL) {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query skipped pair");
+      truth(nnz == 0, fn, "skipped pair is absent");
+    } else {
+      truth(0, fn, "stencil skips the coefficient pair");
+    }
+    seams_neighbours_destroy(nb);
+    nb = NULL;
+    expect(seams_neighbours_build(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_ERR_RANGE, fn,
+           "stencil visits the coefficient pair");
+    const char *msg = seams_last_error_message();
+    truth(msg != NULL &&
+              strstr(msg, "minimum-image lattice coefficient exceeds binary64 integer precision") !=
+                  NULL,
+          fn, "visited coefficient message");
+    seams_neighbours_destroy(nb);
+  }
+
+  /* 4 + 10*2^52 rounds to a lattice point. The wrapped distance is 4. */
+  const double apart[6] = {4.0, 0.0, 0.0, 4.0 + coef, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, apart, 2, ortho, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "orthorhombic non-coincident pair");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "orthorhombic wrap stays inside the cutoff test");
+    size_t n_off = 0, nnz = 0;
+    if (nb != NULL) {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query non-coincident pair");
+      truth(nnz == 0, fn, "wrapped distance is outside both cutoffs");
+    } else {
+      truth(0, fn, "orthorhombic wrap stays inside the cutoff test");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* d^2 == rc^2 is not inside the cutoff. */
+  const double touch[6] = {0.0, 0.0, 0.0, 0.5, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, touch, 2, ortho, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "pair at the cutoff");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "distance equal to the cutoff");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "distance equal to the cutoff");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the cutoff pair");
+      truth(nnz == 0, fn, "equal distance is outside the cutoff");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* Type 99 matches no atom, so the link-cell stage returns before the
+   * cell is built. */
+  expect(seams_system_set_atoms(sys, near, 2, wide, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "type 99 on orthorhombic edge 1e160");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 99, SEAMS_GRAPH_MUTUAL, &nb), SEAMS_OK, fn,
+           "type 99 mutual orthorhombic edge is empty");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "type 99 mutual orthorhombic edge is empty");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query type 99 orthorhombic mutual");
+      truth(nnz == 0, fn, "type 99 orthorhombic mutual has no pairs");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  expect(seams_system_set_atoms(sys, near, 2, tri160, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "type 99 on triclinic edge 1e160");
+  for (int i = 0; i < 2; ++i) {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, cutoffs[i], 99, SEAMS_GRAPH_MUTUAL, &nb), SEAMS_OK, fn,
+           "type 99 mutual triclinic edge is empty");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "type 99 mutual triclinic edge is empty");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query type 99 triclinic mutual");
+      truth(nnz == 0, fn, "type 99 triclinic mutual has no pairs");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 99, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "type 99 cutoff on triclinic edge 1e160");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "type 99 cutoff on triclinic edge 1e160");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query type 99 triclinic cutoff");
+      truth(nnz == 0, fn, "type 99 triclinic cutoff has no pairs");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* Multiply by the reciprocal, then the floor. A result that is not
+   * strictly below 1, NaN included, becomes 0. */
+  const double far162[6] = {0.0, 0.0, 0.0, 1e162, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, far162, 2, wide, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "coordinate 1e162");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "1e162 on edge 1e160");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "1e162 on edge 1e160");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query 1e162");
+      truth(nnz == 0, fn, "1e162 is not stored at the origin");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  const double oneAndHalf[6] = {0.0, 0.0, 0.0, 1.5e160, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, oneAndHalf, 2, wide, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "coordinate 1.5e160");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "1.5e160 on edge 1e160");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "1.5e160 on edge 1e160");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query 1.5e160");
+      truth(nnz == 0, fn, "1.5e160 is not stored at the origin");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  const double closePair[6] = {3.2581295480326344e+46, 0.0, 0.0, 3.2581295480326338e+46, 0.0,
+                               0.0};
+  expect(seams_system_set_atoms(sys, closePair, 2, wide, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "pair the reciprocal stores together");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "close pair on edge 1e160");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "close pair on edge 1e160");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the close pair");
+      truth(nnz == 2, fn, "reciprocal stores the close pair together");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  const double originFive[9] = {5.0, 0.0, 0.0, 1e160, 1e160, 1e160, 0.0, 0.0, 0.0};
+  const double at4096[6] = {5.0, 0.0, 0.0, 4096.0, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, at4096, 2, originFive, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "origin 5 and x = 4096");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 4091.0, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "origin 5 at cutoff 4091");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "origin 5 at cutoff 4091");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query origin 5");
+      truth(nnz == 2, fn, "origin 5 stores 4096 inside cutoff 4091");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  const double overflow[6] = {0.0, 0.0, 0.0, 2e154, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, overflow, 2, wide, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "separation whose square overflows");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 3e154, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "overflowing square at cutoff 3e154");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "overflowing square at cutoff 3e154");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the overflowing square");
+      truth(nnz == 0, fn, "squared separation overflows");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* inf - floor(inf) is NaN, and a NaN fraction becomes 0. */
+  const double nanOrigin[9] = {-1e308, 0.0, 0.0, 30.0, 30.0, 30.0, 0.0, 0.0, 0.0};
+  const double nanPair[6] = {-1e308, 0.0, 0.0, 1e308, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, nanPair, 2, nanOrigin, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "origin -1e308");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "NaN fraction on edge 30");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "NaN fraction on edge 30");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the NaN fraction");
+      truth(nnz == 2, fn, "NaN fraction snaps both atoms to the origin");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* 1/edge overflows. 0 * inf and 1 * inf both become 0. */
+  const double tiny = ldexp(1.0, -1070);
+  const double tinyBox[9] = {0.0, 0.0, 0.0, tiny, tiny, tiny, 0.0, 0.0, 0.0};
+  const double tinyPair[6] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, tinyPair, 2, tinyBox, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "edge 2^-1070");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "infinite reciprocal");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "infinite reciprocal");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the infinite reciprocal");
+      truth(nnz == 2, fn, "infinite reciprocal stores both atoms at the origin");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  /* Both wrapped x coordinates are inf, so every squared separation is NaN. */
+  const double infBox[9] = {1e308, 0.0, 0.0, 1e308, 1e308, 1e308, 0.0, 0.0, 0.0};
+  const double infPair[6] = {0.9e308, 0.0, 0.0, 0.901e308, 0.0, 0.0};
+  expect(seams_system_set_atoms(sys, infPair, 2, infBox, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "stored coordinates overflow");
+  {
+    seams_neighbours *nb = NULL;
+    expect(seams_neighbours_build(sys, 0.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK, fn,
+           "NaN squared separation");
+    size_t n_off = 0, nnz = 0;
+    if (nb == NULL) {
+      truth(0, fn, "NaN squared separation");
+    } else {
+      expect(seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), SEAMS_OK, fn,
+             "query the NaN square");
+      truth(nnz == 0, fn, "NaN square is not below the cutoff");
+    }
+    seams_neighbours_destroy(nb);
+  }
+  seams_system_destroy(sys);
+}
+
 static void extreme_cells_contract(void) {
   const double xyz[12] = {0.1, 0.2, 0.3, 1.0, 1.1, 1.2, 2.0, 2.1, 2.2, 3.0, 3.1, 3.2};
   const double edges[2] = {1e-20, 1e250};
@@ -2033,7 +2578,46 @@ static void cv_contract(void) {
     const char *msg = seams_last_error_message();
     truth(msg != NULL && strstr(msg, "linked-cell mesh is too fine") != NULL, fn,
           "mesh message");
+    seams_system *mesh = seams_system_create();
+    expect(seams_system_set_atoms(mesh, g_xyz, (size_t)g_n, box, 9, g_types, NULL),
+           SEAMS_OK, "seams_system_set_atoms", "same atoms, too-fine cell");
+    stale = 0;
+    expect(seams_cv_needs_rebuild(cv, mesh, &stale), SEAMS_OK, "seams_cv_needs_rebuild",
+           "compares state and does not bin");
+    truth(stale == 1, "seams_cv_needs_rebuild", "stale when only the cell differs");
+    seams_system_destroy(mesh);
     seams_system_destroy(wide);
+  }
+
+  /* Skin 0.1. Moving the origin atom by 30 * 2^52 on the same cell makes
+   * the minimum-image coefficient too large. stale is left as it was. */
+  {
+    fn = "seams_cv_needs_rebuild";
+    seams_cv *far = NULL;
+    expect(seams_cv_create(0.3, 2.8, 6, 0, 3.0, 3.2, 6, &far), SEAMS_OK, "seams_cv_create",
+           "far-move workspace");
+    seams_system *moved = seams_system_create();
+    const double xyz[6] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+    const double box[9] = {0.0, 0.0, 0.0, 30.0, 30.0, 30.0, 0.0, 0.0, 0.0};
+    expect(seams_system_set_atoms(moved, xyz, 2, box, 9, NULL, NULL), SEAMS_OK,
+           "seams_system_set_atoms", "edge 30 before the far move");
+    expect(seams_cv_rebuild(far, moved, 0, NULL, 0, 0.1), SEAMS_OK, "seams_cv_rebuild",
+           "skin 0.1");
+    const double shifted[6] = {30.0 * 4503599627370496.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+    expect(seams_system_set_atoms(moved, shifted, 2, box, 9, NULL, NULL), SEAMS_OK,
+           "seams_system_set_atoms", "move of 30 * 2^52");
+    stale = 7;
+    expect(seams_cv_needs_rebuild(far, moved, &stale), SEAMS_ERR_RANGE, fn,
+           "far move on the same cell");
+    truth(stale == 7, fn, "far move leaves stale unchanged");
+    const char *moveMsg = seams_last_error_message();
+    truth(moveMsg != NULL &&
+              strstr(moveMsg, "minimum-image lattice coefficient exceeds binary64 integer precision") !=
+                  NULL,
+          fn, "far-move coefficient message");
+    seams_cv_destroy(far);
+    seams_system_destroy(moved);
+    fn = "seams_cv_rebuild";
   }
 
   fn = "seams_cv_topology";
@@ -2163,6 +2747,7 @@ int main(int argc, char **argv) {
   hydrogen_frame_contract();
   analysis_contract();
   extreme_cells_contract();
+  neighbour_cell_contract();
   neighbours_contract();
   rings_contract();
   cages_contract();

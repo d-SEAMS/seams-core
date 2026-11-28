@@ -115,10 +115,10 @@ PLUMED RATIONAL switching function with a C2 taper to zero.
     Plateau radius, Angstrom, at least zero.
 
 ``n``
-    Numerator exponent, at least one.
+    Numerator exponent, from 1 through 4096.
 
 ``m``
-    Denominator exponent, greater than n. Zero selects 2 \* n, which needs n <= INT_MAX / 2.
+    Denominator exponent, greater than n and at most 4096. Zero selects 2 \* n, which needs 2 \* n <= 4096.
 
 ``d_on``
     Taper start, Angstrom, from d0 and below d_max.
@@ -134,7 +134,7 @@ PLUMED RATIONAL switching function with a C2 taper to zero.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE.
 
-For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. On r >= 0, s is C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise. Above x = 1, s is evaluated in 1 / x, so for every finite argument s is finite, for any n and m. ds/dr can exceed double range when r0 or d_max - d_on is near the smallest doubles; when dsdr is not NULL that is ::SEAMS_ERR_RANGE, and neither output is written. @par Ownership The caller owns s and dsdr. The call keeps no state. @par Thread safety Safe from any thread. @par Example @code double sw = 0, dsw = 0; seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &sw, &dsw); @endcode
+For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. On r >= 0, s is C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise. Above x = 1, s is evaluated in 1 / x, so for every finite argument s is finite when n and m are at most 4096. A larger exponent is ::SEAMS_ERR_RANGE and the message names 4096. ds/dr can exceed double range when r0 or d_max - d_on is near the smallest doubles; when dsdr is not NULL that is ::SEAMS_ERR_RANGE, and neither output is written. @par Ownership The caller owns s and dsdr. The call keeps no state. @par Thread safety Safe from any thread. @par Example @code double sw = 0, dsw = 0; seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &sw, &dsw); @endcode
 
 .. _capi-seams_cv_create:
 
@@ -155,10 +155,10 @@ Create a smooth collective-variable workspace.
     Switching plateau radius, Angstrom.
 
 ``n``
-    Switching numerator exponent.
+    Switching numerator exponent, from 1 through 4096.
 
 ``m``
-    Switching denominator exponent; zero selects 2 \* n, which needs n <= INT_MAX / 2.
+    Switching denominator exponent, greater than n and at most 4096. Zero selects 2 \* n, which needs 2 \* n <= 4096.
 
 ``d_on``
     Taper start, Angstrom.
@@ -225,7 +225,7 @@ List the graph and fix the candidate rings for the next frames.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_BOX, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-Bonds are the selected pairs within d_max + skin, from linkcell. The candidate rings, their shortcut paths and the hexagon pairs are fixed until the next rebuild. A ring, ring-atom or hexagon-pair value computed from this topology equals the value from a fresh rebuild while no selected atom has moved more than skin / 2 from its position here and the cell is unchanged; so does a gyration value of a compact selection (see seams_cv_value()). seams_cv_needs_rebuild() reports when that no longer holds, and seams_cv_value() then refuses the frame. @par Handle access Writes the topology into cv. Reads sys. @par Ownership The caller owns atoms. The workspace keeps a copy of the selection and of the coordinates and cell of this frame. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); seams_cv_destroy(cv); @endcode
+Bonds are the selected pairs within d_max + skin, from linkcell. The candidate rings, their shortcut paths and the hexagon pairs are fixed until the next rebuild. A ring, ring-atom or hexagon-pair value computed from this topology equals the value from a fresh rebuild while no selected atom has moved more than skin / 2 from its position here, the cell is unchanged, and every atom type is unchanged; so does a gyration value of a compact selection (see seams_cv_value()). A type change marks the selection stale. The ring and shortcut searches are bounded by the ring size. A graph that would pass 20000000 ring-search steps, 2000000 candidate rings, 20000000 shortcut-search steps, or 2000000 shortcut paths is ::SEAMS_ERR_RANGE and the message names that limit; rings and paths are not dropped. seams_cv_needs_rebuild() reports when the topology no longer matches the frame, and seams_cv_value() then refuses the frame. @par Handle access Writes the topology into cv. Reads sys. @par Ownership The caller owns atoms. The workspace keeps a copy of the selection and of the coordinates and cell of this frame. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); seams_cv_destroy(cv); @endcode
 
 .. _capi-seams_cv_needs_rebuild:
 
@@ -246,11 +246,11 @@ Whether a frame needs seams_cv_rebuild() before the next value.
     Frame handle that holds a frame.
 
 ``stale``
-    Receives 1 when cv was never rebuilt, the atom count or cell changed, or a selected atom moved more than skin / 2 since the rebuild, and 0 otherwise.
+    Written only on ::SEAMS_OK. Then 1 when the workspace has not been rebuilt, the atom count, cell, or origin differs, an atom type differs, or a selected atom's squared minimum-image displacement is greater than (skin / 2)^2, and 0 when none of those holds. Left unchanged on any error.
 
-Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE.
 
-@par Ownership The caller owns stale. @par Thread safety Read-only: may run alongside other const calls on cv and sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); int stale = 0; seams_cv_needs_rebuild(cv, sys, &stale); seams_cv_destroy(cv); @endcode
+It compares state only and does not bin the cell. A too-fine mesh is reported by seams_cv_rebuild() as ::SEAMS_ERR_RANGE. stale is written only on ::SEAMS_OK and left unchanged on any error. With skin 0.1, the atoms (0, 0, 0) and (1, 0, 0) in an orthorhombic cell of edge 30 with origin (0, 0, 0) rebuild, and moving the first atom to (30 \* 2^52, 0, 0) on that same cell returns ::SEAMS_ERR_RANGE and leaves a pre-set stale of 7 unchanged. @par Ownership The caller owns stale. @par Thread safety Read-only: may run alongside other const calls on cv and sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); int stale = 0; seams_cv_needs_rebuild(cv, sys, &stale); seams_cv_destroy(cv); @endcode
 
 .. _capi-seams_cv_topology:
 
@@ -315,7 +315,7 @@ Value and gradient of one collective variable.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE when cv needs a rebuild for sys, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-::SEAMS_CV_RING_COUNT sums the ring weights of size arg. ::SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. ::SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. These three are as smooth as the switch. ::SEAMS_CV_GYRATION_RG2 and ::SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. A part of the selection that no bond reaches is placed by its minimum image from the first selected atom. Both are smooth while the selection is compact, its atoms all closer to each other than half the narrowest cell width in some periodic image, and its total weight is positive. With total weight 0 both values and gradients are 0, so with ring weights they jump to 0 as the last ring breaks. The volume is in general not differentiable where the cluster becomes flat, det G = 0; there it and its gradient are 0. ::SEAMS_CV_STATE returns state arg, as smooth as the variables its clauses read. A value or gradient entry outside double range, from switch parameters near the smallest doubles or coordinates near the largest, is ::SEAMS_ERR_RANGE, and neither value nor grad is written. @par Handle access Non-const because the evaluation keeps bond-weight scratch on cv. The topology is not changed. @par Ownership The caller owns value and grad. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); double n6 = 0; seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &n6, NULL, 0); seams_cv_destroy(cv); @endcode
+::SEAMS_CV_RING_COUNT sums the ring weights of size arg. ::SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. ::SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. These three are as smooth as the switch. ::SEAMS_CV_GYRATION_RG2 and ::SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. A part of the selection that no bond reaches is placed by its minimum image from the first selected atom. Both are smooth while the selection is compact, its atoms all closer to each other than half the narrowest cell width in some periodic image, and its total weight is positive. With total weight 0 both values and gradients are 0, so with ring weights they jump to 0 as the last ring breaks. The volume is in general not differentiable where the cluster becomes flat, det G = 0; there it and its gradient are 0. The same 0 value and 0 gradient are returned when the smallest eigenvalue of G is at most 1e-10 times the largest, so a coplanar cloud whose determinant rounds positive stays flat. ::SEAMS_CV_STATE returns state arg, as smooth as the variables its clauses read. A value or gradient entry outside double range, from switch parameters near the smallest doubles or coordinates near the largest, is ::SEAMS_ERR_RANGE, and neither value nor grad is written. @par Handle access Non-const because the evaluation keeps bond-weight scratch on cv. The topology is not changed. @par Ownership The caller owns value and grad. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); double n6 = 0; seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &n6, NULL, 0); seams_cv_destroy(cv); @endcode
 
 .. _capi-seams_cv_state_clause:
 
@@ -1149,6 +1149,8 @@ Mutual nearest unlike contacts of a site table.
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
 Cation and anion counts are molecules in the ion cloud.
+
+A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted.
 
 @par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys; the call borrows it. site_spec is read during the call only. n_pairs, n_cation and n_anion are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Exclusive use of sys. @par Example @code size_t pairs = 0; seams_contact_pairs(sys, "1=cationHead,2=anion", &pairs, NULL, NULL); @endcode
 
@@ -2306,6 +2308,8 @@ Nearest framework site and contact counts for each guest.
     Capacity of contact_counts. Must hold n_guest \* n_types when contact_counts is not NULL.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_BOX, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted.
 
 guest_type must be positive. framework_type 0 keeps every atom of another type. framework_type equal to guest_type is an error. nearest_distance is negative when a guest has no framework atom. A contact is a framework atom at or inside cutoff under the triclinic minimum image. contact_counts is row-major, one row per guest and one column per framework type, types sorted. Pass NULL columns to query the guest and type counts.
 
