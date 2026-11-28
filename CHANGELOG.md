@@ -418,6 +418,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `seams chill-plus` on a published cutoff classifies from the fused CSR kernel. `seams steinhardt` computes the degrees named by `--l` (default `4,6`). `seams symmetry` builds the reported shell from the cells inside 5 Å. Primitive rings and the orthorhombic cutoff list stay on one thread below 2048 atoms. The vendored vesin meson project reports 0.5.7.
 - q12 is the Cartesian solid harmonic, eight bonds at a time. The value matches the associated-Legendre form.
 - q4 and q6 share one cutoff list. A multi-thread cutoff walk records each pair once. Seeded cages with identical neighbour rows search rings and cages once, and the k-nearest nomination uses the same thread count as the rest of the command.
+- seams-core pins linkcell 8da70c18, whose tests run their full-size inputs again. The pin also brings linkcell's fix for fused k-nearest queries, which no longer run on a standing OpenMP team wider than the scratch the caller prepared.
 
 ### Deprecated
 

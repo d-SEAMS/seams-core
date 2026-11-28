@@ -35,7 +35,7 @@ const backward_cpp_tag_sha = "3bb9240cb15459768adb3e7d963a20e1523a6294"
 
 # The pinned main commit subprojects/linkcell.wrap names. linkcell is
 # the neighbour backend and is always built; its meson.build drives cargo.
-const linkcell_sha = "f5ea5d6f0cc490686daec5e8352fdee8bc9b2314"
+const linkcell_sha = "8da70c187d7afe12ec3d915b050077911e2d71db"
 
 sources = [
     GitSource("https://github.com/d-SEAMS/seams-core.git", tag_sha),

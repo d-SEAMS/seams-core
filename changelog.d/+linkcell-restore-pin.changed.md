@@ -1,0 +1,1 @@
+seams-core pins linkcell 8da70c18, whose tests run their full-size inputs again. The pin also brings linkcell's fix for fused k-nearest queries, which no longer run on a standing OpenMP team wider than the scratch the caller prepared.
