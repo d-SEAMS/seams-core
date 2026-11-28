@@ -2020,6 +2020,22 @@ static void cv_contract(void) {
          "atom outside the frame");
   expect(seams_cv_rebuild(cv, g_good, 0, NULL, 0, 0.3), SEAMS_OK, fn, "valid");
 
+  /* Edges 1e8, 1e8 and 20 pass the half-cell check and overflow linkcell's
+   * bins. The same failure is SEAMS_ERR_RANGE from seams_neighbours_build. */
+  {
+    seams_system *wide = seams_system_create();
+    const double xyz[6] = {1.0, 1.0, 1.0, 2.0, 1.2, 1.1};
+    const double box[9] = {0.0, 0.0, 0.0, 1.0e8, 1.0e8, 20.0, 0.0, 0.0, 0.0};
+    expect(seams_system_set_atoms(wide, xyz, 2, box, 9, NULL, NULL), SEAMS_OK,
+           "seams_system_set_atoms", "1e8 by 1e8 by 20 cell");
+    expect(seams_cv_rebuild(cv, wide, 0, NULL, 0, 0.3), SEAMS_ERR_RANGE, fn,
+           "linked-cell mesh is too fine");
+    const char *msg = seams_last_error_message();
+    truth(msg != NULL && strstr(msg, "linked-cell mesh is too fine") != NULL, fn,
+          "mesh message");
+    seams_system_destroy(wide);
+  }
+
   fn = "seams_cv_topology";
   expect(seams_cv_topology(cv, &ne, &nr, NULL), SEAMS_OK, fn, "valid");
   truth(ne == 2 * (size_t)g_n && nr == 2 * (size_t)g_n, fn,
